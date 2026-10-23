@@ -114,7 +114,10 @@ describe('dateUtils', () => {
     it('should return a valid IANA timezone string', () => {
       const tz = getSystemTimezone();
       expect(typeof tz).toBe('string');
-      expect(tz).toMatch(/^[A-Z]+\/[A-Z_]+/i);
+      expect(tz.length).toBeGreaterThan(0);
+      // UTC is also a valid system timezone; slash-shaped names are not required.
+      expect(() => new Intl.DateTimeFormat('en', { timeZone: tz })).not.toThrow();
+      expect(tz).toBe(Intl.DateTimeFormat().resolvedOptions().timeZone);
     });
   });
 
