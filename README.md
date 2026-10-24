@@ -4,7 +4,7 @@
 
 ## 本地开发
 
-需要 Node.js 24.22.1 和 Corepack。项目固定 pnpm 10.33.4，make setup 在 .tools/bin 创建局部 Corepack 入口，不修改全局 pnpm。
+需要 Node.js 24.22.1 和 pnpm 10.33.4。make setup 使用 pnpm-lock.yaml 安装固定依赖，CI 通过 packageManager 字段读取 pnpm 版本。
 
 ```bash
 make setup

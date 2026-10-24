@@ -34,6 +34,7 @@ overrides:
   clsx: 'catalog:'
   pinia: 'catalog:'
   vue: 'catalog:'
+  katex: 0.18.2
 
 catalog:
   '@ast-grep/napi': ^0.42.3

@@ -13,12 +13,12 @@
     "dev": "pnpm --filter @stuhelper/admin dev",
     "preview": "pnpm --filter @stuhelper/admin preview",
     "typecheck": "pnpm --filter @stuhelper/admin typecheck",
-    "lint": "pnpm exec eslint apps/web-antd/src --max-warnings=0",
+    "lint": "pnpm exec eslint apps/web-antd/src packages/locales/src/langs --max-warnings=0",
     "test": "vitest run",
     "generate": "pnpm --dir scripts/contracts generate",
     "check": "pnpm run check:i18n && pnpm run typecheck && pnpm run lint && pnpm test && pnpm run build",
     "postinstall": "pnpm -r --if-present run stub",
-    "check:i18n": "node scripts/check-i18n.mjs && node --test scripts/i18n.node.mjs"
+    "check:i18n": "stuhelper-check i18n"
   },
   "devDependencies": {
     "@changesets/changelog-github": "catalog:",
@@ -54,11 +54,12 @@
     "vite": "catalog:",
     "vitest": "catalog:",
     "vue": "catalog:",
-    "vue-tsc": "catalog:"
+    "vue-tsc": "catalog:",
+    "@stuhelper/engineering-tools": "git+https://github.com/StuHelper/stuhelper-next.git#360f0e9c02738117d1aa8cdac090cf0bae11f217"
   },
   "engines": {
     "node": "24.22.1",
-    "pnpm": ">=10.0.0"
+    "pnpm": "10.33.4"
   },
   "packageManager": "pnpm@10.33.4"
 }
