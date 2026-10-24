@@ -3,6 +3,7 @@ setup:
 	pnpm install --frozen-lockfile
 	pnpm run setup
 check:
+	pnpm exec stuhelper-check release
 	pnpm check
 	pnpm exec stuhelper-check workflows
 build:
