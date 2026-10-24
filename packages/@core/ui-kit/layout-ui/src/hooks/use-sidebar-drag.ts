@@ -35,7 +35,8 @@ export function useSidebarDrag() {
 
     const startX = e.clientX;
     const startWidth = target.getBoundingClientRect().width;
-    const startLeft = dragBar.offsetLeft;
+    const direction = getComputedStyle(target).direction === 'rtl' ? -1 : 1;
+    const initialTransform = dragBar.style.transform;
 
     dragBar.classList.add('bg-primary');
     dragBar.classList.remove('bg-primary/30');
@@ -63,7 +64,7 @@ export function useSidebarDrag() {
         return;
       }
 
-      const deltaX = moveEvent.clientX - startX;
+      const deltaX = (moveEvent.clientX - startX) * direction;
       let currentWidth = startWidth + deltaX;
 
       const isOutOfMin = currentWidth < min;
@@ -73,12 +74,12 @@ export function useSidebarDrag() {
       if (isOutOfMin) currentWidth = min;
       if (isOutOfMax) currentWidth = max;
 
-      const newLeft = startLeft + (currentWidth - startWidth);
+      const shift = (currentWidth - startWidth) * direction;
 
       if (dragOverlay)
         dragOverlay.style.cursor = isOutOfBounds ? 'not-allowed' : 'col-resize';
 
-      dragBar.style.left = `${newLeft}px`;
+      dragBar.style.transform = `translateX(${shift}px)`;
 
       if (isOutOfBounds) {
         dragBar.classList.add('bg-primary/30');
@@ -95,7 +96,7 @@ export function useSidebarDrag() {
         return;
       }
 
-      const deltaX = upEvent.clientX - startX;
+      const deltaX = (upEvent.clientX - startX) * direction;
       let newWidth = startWidth + deltaX;
 
       newWidth = Math.min(max, Math.max(min, newWidth));
@@ -120,7 +121,7 @@ export function useSidebarDrag() {
 
       if (dragBar) {
         dragBar.style.transition = dragBarTransition;
-        dragBar.style.left = '';
+        dragBar.style.transform = initialTransform;
         dragBar.classList.remove('bg-primary', 'bg-primary/30');
       }
 

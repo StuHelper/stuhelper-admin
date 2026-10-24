@@ -1,0 +1,232 @@
+{
+  "title": "表示設定",
+  "subtitle": "設定を変更してリアルタイムで確認",
+  "enableStickyPreferencesNavigationBar": "設定ナビゲーションを固定",
+  "disableStickyPreferencesNavigationBar": "設定ナビゲーションの固定を解除",
+  "resetTip": "設定が変更されています。クリックしてリセットします",
+  "resetTitle": "設定をリセット",
+  "resetSuccess": "設定をリセットしました",
+  "appearance": "外観",
+  "layout": "レイアウト",
+  "content": "コンテンツ",
+  "other": "その他",
+  "wide": "ワイド",
+  "compact": "固定",
+  "followSystem": "システムに合わせる",
+  "vertical": "縦型",
+  "verticalTip": "サイドの縦型メニュー",
+  "horizontal": "横型",
+  "horizontalTip": "すべてのメニューを上部に表示",
+  "twoColumn": "2カラム",
+  "twoColumnTip": "縦型の2カラムメニュー",
+  "headerSidebarNav": "ヘッダーと縦型メニュー",
+  "headerSidebarNavTip": "全幅ヘッダーとサイドナビゲーション",
+  "headerTwoColumn": "ヘッダーと2カラム",
+  "headerTwoColumnTip": "ヘッダーナビゲーションと2カラムサイドメニュー",
+  "mixedMenu": "混合メニュー",
+  "mixedMenuTip": "縦型と横型メニューを組み合わせる",
+  "fullContent": "コンテンツのみ",
+  "fullContentTip": "メニューを隠してコンテンツのみ表示",
+  "normal": "標準",
+  "plain": "シンプル",
+  "rounded": "角丸",
+  "copyPreferences": "設定をコピー",
+  "enableCopyPreferences": "設定コピーボタンを表示",
+  "copyPreferencesSuccessTitle": "コピーしました",
+  "copyPreferencesSuccess": "コピーしました。アプリの src/preferences.ts に設定を適用してください。",
+  "clearAndLogout": "キャッシュを消去してログアウト",
+  "mode": "モード",
+  "general": "全般",
+  "language": "言語",
+  "timezone": "タイムゾーン",
+  "dynamicTitle": "動的タイトル",
+  "watermark": "透かし",
+  "watermarkContent": "透かしの内容を入力",
+  "checkUpdates": "更新を定期確認",
+  "position": {
+    "title": "設定ボタンの位置",
+    "header": "ヘッダー",
+    "auto": "自動",
+    "fixed": "固定",
+    "userDropdown": "ユーザーメニュー"
+  },
+  "sidebar": {
+    "buttons": "ボタンを表示",
+    "buttonFixed": "固定",
+    "buttonCollapsed": "折りたたみ",
+    "title": "サイドバー",
+    "width": "幅",
+    "visible": "サイドバーを表示",
+    "draggable": "サイドメニューをドラッグ",
+    "collapsed": "メニューを折りたたむ",
+    "collapsedShowTitle": "メニュー名を表示",
+    "autoActivateChild": "サブメニューを自動選択",
+    "autoActivateChildTip": "メニューをクリックするとサブメニューを自動で選択します。",
+    "expandOnHover": "ホバーで展開",
+    "expandOnHoverTip": "ホバー時、有効ならサブメニュー、無効ならサイドバー全体を展開します。"
+  },
+  "tabbar": {
+    "title": "タブバー",
+    "enable": "タブバーを有効化",
+    "icon": "タブのアイコンを表示",
+    "showMore": "その他ボタンを表示",
+    "showMaximize": "最大化ボタンを表示",
+    "persist": "タブを保存",
+    "visitHistory": "閲覧履歴",
+    "visitHistoryTip": "現在のタブを閉じると、最後に開いたタブに戻ります。",
+    "maxCount": "タブ数の上限",
+    "maxCountTip": "上限を超えると最も古いタブを閉じます。0で制限なしになります。",
+    "draggable": "ドラッグで並べ替え",
+    "wheelable": "マウスホイールを使用",
+    "middleClickClose": "中ボタンでタブを閉じる",
+    "wheelableTip": "タブバーでホイールの縦スクロールを使用します。",
+    "styleType": {
+      "title": "タブのスタイル",
+      "chrome": "Chrome",
+      "card": "カード",
+      "plain": "シンプル",
+      "brisk": "軽快"
+    },
+    "contextMenu": {
+      "reload": "再読み込み",
+      "close": "閉じる",
+      "pin": "固定",
+      "unpin": "固定を解除",
+      "closeLeft": "左側のタブを閉じる",
+      "closeRight": "右側のタブを閉じる",
+      "closeOther": "他のタブを閉じる",
+      "closeAll": "すべてのタブを閉じる",
+      "openInNewWindow": "新しいウィンドウで開く",
+      "maximize": "最大化",
+      "restoreMaximize": "元に戻す"
+    }
+  },
+  "navigationMenu": {
+    "title": "ナビゲーションメニュー",
+    "style": "ナビゲーションのスタイル",
+    "accordion": "アコーディオン式サイドメニュー",
+    "split": "ナビゲーションを分離",
+    "splitTip": "上部メニューのサブメニューをサイドバーに表示します。"
+  },
+  "breadcrumb": {
+    "title": "パンくずリスト",
+    "home": "ホームボタンを表示",
+    "enable": "パンくずリストを有効化",
+    "icon": "パンくずのアイコンを表示",
+    "background": "背景",
+    "style": "パンくずのスタイル",
+    "hideOnlyOne": "項目が1つの場合は非表示"
+  },
+  "animation": {
+    "title": "アニメーション",
+    "loading": "ページ読み込み",
+    "transition": "ページ遷移",
+    "progress": "ページの進行状況"
+  },
+  "theme": {
+    "title": "テーマ",
+    "radius": "角丸の半径",
+    "fontSize": "文字サイズ",
+    "fontSizeTip": "文字サイズを変更してリアルタイムで確認",
+    "light": "ライト",
+    "dark": "ダーク",
+    "darkSidebar": "サイドバーを暗くする",
+    "darkSidebarTip": "ライトテーマで、横型およびコンテンツのみ以外のレイアウトに適用できます。",
+    "darkSidebarSub": "サブサイドバーを暗くする",
+    "darkSidebarSubTip": "ライトテーマ、暗いサイドバー、2カラムメニューを使用時に適用できます。",
+    "darkHeader": "ヘッダーを暗くする",
+    "weakMode": "色覚サポート",
+    "grayMode": "グレースケール",
+    "builtin": {
+      "title": "組み込み",
+      "default": "デフォルト",
+      "violet": "すみれ色",
+      "pink": "ピンク",
+      "rose": "ローズ",
+      "skyBlue": "空色",
+      "deepBlue": "濃い青",
+      "green": "緑",
+      "deepGreen": "深緑",
+      "orange": "オレンジ",
+      "yellow": "黄",
+      "zinc": "亜鉛色",
+      "neutral": "ニュートラル",
+      "slate": "スレート",
+      "gray": "灰色",
+      "custom": "カスタム"
+    }
+  },
+  "header": {
+    "title": "ヘッダー",
+    "visible": "ヘッダーを表示",
+    "modeStatic": "静的",
+    "modeFixed": "固定",
+    "modeAuto": "自動表示・非表示",
+    "modeAutoScroll": "スクロールに応じて表示",
+    "menuAlign": "メニューの配置",
+    "menuAlignStart": "先頭",
+    "menuAlignEnd": "末尾",
+    "menuAlignCenter": "中央"
+  },
+  "footer": {
+    "title": "フッター",
+    "visible": "フッターを表示",
+    "fixed": "下部に固定"
+  },
+  "copyright": {
+    "title": "著作権",
+    "enable": "著作権表示を有効化",
+    "companyName": "組織名",
+    "companySiteLink": "組織のサイト",
+    "date": "日付",
+    "icp": "ICP登録番号",
+    "icpLink": "ICP登録のリンク"
+  },
+  "shortcutKeys": {
+    "title": "キーボードショートカット",
+    "global": "全体",
+    "search": "全体検索",
+    "logout": "ログアウト",
+    "preferences": "表示設定"
+  },
+  "widget": {
+    "title": "ウィジェット",
+    "globalSearch": "全体検索を有効化",
+    "fullscreen": "全画面表示を有効化",
+    "themeToggle": "テーマ切り替えを有効化",
+    "languageToggle": "言語切り替えを有効化",
+    "notification": "通知を有効化",
+    "sidebarToggle": "サイドバー切り替えを有効化",
+    "lockScreen": "画面ロックを有効化",
+    "refresh": "更新ボタンを有効化",
+    "timezone": "タイムゾーン選択を有効化"
+  },
+  "antd": {
+    "tabLabel": "Ant Design 拡張",
+    "title": "業務設定",
+    "fields": {
+      "enableFormFullscreen": {
+        "label": "フォームの全画面表示を有効化",
+        "tip": "各サブプロジェクトの機能でこの拡張設定を使用できます。"
+      },
+      "tenantMode": {
+        "label": "テナントモード",
+        "options": {
+          "single": {
+            "label": "単一テナント"
+          },
+          "multi": {
+            "label": "複数テナント"
+          }
+        }
+      },
+      "defaultTableSize": {
+        "label": "既定のページサイズ"
+      },
+      "reportTitle": {
+        "label": "既定のレポート名",
+        "placeholder": "既定のレポート名を入力"
+      }
+    }
+  }
+}

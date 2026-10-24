@@ -1,0 +1,26 @@
+{
+  "framework": {
+    "title": "Administration",
+    "unavailable": "Cette page est indisponible",
+    "preview": "Aperçu de développement",
+    "description": "Ceci est un aperçu de développement de stuhelper-admin.",
+    "status": "État du service",
+    "loading": "Connexion au service d’administration…",
+    "ready": "Service d’administration connecté",
+    "retry": "Reconnecter",
+    "errors": {
+      "forbidden": "Ce compte n’a pas accès à l’espace d’administration.",
+      "identity": "Le service d’identification des administrateurs n’est pas encore connecté.",
+      "incompatible": "Cette version du service est incompatible. Actualisez la page et réessayez.",
+      "unauthenticated": "Connectez-vous pour accéder à l’espace d’administration.",
+      "network": "Connexion impossible. Réessayez ultérieurement."
+    }
+  },
+  "notFound": {
+    "description": "L’adresse est peut-être incorrecte ou la fonctionnalité n’est pas encore disponible.",
+    "home": "Retour à l’espace de travail"
+  },
+  "format": {
+    "items": "{count} élément | {count} éléments | {count} éléments"
+  }
+}

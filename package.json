@@ -16,12 +16,14 @@
     "lint": "pnpm exec eslint apps/web-antd/src --max-warnings=0",
     "test": "vitest run",
     "generate": "pnpm --dir scripts/contracts generate",
-    "check": "pnpm run typecheck && pnpm run lint && pnpm test && pnpm run build",
-    "postinstall": "pnpm -r --if-present run stub"
+    "check": "pnpm run check:i18n && pnpm run typecheck && pnpm run lint && pnpm test && pnpm run build",
+    "postinstall": "pnpm -r --if-present run stub",
+    "check:i18n": "node scripts/check-i18n.mjs && node --test scripts/i18n.node.mjs"
   },
   "devDependencies": {
     "@changesets/changelog-github": "catalog:",
     "@changesets/cli": "catalog:",
+    "@intlify/eslint-plugin-vue-i18n": "4.5.1",
     "@tsdown/css": "catalog:",
     "@types/node": "catalog:",
     "@vben/commitlint-config": "workspace:*",
@@ -55,7 +57,7 @@
     "vue-tsc": "catalog:"
   },
   "engines": {
-    "node": "^22.18.0 || ^24.0.0",
+    "node": "24.22.1",
     "pnpm": ">=10.0.0"
   },
   "packageManager": "pnpm@10.33.4"

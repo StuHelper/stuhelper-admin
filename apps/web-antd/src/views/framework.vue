@@ -2,37 +2,39 @@
 import { computed } from 'vue';
 
 import { Page } from '@vben/common-ui';
+import { useI18n } from '@vben/locales';
 
 import { Alert, Button, Card } from 'ant-design-vue';
 
 import { usePlatform } from '#/composables/usePlatform';
 
+const { t } = useI18n();
 const { state, error, reload } = usePlatform({ admin: true });
 const description = computed(() => {
-  if (state.value === 'loading') return '正在连接管理服务…';
-  if (state.value === 'ready') return '管理服务已连接。';
+  if (state.value === 'loading') return t('page.framework.loading');
+  if (state.value === 'ready') return t('page.framework.ready');
   switch (error.value) {
-    case 'forbidden': { return '当前账号没有访问管理工作台的权限。';
+    case 'forbidden': { return t('page.framework.errors.forbidden');
     }
-    case 'identity': { return '管理员身份服务尚未接入。';
+    case 'identity': { return t('page.framework.errors.identity');
     }
-    case 'incompatible': { return '服务版本暂不兼容，请更新后重试。';
+    case 'incompatible': { return t('page.framework.errors.incompatible');
     }
-    case 'unauthenticated': { return '请先登录后访问管理工作台。';
+    case 'unauthenticated': { return t('page.framework.errors.unauthenticated');
     }
-    default: { return '暂时无法连接管理服务，请稍后重试。';
+    default: { return t('page.framework.errors.network');
     }
   }
 });
 </script>
 
 <template>
-  <Page title="管理工作台" description="当前为开发预览，管理功能尚未开放。">
-    <Card title="服务状态" :bordered="false">
+  <Page :title="t('page.framework.title')" :description="t('page.framework.description')">
+    <Card :title="t('page.framework.status')" :bordered="false">
       <div role="status" aria-live="polite">
         <Alert :message="description" :type="state === 'ready' ? 'success' : 'info'" show-icon />
       </div>
-      <Button class="mt-4" :loading="state === 'loading'" @click="reload">重新连接</Button>
+      <Button class="mt-4" :loading="state === 'loading'" @click="reload">{{ t('page.framework.retry') }}</Button>
     </Card>
   </Page>
 </template>

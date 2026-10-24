@@ -431,7 +431,7 @@ const headerSlots = computed(() => {
 
       <template v-if="preferencesButtonPosition.fixed">
         <Preferences
-          class="fixed top-1/2 right-0 z-100 -translate-y-1/2 transform"
+          class="fixed top-1/2 end-0 z-100 -translate-y-1/2 transform"
           @clear-preferences-and-logout="clearPreferencesAndLogout"
         />
       </template>

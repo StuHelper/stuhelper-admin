@@ -67,18 +67,15 @@ const rightSlots = computed(() => {
         name: 'theme-toggle',
       });
     }
-    if (preferences.widget.languageToggle) {
-      list.push({
-        index: REFERENCE_VALUE + 30,
-        name: 'language-toggle',
-      });
-    }
     if (preferences.widget.timezone) {
       list.push({
         index: REFERENCE_VALUE + 40,
         name: 'timezone',
       });
     }
+  }
+  if (preferences.widget.languageToggle) {
+    list.push({ index: REFERENCE_VALUE + 30, name: 'language-toggle' });
   }
   // 全屏
   if (preferences.widget.fullscreen) {

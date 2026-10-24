@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router';
 
+import { useI18n } from '@vben/locales';
+const { t } = useI18n();
+
 import { Result } from 'ant-design-vue';
 </script>
 
 <template>
-  <Result status="404" title="页面暂不可用" sub-title="地址可能有误，或对应功能尚未开放。">
-    <template #extra><RouterLink to="/">返回工作台</RouterLink></template>
+  <Result status="404" :title="t('page.framework.unavailable')" :sub-title="t('page.notFound.description')">
+    <template #extra><RouterLink to="/">{{ t('page.notFound.home') }}</RouterLink></template>
   </Result>
 </template>

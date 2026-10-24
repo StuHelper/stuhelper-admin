@@ -1,4 +1,5 @@
-export type SupportedLanguagesType = 'en-US' | 'zh-CN';
+import type policy from '../../../locale-policy.json';
+export type SupportedLanguagesType = keyof typeof policy.languages;
 
 export type ImportLocaleFn = () => Promise<{ default: Record<string, string> }>;
 

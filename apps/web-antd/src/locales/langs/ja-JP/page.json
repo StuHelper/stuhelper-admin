@@ -1,0 +1,26 @@
+{
+  "framework": {
+    "title": "管理画面",
+    "unavailable": "このページは利用できません",
+    "preview": "開発プレビュー",
+    "description": "stuhelper-admin の開発プレビューです。",
+    "status": "サービス状況",
+    "loading": "管理サービスに接続中…",
+    "ready": "管理サービスに接続しました",
+    "retry": "再接続",
+    "errors": {
+      "forbidden": "このアカウントには管理画面へのアクセス権限がありません。",
+      "identity": "管理者の認証サービスはまだ接続されていません。",
+      "incompatible": "サービスのバージョンに互換性がありません。ページを更新して再試行してください。",
+      "unauthenticated": "管理画面にアクセスするにはログインしてください。",
+      "network": "接続できません。しばらくしてから再試行してください。"
+    }
+  },
+  "notFound": {
+    "description": "アドレスが正しくないか、機能がまだ公開されていません。",
+    "home": "管理画面へ戻る"
+  },
+  "format": {
+    "items": "{count} 件"
+  }
+}

@@ -1,0 +1,165 @@
+{
+  "formRules": {
+    "required": "Veuillez saisir {0}",
+    "selectRequired": "Veuillez sélectionner {0}",
+    "minLength": "Longueur minimale de {0} : {1}",
+    "maxLength": "Longueur maximale de {0} : {1}",
+    "length": "Longueur requise pour {0} : {1}",
+    "alreadyExists": "{0} « {1} » existe déjà",
+    "startWith": "{0} doit commencer par « {1} »",
+    "invalidURL": "Saisissez une URL valide",
+    "sizeLimit": "La taille du fichier est limitée à {0} Mo",
+    "previewWarning": "Impossible d’ouvrir le fichier : aucune URL ni adresse d’aperçu disponible"
+  },
+  "actionTitle": {
+    "edit": "Modifier {0}",
+    "create": "Créer {0}",
+    "delete": "Supprimer {0}",
+    "view": "Voir {0}"
+  },
+  "actionMessage": {
+    "deleteConfirm": "Voulez-vous supprimer {0} ?",
+    "deleting": "Suppression de {0}…",
+    "deleteSuccess": "{0} a été supprimé",
+    "operationSuccess": "Opération réussie",
+    "operationFailed": "Échec de l’opération"
+  },
+  "placeholder": {
+    "input": "Saisissez une valeur",
+    "select": "Sélectionnez une valeur",
+    "upload": "Cliquer pour importer"
+  },
+  "captcha": {
+    "title": "Effectuez la vérification de sécurité",
+    "sliderSuccessText": "Validé",
+    "sliderDefaultText": "Faites glisser le curseur",
+    "alt": "Source de l’image de vérification",
+    "sliderRotateDefaultTip": "Cliquer sur l’image pour actualiser",
+    "sliderTranslateDefaultTip": "Cliquer sur l’image pour actualiser",
+    "sliderRotateFailTip": "Échec de la vérification",
+    "sliderRotateSuccessTip": "Vérification réussie en {0} secondes",
+    "sliderTranslateFailTip": "Échec de la vérification",
+    "sliderTranslateSuccessTip": "Vérification réussie en {0} secondes",
+    "refreshAriaLabel": "Actualiser le code de vérification",
+    "confirmAriaLabel": "Confirmer la sélection",
+    "confirm": "Confirmer",
+    "pointAriaLabel": "Point à sélectionner",
+    "clickInOrder": "Cliquez dans l’ordre"
+  },
+  "iconPicker": {
+    "placeholder": "Choisir une icône",
+    "search": "Rechercher une icône…"
+  },
+  "jsonViewer": {
+    "copy": "Copier",
+    "copied": "Copié"
+  },
+  "crop": {
+    "title": "Recadrage de l’image",
+    "titleTip": "Rapport de recadrage {0}",
+    "confirm": "Recadrer",
+    "cancel": "Annuler le recadrage",
+    "errorTip": "Erreur de recadrage"
+  },
+  "tiptap": {
+    "placeholder": "Saisissez le contenu…",
+    "prompts": {
+      "image": "Saisissez l’URL de l’image",
+      "link": "Saisissez l’URL du lien"
+    },
+    "toolbar": {
+      "bold": "Gras",
+      "italic": "Italique",
+      "underline": "Souligné",
+      "strike": "Barré",
+      "code": "Code",
+      "codeBlock": "Bloc de code",
+      "heading": "Titre",
+      "paragraph": "Paragraphe",
+      "heading1": "H1",
+      "heading2": "H2",
+      "heading3": "H3",
+      "heading4": "H4",
+      "bulletList": "Liste à puces",
+      "orderedList": "Liste numérotée",
+      "blockquote": "Citation",
+      "link": "Lien",
+      "unlink": "Supprimer le lien",
+      "image": "Image",
+      "imageUrl": "URL de l’image",
+      "imageUpload": "Importer une image",
+      "textColor": "Couleur du texte",
+      "highlightColor": "Couleur de surlignage",
+      "alignLeft": "Gauche",
+      "alignCenter": "Centre",
+      "alignRight": "Droite",
+      "preview": "Aperçu",
+      "undo": "Annuler",
+      "redo": "Rétablir",
+      "clear": "Effacer"
+    },
+    "upload": {
+      "fileTooLarge": "Le fichier dépasse la taille autorisée",
+      "fileTypeNotAllowed": "Ce type de fichier n’est pas autorisé",
+      "onlySingleImage": "Une seule image est autorisée ; la première a été sélectionnée",
+      "uploadFailed": "Échec de l’importation"
+    }
+  },
+  "fallback": {
+    "pageNotFound": "Page introuvable",
+    "pageNotFoundDesc": "La page recherchée est introuvable.",
+    "forbidden": "Accès refusé",
+    "forbiddenDesc": "Vous n’avez pas l’autorisation d’accéder à cette page.",
+    "internalError": "Une erreur s’est produite",
+    "internalErrorDesc": "Le serveur a rencontré une erreur.",
+    "offline": "Page hors connexion",
+    "offlineError": "Erreur réseau",
+    "offlineErrorDesc": "Connexion Internet impossible. Vérifiez votre connexion.",
+    "comingSoon": "Bientôt disponible",
+    "http": {
+      "requestTimeout": "La requête a expiré. Réessayez ultérieurement.",
+      "networkError": "Erreur réseau. Vérifiez votre connexion et réessayez.",
+      "badRequest": "Requête incorrecte. Vérifiez les données saisies et réessayez.",
+      "unauthorized": "Authentification requise. Connectez-vous pour continuer.",
+      "forbidden": "Vous n’avez pas l’autorisation d’accéder à cette ressource.",
+      "notFound": "La ressource demandée est introuvable.",
+      "internalServerError": "Erreur interne du serveur. Réessayez ultérieurement."
+    }
+  },
+  "widgets": {
+    "document": "Documentation",
+    "qa": "Questions et réponses",
+    "setting": "Paramètres",
+    "logoutTip": "Voulez-vous vous déconnecter ?",
+    "viewAll": "Voir tous les messages",
+    "notifications": "Notifications",
+    "markAllAsRead": "Tout marquer comme lu",
+    "clearNotifications": "Effacer",
+    "checkUpdatesTitle": "Nouvelle version disponible",
+    "checkUpdatesDescription": "Actualisez pour obtenir la dernière version",
+    "search": {
+      "title": "Rechercher",
+      "searchNavigate": "Rechercher dans la navigation",
+      "select": "Sélectionner",
+      "navigate": "Naviguer",
+      "close": "Fermer",
+      "noResults": "Aucun résultat",
+      "noRecent": "Aucun historique de recherche",
+      "recent": "Historique de recherche"
+    },
+    "lockScreen": {
+      "title": "Verrouiller l’écran",
+      "screenButton": "Déverrouiller",
+      "password": "Mot de passe",
+      "placeholder": "Saisissez votre mot de passe",
+      "unlock": "Cliquer pour déverrouiller",
+      "errorPasswordTip": "Mot de passe incorrect. Réessayez.",
+      "backToLogin": "Retour à la connexion",
+      "entry": "Accéder au système"
+    },
+    "timezone": {
+      "setTimezone": "Définir le fuseau horaire",
+      "setSuccess": "Fuseau horaire mis à jour"
+    }
+  }
+}

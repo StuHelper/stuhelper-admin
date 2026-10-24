@@ -21,11 +21,11 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@v7.1.0
         with:
-          node-version: '24'
+          node-version-file: .node-version
           package-manager-cache: false
       - name: Install Corepack
         run: npm install --global corepack@0.34.5
-      - name: Install locked Vben workspace
+      - name: Install locked stuhelper-admin dependencies
         run: make setup
-      - name: Check Vben application and unit tests
+      - name: Check stuhelper-admin and unit tests
         run: make check

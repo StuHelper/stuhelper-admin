@@ -2,7 +2,8 @@ import { defineOverridesPreferences } from '@vben/preferences';
 
 export const overridesPreferences = defineOverridesPreferences({
   app: {
-    name: 'StuHelper 管理工作台',
+    name: 'stuhelper-admin'
+    ,locale: 'zh-CN',
     defaultHomePath: '/',
     defaultAvatar: '/brand.png',
     enableCheckUpdates: false,

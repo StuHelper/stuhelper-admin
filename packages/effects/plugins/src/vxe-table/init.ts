@@ -21,6 +21,12 @@ import {
 } from 'vxe-pc-ui';
 import enUS from 'vxe-pc-ui/lib/language/en-US'; // 导入默认的语言
 import zhCN from 'vxe-pc-ui/lib/language/zh-CN';
+import arEG from 'vxe-pc-ui/lib/language/ar-EG';
+import frFR from 'vxe-pc-ui/lib/language/fr-FR';
+import ruRU from 'vxe-pc-ui/lib/language/ru-RU';
+import jaJP from 'vxe-pc-ui/lib/language/ja-JP';
+import koKR from 'vxe-pc-ui/lib/language/ko-KR';
+import esES from 'vxe-pc-ui/lib/language/es-ES';
 import {
   VxeColgroup,
   VxeColumn,
@@ -122,6 +128,12 @@ export function setupVbenVxeTable(setupOptions: SetupVxeTable) {
   const localMap = {
     'zh-CN': normalizeVxeLocale(zhCN),
     'en-US': normalizeVxeLocale(enUS),
+    'ar-EG': normalizeVxeLocale(arEG),
+    'fr-FR': normalizeVxeLocale(frFR),
+    'ru-RU': normalizeVxeLocale(ruRU),
+    'ja-JP': normalizeVxeLocale(jaJP),
+    'ko-KR': normalizeVxeLocale(koKR),
+    'es-ES': normalizeVxeLocale(esES),
   };
 
   watch(

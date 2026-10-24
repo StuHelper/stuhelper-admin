@@ -48,8 +48,8 @@ const style = computed((): CSSProperties => {
     flex: 1,
     padding: `${padding}px`,
     paddingBottom: `${paddingBottom}px`,
-    paddingLeft: `${paddingLeft}px`,
-    paddingRight: `${paddingRight}px`,
+    paddingInlineStart: `${paddingLeft}px`,
+    paddingInlineEnd: `${paddingRight}px`,
     paddingTop: `${paddingTop}px`,
   };
 });

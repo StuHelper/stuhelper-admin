@@ -1,0 +1,232 @@
+{
+  "title": "التفضيلات",
+  "subtitle": "خصّص التفضيلات مع معاينة فورية",
+  "enableStickyPreferencesNavigationBar": "تثبيت شريط تنقل التفضيلات",
+  "disableStickyPreferencesNavigationBar": "إلغاء تثبيت شريط تنقل التفضيلات",
+  "resetTip": "تغيرت البيانات. انقر لإعادة التعيين.",
+  "resetTitle": "إعادة تعيين التفضيلات",
+  "resetSuccess": "تمت إعادة تعيين التفضيلات",
+  "appearance": "المظهر",
+  "layout": "التخطيط",
+  "content": "المحتوى",
+  "other": "أخرى",
+  "wide": "واسع",
+  "compact": "ثابت",
+  "followSystem": "اتباع النظام",
+  "vertical": "عمودي",
+  "verticalTip": "قائمة جانبية عمودية",
+  "horizontal": "أفقي",
+  "horizontalTip": "عرض جميع القوائم في الأعلى",
+  "twoColumn": "عمودان",
+  "twoColumnTip": "قائمة عمودية من عمودين",
+  "headerSidebarNav": "ترويسة وقائمة عمودية",
+  "headerSidebarNavTip": "ترويسة بعرض كامل وتنقل جانبي",
+  "headerTwoColumn": "ترويسة وعمودان",
+  "headerTwoColumnTip": "تنقل علوي وقائمة جانبية من عمودين",
+  "mixedMenu": "قائمة مختلطة",
+  "mixedMenuTip": "دمج القوائم العمودية والأفقية",
+  "fullContent": "المحتوى فقط",
+  "fullContentTip": "عرض المحتوى فقط وإخفاء القوائم",
+  "normal": "عادي",
+  "plain": "بسيط",
+  "rounded": "مستدير",
+  "copyPreferences": "نسخ التفضيلات",
+  "enableCopyPreferences": "إظهار زر نسخ التفضيلات",
+  "copyPreferencesSuccessTitle": "تم النسخ بنجاح",
+  "copyPreferencesSuccess": "تم النسخ. طبّق القيم في ملف src/preferences.ts الخاص بالتطبيق.",
+  "clearAndLogout": "مسح الذاكرة المؤقتة وتسجيل الخروج",
+  "mode": "الوضع",
+  "general": "عام",
+  "language": "اللغة",
+  "timezone": "المنطقة الزمنية",
+  "dynamicTitle": "عنوان ديناميكي",
+  "watermark": "علامة مائية",
+  "watermarkContent": "أدخل نص العلامة المائية",
+  "checkUpdates": "التحقق الدوري من التحديثات",
+  "position": {
+    "title": "موضع التفضيلات",
+    "header": "الترويسة",
+    "auto": "تلقائي",
+    "fixed": "ثابت",
+    "userDropdown": "قائمة المستخدم"
+  },
+  "sidebar": {
+    "buttons": "إظهار الأزرار",
+    "buttonFixed": "ثابت",
+    "buttonCollapsed": "مطوي",
+    "title": "الشريط الجانبي",
+    "width": "العرض",
+    "visible": "إظهار الشريط الجانبي",
+    "draggable": "سحب القائمة الجانبية",
+    "collapsed": "طي القائمة",
+    "collapsedShowTitle": "إظهار عنوان القائمة",
+    "autoActivateChild": "تفعيل القائمة الفرعية تلقائيًا",
+    "autoActivateChildTip": "يؤدي النقر على القائمة إلى تفعيل قائمتها الفرعية تلقائيًا.",
+    "expandOnHover": "التوسيع عند تمرير المؤشر",
+    "expandOnHoverTip": "عند تمرير المؤشر، يوسع التفعيل القوائم الفرعية، ويوسع التعطيل الشريط الجانبي كاملًا."
+  },
+  "tabbar": {
+    "title": "شريط علامات التبويب",
+    "enable": "تفعيل شريط علامات التبويب",
+    "icon": "إظهار أيقونات علامات التبويب",
+    "showMore": "إظهار زر المزيد",
+    "showMaximize": "إظهار زر التكبير",
+    "persist": "حفظ علامات التبويب",
+    "visitHistory": "سجل التصفح",
+    "visitHistoryTip": "عند إغلاق علامة التبويب الحالية، يتم الرجوع إلى آخر علامة تمت زيارتها.",
+    "maxCount": "الحد الأقصى لعلامات التبويب",
+    "maxCountTip": "عند تجاوز الحد تُغلق أقدم علامة تبويب. تعني القيمة 0 إلغاء الحد.",
+    "draggable": "الترتيب بالسحب",
+    "wheelable": "استخدام عجلة الفأرة",
+    "middleClickClose": "الإغلاق بزر الفأرة الأوسط",
+    "wheelableTip": "يستجيب شريط علامات التبويب للتمرير العمودي لعجلة الفأرة.",
+    "styleType": {
+      "title": "نمط علامات التبويب",
+      "chrome": "Chrome",
+      "card": "بطاقة",
+      "plain": "بسيط",
+      "brisk": "خفيف"
+    },
+    "contextMenu": {
+      "reload": "إعادة التحميل",
+      "close": "إغلاق",
+      "pin": "تثبيت",
+      "unpin": "إلغاء التثبيت",
+      "closeLeft": "إغلاق علامات التبويب اليسرى",
+      "closeRight": "إغلاق علامات التبويب اليمنى",
+      "closeOther": "إغلاق علامات التبويب الأخرى",
+      "closeAll": "إغلاق كل علامات التبويب",
+      "openInNewWindow": "فتح في نافذة جديدة",
+      "maximize": "تكبير",
+      "restoreMaximize": "استعادة"
+    }
+  },
+  "navigationMenu": {
+    "title": "قائمة التنقل",
+    "style": "نمط قائمة التنقل",
+    "accordion": "قائمة جانبية قابلة للطي",
+    "split": "فصل التنقل",
+    "splitTip": "يعرض الشريط الجانبي القائمة الفرعية للشريط العلوي."
+  },
+  "breadcrumb": {
+    "title": "مسار التنقل",
+    "home": "إظهار زر الصفحة الرئيسية",
+    "enable": "تفعيل مسار التنقل",
+    "icon": "إظهار أيقونات مسار التنقل",
+    "background": "الخلفية",
+    "style": "نمط مسار التنقل",
+    "hideOnlyOne": "الإخفاء عند وجود عنصر واحد"
+  },
+  "animation": {
+    "title": "الحركات",
+    "loading": "تحميل الصفحات",
+    "transition": "الانتقال بين الصفحات",
+    "progress": "تقدم تحميل الصفحة"
+  },
+  "theme": {
+    "title": "السمة",
+    "radius": "نصف قطر الزوايا",
+    "fontSize": "حجم الخط",
+    "fontSizeTip": "اضبط حجم الخط العام مع معاينة فورية",
+    "light": "فاتح",
+    "dark": "داكن",
+    "darkSidebar": "شريط جانبي داكن",
+    "darkSidebarTip": "متاح مع السمة الفاتحة، باستثناء الوضع الأفقي ووضع المحتوى فقط.",
+    "darkSidebarSub": "قائمة جانبية فرعية داكنة",
+    "darkSidebarSubTip": "متاح مع السمة الفاتحة والشريط الجانبي الداكن وقائمة العمودين.",
+    "darkHeader": "ترويسة داكنة",
+    "weakMode": "وضع دعم عمى الألوان",
+    "grayMode": "تدرج رمادي",
+    "builtin": {
+      "title": "مضمّنة",
+      "default": "افتراضي",
+      "violet": "بنفسجي",
+      "pink": "وردي",
+      "rose": "وردي داكن",
+      "skyBlue": "أزرق سماوي",
+      "deepBlue": "أزرق داكن",
+      "green": "أخضر",
+      "deepGreen": "أخضر داكن",
+      "orange": "برتقالي",
+      "yellow": "أصفر",
+      "zinc": "رمادي زنك",
+      "neutral": "محايد",
+      "slate": "رمادي أردوازي",
+      "gray": "رمادي",
+      "custom": "مخصص"
+    }
+  },
+  "header": {
+    "title": "الترويسة",
+    "visible": "إظهار الترويسة",
+    "modeStatic": "ثابت ضمن الصفحة",
+    "modeFixed": "ثابت",
+    "modeAuto": "إظهار وإخفاء تلقائي",
+    "modeAutoScroll": "الإظهار حسب التمرير",
+    "menuAlign": "محاذاة القائمة",
+    "menuAlignStart": "البداية",
+    "menuAlignEnd": "النهاية",
+    "menuAlignCenter": "وسط"
+  },
+  "footer": {
+    "title": "التذييل",
+    "visible": "إظهار التذييل",
+    "fixed": "تثبيت في الأسفل"
+  },
+  "copyright": {
+    "title": "حقوق النشر",
+    "enable": "إظهار حقوق النشر",
+    "companyName": "اسم المؤسسة",
+    "companySiteLink": "موقع المؤسسة",
+    "date": "التاريخ",
+    "icp": "رقم ترخيص ICP",
+    "icpLink": "رابط ترخيص ICP"
+  },
+  "shortcutKeys": {
+    "title": "اختصارات لوحة المفاتيح",
+    "global": "عامة",
+    "search": "بحث شامل",
+    "logout": "تسجيل الخروج",
+    "preferences": "التفضيلات"
+  },
+  "widget": {
+    "title": "الأدوات",
+    "globalSearch": "تفعيل البحث الشامل",
+    "fullscreen": "تفعيل ملء الشاشة",
+    "themeToggle": "تفعيل تبديل السمة",
+    "languageToggle": "تفعيل تبديل اللغة",
+    "notification": "تفعيل الإشعارات",
+    "sidebarToggle": "تفعيل تبديل الشريط الجانبي",
+    "lockScreen": "تفعيل قفل الشاشة",
+    "refresh": "تفعيل التحديث",
+    "timezone": "تفعيل اختيار المنطقة الزمنية"
+  },
+  "antd": {
+    "tabLabel": "إضافة Ant Design",
+    "title": "تفضيلات التطبيق",
+    "fields": {
+      "enableFormFullscreen": {
+        "label": "تفعيل النماذج بملء الشاشة",
+        "tip": "يمكن للمشاريع الفرعية استخدام هذا الإعداد في وظائفها."
+      },
+      "tenantMode": {
+        "label": "وضع المستأجرين",
+        "options": {
+          "single": {
+            "label": "مستأجر واحد"
+          },
+          "multi": {
+            "label": "عدة مستأجرين"
+          }
+        }
+      },
+      "defaultTableSize": {
+        "label": "حجم الصفحة الافتراضي"
+      },
+      "reportTitle": {
+        "label": "عنوان التقرير الافتراضي",
+        "placeholder": "أدخل عنوان التقرير الافتراضي"
+      }
+    }
+  }
+}

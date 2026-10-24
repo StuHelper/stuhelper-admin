@@ -10,10 +10,10 @@ function handleCollapsed() {
 
 <template>
   <div
-    class="absolute bottom-2 left-3 z-10 flex-center cursor-pointer rounded-sm bg-accent p-1 text-foreground/60 hover:bg-accent-hover hover:text-foreground"
+    class="absolute bottom-2 start-3 z-10 flex-center cursor-pointer rounded-sm bg-accent p-1 text-foreground/60 hover:bg-accent-hover hover:text-foreground"
     @click.stop="handleCollapsed"
   >
-    <ChevronsRight v-if="collapsed" class="size-4" />
-    <ChevronsLeft v-else class="size-4" />
+    <ChevronsRight v-if="collapsed" class="size-4 rtl:rotate-180" />
+    <ChevronsLeft v-else class="size-4 rtl:rotate-180" />
   </div>
 </template>

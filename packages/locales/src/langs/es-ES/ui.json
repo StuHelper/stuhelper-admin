@@ -1,0 +1,165 @@
+{
+  "formRules": {
+    "required": "Introduce {0}",
+    "selectRequired": "Selecciona {0}",
+    "minLength": "Longitud mínima de {0}: {1}",
+    "maxLength": "Longitud máxima de {0}: {1}",
+    "length": "Longitud requerida de {0}: {1}",
+    "alreadyExists": "{0} «{1}» ya existe",
+    "startWith": "{0} debe empezar por «{1}»",
+    "invalidURL": "Introduce una URL válida",
+    "sizeLimit": "El tamaño máximo del archivo es {0} MB",
+    "previewWarning": "No se puede abrir el archivo: no hay URL ni dirección de vista previa"
+  },
+  "actionTitle": {
+    "edit": "Editar {0}",
+    "create": "Crear {0}",
+    "delete": "Eliminar {0}",
+    "view": "Ver {0}"
+  },
+  "actionMessage": {
+    "deleteConfirm": "¿Quieres eliminar {0}?",
+    "deleting": "Eliminando {0}…",
+    "deleteSuccess": "Se ha eliminado {0}",
+    "operationSuccess": "Operación completada",
+    "operationFailed": "La operación ha fallado"
+  },
+  "placeholder": {
+    "input": "Introduce un valor",
+    "select": "Selecciona una opción",
+    "upload": "Haz clic para subir"
+  },
+  "captcha": {
+    "title": "Completa la verificación de seguridad",
+    "sliderSuccessText": "Verificado",
+    "sliderDefaultText": "Arrastra el control",
+    "alt": "Origen de la imagen de verificación",
+    "sliderRotateDefaultTip": "Haz clic en la imagen para actualizar",
+    "sliderTranslateDefaultTip": "Haz clic en la imagen para actualizar",
+    "sliderRotateFailTip": "La verificación ha fallado",
+    "sliderRotateSuccessTip": "Verificación completada en {0} segundos",
+    "sliderTranslateFailTip": "La verificación ha fallado",
+    "sliderTranslateSuccessTip": "Verificación completada en {0} segundos",
+    "refreshAriaLabel": "Actualizar código de verificación",
+    "confirmAriaLabel": "Confirmar selección",
+    "confirm": "Confirmar",
+    "pointAriaLabel": "Punto de selección",
+    "clickInOrder": "Haz clic en orden"
+  },
+  "iconPicker": {
+    "placeholder": "Seleccionar icono",
+    "search": "Buscar icono…"
+  },
+  "jsonViewer": {
+    "copy": "Copiar",
+    "copied": "Copiado"
+  },
+  "crop": {
+    "title": "Recortar imagen",
+    "titleTip": "Relación de recorte {0}",
+    "confirm": "Recortar",
+    "cancel": "Cancelar recorte",
+    "errorTip": "Error al recortar"
+  },
+  "tiptap": {
+    "placeholder": "Introduce el contenido…",
+    "prompts": {
+      "image": "Introduce la URL de la imagen",
+      "link": "Introduce la URL del enlace"
+    },
+    "toolbar": {
+      "bold": "Negrita",
+      "italic": "Cursiva",
+      "underline": "Subrayado",
+      "strike": "Tachado",
+      "code": "Código",
+      "codeBlock": "Bloque de código",
+      "heading": "Encabezado",
+      "paragraph": "Párrafo",
+      "heading1": "H1",
+      "heading2": "H2",
+      "heading3": "H3",
+      "heading4": "H4",
+      "bulletList": "Lista con viñetas",
+      "orderedList": "Lista numerada",
+      "blockquote": "Cita",
+      "link": "Enlace",
+      "unlink": "Quitar enlace",
+      "image": "Imagen",
+      "imageUrl": "URL de la imagen",
+      "imageUpload": "Subir imagen",
+      "textColor": "Color del texto",
+      "highlightColor": "Color de resaltado",
+      "alignLeft": "Izquierda",
+      "alignCenter": "Centro",
+      "alignRight": "Derecha",
+      "preview": "Vista previa",
+      "undo": "Deshacer",
+      "redo": "Rehacer",
+      "clear": "Limpiar"
+    },
+    "upload": {
+      "fileTooLarge": "El archivo supera el tamaño permitido",
+      "fileTypeNotAllowed": "Este tipo de archivo no está permitido",
+      "onlySingleImage": "Solo se permite una imagen; se ha seleccionado la primera",
+      "uploadFailed": "Error al subir"
+    }
+  },
+  "fallback": {
+    "pageNotFound": "Página no encontrada",
+    "pageNotFoundDesc": "No se ha encontrado la página solicitada.",
+    "forbidden": "Acceso denegado",
+    "forbiddenDesc": "No tienes permiso para acceder a esta página.",
+    "internalError": "Se ha producido un error",
+    "internalErrorDesc": "Se ha producido un error en el servidor.",
+    "offline": "Página sin conexión",
+    "offlineError": "Error de red",
+    "offlineErrorDesc": "No hay conexión a Internet. Comprueba tu conexión.",
+    "comingSoon": "Próximamente",
+    "http": {
+      "requestTimeout": "La solicitud ha agotado el tiempo de espera. Inténtalo más tarde.",
+      "networkError": "Error de red. Comprueba la conexión e inténtalo de nuevo.",
+      "badRequest": "Solicitud incorrecta. Revisa los datos e inténtalo de nuevo.",
+      "unauthorized": "Se requiere autenticación. Inicia sesión para continuar.",
+      "forbidden": "No tienes permiso para acceder a este recurso.",
+      "notFound": "No se ha encontrado el recurso solicitado.",
+      "internalServerError": "Error interno del servidor. Inténtalo más tarde."
+    }
+  },
+  "widgets": {
+    "document": "Documentación",
+    "qa": "Preguntas y respuestas",
+    "setting": "Configuración",
+    "logoutTip": "¿Quieres cerrar sesión?",
+    "viewAll": "Ver todos los mensajes",
+    "notifications": "Notificaciones",
+    "markAllAsRead": "Marcar todo como leído",
+    "clearNotifications": "Limpiar",
+    "checkUpdatesTitle": "Nueva versión disponible",
+    "checkUpdatesDescription": "Actualiza para obtener la última versión",
+    "search": {
+      "title": "Buscar",
+      "searchNavigate": "Buscar en la navegación",
+      "select": "Seleccionar",
+      "navigate": "Navegar",
+      "close": "Cerrar",
+      "noResults": "No se han encontrado resultados",
+      "noRecent": "Sin historial de búsqueda",
+      "recent": "Historial de búsqueda"
+    },
+    "lockScreen": {
+      "title": "Bloquear pantalla",
+      "screenButton": "Desbloquear",
+      "password": "Contraseña",
+      "placeholder": "Introduce la contraseña",
+      "unlock": "Haz clic para desbloquear",
+      "errorPasswordTip": "Contraseña incorrecta. Inténtalo de nuevo.",
+      "backToLogin": "Volver al inicio de sesión",
+      "entry": "Entrar al sistema"
+    },
+    "timezone": {
+      "setTimezone": "Configurar zona horaria",
+      "setSuccess": "Zona horaria actualizada"
+    }
+  }
+}
