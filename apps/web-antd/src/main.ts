@@ -1,6 +1,9 @@
-import { initPreferences } from '@vben/preferences';
+import type { SupportedLanguagesType } from '@vben/locales';
+
+import { initPreferences, updatePreferences } from '@vben/preferences';
 import { unmountGlobalLoading } from '@vben/utils';
 
+import policy from '../../../locale-policy.json';
 import { overridesPreferences } from './preferences';
 
 /**
@@ -18,6 +21,11 @@ async function initApplication() {
     namespace,
     overrides: overridesPreferences,
   });
+
+  const language = new URLSearchParams(location.search).get('lang');
+  if (language && Object.hasOwn(policy.languages, language)) {
+    updatePreferences({ app: { locale: language as SupportedLanguagesType } });
+  }
 
   // 启动应用并挂载
   // vue应用主要逻辑及视图

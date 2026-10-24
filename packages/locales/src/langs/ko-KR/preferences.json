@@ -1,0 +1,232 @@
+{
+  "title": "환경설정",
+  "subtitle": "설정을 변경하고 실시간으로 확인하세요",
+  "enableStickyPreferencesNavigationBar": "환경설정 탐색 모음 고정",
+  "disableStickyPreferencesNavigationBar": "환경설정 탐색 모음 고정 해제",
+  "resetTip": "설정이 변경되었습니다. 클릭하여 초기화하세요",
+  "resetTitle": "환경설정 초기화",
+  "resetSuccess": "환경설정이 초기화되었습니다",
+  "appearance": "모양",
+  "layout": "레이아웃",
+  "content": "콘텐츠",
+  "other": "기타",
+  "wide": "넓게",
+  "compact": "고정",
+  "followSystem": "시스템 설정 따르기",
+  "vertical": "세로",
+  "verticalTip": "세로 사이드 메뉴",
+  "horizontal": "가로",
+  "horizontalTip": "모든 메뉴를 상단에 표시",
+  "twoColumn": "두 열",
+  "twoColumnTip": "세로 두 열 메뉴",
+  "headerSidebarNav": "헤더와 세로 메뉴",
+  "headerSidebarNavTip": "전체 너비 헤더와 사이드 탐색",
+  "headerTwoColumn": "헤더와 두 열",
+  "headerTwoColumnTip": "상단 탐색과 두 열 사이드 메뉴",
+  "mixedMenu": "혼합 메뉴",
+  "mixedMenuTip": "세로 메뉴와 가로 메뉴를 함께 사용",
+  "fullContent": "콘텐츠만 표시",
+  "fullContentTip": "메뉴를 숨기고 콘텐츠만 표시",
+  "normal": "일반",
+  "plain": "단순",
+  "rounded": "둥글게",
+  "copyPreferences": "환경설정 복사",
+  "enableCopyPreferences": "환경설정 복사 버튼 표시",
+  "copyPreferencesSuccessTitle": "복사되었습니다",
+  "copyPreferencesSuccess": "복사되었습니다. 앱의 src/preferences.ts에 설정을 적용하세요.",
+  "clearAndLogout": "캐시 삭제 후 로그아웃",
+  "mode": "모드",
+  "general": "일반",
+  "language": "언어",
+  "timezone": "시간대",
+  "dynamicTitle": "동적 제목",
+  "watermark": "워터마크",
+  "watermarkContent": "워터마크 내용을 입력하세요",
+  "checkUpdates": "주기적으로 업데이트 확인",
+  "position": {
+    "title": "환경설정 위치",
+    "header": "헤더",
+    "auto": "자동",
+    "fixed": "고정",
+    "userDropdown": "사용자 메뉴"
+  },
+  "sidebar": {
+    "buttons": "버튼 표시",
+    "buttonFixed": "고정",
+    "buttonCollapsed": "접힘",
+    "title": "사이드바",
+    "width": "너비",
+    "visible": "사이드바 표시",
+    "draggable": "사이드 메뉴 드래그",
+    "collapsed": "메뉴 접기",
+    "collapsedShowTitle": "메뉴 제목 표시",
+    "autoActivateChild": "하위 메뉴 자동 활성화",
+    "autoActivateChildTip": "메뉴를 클릭하면 하위 메뉴가 자동으로 활성화됩니다.",
+    "expandOnHover": "마우스를 올리면 펼치기",
+    "expandOnHoverTip": "마우스를 올리면 활성화 시 하위 메뉴를, 비활성화 시 전체 사이드바를 펼칩니다."
+  },
+  "tabbar": {
+    "title": "탭 표시줄",
+    "enable": "탭 표시줄 사용",
+    "icon": "탭 아이콘 표시",
+    "showMore": "더 보기 버튼 표시",
+    "showMaximize": "최대화 버튼 표시",
+    "persist": "탭 유지",
+    "visitHistory": "방문 기록",
+    "visitHistoryTip": "현재 탭을 닫으면 마지막으로 방문한 탭으로 이동합니다.",
+    "maxCount": "최대 탭 수",
+    "maxCountTip": "최대 개수를 초과하면 가장 오래된 탭을 닫습니다. 0은 제한 없음입니다.",
+    "draggable": "드래그하여 정렬",
+    "wheelable": "마우스 휠 사용",
+    "middleClickClose": "마우스 가운데 버튼으로 탭 닫기",
+    "wheelableTip": "탭 표시줄에서 마우스 휠의 세로 스크롤을 사용합니다.",
+    "styleType": {
+      "title": "탭 스타일",
+      "chrome": "Chrome",
+      "card": "카드",
+      "plain": "단순",
+      "brisk": "경쾌함"
+    },
+    "contextMenu": {
+      "reload": "다시 불러오기",
+      "close": "닫기",
+      "pin": "고정",
+      "unpin": "고정 해제",
+      "closeLeft": "왼쪽 탭 닫기",
+      "closeRight": "오른쪽 탭 닫기",
+      "closeOther": "다른 탭 닫기",
+      "closeAll": "모든 탭 닫기",
+      "openInNewWindow": "새 창에서 열기",
+      "maximize": "최대화",
+      "restoreMaximize": "복원"
+    }
+  },
+  "navigationMenu": {
+    "title": "탐색 메뉴",
+    "style": "탐색 메뉴 스타일",
+    "accordion": "아코디언 사이드 메뉴",
+    "split": "탐색 메뉴 분리",
+    "splitTip": "상단 메뉴의 하위 메뉴를 사이드바에 표시합니다."
+  },
+  "breadcrumb": {
+    "title": "탐색 경로",
+    "home": "홈 버튼 표시",
+    "enable": "탐색 경로 사용",
+    "icon": "탐색 경로 아이콘 표시",
+    "background": "배경",
+    "style": "탐색 경로 스타일",
+    "hideOnlyOne": "항목이 하나일 때 숨기기"
+  },
+  "animation": {
+    "title": "애니메이션",
+    "loading": "페이지 불러오기",
+    "transition": "페이지 전환",
+    "progress": "페이지 진행 상태"
+  },
+  "theme": {
+    "title": "테마",
+    "radius": "모서리 반경",
+    "fontSize": "글꼴 크기",
+    "fontSizeTip": "전체 글꼴 크기를 실시간으로 조절하세요",
+    "light": "밝게",
+    "dark": "어둡게",
+    "darkSidebar": "어두운 사이드바",
+    "darkSidebarTip": "밝은 테마에서 가로 및 콘텐츠 전용 레이아웃을 제외하고 사용할 수 있습니다.",
+    "darkSidebarSub": "어두운 하위 사이드바",
+    "darkSidebarSubTip": "밝은 테마, 어두운 사이드바, 두 열 메뉴 사용 시 적용할 수 있습니다.",
+    "darkHeader": "어두운 헤더",
+    "weakMode": "색각 보조 모드",
+    "grayMode": "회색조 모드",
+    "builtin": {
+      "title": "기본 제공",
+      "default": "기본값",
+      "violet": "보라색",
+      "pink": "분홍색",
+      "rose": "장미색",
+      "skyBlue": "하늘색",
+      "deepBlue": "진한 파란색",
+      "green": "초록색",
+      "deepGreen": "진한 초록색",
+      "orange": "주황색",
+      "yellow": "노란색",
+      "zinc": "아연색",
+      "neutral": "중립색",
+      "slate": "슬레이트색",
+      "gray": "회색",
+      "custom": "사용자 지정"
+    }
+  },
+  "header": {
+    "title": "헤더",
+    "visible": "헤더 표시",
+    "modeStatic": "정적",
+    "modeFixed": "고정",
+    "modeAuto": "자동 숨기기 및 표시",
+    "modeAutoScroll": "스크롤에 따라 표시",
+    "menuAlign": "메뉴 정렬",
+    "menuAlignStart": "시작",
+    "menuAlignEnd": "끝",
+    "menuAlignCenter": "가운데"
+  },
+  "footer": {
+    "title": "푸터",
+    "visible": "푸터 표시",
+    "fixed": "하단에 고정"
+  },
+  "copyright": {
+    "title": "저작권",
+    "enable": "저작권 표시",
+    "companyName": "조직 이름",
+    "companySiteLink": "조직 웹사이트",
+    "date": "날짜",
+    "icp": "ICP 등록 번호",
+    "icpLink": "ICP 등록 링크"
+  },
+  "shortcutKeys": {
+    "title": "단축키",
+    "global": "전역",
+    "search": "전체 검색",
+    "logout": "로그아웃",
+    "preferences": "환경설정"
+  },
+  "widget": {
+    "title": "위젯",
+    "globalSearch": "전체 검색 사용",
+    "fullscreen": "전체 화면 사용",
+    "themeToggle": "테마 전환 사용",
+    "languageToggle": "언어 전환 사용",
+    "notification": "알림 사용",
+    "sidebarToggle": "사이드바 전환 사용",
+    "lockScreen": "화면 잠금 사용",
+    "refresh": "새로 고침 사용",
+    "timezone": "시간대 선택 사용"
+  },
+  "antd": {
+    "tabLabel": "Ant Design 확장",
+    "title": "업무 설정",
+    "fields": {
+      "enableFormFullscreen": {
+        "label": "양식 전체 화면 모드 사용",
+        "tip": "하위 프로젝트의 기능에서 이 확장 설정을 사용할 수 있습니다."
+      },
+      "tenantMode": {
+        "label": "테넌트 모드",
+        "options": {
+          "single": {
+            "label": "단일 테넌트"
+          },
+          "multi": {
+            "label": "다중 테넌트"
+          }
+        }
+      },
+      "defaultTableSize": {
+        "label": "기본 페이지 크기"
+      },
+      "reportTitle": {
+        "label": "기본 보고서 제목",
+        "placeholder": "기본 보고서 제목을 입력하세요"
+      }
+    }
+  }
+}

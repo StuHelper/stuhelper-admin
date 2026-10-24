@@ -1,0 +1,165 @@
+{
+  "formRules": {
+    "required": "يرجى إدخال {0}",
+    "selectRequired": "يرجى اختيار {0}",
+    "minLength": "الحد الأدنى لطول {0}: {1}",
+    "maxLength": "الحد الأقصى لطول {0}: {1}",
+    "length": "الطول المطلوب لـ {0}: {1}",
+    "alreadyExists": "{0} «{1}» موجود بالفعل",
+    "startWith": "يجب أن يبدأ {0} بـ «{1}»",
+    "invalidURL": "أدخل رابطًا صالحًا",
+    "sizeLimit": "الحد الأقصى لحجم الملف هو {0} ميغابايت",
+    "previewWarning": "تعذر فتح الملف لعدم توفر رابط أو عنوان للمعاينة"
+  },
+  "actionTitle": {
+    "edit": "تعديل {0}",
+    "create": "إنشاء {0}",
+    "delete": "حذف {0}",
+    "view": "عرض {0}"
+  },
+  "actionMessage": {
+    "deleteConfirm": "هل تريد حذف {0}؟",
+    "deleting": "جارٍ حذف {0}…",
+    "deleteSuccess": "تم حذف {0} بنجاح",
+    "operationSuccess": "تمت العملية بنجاح",
+    "operationFailed": "فشلت العملية"
+  },
+  "placeholder": {
+    "input": "يرجى الإدخال",
+    "select": "يرجى الاختيار",
+    "upload": "انقر للرفع"
+  },
+  "captcha": {
+    "title": "أكمل التحقق الأمني",
+    "sliderSuccessText": "تم التحقق",
+    "sliderDefaultText": "اسحب شريط التمرير",
+    "alt": "مصدر صورة التحقق",
+    "sliderRotateDefaultTip": "انقر على الصورة للتحديث",
+    "sliderTranslateDefaultTip": "انقر على الصورة للتحديث",
+    "sliderRotateFailTip": "فشل التحقق",
+    "sliderRotateSuccessTip": "تم التحقق بنجاح خلال {0} ث",
+    "sliderTranslateFailTip": "فشل التحقق",
+    "sliderTranslateSuccessTip": "تم التحقق بنجاح خلال {0} ث",
+    "refreshAriaLabel": "تحديث رمز التحقق",
+    "confirmAriaLabel": "تأكيد الاختيار",
+    "confirm": "تأكيد",
+    "pointAriaLabel": "نقطة النقر",
+    "clickInOrder": "انقر بالترتيب"
+  },
+  "iconPicker": {
+    "placeholder": "اختيار أيقونة",
+    "search": "البحث عن أيقونة…"
+  },
+  "jsonViewer": {
+    "copy": "نسخ",
+    "copied": "تم النسخ"
+  },
+  "crop": {
+    "title": "اقتصاص الصورة",
+    "titleTip": "نسبة الاقتصاص {0}",
+    "confirm": "اقتصاص",
+    "cancel": "إلغاء الاقتصاص",
+    "errorTip": "خطأ في الاقتصاص"
+  },
+  "tiptap": {
+    "placeholder": "أدخل المحتوى…",
+    "prompts": {
+      "image": "أدخل رابط الصورة",
+      "link": "أدخل عنوان الرابط"
+    },
+    "toolbar": {
+      "bold": "عريض",
+      "italic": "مائل",
+      "underline": "تسطير",
+      "strike": "يتوسطه خط",
+      "code": "شفرة",
+      "codeBlock": "كتلة شفرة",
+      "heading": "عنوان",
+      "paragraph": "فقرة",
+      "heading1": "H1",
+      "heading2": "H2",
+      "heading3": "H3",
+      "heading4": "H4",
+      "bulletList": "قائمة نقطية",
+      "orderedList": "قائمة مرقمة",
+      "blockquote": "اقتباس",
+      "link": "رابط",
+      "unlink": "إزالة الرابط",
+      "image": "صورة",
+      "imageUrl": "رابط الصورة",
+      "imageUpload": "رفع صورة",
+      "textColor": "لون النص",
+      "highlightColor": "لون التمييز",
+      "alignLeft": "يسار",
+      "alignCenter": "وسط",
+      "alignRight": "يمين",
+      "preview": "معاينة",
+      "undo": "تراجع",
+      "redo": "إعادة",
+      "clear": "مسح"
+    },
+    "upload": {
+      "fileTooLarge": "حجم الملف يتجاوز الحد المسموح",
+      "fileTypeNotAllowed": "نوع الملف غير مسموح",
+      "onlySingleImage": "يُسمح بصورة واحدة فقط؛ تم اختيار الأولى",
+      "uploadFailed": "فشل الرفع"
+    }
+  },
+  "fallback": {
+    "pageNotFound": "الصفحة غير موجودة",
+    "pageNotFoundDesc": "تعذر العثور على الصفحة المطلوبة.",
+    "forbidden": "تم رفض الوصول",
+    "forbiddenDesc": "ليس لديك إذن للوصول إلى هذه الصفحة.",
+    "internalError": "حدث خطأ",
+    "internalErrorDesc": "حدث خطأ في الخادم.",
+    "offline": "صفحة دون اتصال",
+    "offlineError": "خطأ في الشبكة",
+    "offlineErrorDesc": "تعذر الاتصال بالإنترنت. تحقق من اتصالك.",
+    "comingSoon": "قريبًا",
+    "http": {
+      "requestTimeout": "انتهت مهلة الطلب. يرجى المحاولة لاحقًا.",
+      "networkError": "حدث خطأ في الشبكة. تحقق من الاتصال وحاول مجددًا.",
+      "badRequest": "طلب غير صالح. تحقق من المدخلات وحاول مجددًا.",
+      "unauthorized": "المصادقة مطلوبة. سجل الدخول للمتابعة.",
+      "forbidden": "ليس لديك إذن للوصول إلى هذا المورد.",
+      "notFound": "المورد المطلوب غير موجود.",
+      "internalServerError": "خطأ داخلي في الخادم. يرجى المحاولة لاحقًا."
+    }
+  },
+  "widgets": {
+    "document": "التوثيق",
+    "qa": "أسئلة وأجوبة",
+    "setting": "الإعدادات",
+    "logoutTip": "هل تريد تسجيل الخروج؟",
+    "viewAll": "عرض كل الرسائل",
+    "notifications": "الإشعارات",
+    "markAllAsRead": "وضع علامة مقروء على الكل",
+    "clearNotifications": "مسح",
+    "checkUpdatesTitle": "يتوفر إصدار جديد",
+    "checkUpdatesDescription": "حدّث الصفحة للحصول على أحدث إصدار",
+    "search": {
+      "title": "بحث",
+      "searchNavigate": "البحث في التنقل",
+      "select": "اختيار",
+      "navigate": "تنقل",
+      "close": "إغلاق",
+      "noResults": "لا توجد نتائج",
+      "noRecent": "لا يوجد سجل بحث",
+      "recent": "سجل البحث"
+    },
+    "lockScreen": {
+      "title": "قفل الشاشة",
+      "screenButton": "فتح القفل",
+      "password": "كلمة المرور",
+      "placeholder": "أدخل كلمة المرور",
+      "unlock": "انقر لفتح القفل",
+      "errorPasswordTip": "كلمة المرور غير صحيحة. أعد الإدخال.",
+      "backToLogin": "العودة إلى تسجيل الدخول",
+      "entry": "الدخول إلى النظام"
+    },
+    "timezone": {
+      "setTimezone": "ضبط المنطقة الزمنية",
+      "setSuccess": "تم ضبط المنطقة الزمنية"
+    }
+  }
+}

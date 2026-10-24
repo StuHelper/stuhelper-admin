@@ -7,7 +7,7 @@
     "url": "https://github.com/StuHelper/stuhelper-admin.git",
     "directory": "apps/web-antd"
   },
-  "license": "MIT",
+  "license": "AGPL-3.0-only",
   "type": "module",
   "scripts": {
     "build": "pnpm vite build --mode production",

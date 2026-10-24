@@ -8,7 +8,8 @@ import type {
   SupportedLanguagesType,
 } from './typing';
 
-import { unref } from 'vue';
+import policy from '../../../locale-policy.json';
+import { pluralIndex } from './formatting';
 import { createI18n } from 'vue-i18n';
 
 import { useSimpleLocale } from '@vben-core/composables';
@@ -16,7 +17,11 @@ import { useSimpleLocale } from '@vben-core/composables';
 const i18n = createI18n({
   globalInjection: true,
   legacy: false,
-  locale: '',
+  locale: policy.default,
+  fallbackLocale: false,
+  pluralRules: Object.fromEntries(Object.keys(policy.languages).map(locale => [locale, (count: number, choices: number) => pluralIndex(locale, count, choices)])),
+  numberFormats: Object.fromEntries(Object.keys(policy.languages).map(locale => [locale, { decimal: { style: 'decimal' }, percent: { style: 'percent' } }])),
+  datetimeFormats: Object.fromEntries(Object.keys(policy.languages).map(locale => [locale, { date: { year: 'numeric', month: 'short', day: 'numeric', calendar: 'gregory', timeZone: policy.default_time_zone }, dateTime: { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', calendar: 'gregory', timeZone: policy.default_time_zone } }])),
   messages: {},
 });
 
@@ -97,6 +102,7 @@ function setI18nLanguage(locale: Locale) {
   i18n.global.locale.value = locale;
 
   document?.querySelector('html')?.setAttribute('lang', locale);
+  document?.querySelector('html')?.setAttribute('dir', policy.languages[locale as SupportedLanguagesType].direction);
 }
 
 async function setupI18n(app: App, options: LocaleSetupOptions = {}) {
@@ -120,22 +126,22 @@ async function setupI18n(app: App, options: LocaleSetupOptions = {}) {
  * Load locale messages
  * @param lang
  */
+let activeRequest = 0;
+const loadedLocales = new Set<SupportedLanguagesType>();
 async function loadLocaleMessages(lang: SupportedLanguagesType) {
-  if (unref(i18n.global.locale) === lang) {
-    return setI18nLanguage(lang);
-  }
-  setSimpleLocale(lang);
-
-  const message = await localesMap[lang]?.();
-
-  if (message?.default) {
+  const request = ++activeRequest;
+  if (!loadedLocales.has(lang)) {
+    const message = await localesMap[lang]?.();
+    if (!message?.default) throw new Error(`Missing locale catalogue: ${lang}`);
     i18n.global.setLocaleMessage(lang, message.default);
   }
-
   const mergeMessage = await loadMessages(lang);
-  i18n.global.mergeLocaleMessage(lang, mergeMessage);
-
-  return setI18nLanguage(lang);
+  if (mergeMessage) i18n.global.mergeLocaleMessage(lang, mergeMessage);
+  loadedLocales.add(lang);
+  if (request === activeRequest) {
+    setSimpleLocale(lang);
+    setI18nLanguage(lang);
+  }
 }
 
 export {

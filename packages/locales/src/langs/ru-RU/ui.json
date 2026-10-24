@@ -1,0 +1,165 @@
+{
+  "formRules": {
+    "required": "Введите {0}",
+    "selectRequired": "Выберите {0}",
+    "minLength": "Минимальная длина {0}: {1}",
+    "maxLength": "Максимальная длина {0}: {1}",
+    "length": "Требуемая длина {0}: {1}",
+    "alreadyExists": "{0} «{1}» уже существует",
+    "startWith": "{0} должно начинаться с «{1}»",
+    "invalidURL": "Введите корректный URL",
+    "sizeLimit": "Максимальный размер файла: {0} МБ",
+    "previewWarning": "Не удалось открыть файл: нет адреса для просмотра"
+  },
+  "actionTitle": {
+    "edit": "Изменить {0}",
+    "create": "Создать {0}",
+    "delete": "Удалить {0}",
+    "view": "Просмотреть {0}"
+  },
+  "actionMessage": {
+    "deleteConfirm": "Удалить {0}?",
+    "deleting": "Удаление {0}…",
+    "deleteSuccess": "{0} удалено",
+    "operationSuccess": "Операция выполнена",
+    "operationFailed": "Ошибка операции"
+  },
+  "placeholder": {
+    "input": "Введите значение",
+    "select": "Выберите значение",
+    "upload": "Нажмите для загрузки"
+  },
+  "captcha": {
+    "title": "Пройдите проверку безопасности",
+    "sliderSuccessText": "Пройдено",
+    "sliderDefaultText": "Перетащите ползунок",
+    "alt": "Источник изображения проверки",
+    "sliderRotateDefaultTip": "Нажмите на изображение для обновления",
+    "sliderTranslateDefaultTip": "Нажмите на изображение для обновления",
+    "sliderRotateFailTip": "Проверка не пройдена",
+    "sliderRotateSuccessTip": "Проверка пройдена за {0} с",
+    "sliderTranslateFailTip": "Проверка не пройдена",
+    "sliderTranslateSuccessTip": "Проверка пройдена за {0} с",
+    "refreshAriaLabel": "Обновить проверочный код",
+    "confirmAriaLabel": "Подтвердить выбор",
+    "confirm": "Подтвердить",
+    "pointAriaLabel": "Точка нажатия",
+    "clickInOrder": "Нажимайте по порядку"
+  },
+  "iconPicker": {
+    "placeholder": "Выберите значок",
+    "search": "Поиск значка…"
+  },
+  "jsonViewer": {
+    "copy": "Копировать",
+    "copied": "Скопировано"
+  },
+  "crop": {
+    "title": "Обрезка изображения",
+    "titleTip": "Пропорции обрезки {0}",
+    "confirm": "Обрезать",
+    "cancel": "Отменить обрезку",
+    "errorTip": "Ошибка обрезки"
+  },
+  "tiptap": {
+    "placeholder": "Введите содержимое…",
+    "prompts": {
+      "image": "Введите URL изображения",
+      "link": "Введите URL ссылки"
+    },
+    "toolbar": {
+      "bold": "Полужирный",
+      "italic": "Курсив",
+      "underline": "Подчёркнутый",
+      "strike": "Зачёркнутый",
+      "code": "Код",
+      "codeBlock": "Блок кода",
+      "heading": "Заголовок",
+      "paragraph": "Абзац",
+      "heading1": "H1",
+      "heading2": "H2",
+      "heading3": "H3",
+      "heading4": "H4",
+      "bulletList": "Маркированный список",
+      "orderedList": "Нумерованный список",
+      "blockquote": "Цитата",
+      "link": "Ссылка",
+      "unlink": "Удалить ссылку",
+      "image": "Изображение",
+      "imageUrl": "URL изображения",
+      "imageUpload": "Загрузить изображение",
+      "textColor": "Цвет текста",
+      "highlightColor": "Цвет выделения",
+      "alignLeft": "Слева",
+      "alignCenter": "По центру",
+      "alignRight": "Справа",
+      "preview": "Предпросмотр",
+      "undo": "Отменить",
+      "redo": "Повторить",
+      "clear": "Очистить"
+    },
+    "upload": {
+      "fileTooLarge": "Файл превышает допустимый размер",
+      "fileTypeNotAllowed": "Этот тип файла не разрешён",
+      "onlySingleImage": "Разрешено одно изображение; выбрано первое",
+      "uploadFailed": "Ошибка загрузки"
+    }
+  },
+  "fallback": {
+    "pageNotFound": "Страница не найдена",
+    "pageNotFoundDesc": "Не удалось найти запрошенную страницу.",
+    "forbidden": "Доступ запрещён",
+    "forbiddenDesc": "У вас нет доступа к этой странице.",
+    "internalError": "Произошла ошибка",
+    "internalErrorDesc": "На сервере произошла ошибка.",
+    "offline": "Автономная страница",
+    "offlineError": "Ошибка сети",
+    "offlineErrorDesc": "Нет подключения к Интернету. Проверьте соединение.",
+    "comingSoon": "Скоро появится",
+    "http": {
+      "requestTimeout": "Время ожидания запроса истекло. Повторите попытку позже.",
+      "networkError": "Ошибка сети. Проверьте подключение и повторите попытку.",
+      "badRequest": "Некорректный запрос. Проверьте введённые данные.",
+      "unauthorized": "Требуется авторизация. Войдите для продолжения.",
+      "forbidden": "У вас нет доступа к этому ресурсу.",
+      "notFound": "Запрошенный ресурс не найден.",
+      "internalServerError": "Внутренняя ошибка сервера. Повторите попытку позже."
+    }
+  },
+  "widgets": {
+    "document": "Документация",
+    "qa": "Вопросы и ответы",
+    "setting": "Настройки",
+    "logoutTip": "Выйти из системы?",
+    "viewAll": "Просмотреть все сообщения",
+    "notifications": "Уведомления",
+    "markAllAsRead": "Отметить всё как прочитанное",
+    "clearNotifications": "Очистить",
+    "checkUpdatesTitle": "Доступна новая версия",
+    "checkUpdatesDescription": "Обновите страницу для получения новой версии",
+    "search": {
+      "title": "Поиск",
+      "searchNavigate": "Поиск по навигации",
+      "select": "Выбрать",
+      "navigate": "Перейти",
+      "close": "Закрыть",
+      "noResults": "Ничего не найдено",
+      "noRecent": "Нет истории поиска",
+      "recent": "История поиска"
+    },
+    "lockScreen": {
+      "title": "Блокировка экрана",
+      "screenButton": "Разблокировать",
+      "password": "Пароль",
+      "placeholder": "Введите пароль",
+      "unlock": "Нажмите для разблокировки",
+      "errorPasswordTip": "Неверный пароль. Повторите ввод.",
+      "backToLogin": "Вернуться ко входу",
+      "entry": "Войти в систему"
+    },
+    "timezone": {
+      "setTimezone": "Установить часовой пояс",
+      "setSuccess": "Часовой пояс установлен"
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "framework": {
+    "title": "Administración",
+    "unavailable": "Esta página no está disponible",
+    "preview": "Vista previa de desarrollo",
+    "description": "Esta es una vista previa de desarrollo de stuhelper-admin.",
+    "status": "Estado del servicio",
+    "loading": "Conectando con el servicio de administración…",
+    "ready": "Servicio de administración conectado",
+    "retry": "Volver a conectar",
+    "errors": {
+      "forbidden": "Esta cuenta no tiene acceso al panel de administración.",
+      "identity": "El servicio de identidad de administradores aún no está conectado.",
+      "incompatible": "Esta versión del servicio es incompatible. Actualiza la página e inténtalo de nuevo.",
+      "unauthenticated": "Inicia sesión para acceder al panel de administración.",
+      "network": "No se puede conectar. Inténtalo de nuevo más tarde."
+    }
+  },
+  "notFound": {
+    "description": "La dirección puede ser incorrecta o la función aún no está disponible.",
+    "home": "Volver al panel"
+  },
+  "format": {
+    "items": "{count} elemento | {count} elementos | {count} elementos"
+  }
+}

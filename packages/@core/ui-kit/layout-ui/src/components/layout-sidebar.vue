@@ -142,7 +142,7 @@ const extraStyle = computed((): CSSProperties => {
   const { extraWidth, show, width, zIndex } = props;
 
   return {
-    left: `${width}px`,
+    insetInlineStart: `${width}px`,
     width: extraVisible.value && show ? `${extraWidth}px` : 0,
     zIndex,
   };
@@ -223,7 +223,7 @@ function calcMenuWidthStyle(isHiddenDom: boolean): CSSProperties {
   return {
     ...(widthValue === '0px' ? { overflow: 'hidden' } : {}),
     flex: `0 0 ${widthValue}`,
-    marginLeft: show ? 0 : `-${widthValue}`,
+    marginInlineStart: show ? 0 : `-${widthValue}`,
     maxWidth: widthValue,
     minWidth: widthValue,
     width: widthValue,
@@ -307,7 +307,7 @@ onUnmounted(() => {
   <aside
     ref="asideRef"
     :style="style"
-    class="fixed left-0 top-0 h-full transition-all duration-150"
+    class="fixed start-0 top-0 h-full transition-all duration-150"
     :class="theme"
     @mouseenter="handleMouseenter"
     @mouseleave="handleMouseleave"
@@ -359,7 +359,7 @@ onUnmounted(() => {
         v-if="!extraCollapse"
         v-model:expand-on-hover="expandOnHover"
       />
-      <div v-if="!extraCollapse" :style="extraTitleStyle" class="pl-2">
+      <div v-if="!extraCollapse" :style="extraTitleStyle" class="ps-2">
         <slot name="extra-title"></slot>
       </div>
       <VbenScrollbar
@@ -374,7 +374,7 @@ onUnmounted(() => {
     <div
       v-if="draggable"
       ref="dragBarRef"
-      class="absolute inset-y-0 -right-px z-1000 w-0.5 cursor-col-resize hover:bg-primary"
+      class="absolute inset-y-0 -end-px z-1000 w-0.5 cursor-col-resize hover:bg-primary"
       @mousedown="handleDragSidebar"
     ></div>
   </aside>

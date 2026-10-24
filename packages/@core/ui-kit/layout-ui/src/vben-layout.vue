@@ -300,7 +300,7 @@ const tabbarStyle = computed((): CSSProperties => {
   }
 
   return {
-    marginLeft: `${marginLeft}px`,
+    marginInlineStart: `${marginLeft}px`,
     width,
   };
 });
@@ -331,7 +331,7 @@ const headerWrapperStyle = computed((): CSSProperties => {
   const fixed = headerFixed.value;
   return {
     height: isFullContent.value ? '0' : `${headerWrapperHeight.value}px`,
-    left: isMixedNav.value ? 0 : mainStyle.value.sidebarAndExtraWidth,
+    insetInlineStart: isMixedNav.value ? 0 : mainStyle.value.sidebarAndExtraWidth,
     position: fixed ? 'fixed' : 'static',
     top:
       headerIsHidden.value || isFullContent.value
@@ -573,7 +573,7 @@ const idMainContent = ELEMENT_ID_MAIN_CONTENT;
           <template #toggle-button>
             <VbenIconButton
               v-if="showHeaderToggleButton"
-              class="my-0 mr-1 rounded-md"
+              class="my-0 me-1 rounded-md"
               @click="handleHeaderToggle"
             >
               <IconifyIcon v-if="showSidebar" icon="ep:fold" />
@@ -627,7 +627,7 @@ const idMainContent = ELEMENT_ID_MAIN_CONTENT;
     <div
       v-if="maskVisible"
       :style="maskStyle"
-      class="fixed top-0 left-0 size-full bg-overlay transition-[background-color] duration-200"
+      class="fixed top-0 start-0 size-full bg-overlay transition-[background-color] duration-200"
       @click="handleClickMask"
     ></div>
   </div>
