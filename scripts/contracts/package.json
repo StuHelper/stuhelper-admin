@@ -3,10 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "generate": "openapi-typescript ../../contracts/platform.openapi.yaml -o ../../apps/web-antd/src/api/platform.gen.ts"
+    "generate": "pnpm --dir ../openapi generate",
+    "check": "tsc --noEmit --strict --target es2023 --module nodenext --skipLibCheck ../../apps/web-antd/src/api/platform.gen.ts"
   },
   "devDependencies": {
-    "openapi-typescript": "7.13.0",
-    "typescript": "5.9.3"
+    "typescript": "7.0.2"
   }
 }

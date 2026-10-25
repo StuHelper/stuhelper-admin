@@ -1,0 +1,18 @@
+name: Admin checks
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  check:
+    uses: StuHelper/stuhelper-tooling/.github/workflows/node-checks.yml@v0.1.0
+    with:
+      name: Admin checks
+      setup-command: pnpm run setup
