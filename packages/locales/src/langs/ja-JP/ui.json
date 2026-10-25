@@ -1,0 +1,165 @@
+{
+  "formRules": {
+    "required": "{0}を入力してください",
+    "selectRequired": "{0}を選択してください",
+    "minLength": "{0}の最小文字数：{1}",
+    "maxLength": "{0}の最大文字数：{1}",
+    "length": "{0}の文字数：{1}",
+    "alreadyExists": "{0}「{1}」は既に存在します",
+    "startWith": "{0}は「{1}」で始めてください",
+    "invalidURL": "有効なURLを入力してください",
+    "sizeLimit": "ファイルサイズの上限は{0}MBです",
+    "previewWarning": "URLまたはプレビュー用アドレスがないため開けません"
+  },
+  "actionTitle": {
+    "edit": "{0}を編集",
+    "create": "{0}を作成",
+    "delete": "{0}を削除",
+    "view": "{0}を表示"
+  },
+  "actionMessage": {
+    "deleteConfirm": "{0}を削除しますか？",
+    "deleting": "{0}を削除中…",
+    "deleteSuccess": "{0}を削除しました",
+    "operationSuccess": "操作が完了しました",
+    "operationFailed": "操作に失敗しました"
+  },
+  "placeholder": {
+    "input": "入力してください",
+    "select": "選択してください",
+    "upload": "クリックしてアップロード"
+  },
+  "captcha": {
+    "title": "セキュリティ認証を完了してください",
+    "sliderSuccessText": "認証済み",
+    "sliderDefaultText": "スライダーをドラッグ",
+    "alt": "認証画像のソース",
+    "sliderRotateDefaultTip": "画像をクリックして更新",
+    "sliderTranslateDefaultTip": "画像をクリックして更新",
+    "sliderRotateFailTip": "認証に失敗しました",
+    "sliderRotateSuccessTip": "認証完了、所要時間{0}秒",
+    "sliderTranslateFailTip": "認証に失敗しました",
+    "sliderTranslateSuccessTip": "認証完了、所要時間{0}秒",
+    "refreshAriaLabel": "認証コードを更新",
+    "confirmAriaLabel": "選択を確定",
+    "confirm": "確認",
+    "pointAriaLabel": "クリック位置",
+    "clickInOrder": "順番にクリックしてください"
+  },
+  "iconPicker": {
+    "placeholder": "アイコンを選択",
+    "search": "アイコンを検索…"
+  },
+  "jsonViewer": {
+    "copy": "コピー",
+    "copied": "コピーしました"
+  },
+  "crop": {
+    "title": "画像の切り抜き",
+    "titleTip": "切り抜き比率 {0}",
+    "confirm": "切り抜く",
+    "cancel": "切り抜きをキャンセル",
+    "errorTip": "切り抜きエラー"
+  },
+  "tiptap": {
+    "placeholder": "内容を入力してください…",
+    "prompts": {
+      "image": "画像のURLを入力",
+      "link": "リンクのURLを入力"
+    },
+    "toolbar": {
+      "bold": "太字",
+      "italic": "斜体",
+      "underline": "下線",
+      "strike": "取り消し線",
+      "code": "コード",
+      "codeBlock": "コードブロック",
+      "heading": "見出し",
+      "paragraph": "段落",
+      "heading1": "H1",
+      "heading2": "H2",
+      "heading3": "H3",
+      "heading4": "H4",
+      "bulletList": "箇条書き",
+      "orderedList": "番号付きリスト",
+      "blockquote": "引用",
+      "link": "リンク",
+      "unlink": "リンクを解除",
+      "image": "画像",
+      "imageUrl": "画像のURL",
+      "imageUpload": "画像をアップロード",
+      "textColor": "文字色",
+      "highlightColor": "蛍光ペンの色",
+      "alignLeft": "左",
+      "alignCenter": "中央",
+      "alignRight": "右",
+      "preview": "プレビュー",
+      "undo": "元に戻す",
+      "redo": "やり直す",
+      "clear": "クリア"
+    },
+    "upload": {
+      "fileTooLarge": "ファイルサイズが上限を超えています",
+      "fileTypeNotAllowed": "このファイル形式は許可されていません",
+      "onlySingleImage": "画像は1枚のみ選択できます。最初の画像を選択しました",
+      "uploadFailed": "アップロードに失敗しました"
+    }
+  },
+  "fallback": {
+    "pageNotFound": "ページが見つかりません",
+    "pageNotFoundDesc": "お探しのページが見つかりません。",
+    "forbidden": "アクセスが拒否されました",
+    "forbiddenDesc": "このページにアクセスする権限がありません。",
+    "internalError": "エラーが発生しました",
+    "internalErrorDesc": "サーバーでエラーが発生しました。",
+    "offline": "オフラインページ",
+    "offlineError": "ネットワークエラー",
+    "offlineErrorDesc": "インターネットに接続できません。接続を確認してください。",
+    "comingSoon": "近日公開",
+    "http": {
+      "requestTimeout": "リクエストがタイムアウトしました。後でもう一度お試しください。",
+      "networkError": "ネットワークエラーです。接続を確認して再試行してください。",
+      "badRequest": "リクエストが正しくありません。入力内容を確認してください。",
+      "unauthorized": "認証が必要です。ログインしてください。",
+      "forbidden": "このリソースにアクセスする権限がありません。",
+      "notFound": "要求されたリソースが見つかりません。",
+      "internalServerError": "サーバー内部エラーです。後でもう一度お試しください。"
+    }
+  },
+  "widgets": {
+    "document": "ドキュメント",
+    "qa": "よくある質問",
+    "setting": "設定",
+    "logoutTip": "ログアウトしますか？",
+    "viewAll": "すべてのメッセージを表示",
+    "notifications": "通知",
+    "markAllAsRead": "すべて既読にする",
+    "clearNotifications": "クリア",
+    "checkUpdatesTitle": "新しいバージョンがあります",
+    "checkUpdatesDescription": "更新して最新バージョンを取得",
+    "search": {
+      "title": "検索",
+      "searchNavigate": "ナビゲーションを検索",
+      "select": "選択",
+      "navigate": "移動",
+      "close": "閉じる",
+      "noResults": "検索結果がありません",
+      "noRecent": "検索履歴がありません",
+      "recent": "検索履歴"
+    },
+    "lockScreen": {
+      "title": "画面をロック",
+      "screenButton": "ロックを解除",
+      "password": "パスワード",
+      "placeholder": "パスワードを入力してください",
+      "unlock": "クリックしてロックを解除",
+      "errorPasswordTip": "パスワードが正しくありません。再入力してください。",
+      "backToLogin": "ログインへ戻る",
+      "entry": "システムに入る"
+    },
+    "timezone": {
+      "setTimezone": "タイムゾーンを設定",
+      "setSuccess": "タイムゾーンを設定しました"
+    }
+  }
+}

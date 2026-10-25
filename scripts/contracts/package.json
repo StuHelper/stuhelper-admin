@@ -1,0 +1,12 @@
+{
+  "name": "@stuhelper/admin-contracts",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate": "pnpm --dir ../openapi generate",
+    "check": "tsc --noEmit --strict --target es2023 --module nodenext --skipLibCheck ../../apps/web-antd/src/api/platform.gen.ts"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2"
+  }
+}

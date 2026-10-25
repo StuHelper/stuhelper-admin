@@ -1,0 +1,26 @@
+{
+  "framework": {
+    "title": "Administration",
+    "unavailable": "Page unavailable",
+    "preview": "Development preview",
+    "description": "This is a development preview of the administration application.",
+    "status": "Service status",
+    "loading": "Connecting to the administration service…",
+    "ready": "Administration service connected.",
+    "retry": "Reconnect",
+    "errors": {
+      "forbidden": "This account cannot access the administration workspace.",
+      "identity": "Administrator identity service is not connected yet.",
+      "incompatible": "This service version is incompatible. Refresh the page and try again.",
+      "unauthenticated": "Sign in to access the administration workspace.",
+      "network": "Unable to connect to the administration service. Please try again later."
+    }
+  },
+  "notFound": {
+    "description": "The address may be incorrect, or the feature is not available yet.",
+    "home": "Return to the workspace"
+  },
+  "format": {
+    "items": "{count} item | {count} items"
+  }
+}
