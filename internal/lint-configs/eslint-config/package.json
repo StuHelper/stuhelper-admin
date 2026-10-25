@@ -43,5 +43,8 @@
     "globals": "catalog:",
     "vue-eslint-parser": "catalog:",
     "yaml-eslint-parser": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:"
   }
 }
