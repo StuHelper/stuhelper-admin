@@ -12,6 +12,9 @@ export const router = createRouter({
         name: 'Contributions', path: 'contributions', component: () => import('#/views/contributions.vue'),
         meta: { title: 'page.contribution.adminTitle', serverAuthorized: true },
       }, {
+        name: 'Custody', path: 'storage-accounts', component: () => import('#/views/custody.vue'),
+        meta: { title: 'page.custody.adminTitle', serverAuthorized: true },
+      }, {
         name: 'Storage', path: 'storage', component: () => import('#/views/storage.vue'),
         meta: { title: 'page.storage.title', serverAuthorized: true },
       }],

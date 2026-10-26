@@ -2,7 +2,7 @@ import { defineConfig } from '@vben/eslint-config';
 
 import i18n from '@intlify/eslint-plugin-vue-i18n';
 export default defineConfig([
-  { ignores: ['**/*.gen.ts', 'apps/web-antd/src/api/contribution.ts'] },
+  { ignores: ['**/*.gen.ts', 'apps/web-antd/src/api/contribution.ts', 'apps/web-antd/src/api/custody.ts'] },
   ...i18n.configs['flat/base'],
   { settings: { 'vue-i18n': { localeDir: [
     { pattern: './apps/web-antd/src/locales/langs/*/*.json', localeKey: 'path', localePattern: /langs\/(?<locale>[^/]+)\// },

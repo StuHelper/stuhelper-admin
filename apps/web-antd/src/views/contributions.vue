@@ -28,6 +28,7 @@ function retry(item: Contribution) { prepare({ kind: 'retry', id: item.id, key: 
   <Page :title="t('page.contribution.adminTitle')" :description="t('page.contribution.adminDescription')">
     <div class="contribution-page">
       <nav class="controls" :aria-label="t('page.storage.navigation')">
+        <RouterLink to="/storage-accounts">{{ t('page.custody.adminTitle') }}</RouterLink>
         <RouterLink to="/">{{ t('page.notFound.home') }}</RouterLink>
         <RouterLink to="/storage">{{ t('page.storage.title') }}</RouterLink>
         <Button :disabled="locked" :loading="loading" @click="reload()">{{ t('page.contribution.refresh') }}</Button>

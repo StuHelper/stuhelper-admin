@@ -8,6 +8,7 @@ import path from 'node:path';
 const source = JSON.parse(fs.readFileSync('contracts/storage.source.json', 'utf8'));
 assert.equal(source.repository, 'StuHelper/stuhelper-storage');
 assert.match(source.revision, /^[a-f0-9]{40}$/);
+assert.equal(createHash('sha256').update(fs.readFileSync('apps/web-antd/src/api/custody.ts')).digest('hex'), source.custody_browser_sha256);
 const contract = fs.readFileSync('contracts/storage.openapi.json');
 assert.equal(createHash('sha256').update(contract).digest('hex'), source.sha256);
 assert.equal(JSON.parse(contract).info.version, source.version);
