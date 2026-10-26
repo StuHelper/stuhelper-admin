@@ -1,0 +1,11 @@
+{
+  "repository": "StuHelper/stuhelper-storage",
+  "revision": "099dbd1c30df19ea43fd09154e7a6c1fb01d21e3",
+  "version": "0.1.0",
+  "sha256": "b8a8af05bb2968ce3b4d93979f6c02cdd642750b4e1da682c1339415c4f4bd90",
+  "files": {
+    "contracts/storage.openapi.json": "contracts/storage.openapi.json",
+    "sdk/storage.gen.ts": "apps/web-antd/src/api/storage.gen.ts",
+    "contracts/operations.example.json": "contracts/storage-operations.example.json"
+  }
+}

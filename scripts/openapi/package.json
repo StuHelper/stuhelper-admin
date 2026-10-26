@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "generate": "openapi-typescript ../../contracts/platform.openapi.yaml -o ../../apps/web-antd/src/api/platform.gen.ts"
+    "generate": "openapi-typescript ../../contracts/platform.openapi.yaml -o ../../apps/web-antd/src/api/platform.gen.ts && openapi-typescript ../../contracts/storage.openapi.json -o ../../apps/web-antd/src/api/storage.gen.ts"
   },
   "devDependencies": {
     "openapi-typescript": "7.13.0",

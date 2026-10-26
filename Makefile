@@ -4,9 +4,12 @@ setup:
 	pnpm run setup
 check:
 	pnpm exec stuhelper-check repository
+	node scripts/check-storage-contract.mjs
 	pnpm --dir scripts/contracts check
 	pnpm check
 	pnpm exec stuhelper-check workflows
+storage-browser:
+	pnpm exec playwright test --config playwright.storage.config.mjs
 build:
 	pnpm build
 dev:
