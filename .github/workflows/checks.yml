@@ -32,6 +32,7 @@ jobs:
         run: |
           git rev-parse HEAD >> "$GITHUB_STEP_SUMMARY"
           cat contracts/storage.source.json >> "$GITHUB_STEP_SUMMARY"
+          cat contracts/contribution.source.json >> "$GITHUB_STEP_SUMMARY"
       - run: make build
       - run: pnpm exec playwright install --with-deps chromium
       - run: make storage-browser

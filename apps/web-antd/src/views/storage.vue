@@ -33,7 +33,7 @@ function quota(instance: InstanceHealth) {
   <Page :title="t('page.storage.title')" :description="t('page.storage.description')">
     <div class="storage-page">
       <nav class="controls" :aria-label="t('page.storage.navigation')">
-        <RouterLink to="/">{{ t('page.notFound.home') }}</RouterLink>
+        <RouterLink to="/contributions">{{ t('page.contribution.adminTitle') }}</RouterLink><RouterLink to="/">{{ t('page.notFound.home') }}</RouterLink>
         <Button :disabled="locked" :loading="loading" @click="reload()">{{ t('page.storage.refresh') }}</Button>
         <Button :disabled="locked" @click="firstPage">{{ t('page.storage.first') }}</Button>
       </nav>

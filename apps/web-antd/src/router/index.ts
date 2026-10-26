@@ -9,6 +9,9 @@ export const router = createRouter({
         name: 'Framework', path: '', component: () => import('#/views/framework.vue'),
         meta: { title: 'page.framework.title', frameworkPublic: true, affixTab: true },
       }, {
+        name: 'Contributions', path: 'contributions', component: () => import('#/views/contributions.vue'),
+        meta: { title: 'page.contribution.adminTitle', serverAuthorized: true },
+      }, {
         name: 'Storage', path: 'storage', component: () => import('#/views/storage.vue'),
         meta: { title: 'page.storage.title', serverAuthorized: true },
       }],

@@ -3,6 +3,7 @@ setup:
 	LEFTHOOK=0 pnpm install --frozen-lockfile
 	pnpm run setup
 check:
+	node scripts/check-contribution-contract.mjs
 	pnpm exec stuhelper-check repository
 	node scripts/check-storage-contract.mjs
 	pnpm --dir scripts/contracts check

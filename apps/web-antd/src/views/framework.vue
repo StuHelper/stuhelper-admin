@@ -36,7 +36,7 @@ const description = computed(() => {
         <Alert :message="description" :type="state === 'ready' ? 'success' : 'info'" show-icon />
       </div>
       <Button class="mt-4" :loading="state === 'loading'" @click="reload">{{ t('page.framework.retry') }}</Button>
-      <RouterLink class="ms-4" to="/storage">{{ t('page.storage.title') }}</RouterLink>
+      <RouterLink class="ms-4" to="/contributions">{{ t('page.contribution.adminTitle') }}</RouterLink><RouterLink class="ms-4" to="/storage">{{ t('page.storage.title') }}</RouterLink>
     </Card>
   </Page>
 </template>
