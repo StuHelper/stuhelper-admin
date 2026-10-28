@@ -49,7 +49,7 @@
     "samples": "{courses} courses · {samples} reviews",
     "writeReview": "Write a course review",
     "writeMentor": "Write a mentor comment",
-    "identityHint": "Anonymous by default. Signing uses your platform nickname; your real name stays private.",
+    "identityHint": "Your platform nickname is private by default. Verified information selected below is disclosed separately.",
     "reviewTerm": "Reviewed semester",
     "taughtBy": "Teaching staff",
     "choose": "Choose",
@@ -123,7 +123,8 @@
       "conflict": "The content changed or the request conflicts. Refresh and check.",
       "not_found": "This content is missing, removed or currently unavailable.",
       "invalid_input": "Check required fields, semester and rating selections.",
-      "unavailable": "The service or a required dependency is unavailable. Try again later."
+      "unavailable": "The service or a required dependency is unavailable. Try again later.",
+      "disclosure_required": "Authorized real name or teacher verification is missing. You cannot reply to your own course yet."
     },
     "mentorTemplate": "Mentoring style\n\nExpectations for doctoral students\n\nExpectations for master’s students\n\nFunding and support\n\nResearch\n\nLab atmosphere",
     "ratings": {
@@ -247,7 +248,8 @@
       "report": "Report",
       "edit_request": "Edit request",
       "delete_request": "Deletion request",
-      "review": "Content review"
+      "review": "Content review",
+      "appeal": "Decision review"
     },
     "adminTitle": "Review moderation",
     "adminIntro": "Handle reviews, reports and author requests within your authorized schools.",
@@ -292,7 +294,10 @@
       "delete": "Moderation deletion (recoverable)",
       "edit": "Edit body",
       "identity": "Change author display identity",
-      "dismiss": "Close request without changing content"
+      "dismiss": "Close request without changing content",
+      "feature": "Mark as featured",
+      "unfeature": "Remove featured status",
+      "reassign": "Correct teacher attribution"
     },
     "policyModes": {
       "published": "Publish directly",
@@ -304,6 +309,61 @@
       "global": "Inheriting site-wide defaults",
       "school": "Using school-specific rules"
     },
-    "recordName": "Name"
+    "recordName": "Name",
+    "disclosureTitle": "Information to disclose",
+    "disclosureHint": "Only authorized facts from trusted sources are available. Selected items will be public with this post.",
+    "teacherRequired": "You have taught this course. Your reply must show your real name and verified teacher badge.",
+    "disclosureNone": "No verified information is available for disclosure.",
+    "labels": {
+      "gender": "Gender",
+      "department": "College",
+      "enrollment": "Enrollment",
+      "real_name": "Real name",
+      "teacher": "Verified teacher",
+      "organization": "Organization"
+    },
+    "labelValues": {
+      "enrolled": "Enrolled in this course",
+      "not_enrolled": "Not enrolled in this course"
+    },
+    "featured": "Featured content",
+    "inactive": "Inactive. Historical content is preserved.",
+    "mergeTitle": "Merge duplicates",
+    "mergeTarget": "Merge into",
+    "previewMerge": "Preview merge",
+    "confirmMerge": "Confirm merge",
+    "mergeHint": "Confirm both records refer to the same object. Target details are kept; the source name becomes an alias. Other source fields do not overwrite the target. Existing links and history remain.",
+    "disableObject": "Deactivate",
+    "enableObject": "Reactivate",
+    "importTitle": "Directory import",
+    "importFile": "Normalized directory file (JSON)",
+    "previewImport": "Preview import changes",
+    "confirmImport": "Confirm import",
+    "appeal": "Request reconsideration",
+    "objectHistory": "History for this content",
+    "fromTime": "Start time",
+    "untilTime": "End time",
+    "batchTitle": "Batch decisions",
+    "previewBatch": "Preview each item",
+    "applyBatch": "Submit batch decisions",
+    "presentationTitle": "Review display settings",
+    "guestPreview": "Guest preview character limit",
+    "memberPreview": "Member preview character limit",
+    "previewRatio": "Preview body ratio",
+    "ratingTextLanguage": "Rating text language",
+    "previewAttribution": "Check current teaching attribution",
+    "operationStates": {
+      "new": "New",
+      "updated": "Updated",
+      "unchanged": "Unchanged",
+      "preserved": "Manual corrections preserved",
+      "conflict": "Conflict",
+      "unlinked": "Missing reference",
+      "ready": "Ready",
+      "rejected": "Rejected",
+      "decided": "Decision saved",
+      "applied": "Applied"
+    },
+    "mergeSource": "Merge source"
   }
 }
