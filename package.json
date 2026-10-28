@@ -16,10 +16,11 @@
     "lint": "pnpm exec eslint apps/web-antd/src packages/locales/src/langs --max-warnings=0",
     "test": "vitest run",
     "generate": "pnpm --dir scripts/contracts generate",
-    "check": "pnpm run check:i18n && pnpm run typecheck && pnpm run lint && pnpm test && pnpm run build",
+    "check": "pnpm run check:academic && pnpm run check:i18n && pnpm run typecheck && pnpm run lint && pnpm test && pnpm run build",
     "postinstall": "pnpm -r --if-present run stub",
     "check:i18n": "stuhelper-check i18n",
-    "hooks": "lefthook install"
+    "hooks": "lefthook install",
+    "check:academic": "node scripts/check-academic-contracts.mjs"
   },
   "devDependencies": {
     "@changesets/changelog-github": "catalog:",

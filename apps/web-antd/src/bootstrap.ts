@@ -45,7 +45,7 @@ async function bootstrap(namespace: string) {
 
   // 配置 pinia-tore
   await initStores(app, { namespace });
-  useAccessStore().setAccessMenus([{ name: 'page.framework.title', path: '/', icon: 'lucide:layout-dashboard' }]);
+  useAccessStore().setAccessMenus([{ name: 'page.framework.title', path: '/', icon: 'lucide:layout-dashboard' },{name:'page.academic.adminTitle',path:'/academic/reviews',icon:'lucide:message-square'},{name:'page.academic.catalogTitle',path:'/academic/catalog',icon:'lucide:book-open'}]);
 
   // 安装权限指令
   registerAccessDirective(app);

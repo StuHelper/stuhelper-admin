@@ -8,6 +8,12 @@ export const router = createRouter({
       children: [{
         name: 'Framework', path: '', component: () => import('#/views/framework.vue'),
         meta: { title: 'page.framework.title', frameworkPublic: true, affixTab: true },
+      }, {
+        name: 'AcademicReviews', path: '/academic/reviews', component: () => import('#/academic/ModerationView.vue'),
+        meta: { title: 'page.academic.adminTitle', academicConsole: true },
+      }, {
+        name: 'AcademicCatalog', path: '/academic/catalog', component: () => import('#/academic/CatalogView.vue'),
+        meta: { title: 'page.academic.catalogTitle', academicConsole: true },
       }],
     },
     {
@@ -19,6 +25,6 @@ export const router = createRouter({
   scrollBehavior: () => ({ top: 0 }),
 });
 
-// The only public routes are the empty framework page and its fallback.
-// New business routes stay unavailable until the real identity adapter is added.
-router.beforeEach((to) => to.meta.frameworkPublic === true || { name: 'NotFound', params: { pathMatch: ['unavailable'] } });
+// The console renders no protected data without a successful, scoped server request.
+// Visiting a route does not grant a role; every read and mutation is authorized by its API.
+router.beforeEach((to) => to.meta.frameworkPublic === true || to.meta.academicConsole === true || { name: 'NotFound', params: { pathMatch: ['unavailable'] } });

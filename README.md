@@ -1,6 +1,6 @@
 # stuhelper-admin
 
-基于 **Vben Admin v5.7.0 官方默认 web-antd 应用**的 StuHelper 管理端框架，组件库为 Ant Design Vue。当前提供官方布局、主题、组件适配和平台服务状态页，业务管理及真实身份接入尚未实现。
+基于 **Vben Admin v5.7.0 官方默认 web-antd 应用**的 StuHelper 管理端框架，组件库为 Ant Design Vue。当前提供官方布局、平台状态、评价审核、审核规则和课程教师资料更正。真实身份接入仍由后端提供。
 
 ## 本地开发
 
@@ -24,14 +24,20 @@ make dev
 
 ## 身份和权限边界
 
-当前公开路由只展示无业务数据的框架页面。管理接口依赖真实身份适配器，未接入时显示身份服务尚未接入。新增业务路由默认不可访问，不能通过 Vben 演示 roles 或本地 accessToken 取得服务端权限。
+公开框架页与管理页面使用同一布局。管理页面访问 `/api/v1/reviews/admin`、moderation 和 catalog 接口，服务端逐次检查学校权限。认证失败时清除旧结果，不能通过页面路由或本地 accessToken 取得权限。
 
 当前不提供本地账号密码登录、演示账号或 OAuth client secret。后续统一登录通过独立官方 SSO 接入。
 
+## 业务入口
+
+`/academic/reviews` 提供待审与申请队列、内容管理及审核规则。管理员可以查看原文、隐藏、恢复、删除、修改正文和讨论身份。决定保存后显示等待执行，只有服务端确认 applied 才展示已执行。
+
+`/academic/catalog` 提供按学校查询课程与教师，并更正名称、简介、院系及课程分类。缺失学分可保持未知。版本冲突保留输入，加载当前版本后再由管理员确认保存。
+
 ## 契约与检查
 
-contracts/platform.openapi.yaml 与生成类型来自 platform 仓库。scripts/contracts 独立固定接口生成工具使用的 TypeScript 5，不改变 Vben 应用的 TypeScript 6 工具链。`contracts/platform.source.json` 记录契约来源。工作区检查核对来源提交，并验证当前提供方兼容性。
+contracts/platform.openapi.yaml 与生成类型来自 platform 仓库。scripts/contracts 独立固定接口生成工具使用的 TypeScript 5，不改变 Vben 应用的 TypeScript 6 工具链。`contracts/platform.source.json` 记录契约来源。课程、评价与审核的 OpenAPI 和生成类型同样记录来源、提交和摘要，并检查生成一致性。工作区检查核对来源提交及提供方兼容性。
 
-make check 执行八语言覆盖检查、类型检查、应用 lint、单元测试与生产构建。中文为默认语言，支持英文、法文、俄文、日文、韩文、西班牙文和阿拉伯文。金额、数字、日期与复数由统一格式接口处理，阿拉伯文布局使用 RTL。业务与真实登录验收在实现后单独执行。
+make check 执行八语言覆盖检查、类型检查、应用 lint、单元测试与生产构建。中文为默认语言，支持英文、法文、俄文、日文、韩文、西班牙文和阿拉伯文。金额、数字、日期与复数由统一格式接口处理，阿拉伯文布局使用 RTL。学生端和管理端的 208 项八语言桌面与移动浏览器检查在架构仓库维护，使用合成响应。真实登录与生产运行分别验收。
 
 架构与业务规格见 [StuHelper Next](https://github.com/StuHelper/stuhelper-next)。
