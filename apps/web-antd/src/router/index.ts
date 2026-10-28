@@ -17,6 +17,12 @@ export const router = createRouter({
       }, {
         name: 'Storage', path: 'storage', component: () => import('#/views/storage.vue'),
         meta: { title: 'page.storage.title', serverAuthorized: true },
+      }, {
+        name: 'AcademicReviews', path: '/academic/reviews', component: () => import('#/academic/ModerationView.vue'),
+        meta: { title: 'page.academic.adminTitle', academicConsole: true },
+      }, {
+        name: 'AcademicCatalog', path: '/academic/catalog', component: () => import('#/academic/CatalogView.vue'),
+        meta: { title: 'page.academic.catalogTitle', academicConsole: true },
       }],
     },
     {
@@ -30,4 +36,4 @@ export const router = createRouter({
 
 // Server-authorized pages render an empty access boundary until the protected
 // API succeeds. No local role or public-route flag grants access to business data.
-router.beforeEach((to) => to.meta.frameworkPublic === true || to.meta.serverAuthorized === true || { name: 'NotFound', params: { pathMatch: ['unavailable'] } });
+router.beforeEach((to) => to.meta.frameworkPublic === true || to.meta.serverAuthorized === true || to.meta.academicConsole === true || { name: 'NotFound', params: { pathMatch: ['unavailable'] } });
