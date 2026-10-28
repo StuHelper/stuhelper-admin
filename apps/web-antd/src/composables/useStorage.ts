@@ -2,9 +2,10 @@ import type { InstanceCommand, InstanceHealth, JobFailure, Operation, Operations
 
 import { onMounted, onScopeDispose, readonly, shallowRef } from 'vue';
 
+import { useHostFetch } from '../api/host';
 import { storageAPI, StorageError } from '../api/storage';
 
-export function useStorage(api = storageAPI()) {
+export function useStorage(api = storageAPI(useHostFetch())) {
   const data = shallowRef<null | Operations>(null);
   const loading = shallowRef(false);
   const sending = shallowRef(false);

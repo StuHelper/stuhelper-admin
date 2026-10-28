@@ -26,7 +26,9 @@ make dev
 
 框架首页不展示业务数据。/storage 和 /contributions 页面只在受保护的服务端 API 返回成功后显示脱敏账本。未登录或权限不足时展示明确错误并清空旧数据，不使用本地角色、演示账号或手工 token 绕过服务端授权。
 
-请求复用同源认证传输。当前 backend 要求有效的 Bearer 访问令牌，浏览器登录与认证传输尚未装配，默认页面显示未登录或不可用。存储页面实现与显式测试夹具不表示真实登录完成，Next SSO 配置保持不动。
+请求复用同源认证传输。宿主可通过 bootstrap(namespace, authenticatedFetch) 注入当前认证请求；存储、托管和贡献页面共用该传输。默认入口使用同源 fetch，未认证时显示未登录或不可用。实际网页登录和 Next SSO 另行集成。
+
+authenticatedFetch 每次读取宿主当前凭据，保留取消信号、幂等键和同源限制。页面不缓存令牌。hostTransport.test.ts 验证托管与贡献请求使用同一宿主传输、凭据轮换和认证失效后的私有数据清空。
 
 当前不提供本地账号密码登录、演示账号或 OAuth client secret。后续统一登录通过独立官方 SSO 接入。
 
