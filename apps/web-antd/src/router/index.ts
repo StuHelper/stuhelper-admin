@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
+import { verification } from '#/api/verification';
+
 export const router = createRouter({
   history: createWebHistory(import.meta.env.VITE_BASE),
   routes: [
@@ -8,6 +10,9 @@ export const router = createRouter({
       children: [{
         name: 'Framework', path: '', component: () => import('#/views/framework.vue'),
         meta: { title: 'page.framework.title', frameworkPublic: true, affixTab: true },
+      }, {
+        name: 'Verification', path: 'verification', component: () => import('#/views/verification.vue'),
+        meta: { title: 'page.verification.adminTitle', verificationProtected: true },
       }],
     },
     {
@@ -19,6 +24,11 @@ export const router = createRouter({
   scrollBehavior: () => ({ top: 0 }),
 });
 
-// The only public routes are the empty framework page and its fallback.
-// New business routes stay unavailable until the real identity adapter is added.
-router.beforeEach((to) => to.meta.frameworkPublic === true || { name: 'NotFound', params: { pathMatch: ['unavailable'] } });
+// Business routes require a current server decision, including after permissions change.
+router.beforeEach(async (to) => {
+  if (to.meta.frameworkPublic === true) return true;
+  if (to.meta.verificationProtected === true) {
+    try { return await verification.consoleAccess(); } catch { /* The destination stays unavailable. */ }
+  }
+  return { name: 'NotFound', params: { pathMatch: ['unavailable'] } };
+});

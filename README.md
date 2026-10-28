@@ -1,6 +1,6 @@
 # stuhelper-admin
 
-基于 **Vben Admin v5.7.0 官方默认 web-antd 应用**的 StuHelper 管理端框架，组件库为 Ant Design Vue。当前提供官方布局、主题、组件适配和平台服务状态页，业务管理及真实身份接入尚未实现。
+基于 **Vben Admin v5.7.0 官方默认 web-antd 应用**的 StuHelper 管理端框架，组件库为 Ant Design Vue。当前提供官方布局、主题、组件适配、平台服务状态页和学生认证管理候选，真实身份接入仍待验收。
 
 ## 本地开发
 
@@ -20,7 +20,9 @@ make dev
 
 仅保留 web-antd 应用，移除其他 UI 应用、演示页面、Mock 后端和上游统计脚本。保留官方布局、主题、表单适配、国际化和共享组件。主应用不伪造用户、角色、通知或业务统计。
 
-为了修复实际安装检查中的兼容问题，构建工具固定 tsdown/@tsdown/css 0.23.2 和 vite-plugin-vue-devtools 8.2.1。原 skipNodeModulesBundle 配置使用当前 neverBundle 选项表达，继续生成并检查类型声明。同时固定兼容 Vite 8 的 inspect 依赖和 unplugin-dts 1.1.2。移除未使用的 Git hook 自动安装依赖。完整工具链通过 pnpm-lock.yaml 固定。
+为了修复实际安装检查中的兼容问题，构建工具固定 tsdown/@tsdown/css 0.23.2 和 vite-plugin-vue-devtools 8.2.1。
+
+原 skipNodeModulesBundle 配置使用当前 neverBundle 选项表达，继续生成并检查类型声明。同时固定兼容 Vite 8 的 inspect 依赖和 unplugin-dts 1.1.2。移除未使用的 Git hook 自动安装依赖。完整工具链通过 pnpm-lock.yaml 固定。
 
 ## 身份和权限边界
 
@@ -35,3 +37,9 @@ contracts/platform.openapi.yaml 与生成类型来自 platform 仓库。scripts/
 make check 执行八语言覆盖检查、类型检查、应用 lint、单元测试与生产构建。中文为默认语言，支持英文、法文、俄文、日文、韩文、西班牙文和阿拉伯文。金额、数字、日期与复数由统一格式接口处理，阿拉伯文布局使用 RTL。业务与真实登录验收在实现后单独执行。
 
 架构与业务规格见 [StuHelper Next](https://github.com/StuHelper/stuhelper-next)。
+
+## 学生认证候选
+
+认证页面、接口快照与八语言消息已加入候选。Web 提供个人认证和手机拍摄，Admin 提供学校范围的审核与管理。真实登录和学校服务由后端接入，页面不能自行授予资格。
+
+`check:verification` 验证本地接口摘要、生成类型和来源记录，客户端测试执行提供方共享样例。私有提供方源码的逐字核对在获准的私有组合检查中执行，公开 CI 不读取私有源码。

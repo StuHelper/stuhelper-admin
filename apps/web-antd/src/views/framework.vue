@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { RouterLink } from 'vue-router';
 
 import { Page } from '@vben/common-ui';
 import { useI18n } from '@vben/locales';
@@ -35,6 +36,7 @@ const description = computed(() => {
         <Alert :message="description" :type="state === 'ready' ? 'success' : 'info'" show-icon />
       </div>
       <Button class="mt-4" :loading="state === 'loading'" @click="reload">{{ t('page.framework.retry') }}</Button>
+      <RouterLink class="ms-4" to="/verification">{{ t('page.verification.adminTitle') }}</RouterLink>
     </Card>
   </Page>
 </template>
