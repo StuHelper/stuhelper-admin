@@ -16,12 +16,16 @@
     "lint": "pnpm exec eslint apps/web-antd/src packages/locales/src/langs --max-warnings=0",
     "test": "vitest run",
     "generate": "pnpm --dir scripts/contracts generate",
-    "check": "pnpm run check:resources && pnpm run check:academic && pnpm run check:i18n && pnpm run typecheck && pnpm run lint && pnpm test && pnpm run build",
+    "check": "pnpm run check:session && pnpm run check:verification && pnpm run check:resources && pnpm run check:academic && pnpm run check:i18n && pnpm run typecheck && pnpm run lint && pnpm test && pnpm run build",
     "postinstall": "pnpm -r --if-present run stub",
     "check:i18n": "stuhelper-check i18n",
     "hooks": "lefthook install",
     "check:academic": "node scripts/check-academic-contracts.mjs",
-    "check:resources": "node scripts/check-resources.mjs"
+    "check:resources": "node scripts/check-resources.mjs",
+    "check:verification": "node scripts/check-verification.mjs",
+    "check:docs": "stuhelper-check docs",
+    "check:session": "node scripts/check-session.mjs",
+    "generate:session": "pnpm --dir scripts/openapi exec openapi-typescript ../../contracts/session.openapi.json -o ../../apps/web-antd/src/api/session.gen.ts"
   },
   "devDependencies": {
     "@changesets/changelog-github": "catalog:",

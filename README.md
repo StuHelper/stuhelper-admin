@@ -20,7 +20,9 @@ make dev
 
 仅保留 web-antd 应用，移除其他 UI 应用、演示页面、Mock 后端和上游统计脚本。保留官方布局、主题、表单适配、国际化和共享组件。主应用不伪造用户、角色、通知或业务统计。
 
-为了修复实际安装检查中的兼容问题，构建工具固定 tsdown/@tsdown/css 0.23.2 和 vite-plugin-vue-devtools 8.2.1。原 skipNodeModulesBundle 配置使用当前 neverBundle 选项表达，继续生成并检查类型声明。同时固定兼容 Vite 8 的 inspect 依赖和 unplugin-dts 1.1.2。移除未使用的 Git hook 自动安装依赖。完整工具链通过 pnpm-lock.yaml 固定。
+为了修复实际安装检查中的兼容问题，构建工具固定 tsdown/@tsdown/css 0.23.2 和 vite-plugin-vue-devtools 8.2.1。原 skipNodeModulesBundle 配置使用当前 neverBundle 选项表达，继续生成并检查类型声明。
+
+同时固定兼容 Vite 8 的 inspect 依赖和 unplugin-dts 1.1.2。移除未使用的 Git hook 自动安装依赖。完整工具链通过 pnpm-lock.yaml 固定。
 
 ## 身份和权限边界
 
@@ -50,7 +52,9 @@ platform、storage 和 contribution 接口分别从提供方 OpenAPI 生成类�
 
 make check 执行八语言覆盖检查、类型检查、应用 lint、单元测试与生产构建。中文为默认语言，支持英文、法文、俄文、日文、韩文、西班牙文和阿拉伯文。金额、数字、日期与复数由统一格式接口处理，阿拉伯文布局使用 RTL。存储浏览器检查使用明确 HTTP 夹具覆盖八语言、桌面和移动布局、键盘确认、未知结果重试、分页及撤权清空。真实身份与供应商联调另行验收。
 
-contracts/platform.openapi.yaml 与生成类型来自 platform 仓库。scripts/contracts 独立固定接口生成工具使用的 TypeScript 5，不改变 Vben 应用的 TypeScript 6 工具链。`contracts/platform.source.json` 记录契约来源。课程、评价与审核的 OpenAPI 和生成类型同样记录来源、提交和摘要，并检查生成一致性。工作区检查核对来源提交及提供方兼容性。
+contracts/platform.openapi.yaml 与生成类型来自 platform 仓库。scripts/contracts 独立固定接口生成工具使用的 TypeScript 5，不改变 Vben 应用的 TypeScript 6 工具链。
+
+`contracts/platform.source.json` 记录契约来源。课程、评价与审核的 OpenAPI 和生成类型同样记录来源、提交和摘要，并检查生成一致性。工作区检查核对来源提交及提供方兼容性。
 
 make check 执行八语言覆盖检查、类型检查、应用 lint、单元测试与生产构建。中文为默认语言，支持英文、法文、俄文、日文、韩文、西班牙文和阿拉伯文。金额、数字、日期与复数由统一格式接口处理，阿拉伯文布局使用 RTL。学生端和管理端的 352 项八语言桌面与移动浏览器检查在架构仓库维护，使用合成响应。真实登录与生产运行分别验收。
 
@@ -101,3 +105,9 @@ make check 执行八语言覆盖检查、类型检查、应用 lint、单元测�
 | 场景 | 预期结果 |
 | --- | --- |
 | RES-CLIENT-07 | 免上传请求携带复用选项，处理中与完成后均不发送文件内容，新资料仍单独提交审核 |
+
+## 统一应用会话
+
+统一候选已接入登录、当前设备退出、全部设备退出和本人公开昵称修改。会话 Cookie 为 HttpOnly，写请求携带当前 CSRF 值。学生认证、评价与资料页面共用应用传输，最终资格和授权由后端检查。
+
+session 接口通过 OpenAPI 生成类型，来源提交与摘要保存在 contracts/session.source.json。隔离业务验收由 backend 的 make check-business 执行，覆盖学生认证、课程与导师评价、资料审核下载和撤权。真实账号、发行与部署仍分别验收。
