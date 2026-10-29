@@ -1,0 +1,41 @@
+{
+  "id": "admin",
+  "implementation": "application",
+  "required": [
+    "platform"
+  ],
+  "optional": [
+    "catalog",
+    "reviews",
+    "moderation",
+    "storage",
+    "media",
+    "storage-contribution",
+    "resources"
+  ],
+  "specifications": [
+    "README.md"
+  ],
+  "scenario_tests": {
+    "RES-CLIENT-01": [
+      "apps/web-antd/src/resources/api.test.ts#retries unknown writes with the frozen nested payload and original key",
+      "apps/web-antd/src/resources/api.test.ts#resolves a lost upload response by querying state without sending bytes again"
+    ],
+    "RES-CLIENT-02": [
+      "apps/web-antd/src/resources/api.test.ts#passes current host credentials and cancellation on every request",
+      "apps/web-antd/src/resources/api.test.ts#releases a known rejected mutation and clears private state even for non-JSON denial"
+    ],
+    "RES-CLIENT-03": [
+      "tests/e2e/resources.spec.mjs#category configuration preserves stable ids, fields and original-request retry"
+    ],
+    "RES-CLIENT-04": [
+      "tests/e2e/resources.spec.mjs#review reads the pending file and retries an unknown decision without duplication"
+    ],
+    "RES-CLIENT-05": [
+      "tests/e2e/resources.spec.mjs#grant creation and revocation retain the subject and respect current permissions"
+    ],
+    "RES-CLIENT-06": [
+      "tests/e2e/resources.spec.mjs#directory editing saves revision and configured names"
+    ]
+  }
+}
