@@ -47,7 +47,15 @@ async function bootstrap(namespace: string, fetcher: typeof fetch = fetch) {
 
   // 配置 pinia-tore
   await initStores(app, { namespace });
-  useAccessStore().setAccessMenus([{ name: 'page.framework.title', path: '/', icon: 'lucide:layout-dashboard' },{name:'page.academic.adminTitle',path:'/academic/reviews',icon:'lucide:message-square'},{name:'page.academic.catalogTitle',path:'/academic/catalog',icon:'lucide:book-open'}]);
+  useAccessStore().setAccessMenus([
+    { name: 'page.framework.title', path: '/', icon: 'lucide:layout-dashboard' },
+    { name: 'page.academic.adminTitle', path: '/academic/reviews', icon: 'lucide:message-square' },
+    { name: 'page.academic.catalogTitle', path: '/academic/catalog', icon: 'lucide:book-open' },
+    { name: 'page.resources.adminTitle', path: '/resources', icon: 'lucide:files' },
+    { name: 'page.storage.title', path: '/storage', icon: 'lucide:database' },
+    { name: 'page.custody.adminTitle', path: '/storage-accounts', icon: 'lucide:key-round' },
+    { name: 'page.contribution.adminTitle', path: '/contributions', icon: 'lucide:hard-drive' },
+  ]);
 
   // 安装权限指令
   registerAccessDirective(app);
