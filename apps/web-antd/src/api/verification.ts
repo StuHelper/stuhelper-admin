@@ -1,5 +1,7 @@
 import type { components } from './verification.gen'
 
+import { sessionFetch } from './session';
+
 type Schemas = components['schemas']
 type Entity = 'Application' | 'CaptureSession' | 'Credential' | 'EmailChallenge' | 'Job' | 'ManualInput' | 'Material' | 'Operation' | 'RemovalRequest' | 'School' | 'StudentProfile' | 'Suggestion' | 'Summary'
 export type { Schemas }
@@ -67,7 +69,7 @@ export function parseEntity<K extends Entity>(kind: K, value: unknown): Schemas[
 
 export class VerificationClient {
   private keys = new Map<string, string>()
-  constructor(private readonly fetcher: typeof fetch = fetch) {}
+  constructor(private readonly fetcher: typeof fetch = sessionFetch) {}
   async consoleAccess(): Promise<boolean> {
     const value = await this.body(await this.response('/api/v1/admin/verification/access'))
     if (!object(value) || value.allowed !== true) throw new VerificationError('permission_denied')

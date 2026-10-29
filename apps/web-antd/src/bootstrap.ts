@@ -13,10 +13,12 @@ import { $t, setupI18n } from '#/locales';
 
 import { initComponentAdapter } from './adapter/component';
 import { initSetupVbenForm } from './adapter/form';
+import { hostFetchKey } from './api/host';
+import { sessionFetch } from './api/session';
 import App from './app.vue';
 import { router } from './router';
 
-async function bootstrap(namespace: string) {
+async function bootstrap(namespace: string, fetcher: typeof fetch = sessionFetch) {
   // 初始化组件适配器
   await initComponentAdapter();
 
@@ -33,6 +35,7 @@ async function bootstrap(namespace: string) {
   // });
 
   const app = createApp(App);
+  app.provide(hostFetchKey, fetcher);
 
   // 注册v-loading指令
   registerLoadingDirective(app, {
@@ -45,7 +48,16 @@ async function bootstrap(namespace: string) {
 
   // 配置 pinia-tore
   await initStores(app, { namespace });
-  useAccessStore().setAccessMenus([{ name: 'page.framework.title', path: '/', icon: 'lucide:layout-dashboard' }]);
+  useAccessStore().setAccessMenus([
+    { name: 'page.framework.title', path: '/', icon: 'lucide:layout-dashboard' },
+    { name: 'page.verification.adminTitle', path: '/verification', icon: 'lucide:badge-check' },
+    { name: 'page.academic.adminTitle', path: '/academic/reviews', icon: 'lucide:message-square' },
+    { name: 'page.academic.catalogTitle', path: '/academic/catalog', icon: 'lucide:book-open' },
+    { name: 'page.resources.adminTitle', path: '/resources', icon: 'lucide:files' },
+    { name: 'page.storage.title', path: '/storage', icon: 'lucide:database' },
+    { name: 'page.custody.adminTitle', path: '/storage-accounts', icon: 'lucide:key-round' },
+    { name: 'page.contribution.adminTitle', path: '/contributions', icon: 'lucide:hard-drive' },
+  ]);
 
   // 安装权限指令
   registerAccessDirective(app);
