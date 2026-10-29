@@ -14,10 +14,11 @@ import { $t, setupI18n } from '#/locales';
 import { initComponentAdapter } from './adapter/component';
 import { initSetupVbenForm } from './adapter/form';
 import { hostFetchKey } from './api/host';
+import { sessionFetch } from './api/session';
 import App from './app.vue';
 import { router } from './router';
 
-async function bootstrap(namespace: string, fetcher: typeof fetch = fetch) {
+async function bootstrap(namespace: string, fetcher: typeof fetch = sessionFetch) {
   // 初始化组件适配器
   await initComponentAdapter();
 
@@ -49,6 +50,7 @@ async function bootstrap(namespace: string, fetcher: typeof fetch = fetch) {
   await initStores(app, { namespace });
   useAccessStore().setAccessMenus([
     { name: 'page.framework.title', path: '/', icon: 'lucide:layout-dashboard' },
+    { name: 'page.verification.adminTitle', path: '/verification', icon: 'lucide:badge-check' },
     { name: 'page.academic.adminTitle', path: '/academic/reviews', icon: 'lucide:message-square' },
     { name: 'page.academic.catalogTitle', path: '/academic/catalog', icon: 'lucide:book-open' },
     { name: 'page.resources.adminTitle', path: '/resources', icon: 'lucide:files' },

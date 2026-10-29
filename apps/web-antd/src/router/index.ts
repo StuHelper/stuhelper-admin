@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
+import { verification } from '#/api/verification';
+
 export const router = createRouter({
   history: createWebHistory(import.meta.env.VITE_BASE),
   routes: [
@@ -8,6 +10,9 @@ export const router = createRouter({
       children: [{
         name: 'Framework', path: '', component: () => import('#/views/framework.vue'),
         meta: { title: 'page.framework.title', frameworkPublic: true, affixTab: true },
+      }, {
+        name: 'Verification', path: 'verification', component: () => import('#/views/verification.vue'),
+        meta: { title: 'page.verification.adminTitle', verificationProtected: true },
       }, {
         name: 'Contributions', path: 'contributions', component: () => import('#/views/contributions.vue'),
         meta: { title: 'page.contribution.adminTitle', serverAuthorized: true },
@@ -42,4 +47,10 @@ export const router = createRouter({
 
 // Server-authorized pages render an empty access boundary until the protected
 // API succeeds. No local role or public-route flag grants access to business data.
-router.beforeEach((to) => to.meta.frameworkPublic === true || to.meta.serverAuthorized === true || to.meta.academicConsole === true || { name: 'NotFound', params: { pathMatch: ['unavailable'] } });
+router.beforeEach(async (to) => {
+  if (to.meta.frameworkPublic === true || to.meta.serverAuthorized === true || to.meta.academicConsole === true) return true;
+  if (to.meta.verificationProtected === true) {
+    try { return await verification.consoleAccess(); } catch { /* Server access failed. */ }
+  }
+  return { name: 'NotFound', params: { pathMatch: ['unavailable'] } };
+});

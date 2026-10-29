@@ -5,6 +5,7 @@ import type { components as Reviews } from '../api/reviews.gen'
 import catalogContract from '../../../../contracts/catalog.openapi.json'
 import moderationContract from '../../../../contracts/moderation.openapi.json'
 import reviewContract from '../../../../contracts/reviews.openapi.json'
+import { sessionFetch } from '../api/session';
 
 export type AcademicObject = Catalog['schemas']['Object']
 export type ObjectPage = Catalog['schemas']['Page']
@@ -48,7 +49,7 @@ export function validates(value: unknown, schema: unknown, schemas: Record<strin
 }
 const contracts = { catalog: catalogContract, reviews: reviewContract, moderation: moderationContract }
 type Module = keyof typeof contracts
-export async function call<T>(module: Module, path: string, schema: string, options: { array?: boolean; body?: unknown; key?: string; method?: string; signal?: AbortSignal; } = {}, fetcher: typeof fetch = fetch): Promise<T> {
+export async function call<T>(module: Module, path: string, schema: string, options: { array?: boolean; body?: unknown; key?: string; method?: string; signal?: AbortSignal; } = {}, fetcher: typeof fetch = sessionFetch): Promise<T> {
   const controller = new AbortController()
   const signal = options.signal ? AbortSignal.any([options.signal, controller.signal]) : controller.signal
   const timeout = setTimeout(() => controller.abort(), 20_000)
