@@ -8,6 +8,15 @@ export const router = createRouter({
       children: [{
         name: 'Framework', path: '', component: () => import('#/views/framework.vue'),
         meta: { title: 'page.framework.title', frameworkPublic: true, affixTab: true },
+      }, {
+        name: 'Contributions', path: 'contributions', component: () => import('#/views/contributions.vue'),
+        meta: { title: 'page.contribution.adminTitle', serverAuthorized: true },
+      }, {
+        name: 'Custody', path: 'storage-accounts', component: () => import('#/views/custody.vue'),
+        meta: { title: 'page.custody.adminTitle', serverAuthorized: true },
+      }, {
+        name: 'Storage', path: 'storage', component: () => import('#/views/storage.vue'),
+        meta: { title: 'page.storage.title', serverAuthorized: true },
       }],
     },
     {
@@ -19,6 +28,6 @@ export const router = createRouter({
   scrollBehavior: () => ({ top: 0 }),
 });
 
-// The only public routes are the empty framework page and its fallback.
-// New business routes stay unavailable until the real identity adapter is added.
-router.beforeEach((to) => to.meta.frameworkPublic === true || { name: 'NotFound', params: { pathMatch: ['unavailable'] } });
+// Server-authorized pages render an empty access boundary until the protected
+// API succeeds. No local role or public-route flag grants access to business data.
+router.beforeEach((to) => to.meta.frameworkPublic === true || to.meta.serverAuthorized === true || { name: 'NotFound', params: { pathMatch: ['unavailable'] } });
