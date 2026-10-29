@@ -24,7 +24,7 @@ const data=useLoad(async signal=>{
   if(!school.value||['policyManagement','presentationTitle'].includes(tab.value))return {tasks:[],entries:[],next:''};
   if(tab.value==='queue'){
     const tasks=await call<Task[]>('moderation','/tasks'+query({admin:'true',school_id:school.value,state:state.value,after:after.value,limit:'20',kind:taskKind.value,content_kind:kind.value,from:from.value?new Date(from.value).toISOString():undefined,until:until.value?new Date(until.value).toISOString():undefined}),'TaskView',{signal,array:true});
-    return {tasks,entries:[],next:tasks.length===20?tasks.at(-1)?.id??'':''};
+    return {tasks:tasks.filter(task=>task.content_kind!=='resource'),entries:[],next:tasks.length===20?tasks.at(-1)?.id??'':''};
   }
   const page=await call<AdminPage>('reviews','/admin/entries'+query({school_id:school.value,kind:kind.value,state:state.value,after:after.value,limit:'20'}),'AdminPage',{signal});
   return {tasks:[],entries:page.items,next:page.next};

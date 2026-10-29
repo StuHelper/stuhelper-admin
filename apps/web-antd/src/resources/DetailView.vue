@@ -114,12 +114,9 @@ watch(
             :to="`/resources/items/${entry.id}/edit`"
           >
             {{ t('page.resources.edit') }}
-</RouterLink><RouterLink
-            v-if="version.metadata.associations.course_id"
-            :to="`/courses/${version.metadata.associations.course_id}`"
-          >
-            {{ t('page.resources.catalog.course') }}
-</RouterLink><button @click="showRequest = !showRequest">
+</RouterLink><span v-if="version.metadata.associations.course_id">
+            {{ t('page.resources.catalog.course') }} {{ version.metadata.associations.course_id }}
+</span><button @click="showRequest = !showRequest">
             {{ t('page.resources.request') }}
           </button>
         </div>
