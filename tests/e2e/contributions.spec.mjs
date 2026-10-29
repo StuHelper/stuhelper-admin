@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { expect, test } from 'playwright/test';
+import { expect, test } from '../session-fixture.mjs';
 const example = JSON.parse(fs.readFileSync('contracts/contribution.example.json', 'utf8'));
 function messages(info) { return JSON.parse(fs.readFileSync(`apps/web-antd/src/locales/langs/${info.project.metadata.locale}/page.json`, 'utf8')).contribution; }
 test('operator retry preserves conditions, retains uncertain request and clears revoked inventory', async ({ page }, info) => {

@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { expect, test } from 'playwright/test';
+import { expect, test } from '../session-fixture.mjs';
 
 const example = JSON.parse(fs.readFileSync('contracts/storage-operations.example.json', 'utf8'));
 const endpoint = '**/api/v1/storage/operations**';

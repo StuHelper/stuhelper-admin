@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 
-import { expect, test } from 'playwright/test';
+import { expect, test } from '../session-fixture.mjs';
 
 test('custody administration resumes original consent without credential access', async ({ page }, info) => {
   const messages = JSON.parse(fs.readFileSync(`apps/web-antd/src/locales/langs/${info.project.metadata.locale}/page.json`, 'utf8')); const m = messages.custody;
