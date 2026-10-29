@@ -13,10 +13,11 @@ import { $t, setupI18n } from '#/locales';
 
 import { initComponentAdapter } from './adapter/component';
 import { initSetupVbenForm } from './adapter/form';
+import { hostFetchKey } from './api/host';
 import App from './app.vue';
 import { router } from './router';
 
-async function bootstrap(namespace: string) {
+async function bootstrap(namespace: string, fetcher: typeof fetch = fetch) {
   // 初始化组件适配器
   await initComponentAdapter();
 
@@ -33,6 +34,7 @@ async function bootstrap(namespace: string) {
   // });
 
   const app = createApp(App);
+  app.provide(hostFetchKey, fetcher);
 
   // 注册v-loading指令
   registerLoadingDirective(app, {

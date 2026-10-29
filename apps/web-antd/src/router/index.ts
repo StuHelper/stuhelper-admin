@@ -9,6 +9,15 @@ export const router = createRouter({
         name: 'Framework', path: '', component: () => import('#/views/framework.vue'),
         meta: { title: 'page.framework.title', frameworkPublic: true, affixTab: true },
       }, {
+        name: 'Contributions', path: 'contributions', component: () => import('#/views/contributions.vue'),
+        meta: { title: 'page.contribution.adminTitle', serverAuthorized: true },
+      }, {
+        name: 'Custody', path: 'storage-accounts', component: () => import('#/views/custody.vue'),
+        meta: { title: 'page.custody.adminTitle', serverAuthorized: true },
+      }, {
+        name: 'Storage', path: 'storage', component: () => import('#/views/storage.vue'),
+        meta: { title: 'page.storage.title', serverAuthorized: true },
+      }, {
         name: 'AcademicReviews', path: '/academic/reviews', component: () => import('#/academic/ModerationView.vue'),
         meta: { title: 'page.academic.adminTitle', academicConsole: true },
       }, {
@@ -25,6 +34,6 @@ export const router = createRouter({
   scrollBehavior: () => ({ top: 0 }),
 });
 
-// The console renders no protected data without a successful, scoped server request.
-// Visiting a route does not grant a role; every read and mutation is authorized by its API.
-router.beforeEach((to) => to.meta.frameworkPublic === true || to.meta.academicConsole === true || { name: 'NotFound', params: { pathMatch: ['unavailable'] } });
+// Server-authorized pages render an empty access boundary until the protected
+// API succeeds. No local role or public-route flag grants access to business data.
+router.beforeEach((to) => to.meta.frameworkPublic === true || to.meta.serverAuthorized === true || to.meta.academicConsole === true || { name: 'NotFound', params: { pathMatch: ['unavailable'] } });
