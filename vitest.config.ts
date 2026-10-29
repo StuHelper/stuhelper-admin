@@ -3,6 +3,7 @@ import VueJsx from '@vitejs/plugin-vue-jsx';
 import { configDefaults, defineConfig } from 'vitest/config';
 
 export default defineConfig({
+  resolve: { alias: { '#': new URL('apps/web-antd/src', import.meta.url).pathname } },
   plugins: [Vue(), VueJsx()],
   test: {
     environment: 'happy-dom',

@@ -55,7 +55,7 @@ export function parseEntity<K extends Entity>(kind: K, value: unknown): Schemas[
     }
     case 'School': { valid = text(v.id) && text(v.name) && typeof v.enabled === 'boolean' && Array.isArray(v.methods) && v.methods.every(m => one(m, methods)) && text(v.notice_version) && text(v.opening_date) && number(v.newcomer_days) && text(v.email_domain) && strings(v.material_types) && number(v.revision) && (v.profile_schema === undefined || text(v.profile_schema)); break
     }
-    case 'StudentProfile': { valid = text(v.school_id) && one(v.data_status, ['complete', 'partial', 'reference_only', 'unavailable']) && text(v.schema) && number(v.revision) && expiry(v.collected_at) && text(v.source_revision) && object(v.fields) && Object.keys(v.fields).length <= 64 && fieldSources(v.field_sources) && (v.raw_data === undefined || text(v.raw_data)); break
+    case 'StudentProfile': { valid = text(v.school_id) && one(v.data_status, ['complete', 'partial', 'reference_only', 'unavailable']) && text(v.schema) && number(v.revision) && expiry(v.collected_at) && text(v.source_revision) && object(v.fields) && Object.keys(v.fields).length <= 64 && fieldSources(v.field_sources) && (v.raw_data === undefined || (text(v.raw_data) && v.raw_data.length <= 1 << 20)); break
     }
     case 'Suggestion': { valid = text(v.id) && text(v.name) && text(v.website) && one(v.state, ['pending', 'approved', 'rejected']) && text(v.note) && number(v.revision); break
     }
@@ -76,7 +76,7 @@ export class VerificationClient {
     return true
   }
   async get<K extends Entity>(kind: K, path: string, signal?: AbortSignal): Promise<Schemas[K]> {
-    return parseEntity(kind, await this.body(await this.response(path, { signal })))
+    return parseEntity(kind, await this.body(await this.response(path, { signal }), kind === 'StudentProfile' ? 8 << 20 : 1 << 20))
   }
   async list<K extends Entity>(kind: K, path: string, signal?: AbortSignal): Promise<Schemas[K][]> {
     const value = await this.body(await this.response(path, { signal }))
@@ -118,9 +118,9 @@ export class VerificationClient {
       throw error
     }
   }
-  private async body(response: Response): Promise<unknown> {
+  private async body(response: Response, limit = 1 << 20): Promise<unknown> {
     let value: unknown
-    try { const raw = await response.text(); if (raw.length > 1 << 20) throw new Error('large'); value = JSON.parse(raw) } catch { throw new VerificationError('incompatible') }
+    try { const raw = await response.text(); if (raw.length > limit) throw new Error('large'); value = JSON.parse(raw) } catch { throw new VerificationError('incompatible') }
     if (!response.ok) { const operationId = object(value) && text(value.operation_id) && /^[a-f0-9]{64}$/.test(value.operation_id) ? value.operation_id : undefined; throw new VerificationError(object(value) && text(value.code) && codes.has(value.code) ? value.code : 'dependency_unavailable', operationId) }
     return value
   }

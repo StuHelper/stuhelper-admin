@@ -57,3 +57,16 @@ for (const sample of sharedCases.cases) {
     else expect(parse).toThrow('incompatible')
   })
 }
+
+
+describe('raw profile response limits', () => {
+  const profile = { school_id: 'synthetic', data_status: 'complete', schema: 'v1', revision: 1, collected_at: null, source_revision: 'v1', fields: {}, field_sources: {} }
+  it('accepts maximum raw data including JSON escapes and wrapper fields', async () => {
+    const raw_data = '\u0001'.repeat(1 << 20)
+    const client = new VerificationClient(vi.fn(async () => json({ ...profile, raw_data })))
+    const loaded = await client.get('StudentProfile', '/api/v1/admin/verification/credentials/test/profile'); expect(loaded.raw_data).toBe(raw_data)
+  })
+  it('rejects raw data exceeding the contract field limit', () => {
+    expect(() => parseEntity('StudentProfile', { ...profile, raw_data: 'a'.repeat((1 << 20) + 1) })).toThrow('incompatible')
+  })
+})
