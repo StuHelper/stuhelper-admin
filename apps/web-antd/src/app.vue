@@ -26,13 +26,14 @@ const tokenTheme = computed(() => {
 
   return {
     algorithm,
-    token: tokens,
+    // Softer motion and rounder corners than the Ant Design defaults, at a compact size.
+    token: { ...tokens, borderRadius: 8, controlHeight: 32, fontSize: 14, motionDurationMid: '0.25s', motionEaseOut: 'cubic-bezier(.22, 1, .36, 1)', wireframe: false },
   };
 });
 </script>
 
 <template>
-  <ConfigProvider :locale="antdLocale" :direction="direction" :theme="tokenTheme">
+  <ConfigProvider :locale="antdLocale" :direction="direction" :theme="tokenTheme" :auto-insert-space-in-button="false">
     <App>
       <RouterView />
     </App>

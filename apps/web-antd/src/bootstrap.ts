@@ -13,10 +13,13 @@ import { $t, setupI18n } from '#/locales';
 
 import { initComponentAdapter } from './adapter/component';
 import { initSetupVbenForm } from './adapter/form';
-import { hostFetchKey } from './api/host';
-import { sessionFetch } from './api/session';
 import App from './app.vue';
+import { menus } from './menus';
 import { router } from './router';
+import { hostFetchKey, sessionFetch } from './shared/api/transport';
+import { createSessionStore, sessionKey } from './shared/session';
+
+import './styles/theme.css';
 
 async function bootstrap(namespace: string, fetcher: typeof fetch = sessionFetch) {
   // 初始化组件适配器
@@ -35,7 +38,9 @@ async function bootstrap(namespace: string, fetcher: typeof fetch = sessionFetch
   // });
 
   const app = createApp(App);
-  app.provide(hostFetchKey, fetcher);
+  const session = createSessionStore(fetcher);
+  app.provide(hostFetchKey, fetcher).provide(sessionKey, session);
+  void session.reload();
 
   // 注册v-loading指令
   registerLoadingDirective(app, {
@@ -48,16 +53,7 @@ async function bootstrap(namespace: string, fetcher: typeof fetch = sessionFetch
 
   // 配置 pinia-tore
   await initStores(app, { namespace });
-  useAccessStore().setAccessMenus([
-    { name: 'page.framework.title', path: '/', icon: 'lucide:layout-dashboard' },
-    { name: 'page.verification.adminTitle', path: '/verification', icon: 'lucide:badge-check' },
-    { name: 'page.academic.adminTitle', path: '/academic/reviews', icon: 'lucide:message-square' },
-    { name: 'page.academic.catalogTitle', path: '/academic/catalog', icon: 'lucide:book-open' },
-    { name: 'page.resources.adminTitle', path: '/resources', icon: 'lucide:files' },
-    { name: 'page.storage.title', path: '/storage', icon: 'lucide:database' },
-    { name: 'page.custody.adminTitle', path: '/storage-accounts', icon: 'lucide:key-round' },
-    { name: 'page.contribution.adminTitle', path: '/contributions', icon: 'lucide:hard-drive' },
-  ]);
+  useAccessStore().setAccessMenus(menus);
 
   // 安装权限指令
   registerAccessDirective(app);
