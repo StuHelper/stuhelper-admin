@@ -1,135 +1,50 @@
 /*
- * Apple-style theme on top of Vben and Ant Design Vue, matching stuhelper-web.
- * Framework packages stay unmodified: this file only overrides their public
- * design tokens and the visual details that tokens do not reach.
+ * Compact working theme on top of Vben and Ant Design Vue. Administration compares
+ * many records, so it favours density and clear edges over decoration. Framework
+ * packages stay unmodified: this file only overrides public tokens and details.
  */
 html:not(.dark) {
-  --background-deep: 240 11% 96%;
+  --background-deep: 220 14% 96%;
   --background: 0 0% 100%;
-  --border: 240 6% 89%;
-  --sidebar: 240 11% 96%;
-  --sidebar-deep: 240 11% 96%;
-  --header: 240 14% 98%;
-  --accent: 240 8% 93%;
-  --accent-hover: 240 8% 93%;
-  --accent-lighter: 240 8% 95%;
-  --radius: .75rem;
+  --border: 220 13% 88%;
+  --radius: .25rem;
 }
 
-:root {
-  --sh-glass: rgb(250 250 252 / 72%);
-  --sh-card-shadow: 0 1px 2px rgb(0 0 0 / 3%), 0 6px 20px rgb(0 0 0 / 4%);
-  --sh-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", "Segoe UI", "Microsoft YaHei", "Noto Sans CJK SC", "Noto Sans Arabic", "Noto Sans", Arial, sans-serif;
-  --sh-ease: cubic-bezier(.22, 1, .36, 1);
-}
+html, body { font-size: 14px; }
 
-html.dark.dark {
-  --background-deep: 0 0% 0%;
-  --background: 240 3% 11%;
-  --border: 240 3% 22%;
-  --sidebar: 240 3% 8%;
-  --sidebar-deep: 240 3% 8%;
-  --header: 240 3% 11%;
-  --accent: 240 3% 20%;
-  --accent-hover: 240 3% 20%;
-  --accent-lighter: 240 3% 16%;
-  --sh-glass: rgb(29 29 31 / 72%);
-  --sh-card-shadow: none;
-}
+/* Controls and surfaces */
+.ant-btn { box-shadow: none !important; }
+.ant-card { border: 1px solid hsl(var(--border)) !important; border-radius: 4px; box-shadow: none !important; }
+.ant-card .ant-card-body { padding: 12px 14px; }
+.ant-card .ant-card-head { min-height: 40px; padding-inline: 14px; font-size: 14px; }
+.ant-tag { border-radius: 3px; }
+.ant-alert { border-radius: 4px; }
 
-html, body, .ant-typography, .ant-btn, .ant-input, .ant-select, .ant-table, .ant-card, .ant-modal {
-  font-family: var(--sh-font);
-}
+/* Tables: tight rows, a visible header and row highlight for scanning */
+.ant-table-wrapper { background: hsl(var(--background)); }
+.ant-table-wrapper .ant-table-thead > tr > th { padding: 6px 10px; background: hsl(var(--background-deep)); font-size: 12px; font-weight: 600; }
+.ant-table-wrapper .ant-table-thead > tr > th::before { display: none; }
+.ant-table-wrapper .ant-table-tbody > tr > td { padding: 6px 10px; }
+.ant-table-wrapper .ant-table-tbody > tr:hover > td { background: hsl(var(--primary) / 6%) !important; }
+.ant-table-wrapper .ant-pagination { margin-block: 8px; padding-inline: 10px; }
 
-body {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Translucent top bar */
-header.flex-center, .vben-layout-header, [class*="layout-header"] {
-  background: var(--sh-glass) !important;
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-}
-
-/* Pill buttons with a press response */
-.ant-btn {
-  box-shadow: none !important;
-  font-weight: 500;
-  transition: background-color .2s, color .2s, border-color .2s, opacity .2s, transform .25s var(--sh-ease);
-}
-.ant-btn:not(.ant-btn-circle, .ant-btn-link, .ant-btn-text) { border-radius: 980px; }
-.ant-btn:active:not(:disabled) { transform: scale(.97); }
-.ant-btn-default:not(.ant-btn-dangerous) { border-color: transparent; background: rgb(120 120 128 / 12%); }
-.ant-btn-default:hover:not(:disabled, .ant-btn-dangerous) { border-color: transparent !important; background: rgb(120 120 128 / 20%); color: inherit !important; }
-
-/* Filled controls */
-.ant-input, .ant-input-affix-wrapper, .ant-input-number, .ant-picker, .ant-select:not(.ant-select-customize-input) .ant-select-selector {
-  border-color: transparent !important;
-  background: rgb(120 120 128 / 12%) !important;
-  box-shadow: none;
-}
-.ant-input:focus, .ant-input-affix-wrapper-focused, .ant-input-number-focused, .ant-picker-focused, .ant-select-focused:not(.ant-select-customize-input) .ant-select-selector {
-  border-color: hsl(var(--primary)) !important;
-  background: hsl(var(--background)) !important;
-  box-shadow: 0 0 0 4px hsl(var(--primary) / 12%) !important;
-}
-.ant-input-affix-wrapper .ant-input { background: transparent !important; }
-.ant-form-item-label > label { color: hsl(var(--muted-foreground)); font-size: 13px; font-weight: 500; }
-
-/* Cards and tables rest on the page without outlines */
-.ant-card { border: 0 !important; border-radius: 20px; box-shadow: var(--sh-card-shadow) !important; }
-.ant-card-head { min-height: 52px; border-block-end: 0 !important; font-size: 17px; }
-.ant-table-wrapper { overflow: hidden; border-radius: 20px; background: hsl(var(--background)); box-shadow: var(--sh-card-shadow); }
-.ant-table-thead > tr > th { border-block-end: .5px solid hsl(var(--border)) !important; background: transparent !important; color: hsl(var(--muted-foreground)) !important; font-size: 13px; font-weight: 500 !important; }
-.ant-table-thead > tr > th::before { display: none; }
-.ant-table-tbody > tr > td { border-block-end: .5px solid hsl(var(--border)) !important; transition: background-color .15s; }
-.ant-table-tbody > tr:last-child > td { border-block-end: 0 !important; }
-.ant-table-wrapper .ant-pagination { padding-inline: 16px; }
-.ant-tag { border: 0; border-radius: 980px; padding-inline: 10px; font-weight: 550; }
-.ant-alert { border: 0; border-radius: 14px; }
-.ant-descriptions-bordered .ant-descriptions-view { border: 0; }
-
-/* Modals and drawers float above a blurred page */
-.ant-modal-mask, .ant-drawer-mask { backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
-.ant-modal .ant-modal-content { padding: 28px; border-radius: 28px; }
-.ant-modal .ant-modal-title { font-size: 21px; font-weight: 650; }
-.ant-drawer-content-wrapper { max-width: 100vw; overflow: hidden; }
-
-/* Segmented tabs */
-.ant-tabs-nav::before { border-block-end: 0 !important; }
-.ant-tabs-ink-bar { height: 2.5px !important; border-radius: 2px; }
-
-/* Grouped item inside a card */
-.ant-card article.border { border: 0 !important; border-radius: 16px; background: rgb(120 120 128 / 8%); }
-.ant-card article > form { margin-block-start: 16px; }
-.ant-statistic-title { font-size: 13px !important; }
-.ant-statistic-content { font-size: 26px !important; font-weight: 650; letter-spacing: -.02em; }
-
-/* Side menu: rounded selection, as in macOS sidebars */
-.vben-menu-item, .vben-sub-menu-content { border-radius: 10px !important; }
-
-@media (prefers-reduced-motion: reduce) {
-  .ant-btn { transition-duration: .01ms; }
-  .ant-btn:active:not(:disabled) { transform: none; }
-}
-
-/* Administration compares many records, so it is denser than the student site. */
-.ant-card { border-radius: 12px; }
-.ant-card .ant-card-body { padding: 14px 16px; }
-.ant-card .ant-card-head { min-height: 44px; padding-inline: 16px; font-size: 15px; }
-.ant-btn:not(.ant-btn-circle, .ant-btn-link, .ant-btn-text) { border-radius: 8px; }
-.ant-table-wrapper { border-radius: 10px; box-shadow: none; }
-.ant-table-wrapper .ant-table-thead > tr > th, .ant-table-wrapper .ant-table-tbody > tr > td { padding: 8px 12px !important; }
-.ant-form-inline .ant-form-item { margin-inline-end: 12px; margin-block-end: 0; }
-.ant-form-vertical .ant-form-item { margin-block-end: 12px; }
+/* Forms */
+.ant-form-inline .ant-form-item { margin-inline-end: 10px; margin-block-end: 0; }
+.ant-form-vertical .ant-form-item { margin-block-end: 10px; }
 .ant-form-vertical .ant-form-item-label { padding-block-end: 2px; }
-.ant-drawer .ant-drawer-header { padding: 10px 16px; }
-.ant-drawer .ant-drawer-body { padding: 14px 16px; }
-.ant-modal .ant-modal-content { padding: 20px; border-radius: 16px; }
-.ant-modal .ant-modal-title { font-size: 17px; }
-.ant-statistic-content { font-size: 22px !important; }
+.ant-form-item-label > label { font-size: 12px; }
+
+/* Overlays */
+.ant-drawer .ant-drawer-header { padding: 10px 14px; }
+.ant-drawer .ant-drawer-body { padding: 12px 14px; }
+.ant-drawer-content-wrapper { max-width: 100vw; overflow: hidden; }
+.ant-modal .ant-modal-content { padding: 16px; border-radius: 4px; }
+.ant-modal .ant-modal-title { font-size: 15px; }
+.ant-statistic-content { font-size: 20px !important; font-weight: 600; }
+.ant-statistic-title { font-size: 12px !important; }
+
+/* Side menu: dense rows */
+.vben-menu-item, .vben-sub-menu-content { border-radius: 3px !important; }
 
 /* Ant Design measures column widths with a hidden row; it must take no height. */
 .ant-table-measure-row > td { height: 0 !important; padding: 0 !important; border: 0 !important; }

@@ -26,8 +26,8 @@ const tokenTheme = computed(() => {
 
   return {
     algorithm,
-    // Softer motion and rounder corners than the Ant Design defaults, at a compact size.
-    token: { ...tokens, borderRadius: 8, controlHeight: 32, fontSize: 14, motionDurationMid: '0.25s', motionEaseOut: 'cubic-bezier(.22, 1, .36, 1)', wireframe: false },
+    // Small corners and short motion suit a dense working tool.
+    token: { ...tokens, borderRadius: 4, controlHeight: 32, fontSize: 14, motionDurationMid: '0.25s', motionEaseOut: 'cubic-bezier(.22, 1, .36, 1)', wireframe: false },
   };
 });
 </script>
