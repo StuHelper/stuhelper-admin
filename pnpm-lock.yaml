@@ -648,6 +648,9 @@ importers:
       dayjs:
         specifier: 'catalog:'
         version: 1.11.20
+      lucide-vue-next:
+        specifier: 'catalog:'
+        version: 0.577.0(vue@3.5.34(typescript@6.0.3))
       pinia:
         specifier: ^3.0.4
         version: 3.0.4(typescript@6.0.3)(vue@3.5.34(typescript@6.0.3))
@@ -4558,7 +4561,7 @@ packages:
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
   '@stuhelper/engineering-tools@https://codeload.github.com/StuHelper/stuhelper-tooling/tar.gz/67c84052328e69f048b2601dd56002013db4c282':
-    resolution: {gitHosted: true, integrity: sha512-qISQMMQLBb0sWD8/V5nEQe5HWbRIdvdN5Es7U5yaM8giuMUqS8yaaTS/esHLDq4Ije7rkwzSN73reDBhWUZTig==, tarball: https://codeload.github.com/StuHelper/stuhelper-tooling/tar.gz/67c84052328e69f048b2601dd56002013db4c282}
+    resolution: {gitHosted: true, tarball: https://codeload.github.com/StuHelper/stuhelper-tooling/tar.gz/67c84052328e69f048b2601dd56002013db4c282}
     version: 0.1.0
     engines: {node: 24.22.1, pnpm: 10.33.4}
     hasBin: true

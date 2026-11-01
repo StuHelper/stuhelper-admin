@@ -1,56 +1,43 @@
+import type { RouteRecordRaw } from 'vue-router';
+
 import { createRouter, createWebHistory } from 'vue-router';
 
-import { verification } from '#/api/verification';
+const academic = {
+  moderation: () => import('#/features/academic/ModerationView.vue'),
+};
 
+const children: RouteRecordRaw[] = [
+  { name: 'Overview', path: '', component: () => import('#/features/overview/OverviewView.vue'), meta: { title: 'page.menu.overview', affixTab: true } },
+  { name: 'ModerationQueue', path: 'moderation/queue', component: academic.moderation, props: { mode: 'queue' }, meta: { title: 'page.menu.moderationQueue' } },
+  { name: 'ModerationContent', path: 'moderation/content', component: academic.moderation, props: { mode: 'content' }, meta: { title: 'page.menu.moderationContent' } },
+  { name: 'ModerationPolicies', path: 'moderation/policies', component: () => import('#/features/academic/PolicyView.vue'), meta: { title: 'page.menu.moderationPolicies' } },
+  { name: 'ModerationPresentation', path: 'moderation/presentation', component: () => import('#/features/academic/PresentationView.vue'), meta: { title: 'page.menu.moderationPresentation' } },
+  { name: 'Catalog', path: 'catalog', component: () => import('#/features/academic/CatalogView.vue'), meta: { title: 'page.menu.catalog' } },
+  { name: 'CatalogImports', path: 'catalog/imports', component: () => import('#/features/academic/ImportView.vue'), meta: { title: 'page.menu.catalogImports' } },
+  { name: 'Resources', path: 'resources', component: () => import('#/features/resources/ResourcesView.vue'), meta: { title: 'page.menu.resources' } },
+  { name: 'ResourceReviews', path: 'resources/reviews', component: () => import('#/features/resources/ReviewView.vue'), meta: { title: 'page.menu.resourceReviews' } },
+  { name: 'ResourceCategories', path: 'resources/categories', component: () => import('#/features/resources/CategoriesView.vue'), meta: { title: 'page.menu.resourceCategories' } },
+  { name: 'ResourceDirectories', path: 'resources/directories', component: () => import('#/features/resources/DirectoriesView.vue'), meta: { title: 'page.menu.resourceDirectories' } },
+  { name: 'Verification', path: 'verification', component: () => import('#/features/verification/VerificationView.vue'), meta: { title: 'page.menu.verification' } },
+  { name: 'Storage', path: 'storage', component: () => import('#/features/storage/StorageView.vue'), meta: { title: 'page.menu.storage' } },
+  { name: 'StorageCustody', path: 'storage/custody', component: () => import('#/features/storage/CustodyView.vue'), meta: { title: 'page.menu.custody' } },
+  { name: 'StorageContributions', path: 'storage/contributions', component: () => import('#/features/storage/ContributionsView.vue'), meta: { title: 'page.menu.contributions' } },
+  // Earlier entry points keep working after the reorganisation.
+  { path: 'academic/reviews', redirect: '/moderation/queue' },
+  { path: 'academic/catalog', redirect: '/catalog' },
+  { path: 'storage-accounts', redirect: '/storage/custody' },
+  { path: 'contributions', redirect: '/storage/contributions' },
+];
+
+/**
+ * Routes carry no local role or access flag: every page asks the server, and
+ * an unauthorized response clears the page's data.
+ */
 export const router = createRouter({
   history: createWebHistory(import.meta.env.VITE_BASE),
   routes: [
-    {
-      name: 'Root', path: '/', component: () => import('#/layouts/basic.vue'),
-      children: [{
-        name: 'Framework', path: '', component: () => import('#/views/framework.vue'),
-        meta: { title: 'page.framework.title', frameworkPublic: true, affixTab: true },
-      }, {
-        name: 'Verification', path: 'verification', component: () => import('#/views/verification.vue'),
-        meta: { title: 'page.verification.adminTitle', verificationProtected: true },
-      }, {
-        name: 'Contributions', path: 'contributions', component: () => import('#/views/contributions.vue'),
-        meta: { title: 'page.contribution.adminTitle', serverAuthorized: true },
-      }, {
-        name: 'Custody', path: 'storage-accounts', component: () => import('#/views/custody.vue'),
-        meta: { title: 'page.custody.adminTitle', serverAuthorized: true },
-      }, {
-        name: 'Storage', path: 'storage', component: () => import('#/views/storage.vue'),
-        meta: { title: 'page.storage.title', serverAuthorized: true },
-      }, {
-        name: 'AcademicReviews', path: '/academic/reviews', component: () => import('#/academic/ModerationView.vue'),
-        meta: { title: 'page.academic.adminTitle', academicConsole: true },
-      }, {
-        name: 'AcademicCatalog', path: '/academic/catalog', component: () => import('#/academic/CatalogView.vue'),
-        meta: { title: 'page.academic.catalogTitle', academicConsole: true },
-      }, {name:'Resources',path:'/resources',component:()=>import('#/resources/AdminView.vue'),meta:{title:'page.resources.adminTitle',serverAuthorized:true}},
-      {name:'ResourcesMine',path:'/resources/me',component:()=>import('#/resources/BrowseView.vue'),meta:{title:'page.resources.mine',serverAuthorized:true}},
-      {name:'ResourcesNew',path:'/resources/new',component:()=>import('#/resources/EditorView.vue'),meta:{title:'page.resources.upload',serverAuthorized:true}},
-      {name:'ResourcesEdit',path:'/resources/items/:id/edit',component:()=>import('#/resources/EditorView.vue'),meta:{title:'page.resources.edit',serverAuthorized:true}},
-      {name:'ResourcesDetail',path:'/resources/items/:id',component:()=>import('#/resources/DetailView.vue'),meta:{title:'page.resources.title',serverAuthorized:true}},
-      {name:'ResourcesRequests',path:'/resources/requests',component:()=>import('#/resources/RequestsView.vue'),meta:{title:'page.resources.myRequests',serverAuthorized:true}},
-      ],
-    },
-    {
-      name: 'NotFound', path: '/:pathMatch(.*)*',
-      component: () => import('#/views/not-found.vue'),
-      meta: { title: 'page.framework.unavailable', frameworkPublic: true },
-    },
+    { name: 'Root', path: '/', component: () => import('#/layouts/basic.vue'), children },
+    { name: 'NotFound', path: '/:pathMatch(.*)*', component: () => import('#/features/overview/NotFoundView.vue'), meta: { title: 'page.framework.unavailable' } },
   ],
   scrollBehavior: () => ({ top: 0 }),
-});
-
-// Server-authorized pages render an empty access boundary until the protected
-// API succeeds. No local role or public-route flag grants access to business data.
-router.beforeEach(async (to) => {
-  if (to.meta.frameworkPublic === true || to.meta.serverAuthorized === true || to.meta.academicConsole === true) return true;
-  if (to.meta.verificationProtected === true) {
-    try { return await verification.consoleAccess(); } catch { /* Server access failed. */ }
-  }
-  return { name: 'NotFound', params: { pathMatch: ['unavailable'] } };
 });
