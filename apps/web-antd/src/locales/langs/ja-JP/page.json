@@ -401,11 +401,20 @@
     },
     "ready": "管理サービスに接続しました",
     "title": "管理画面",
-    "description": "stuhelper-admin の開発プレビューです。",
+    "description": "よく使う管理機能とサービスの状態。",
     "loading": "管理サービスに接続中…",
     "preview": "開発プレビュー",
     "retry": "再接続",
-    "unavailable": "このページは利用できません"
+    "unavailable": "このページは利用できません",
+    "shortcuts": "ショートカット",
+    "moduleStates": {
+      "ready": "稼働中",
+      "starting": "起動中",
+      "stopping": "停止中",
+      "stopped": "停止済み",
+      "disabled": "無効",
+      "failed": "障害"
+    }
   },
   "storage": {
     "title": "ストレージ運用管理",
@@ -1032,5 +1041,100 @@
     "save": "保存",
     "unavailable": "アカウントの状態を一時的に確認できません。",
     "retry": "再試行"
+  },
+  "nav": {
+    "content": "コンテンツ運用",
+    "campus": "キャンパスデータ",
+    "storage": "ストレージ"
+  },
+  "settings": {
+    "title": "設定センター",
+    "description": "各業務設定の場所と接続状況を確認します。",
+    "available": "設定可能",
+    "planned": "仕様確定、管理画面は未接続",
+    "plannedHint": "これらの設定にはまだ画面がありません。",
+    "notConnected": "未接続",
+    "items": {
+      "moderationPolicy": {
+        "title": "審査ルール",
+        "summary": "評価審査 › 審査ルール：方式と禁止語"
+      },
+      "reviewPresentation": {
+        "title": "評価の表示",
+        "summary": "評価審査 › 表示設定"
+      },
+      "resourceCategories": {
+        "title": "資料の分類",
+        "summary": "資料管理：分類項目とディレクトリ"
+      },
+      "catalogImport": {
+        "title": "カタログ取込",
+        "summary": "科目と教員：取込と統合"
+      },
+      "verificationSchools": {
+        "title": "学校別認証",
+        "summary": "学生認証：学校と方法"
+      },
+      "storageQuota": {
+        "title": "ストレージ容量",
+        "summary": "ストレージ運用：インスタンスと上限"
+      },
+      "custodyPolicy": {
+        "title": "ストレージ託管",
+        "summary": "託管：アカウント認可と復旧"
+      },
+      "contributionPolicy": {
+        "title": "ストレージ貢献",
+        "summary": "貢献：処理"
+      },
+      "eligibility": {
+        "title": "操作資格",
+        "summary": "全体既定値と範囲別上書き"
+      },
+      "roles": {
+        "title": "ロールと範囲",
+        "summary": "テンプレート、範囲、機微権限"
+      },
+      "auditLog": {
+        "title": "操作記録",
+        "summary": "対象、操作者、結果"
+      },
+      "notifications": {
+        "title": "通知",
+        "summary": "保持期間、集約、リマインド"
+      },
+      "groups": {
+        "title": "グループ管理",
+        "summary": "参加認証、猶予、キーワード"
+      },
+      "entertainment": {
+        "title": "娯楽機能",
+        "summary": "グループ別のダイスと自主ミュート"
+      },
+      "informationQuery": {
+        "title": "情報照会",
+        "summary": "横断照会、一括、エクスポート"
+      },
+      "openPlatform": {
+        "title": "オープンプラットフォーム",
+        "summary": "アプリ申請と権限範囲"
+      },
+      "discovery": {
+        "title": "発見と統計",
+        "summary": "重み、期間、サンプル数"
+      },
+      "billing": {
+        "title": "課金",
+        "summary": "会員、報酬、価格（非公開モジュール）"
+      },
+      "retention": {
+        "title": "データ保持",
+        "summary": "種類別の保持期間"
+      }
+    }
+  },
+  "console": {
+    "selectItem": "一覧から項目を選ぶと詳細が表示されます",
+    "moreFilters": "詳細フィルター"
   }
 }

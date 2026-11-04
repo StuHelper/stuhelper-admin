@@ -4,6 +4,8 @@ import { onBeforeRouteLeave } from 'vue-router';
 
 import { useI18n } from '@vben/locales';
 
+import { confirmLeave } from '#/confirm-leave';
+
 import { AcademicError,call,Mutation,type PolicyView,query } from './api';
 import StatusBlock from './StatusBlock.vue';
 import { useLoad } from './useLoad';
@@ -20,7 +22,7 @@ async function load(preserve=false){await data.load();if(data.data.value){revisi
 watch(()=>[props.schoolId,scope.value,kind.value],()=>{if(scope.value!=='*')scope.value=props.schoolId;error.value='';notice.value='';void load()},{immediate:true});
 watch([busy,uncertain,dirty],()=>emit('pending',busy.value||uncertain.value,dirty.value),{immediate:true});
 onBeforeUnmount(()=>emit('pending',false,false));
-onBeforeRouteLeave(()=>!(dirty.value||busy.value||uncertain.value)||window.confirm(t(uncertain.value?'page.academic.uncertain':'page.academic.unsavedChanges')));
+onBeforeRouteLeave(()=>!(dirty.value||busy.value||uncertain.value)||confirmLeave(t(uncertain.value?'page.academic.uncertain':'page.academic.unsavedChanges')));
 function reset(){if(data.data.value){mode.value=data.data.value.effective.mode;words.value=data.data.value.effective.blocked_terms.join('\n');baseline.value=form();error.value=''}}
 async function save(){
   if(busy.value)return;busy.value=true;error.value='';notice.value='';

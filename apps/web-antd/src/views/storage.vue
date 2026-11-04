@@ -2,13 +2,14 @@
 import type { InstanceHealth } from '../api/storage';
 
 import { computed, ref } from 'vue';
-import { RouterLink } from 'vue-router';
 
 import { Page } from '@vben/common-ui';
 import { createFormatters, useI18n } from '@vben/locales';
 import { preferences } from '@vben/preferences';
 
 import { Alert, Button, Card, Modal } from 'ant-design-vue';
+
+import { stateTone } from '#/console-ui';
 
 import { useStorage } from '../composables/useStorage';
 
@@ -32,11 +33,10 @@ function quota(instance: InstanceHealth) {
 <template>
   <Page :title="t('page.storage.title')" :description="t('page.storage.description')">
     <div class="storage-page">
-      <nav class="controls" :aria-label="t('page.storage.navigation')">
-        <RouterLink to="/contributions">{{ t('page.contribution.adminTitle') }}</RouterLink><RouterLink to="/storage-accounts">{{ t('page.custody.adminTitle') }}</RouterLink>
-        <RouterLink to="/">{{ t('page.notFound.home') }}</RouterLink>
+      <nav class="console-controls" :aria-label="t('page.storage.navigation')">
         <Button :disabled="locked" :loading="loading" @click="reload()">{{ t('page.storage.refresh') }}</Button>
         <Button :disabled="locked" @click="firstPage">{{ t('page.storage.first') }}</Button>
+        <span v-if="data" class="console-end">{{ t('page.storage.updated', { time: format.dateTime(data.generated_at) }) }}</span>
       </nav>
       <div role="status" aria-live="polite">
         <Alert v-if="loading" :message="t('page.storage.loading')" type="info" show-icon />
@@ -44,26 +44,26 @@ function quota(instance: InstanceHealth) {
         <Alert v-else-if="completed" :message="t('page.storage.completed')" type="success" show-icon />
       </div>
       <template v-if="data">
-        <p>{{ t('page.storage.updated', { time: format.dateTime(data.generated_at) }) }}</p>
         <Card :title="t('page.storage.queue')">
-          <dl class="metrics">
+          <dl class="console-tiles">
             <div v-for="(value, key) in data.jobs" :key="key"><dt>{{ state(key) }}</dt><dd>{{ format.number(value) }}</dd></div>
           </dl>
         </Card>
         <Card :title="t('page.storage.instances')">
           <p v-if="data.instances.length === 0">{{ t('page.storage.empty') }}</p>
-          <div class="inventory">
-            <article v-for="instance in data.instances" :key="instance.id" class="entry">
-              <h3><bdi>{{ instance.id }}</bdi></h3>
-              <p>{{ state(instance.state) }}</p><p v-if="reason(instance.reason)">{{ reason(instance.reason) }}</p>
-              <dl class="metrics">
+          <div class="console-inventory">
+            <article v-for="instance in data.instances" :key="instance.id" class="console-entry">
+              <div class="console-row-head"><h3><bdi>{{ instance.id }}</bdi></h3><span class="console-badge" :data-tone="stateTone(instance.state)">{{ state(instance.state) }}</span></div>
+              <progress class="console-meter" :value="instance.used_bytes + instance.reserved_bytes" :max="instance.limit_bytes || 1" :aria-label="t('page.storage.used')"></progress>
+              <p v-if="reason(instance.reason)">{{ reason(instance.reason) }}</p>
+              <dl class="console-tiles">
                 <div><dt>{{ t('page.storage.limit') }}</dt><dd>{{ bytes(instance.limit_bytes) }}</dd></div>
                 <div><dt>{{ t('page.storage.used') }}</dt><dd>{{ bytes(instance.used_bytes) }}</dd></div>
                 <div><dt>{{ t('page.storage.reserved') }}</dt><dd>{{ bytes(instance.reserved_bytes) }}</dd></div>
                 <div><dt>{{ t('page.storage.available') }}</dt><dd>{{ bytes(instance.available_bytes) }}</dd></div>
               </dl>
               <p>{{ t('page.storage.authorizationExpiry', { time: format.dateTime(instance.authorization_expires_at) }) }}</p>
-              <div class="controls" :aria-label="instance.id">
+              <div class="console-controls" :aria-label="instance.id">
                 <Button v-if="instance.state === 'active'" :disabled="locked" @click="prepareInstance(instance, 'pause')">{{ t('page.storage.actions.pause') }}</Button>
                 <Button v-if="instance.state === 'paused'" :disabled="locked" @click="prepareInstance(instance, 'resume')">{{ t('page.storage.actions.resume') }}</Button>
                 <Button v-if="['active', 'paused'].includes(instance.state)" :disabled="locked" @click="prepareInstance(instance, 'drain')">{{ t('page.storage.actions.drain') }}</Button>
@@ -80,9 +80,9 @@ function quota(instance: InstanceHealth) {
         </Card>
         <Card :title="t('page.storage.objects')">
           <p v-if="data.objects.length === 0">{{ t('page.storage.empty') }}</p>
-          <div class="inventory">
-            <article v-for="object in data.objects" :key="object.id" class="entry">
-              <h3><bdi>{{ object.id }}</bdi></h3><p>{{ state(object.state) }}</p>
+          <div class="console-inventory">
+            <article v-for="object in data.objects" :key="object.id" class="console-entry">
+              <div class="console-row-head"><h3><bdi>{{ object.id }}</bdi></h3><span class="console-badge" :data-tone="stateTone(object.state)">{{ state(object.state) }}</span></div>
               <p>{{ t('page.storage.replicas', { healthy: format.number(object.healthy), desired: format.number(object.desired), missing: format.number(object.missing) }) }}</p>
               <p v-if="reason(object.reason)">{{ reason(object.reason) }}</p>
             </article>
@@ -91,9 +91,9 @@ function quota(instance: InstanceHealth) {
         </Card>
         <Card :title="t('page.storage.failures')">
           <p v-if="data.failures.length === 0">{{ t('page.storage.empty') }}</p>
-          <div class="inventory">
-            <article v-for="job in data.failures" :key="job.id" class="entry">
-              <h3><bdi>{{ job.id }}</bdi></h3><p>{{ state(job.state) }}</p>
+          <div class="console-inventory">
+            <article v-for="job in data.failures" :key="job.id" class="console-entry">
+              <div class="console-row-head"><h3><bdi>{{ job.id }}</bdi></h3><span class="console-badge" :data-tone="stateTone(job.state)">{{ state(job.state) }}</span></div>
               <p>{{ t('page.storage.objectId', { id: job.object_id }) }}</p>
               <p>{{ t('page.storage.attempts', { count: format.number(job.attempts) }) }}</p>
               <p>{{ t('page.storage.errorCode', { code: job.error_code }) }}</p>
@@ -115,17 +115,8 @@ function quota(instance: InstanceHealth) {
 </template>
 
 <style scoped>
-.storage-page { display: grid; gap: 1rem; min-width: 0; }
-.controls { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; }
-.inventory { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: 1rem; }
-.entry { min-width: 0; padding: 1rem; border: 1px solid hsl(var(--border)); border-radius: .5rem; overflow-wrap: anywhere; }
-.entry h3 { font-weight: 600; margin-block-end: .5rem; }
-.entry p { margin-block: .5rem; }
-.metrics { display: flex; flex-wrap: wrap; gap: 1rem 2rem; margin-block: .75rem; }
-.metrics dt { opacity: .8; }
-.metrics dd { font-weight: 600; }
-.quota-form { display: grid; gap: .5rem; margin-block-start: 1rem; }
-.quota-form input { width: 100%; min-width: 0; padding: .5rem; border: 1px solid hsl(var(--border)); border-radius: .25rem; background: transparent; }
+.quota-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .35rem .5rem; align-items: center; margin-block-start: 1rem; }
+.quota-form label, .quota-form span { grid-column: 1 / -1; font-size: .8rem; color: hsl(var(--muted-foreground)); }
+.quota-form input { width: 100%; min-width: 0; min-height: 32px; padding: .25rem .5rem; border: 1px solid hsl(var(--border)); border-radius: 6px; background: transparent; }
 .quota-form input:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 2px; }
-.quota-form span { font-size: .875rem; }
 </style>

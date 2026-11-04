@@ -401,11 +401,20 @@
     },
     "ready": "Servicio de administración conectado",
     "title": "Administración",
-    "description": "Esta es una vista previa de desarrollo de stuhelper-admin.",
+    "description": "Tareas habituales y estado de los servicios.",
     "loading": "Conectando con el servicio de administración…",
     "preview": "Vista previa de desarrollo",
     "retry": "Volver a conectar",
-    "unavailable": "Esta página no está disponible"
+    "unavailable": "Esta página no está disponible",
+    "shortcuts": "Accesos directos",
+    "moduleStates": {
+      "ready": "En ejecución",
+      "starting": "Iniciando",
+      "stopping": "Deteniendo",
+      "stopped": "Detenido",
+      "disabled": "Desactivado",
+      "failed": "Con fallos"
+    }
   },
   "storage": {
     "title": "Gestión del almacenamiento",
@@ -1032,5 +1041,100 @@
     "save": "Guardar",
     "unavailable": "El estado de la cuenta no está disponible temporalmente.",
     "retry": "Reintentar"
+  },
+  "nav": {
+    "content": "Contenido",
+    "campus": "Datos del campus",
+    "storage": "Almacenamiento"
+  },
+  "settings": {
+    "title": "Configuración",
+    "description": "Consulta dónde está cada ajuste y si está conectado.",
+    "available": "Disponibles",
+    "planned": "Especificados, aún no en la consola",
+    "plannedHint": "Estos ajustes aún no tienen página.",
+    "notConnected": "No conectado",
+    "items": {
+      "moderationPolicy": {
+        "title": "Reglas de moderación",
+        "summary": "Moderación › Reglas: modo y términos bloqueados"
+      },
+      "reviewPresentation": {
+        "title": "Presentación de reseñas",
+        "summary": "Moderación › Opciones de presentación"
+      },
+      "resourceCategories": {
+        "title": "Categorías de recursos",
+        "summary": "Recursos: campos y directorios"
+      },
+      "catalogImport": {
+        "title": "Importación del catálogo",
+        "summary": "Cursos y docentes: importar y combinar"
+      },
+      "verificationSchools": {
+        "title": "Verificación por escuela",
+        "summary": "Verificación: escuelas y métodos"
+      },
+      "storageQuota": {
+        "title": "Cuotas de almacenamiento",
+        "summary": "Operaciones: instancias y límites"
+      },
+      "custodyPolicy": {
+        "title": "Custodia de almacenamiento",
+        "summary": "Custodia: autorización y recuperación"
+      },
+      "contributionPolicy": {
+        "title": "Contribuciones de almacenamiento",
+        "summary": "Contribuciones: tramitación"
+      },
+      "eligibility": {
+        "title": "Elegibilidad de acciones",
+        "summary": "Valores globales y excepciones"
+      },
+      "roles": {
+        "title": "Roles y ámbitos",
+        "summary": "Plantillas, ámbitos, permisos sensibles"
+      },
+      "auditLog": {
+        "title": "Registro de auditoría",
+        "summary": "Objetos, operadores y resultados"
+      },
+      "notifications": {
+        "title": "Notificaciones",
+        "summary": "Retención, agrupación y recordatorios"
+      },
+      "groups": {
+        "title": "Gestión de grupos",
+        "summary": "Ingreso, gracia, palabras clave"
+      },
+      "entertainment": {
+        "title": "Entretenimiento",
+        "summary": "Dados y autosilencio por grupo"
+      },
+      "informationQuery": {
+        "title": "Consulta de información",
+        "summary": "Consulta, lotes y exportación"
+      },
+      "openPlatform": {
+        "title": "Plataforma abierta",
+        "summary": "Solicitudes de apps y ámbitos"
+      },
+      "discovery": {
+        "title": "Descubrimiento y estadísticas",
+        "summary": "Pesos, ventanas, muestras"
+      },
+      "billing": {
+        "title": "Facturación",
+        "summary": "Membresía, recompensas, precios (módulo privado)"
+      },
+      "retention": {
+        "title": "Retención de datos",
+        "summary": "Plazos por tipo de dato"
+      }
+    }
+  },
+  "console": {
+    "selectItem": "Selecciona un elemento para ver el detalle",
+    "moreFilters": "Más filtros"
   }
 }

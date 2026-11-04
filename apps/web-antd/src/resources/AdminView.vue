@@ -5,6 +5,8 @@ import { RouterLink } from 'vue-router';
 import { Page } from '@vben/common-ui';
 import { useI18n } from '@vben/locales';
 
+import { stateTone } from '#/console-ui';
+
 import { type Category, name, query, type Resource } from './api';
 import CatalogSelect from './CatalogSelect.vue';
 import CategoryEditor from './CategoryEditor.vue';
@@ -80,16 +82,17 @@ watch(
 <template>
   <Page :title="t('page.resources.adminTitle')">
 <section class="resources-page">
-      <nav class="resource-actions">
+      <nav class="admin-tabs">
         <button
           v-for="item in ['content', 'taxonomy', 'directories', 'reviewQueue']"
           :key="item"
+          class="admin-tab"
           :aria-pressed="tab === item"
           :disabled="busy || childBusy"
           @click="tab = item"
         >
           {{ t(`page.resources.${item}`) }}
-</button><RouterLink to="/resources/new">
+</button><RouterLink class="admin-tab-end" to="/resources/new">
 {{
           t('page.resources.upload')
         }}
@@ -118,8 +121,11 @@ watch(
         </button>
       </div>
       <StatusBlock :busy="busy" :error="error" @retry="state.retry" />
+      <p v-if="tab !== 'taxonomy' && !school" class="resource-muted">{{ t('page.academic.selectSchool') }}</p>
       <section v-if="tab === 'taxonomy'" class="resource-form">
         <button
+          class="is-primary"
+          style="justify-self: start"
           :disabled="childBusy || busy"
           @click="
             category = undefined;
@@ -128,8 +134,9 @@ watch(
         >
           {{ t('page.resources.newCategory') }}
         </button>
+        <div class="resource-columns">
         <ul class="resource-list">
-          <li v-for="row in categories" :key="row.id" class="resource-card">
+          <li v-for="row in categories" :key="row.id" class="resource-card console-row-head" :class="{ 'is-selected': editing && category?.id === row.id }">
             <span>{{ name(row.names, locale) }}</span><button
               :disabled="childBusy || busy"
               @click="
@@ -148,13 +155,16 @@ watch(
           @pending="childBusy = $event"
           @saved="load"
         />
+        <div v-else class="console-placeholder">{{ t('page.console.selectItem') }}</div>
+        </div>
       </section>
-      <section v-else-if="tab === 'content'" class="resource-form">
+      <section v-else-if="tab === 'content'" class="resource-columns">
         <ul class="resource-list">
-          <li v-for="row in rows" :key="row.id" class="resource-card">
-            <h2>{{ (row.proposal ?? row.current)?.metadata.title }}</h2>
-            <p>{{ t(`page.resources.states.${row.state}`) }}</p>
-            <button :disabled="busy || childBusy" @click="selected = row.id">
+          <li v-for="row in rows" :key="row.id" class="resource-card" :class="{ 'is-selected': selected === row.id }">
+            <div class="console-row-head"><h2>{{ (row.proposal ?? row.current)?.metadata.title }}</h2><span class="console-badge" :data-tone="stateTone(row.state)">{{ t(`page.resources.states.${row.state}`) }}</span></div>
+            <button
+              class="mt-2" :disabled="busy || childBusy" @click="selected = row.id"
+>
               {{ t('page.resources.view') }}
             </button>
           </li>
@@ -163,10 +173,11 @@ watch(
           v-if="selected"
           :key="selected"
           :id="selected"
-          class="resource-card"
+          class="resource-card console-detail"
           @pending="childBusy = $event"
           @changed="load"
         />
+        <div v-else-if="rows.length > 0" class="console-placeholder">{{ t('page.console.selectItem') }}</div>
       </section>
       <DirectoriesPanel
         v-else-if="tab === 'directories' && school"

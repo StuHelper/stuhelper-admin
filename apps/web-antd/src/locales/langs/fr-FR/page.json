@@ -401,11 +401,20 @@
     },
     "ready": "Service d’administration connecté",
     "title": "Administration",
-    "description": "Ceci est un aperçu de développement de stuhelper-admin.",
+    "description": "Tâches courantes et état des services.",
     "loading": "Connexion au service d’administration…",
     "preview": "Aperçu de développement",
     "retry": "Reconnecter",
-    "unavailable": "Cette page est indisponible"
+    "unavailable": "Cette page est indisponible",
+    "shortcuts": "Raccourcis",
+    "moduleStates": {
+      "ready": "En service",
+      "starting": "Démarrage",
+      "stopping": "Arrêt en cours",
+      "stopped": "Arrêté",
+      "disabled": "Désactivé",
+      "failed": "En échec"
+    }
   },
   "storage": {
     "title": "Gestion du stockage",
@@ -1032,5 +1041,100 @@
     "save": "Enregistrer",
     "unavailable": "Le statut du compte est temporairement indisponible.",
     "retry": "Réessayer"
+  },
+  "nav": {
+    "content": "Contenu",
+    "campus": "Données du campus",
+    "storage": "Stockage"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "description": "Voyez où se trouve chaque paramètre et s’il est connecté.",
+    "available": "Disponibles",
+    "planned": "Spécifiés, pas encore dans la console",
+    "plannedHint": "Ces paramètres n’ont pas encore de page.",
+    "notConnected": "Non connecté",
+    "items": {
+      "moderationPolicy": {
+        "title": "Règles de modération",
+        "summary": "Modération › Règles : mode et termes bloqués"
+      },
+      "reviewPresentation": {
+        "title": "Affichage des avis",
+        "summary": "Modération › Options d’affichage"
+      },
+      "resourceCategories": {
+        "title": "Catégories de ressources",
+        "summary": "Ressources : champs et répertoires"
+      },
+      "catalogImport": {
+        "title": "Import du catalogue",
+        "summary": "Cours et enseignants : import et fusion"
+      },
+      "verificationSchools": {
+        "title": "Vérification par école",
+        "summary": "Vérification : écoles et méthodes"
+      },
+      "storageQuota": {
+        "title": "Quotas de stockage",
+        "summary": "Opérations : instances et limites"
+      },
+      "custodyPolicy": {
+        "title": "Garde du stockage",
+        "summary": "Garde : autorisation et reprise"
+      },
+      "contributionPolicy": {
+        "title": "Contributions de stockage",
+        "summary": "Contributions : traitement"
+      },
+      "eligibility": {
+        "title": "Éligibilité des actions",
+        "summary": "Valeurs par défaut et exceptions"
+      },
+      "roles": {
+        "title": "Rôles et périmètres",
+        "summary": "Modèles, périmètres, droits sensibles"
+      },
+      "auditLog": {
+        "title": "Journal d’audit",
+        "summary": "Cibles, opérateurs et résultats"
+      },
+      "notifications": {
+        "title": "Alertes",
+        "summary": "Conservation, regroupement et rappels"
+      },
+      "groups": {
+        "title": "Gestion des groupes",
+        "summary": "Admission, délais de grâce, mots-clés"
+      },
+      "entertainment": {
+        "title": "Divertissement",
+        "summary": "Dés et auto-silence par groupe"
+      },
+      "informationQuery": {
+        "title": "Recherche d’informations",
+        "summary": "Recherche, lots et export"
+      },
+      "openPlatform": {
+        "title": "Plateforme ouverte",
+        "summary": "Demandes d’applis et périmètres"
+      },
+      "discovery": {
+        "title": "Découverte et statistiques",
+        "summary": "Poids, fenêtres, échantillons"
+      },
+      "billing": {
+        "title": "Facturation",
+        "summary": "Adhésion, récompenses, prix (module privé)"
+      },
+      "retention": {
+        "title": "Conservation des données",
+        "summary": "Durées par type de données"
+      }
+    }
+  },
+  "console": {
+    "selectItem": "Sélectionnez un élément pour voir le détail",
+    "moreFilters": "Plus de filtres"
   }
 }

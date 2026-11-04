@@ -401,11 +401,20 @@
     },
     "ready": "Administration service connected.",
     "title": "Administration",
-    "description": "This is a development preview of the administration application.",
+    "description": "Common admin tasks and service status.",
     "loading": "Connecting to the administration service…",
     "preview": "Development preview",
     "retry": "Reconnect",
-    "unavailable": "Page unavailable"
+    "unavailable": "Page unavailable",
+    "shortcuts": "Shortcuts",
+    "moduleStates": {
+      "ready": "Running",
+      "starting": "Starting",
+      "stopping": "Stopping",
+      "stopped": "Stopped",
+      "disabled": "Disabled",
+      "failed": "Failed"
+    }
   },
   "storage": {
     "title": "Storage operations",
@@ -1032,5 +1041,100 @@
     "save": "Save",
     "unavailable": "Account status is temporarily unavailable.",
     "retry": "Retry"
+  },
+  "nav": {
+    "content": "Content",
+    "campus": "Campus data",
+    "storage": "Storage"
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "See where each business setting lives and whether it is connected.",
+    "available": "Available",
+    "planned": "Specified, not yet in the console",
+    "plannedHint": "These settings have no working page yet.",
+    "notConnected": "Not connected",
+    "items": {
+      "moderationPolicy": {
+        "title": "Moderation rules",
+        "summary": "Review moderation › Rules: mode and blocked terms"
+      },
+      "reviewPresentation": {
+        "title": "Review display",
+        "summary": "Review moderation › Display options"
+      },
+      "resourceCategories": {
+        "title": "Resource categories",
+        "summary": "Resources: category fields and directories"
+      },
+      "catalogImport": {
+        "title": "Catalog import",
+        "summary": "Courses and teachers: import and merge"
+      },
+      "verificationSchools": {
+        "title": "School verification",
+        "summary": "Student verification: schools and methods"
+      },
+      "storageQuota": {
+        "title": "Storage quotas",
+        "summary": "Storage operations: instances and limits"
+      },
+      "custodyPolicy": {
+        "title": "Storage custody",
+        "summary": "Custody: account authorization and recovery"
+      },
+      "contributionPolicy": {
+        "title": "Storage contributions",
+        "summary": "Contributions: processing"
+      },
+      "eligibility": {
+        "title": "Action eligibility",
+        "summary": "Site defaults and scoped overrides"
+      },
+      "roles": {
+        "title": "Roles and scopes",
+        "summary": "Role templates, scopes, sensitive permissions"
+      },
+      "auditLog": {
+        "title": "Audit log",
+        "summary": "Targets, operators and results"
+      },
+      "notifications": {
+        "title": "Notifications",
+        "summary": "Retention, grouping and reminder lead time"
+      },
+      "groups": {
+        "title": "Group management",
+        "summary": "Join checks, grace periods, keywords"
+      },
+      "entertainment": {
+        "title": "Entertainment",
+        "summary": "Per-group dice and self-mute options"
+      },
+      "informationQuery": {
+        "title": "Information query",
+        "summary": "Cross-module lookup, batch, export"
+      },
+      "openPlatform": {
+        "title": "Open platform",
+        "summary": "App applications and scopes"
+      },
+      "discovery": {
+        "title": "Discovery and statistics",
+        "summary": "Trend weights, windows, sample size"
+      },
+      "billing": {
+        "title": "Billing",
+        "summary": "Membership, rewards, prices (private module)"
+      },
+      "retention": {
+        "title": "Data retention",
+        "summary": "Retention periods by data type"
+      }
+    }
+  },
+  "console": {
+    "selectItem": "Select an item to see its details",
+    "moreFilters": "More filters"
   }
 }

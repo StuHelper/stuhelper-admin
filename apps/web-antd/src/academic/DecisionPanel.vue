@@ -4,6 +4,8 @@ import { onBeforeRouteLeave } from 'vue-router';
 
 import { useI18n } from '@vben/locales';
 
+import { confirmLeave } from '#/confirm-leave';
+
 import { AcademicError,type AdminEntry,type AttributionPreview,call,type Decision,lookupObjects,Mutation,query,type Task } from './api';
 import StatusBlock from './StatusBlock.vue';
 import { useLoad } from './useLoad';
@@ -49,9 +51,9 @@ const actions=computed(()=>{
   if(task.value)values.push('dismiss');
   return values;
 });
-function canLeave(){return !(dirty.value||busy.value||uncertain.value)||window.confirm(t(uncertain.value?'page.academic.uncertain':'page.academic.unsavedChanges'))}
+async function canLeave(){return !(dirty.value||busy.value||uncertain.value)||confirmLeave(t(uncertain.value?'page.academic.uncertain':'page.academic.unsavedChanges'))}
 onBeforeRouteLeave(canLeave);
-function close(){if(canLeave())emit('close')}
+async function close(){if(await canLeave())emit('close')}
 let polling=false; let polls=0; let timer:ReturnType<typeof setInterval>|undefined;
 onMounted(()=>{timer=setInterval(()=>{void poll()},3000)});
 onBeforeUnmount(()=>{clearInterval(timer);pollController.abort();emit('pending',false,false)});

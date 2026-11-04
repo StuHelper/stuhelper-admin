@@ -4,6 +4,8 @@ import {onBeforeRouteLeave} from 'vue-router';
 
 import {useI18n} from '@vben/locales';
 
+import { confirmLeave } from '#/confirm-leave';
+
 import locale7 from '../locales/langs/ar-EG/page.json';
 import locale1 from '../locales/langs/en-US/page.json';
 import locale5 from '../locales/langs/es-ES/page.json';
@@ -22,7 +24,7 @@ const names=['recommendation','quality','difficulty','workload','grading'] as co
 const data=useLoad(signal=>call<PresentationView>('reviews','/admin/presentation'+query({school_id:scope.value}),'PresentationView',{signal}));
 const dirty=computed(()=>!!form.value&&JSON.stringify(form.value)!==baseline.value);
 async function load(preserve=false){await data.load();if(!data.data.value){if(['forbidden','unauthenticated'].includes(data.error.value))form.value=undefined;return}const value=data.data.value;if(preserve&&form.value){form.value.revision=value.configured?.revision??0;comparison.value=value.effective;return}const texts:Presentation['rating_texts']={};for(const [lang,dictionary] of Object.entries(dictionaries))texts[lang]=names.map(name=>{const rating=dictionary.academic.ratings[name];return [rating.label,rating.level1,rating.level2,rating.level3,rating.level4,rating.level5]});form.value={...value.effective,school_id:scope.value,revision:value.configured?.revision??0,rating_texts:Object.keys(value.effective.rating_texts).length > 0?value.effective.rating_texts:texts};baseline.value=JSON.stringify(form.value);comparison.value=undefined}
-watch(()=>[props.schoolId,scope.value],()=>{if(scope.value!=='*')scope.value=props.schoolId;void load()},{immediate:true});watch([busy,uncertain,dirty],()=>emit('pending',busy.value||uncertain.value,dirty.value));onBeforeUnmount(()=>emit('pending',false,false));onBeforeRouteLeave(()=>!(busy.value||uncertain.value||dirty.value)||window.confirm(t('page.academic.unsavedChanges')));
+watch(()=>[props.schoolId,scope.value],()=>{if(scope.value!=='*')scope.value=props.schoolId;void load()},{immediate:true});watch([busy,uncertain,dirty],()=>emit('pending',busy.value||uncertain.value,dirty.value));onBeforeUnmount(()=>emit('pending',false,false));onBeforeRouteLeave(()=>!(busy.value||uncertain.value||dirty.value)||confirmLeave(t('page.academic.unsavedChanges')));
 async function save(){if(!form.value||busy.value)return;busy.value=true;error.value='';saved.value=false;try{await mutation.run('reviews','/admin/presentation','PresentationView',form.value,'PUT');await load();saved.value=true}catch(error_){error.value=error_ instanceof AcademicError?error_.code:'unavailable'}finally{busy.value=false;uncertain.value=mutation.uncertain}}
 </script>
 <template>

@@ -1,0 +1,65 @@
+/* Shared look of the business consoles. Ant Design buttons keep their own theme. */
+.academic-console,.verification-admin,.resources-page,.custody-page,.storage-page,.contribution-page { display:grid; gap:1rem; min-width:0; color:hsl(var(--foreground)); overflow-wrap:anywhere; }
+
+:is(.academic-console,.verification-admin,.resources-page,.custody-page) button:not(.ant-btn),.resources-page .resource-button { min-height:36px; padding:.35rem .85rem; border:1px solid hsl(var(--border)); border-radius:6px; background:hsl(var(--card)); color:inherit; font:inherit; cursor:pointer; transition:border-color .15s,color .15s,background-color .15s; }
+:is(.academic-console,.verification-admin,.resources-page,.custody-page) button:not(.ant-btn):hover:not(:disabled) { border-color:hsl(var(--primary)); color:hsl(var(--primary)); }
+:is(.academic-console,.verification-admin,.resources-page,.custody-page) button:not(.ant-btn):disabled { opacity:.5; cursor:not-allowed; }
+:is(.academic-console,.verification-admin,.resources-page,.custody-page) :is(button[type=submit],button.is-primary):not(.ant-btn) { border-color:hsl(var(--primary)); background:hsl(var(--primary)); color:hsl(var(--primary-foreground)); }
+:is(.academic-console,.verification-admin,.resources-page,.custody-page) :is(button[type=submit],button.is-primary):not(.ant-btn):hover:not(:disabled) { color:hsl(var(--primary-foreground)); opacity:.88; }
+:is(.academic-console,.verification-admin,.resources-page,.custody-page) button.is-danger:not(.ant-btn) { border-color:hsl(var(--destructive)); color:hsl(var(--destructive)); }
+
+:is(.academic-console,.verification-admin,.resources-page) :is(input:not([type=checkbox],[type=radio],[type=file]),select,textarea) { width:100%; min-width:0; min-height:36px; padding:.35rem .65rem; border:1px solid hsl(var(--border)); border-radius:6px; background:hsl(var(--background)); color:inherit; font:inherit; }
+:is(.academic-console,.verification-admin,.resources-page) textarea { min-height:5rem; resize:vertical; }
+:is(.academic-console,.verification-admin,.resources-page,.custody-page,.storage-page,.contribution-page) :focus-visible { outline:2px solid hsl(var(--primary)); outline-offset:2px; }
+:is(.academic-console,.verification-admin,.resources-page) label { color:hsl(var(--foreground)); font-size:.875rem; }
+
+/* Tabs keep aria-pressed, so assistive technology hears the same state as before. */
+.academic-console .admin-tabs,.verification-admin .admin-tabs,.resources-page .admin-tabs { display:flex; flex-wrap:wrap; gap:.25rem; margin:0 0 1rem; border-block-end:1px solid hsl(var(--border)); }
+.admin-tabs button:not(.ant-btn).admin-tab,.admin-tabs .admin-tab { min-height:40px; margin-block-end:-1px; border:0; border-block-end:2px solid transparent; border-radius:0; background:transparent; color:hsl(var(--muted-foreground)); }
+.admin-tabs button:not(.ant-btn).admin-tab[aria-pressed=true] { border-block-end-color:hsl(var(--primary)); color:hsl(var(--primary)); font-weight:600; }
+.admin-tabs .admin-tab-end { margin-inline-start:auto; align-self:center; color:hsl(var(--primary)); }
+
+.console-badge { display:inline-flex; align-items:center; padding:.05rem .5rem; border:1px solid hsl(var(--border)); border-radius:999px; color:hsl(var(--foreground)); font-size:.75rem; line-height:1.4rem; white-space:nowrap; }
+.console-badge[data-tone=success] { border-color:hsl(var(--success)); color:color-mix(in srgb,hsl(var(--success)) 55%,currentColor); }
+.console-badge[data-tone=warning] { border-color:hsl(var(--warning)); color:color-mix(in srgb,hsl(var(--warning)) 45%,currentColor); }
+.console-badge[data-tone=error] { border-color:hsl(var(--destructive)); color:hsl(var(--destructive)); }
+
+.console-row-head { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:.5rem; }
+.console-row-head :is(h2,h3) { margin:0; font-size:.95rem; font-weight:600; }
+.console-placeholder { display:grid; place-items:center; min-height:12rem; padding:1.5rem; border:1px dashed hsl(var(--border)); border-radius:8px; color:hsl(var(--muted-foreground)); text-align:center; }
+.console-link { border:0 !important; background:transparent !important; color:hsl(var(--primary)) !important; padding-inline:0 !important; }
+.console-section { padding:1rem 1.25rem; border:1px solid hsl(var(--border)); border-radius:8px; background:hsl(var(--card)); }
+.console-section > summary { cursor:pointer; font-weight:600; }
+.console-section[open] > summary { margin-block-end:1rem; }
+
+.academic-console .admin-list-item.is-selected,.verification-admin article.is-selected,.resources-page .resource-card.is-selected { border-color:hsl(var(--primary)); box-shadow:inset 3px 0 0 hsl(var(--primary)); }
+[dir=rtl] .academic-console .admin-list-item.is-selected,[dir=rtl] .verification-admin article.is-selected,[dir=rtl] .resources-page .resource-card.is-selected { box-shadow:inset -3px 0 0 hsl(var(--primary)); }
+
+.console-tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,8rem),1fr)); gap:.75rem; margin:.75rem 0; }
+.console-tiles > div { padding:.6rem .75rem; border-radius:6px; background:hsl(var(--accent)); }
+.console-tiles dt { color:hsl(var(--muted-foreground)); font-size:.75rem; }
+.console-tiles dd { margin:.15rem 0 0; font-weight:600; }
+.console-entry { min-width:0; padding:1rem 1.25rem; border:1px solid hsl(var(--border)); border-radius:8px; background:hsl(var(--card)); }
+.console-entry p { margin:.5rem 0; }
+.console-identifier { color:hsl(var(--muted-foreground)); font-size:.8rem; }
+.console-meter { display:block; width:100%; height:.5rem; margin-block:.5rem; accent-color:hsl(var(--primary)); }
+.console-inventory { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,22rem),1fr)); gap:1rem; }
+.console-controls { display:flex; flex-wrap:wrap; align-items:center; gap:.5rem; }
+.console-controls .console-end { margin-inline-start:auto; color:hsl(var(--muted-foreground)); font-size:.8rem; }
+
+@media (min-width:901px) {
+  .console-detail { position:sticky; inset-block-start:1rem; max-height:calc(100vh - 2rem); overflow:auto; }
+}
+
+/* The open button stretches over its row, so the whole row is a single click target. */
+.academic-console .admin-list-item,.verification-admin .admin-grid article,.resources-page .resource-columns > .resource-list .resource-card:has(> .console-row-head) { position:relative; }
+.academic-console .admin-list-item:hover,.verification-admin .admin-grid article:hover,.resources-page .resource-columns > .resource-list .resource-card:has(> .console-row-head):hover { border-color:hsl(var(--primary)); }
+.academic-console .admin-list-item > button:not(.ant-btn),.verification-admin .admin-grid article > button:not(.ant-btn),.resources-page .resource-columns > .resource-list .resource-card > .console-row-head + button:not(.ant-btn) { min-height:auto; margin:0; padding:0; border:0; background:transparent; color:hsl(var(--primary)); font-size:.8rem; }
+.academic-console .admin-list-item > button:not(.ant-btn)::after,.verification-admin .admin-grid article > button:not(.ant-btn)::after,.resources-page .resource-columns > .resource-list .resource-card > .console-row-head + button:not(.ant-btn)::after { content:''; position:absolute; inset:0; }
+
+.academic-console .admin-filters > button,.resources-page .resource-grid > button { justify-self:start; }
+.resources-page .resource-grid > button { margin-block-start:1.4rem; }
+.console-meter { appearance:none; overflow:hidden; border:0; border-radius:999px; background:hsl(var(--accent)); }
+.console-meter::-webkit-progress-bar { background:hsl(var(--accent)); }
+.console-meter::-webkit-progress-value { background:hsl(var(--primary)); }
+.console-meter::-moz-progress-bar { background:hsl(var(--primary)); }

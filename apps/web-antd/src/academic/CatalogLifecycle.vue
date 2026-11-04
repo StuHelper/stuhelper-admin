@@ -4,6 +4,8 @@ import {onBeforeRouteLeave} from 'vue-router';
 
 import {useI18n} from '@vben/locales';
 
+import { confirmLeave } from '#/confirm-leave';
+
 import {AcademicError,type AcademicObject,call,type MergePreview,Mutation,objectOptions} from './api';
 import StatusBlock from './StatusBlock.vue';
 import {useLoad} from './useLoad';
@@ -13,7 +15,7 @@ const {t}=useI18n();const target=ref('');const reason=ref('');const busy=ref(fal
 const targets=useLoad(signal=>objectOptions({kind:props.entry.kind,school_id:props.entry.school_id},signal));void targets.load();
 const selected=computed(()=>targets.data.value?.items.find(item=>item.id===target.value));const mutation=new Mutation();
 watch([target,reason],()=>{plan.value=undefined});watch([busy,reason,uncertain],()=>emit('pending',busy.value||uncertain.value||!!reason.value));onBeforeUnmount(()=>emit('pending',false));
-onBeforeRouteLeave(()=>!(busy.value||uncertain.value||reason.value)||window.confirm(t('page.academic.unsavedChanges')));
+onBeforeRouteLeave(()=>!(busy.value||uncertain.value||reason.value)||confirmLeave(t('page.academic.unsavedChanges')));
 function request(){return {target_id:target.value,source_revision:props.entry.revision,target_revision:selected.value?.revision??0,reason:reason.value}}
 async function preview(){busy.value=true;error.value='';try{plan.value=await call<MergePreview>('catalog',`/objects/${encodeURIComponent(props.entry.id)}/merge-preview`,'MergePreview',{body:request(),key:crypto.randomUUID()})}catch(error_){error.value=error_ instanceof AcademicError?error_.code:'unavailable'}finally{busy.value=false}}
 async function apply(action:'merge'|'state'){

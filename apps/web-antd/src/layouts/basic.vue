@@ -10,7 +10,7 @@ const { t } = useI18n();
   <BasicLayout>
     <template #user-dropdown>
       <SessionControls />
-      <span class="text-muted-foreground me-4 hidden text-xs sm:inline">{{ t('page.framework.preview') }}</span>
+      <span class="text-muted-foreground mx-4 hidden text-xs sm:inline">{{ t('page.framework.preview') }}</span>
     </template>
   </BasicLayout>
 </template>

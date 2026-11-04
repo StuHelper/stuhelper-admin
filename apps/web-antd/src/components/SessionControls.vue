@@ -87,7 +87,7 @@ onMounted(reload);
     <button v-else type="button" @click="signIn">
       {{ t('page.auth.signIn') }}
     </button>
-    <span v-if="error" role="status">{{ t('page.auth.unavailable') }}
+    <span v-if="error" role="status"><span class="status-text">{{ t('page.auth.unavailable') }}</span>
       <button type="button" @click="reload">
         {{ t('page.auth.retry') }}
       </button></span>
@@ -95,28 +95,47 @@ onMounted(reload);
 </template>
 <style scoped>
 .session-controls {
+  position: relative;
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
   gap: 0.5rem;
   max-width: 100%;
   font-size: 0.85rem;
+  white-space: nowrap;
 }
 .session-controls button,
 .session-controls input {
   font: inherit;
-  min-height: 36px;
-  padding: 0.3rem 0.6rem;
-  border: 1px solid currentColor;
-  border-radius: 4px;
+  min-height: 32px;
+  padding: 0.2rem 0.65rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: 6px;
   background: transparent;
   color: inherit;
   max-width: 100%;
 }
+.session-controls button:hover:not(:disabled) {
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary));
+}
+.session-controls [role='status'] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: hsl(var(--muted-foreground));
+}
 .session-controls form {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
+  position: absolute;
+  inset-block-start: calc(100% + 0.5rem);
+  inset-inline-end: 0;
+  z-index: 20;
+  display: grid;
+  gap: 0.5rem;
+  min-width: 14rem;
+  padding: 0.75rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  background: hsl(var(--popover));
 }
 .session-controls label {
   display: grid;
@@ -124,5 +143,10 @@ onMounted(reload);
 }
 .session-controls summary {
   cursor: pointer;
+}
+@media (max-width: 767px) {
+  .session-controls .status-text {
+    display: none;
+  }
 }
 </style>

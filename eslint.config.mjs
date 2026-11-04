@@ -14,4 +14,6 @@ export default defineConfig([
     '@intlify/vue-i18n/no-raw-text': ['error', { attributes: { '/.*/': ['title', 'description', 'sub-title', 'aria-label', 'placeholder', 'alt'] }, ignorePattern: String.raw`^[0-9\s/]*$` }],
     'no-restricted-syntax': ['error', { selector: String.raw`Literal[value=/[\u4e00-\u9fff]/]`, message: 'Use a locale message for user-facing text.' }],
   } },
+  // Prototype pages are Chinese-only review mockups behind VITE_PROTOTYPES; formal pages must use locale messages.
+  { files: ['apps/web-antd/src/prototypes/**/*.vue'], rules: { '@intlify/vue-i18n/no-raw-text': 'off', 'no-restricted-syntax': 'off' } },
 ]);

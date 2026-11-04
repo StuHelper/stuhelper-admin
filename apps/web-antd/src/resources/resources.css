@@ -1,15 +1,11 @@
 .resources-page {
-  display: grid;
-  gap: 1.25rem;
-  color: hsl(var(--foreground));
   color-scheme: light;
   max-width: 100%;
-  overflow-wrap: anywhere;
 }
 .resource-card {
   border: 1px solid hsl(var(--border));
-  border-radius: 0.65rem;
-  padding: 1.2rem;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
   background: hsl(var(--card));
 }
 .resource-grid {
@@ -24,38 +20,13 @@
   gap: 0.35rem;
   min-width: 0;
 }
-.resources-page input,
-.resources-page select,
-.resources-page textarea {
-  width: 100%;
-  min-height: 2.6rem;
-  border: 1px solid hsl(var(--border));
-  border-radius: 0.3rem;
-  padding: 0.5rem;
-  background: hsl(var(--card));
-  color: inherit;
-}
 .resources-page input[type='checkbox'] {
   width: auto;
   min-height: auto;
 }
-.resources-page button,
 .resources-page .resource-button {
-  min-height: 2.6rem;
-  padding: 0.5rem 0.8rem;
-  border: 1px solid hsl(var(--border));
-  border-radius: 0.3rem;
-  background: hsl(var(--card));
-  color: inherit;
-  cursor: pointer;
-}
-.resources-page button:disabled {
-  opacity: 0.55;
-  cursor: default;
-}
-.resources-page :focus-visible {
-  outline: 3px solid #4c87bc;
-  outline-offset: 2px;
+  display: inline-flex;
+  align-items: center;
 }
 .resource-actions {
   display: flex;
@@ -91,6 +62,7 @@
 }
 .resource-form fieldset {
   border: 1px solid hsl(var(--border));
+  border-radius: 8px;
   padding: 1rem;
   min-width: 0;
 }
@@ -130,4 +102,5 @@
 }
 
 .dark .resources-page { color-scheme: dark; }
-.resources-page input,.resources-page select,.resources-page textarea { font: inherit; }
+.resource-columns { display: grid; grid-template-columns: minmax(16rem, 1fr) minmax(0, 2fr); gap: 1rem; align-items: start; }
+@media (max-width: 900px) { .resource-columns { grid-template-columns: 1fr; } }

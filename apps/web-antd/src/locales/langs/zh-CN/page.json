@@ -401,11 +401,20 @@
     },
     "ready": "管理服务已连接。",
     "title": "管理工作台",
-    "description": "当前提供管理应用的开发预览。",
+    "description": "常用管理入口和服务状态。",
     "loading": "正在连接管理服务…",
     "preview": "开发预览",
     "retry": "重新连接",
-    "unavailable": "页面暂不可用"
+    "unavailable": "页面暂不可用",
+    "shortcuts": "快捷入口",
+    "moduleStates": {
+      "ready": "运行中",
+      "starting": "启动中",
+      "stopping": "停止中",
+      "stopped": "已停止",
+      "disabled": "未启用",
+      "failed": "故障"
+    }
   },
   "storage": {
     "title": "存储运营管理",
@@ -1032,5 +1041,100 @@
     "save": "保存",
     "unavailable": "暂时无法读取账号状态。",
     "retry": "重试"
+  },
+  "nav": {
+    "content": "内容运营",
+    "campus": "校园数据",
+    "storage": "存储"
+  },
+  "settings": {
+    "title": "配置中心",
+    "description": "查看各项业务配置的位置和接入情况。",
+    "available": "已可配置",
+    "planned": "规格已确认，后台尚未接入",
+    "plannedHint": "这些配置目前没有可用页面。",
+    "notConnected": "未接入",
+    "items": {
+      "moderationPolicy": {
+        "title": "审核规则",
+        "summary": "评价审核 › 审核规则：审核方式和敏感词"
+      },
+      "reviewPresentation": {
+        "title": "评价展示",
+        "summary": "评价审核 › 评价展示：展示方式"
+      },
+      "resourceCategories": {
+        "title": "资料分类与目录",
+        "summary": "资料管理：分类字段和下载目录"
+      },
+      "catalogImport": {
+        "title": "目录导入",
+        "summary": "课程与教师维护：导入与合并"
+      },
+      "verificationSchools": {
+        "title": "学校认证设置",
+        "summary": "学生认证管理：学校与认证方法"
+      },
+      "storageQuota": {
+        "title": "存储实例配额",
+        "summary": "存储运营管理：实例启停和容量上限"
+      },
+      "custodyPolicy": {
+        "title": "存储托管",
+        "summary": "存储托管管理：账号授权和恢复"
+      },
+      "contributionPolicy": {
+        "title": "存储贡献",
+        "summary": "存储贡献管理：贡献处理"
+      },
+      "eligibility": {
+        "title": "动作资格",
+        "summary": "各动作的全站默认与范围覆盖"
+      },
+      "roles": {
+        "title": "角色与范围",
+        "summary": "角色模板、对象范围和敏感权限"
+      },
+      "auditLog": {
+        "title": "操作记录",
+        "summary": "管理操作的对象、操作者和结果"
+      },
+      "notifications": {
+        "title": "通知",
+        "summary": "保留期限、聚合窗口和提醒提前量"
+      },
+      "groups": {
+        "title": "群聊管理",
+        "summary": "入群认证、宽限期、关键词和防复读"
+      },
+      "entertainment": {
+        "title": "娱乐功能",
+        "summary": "骰子和自助禁言的按群参数"
+      },
+      "informationQuery": {
+        "title": "信息查询",
+        "summary": "跨模块查询、批量查询和导出权限"
+      },
+      "openPlatform": {
+        "title": "开放平台",
+        "summary": "应用申请与授权范围"
+      },
+      "discovery": {
+        "title": "发现与统计",
+        "summary": "热度权重、窗口和样本量"
+      },
+      "billing": {
+        "title": "账务",
+        "summary": "会员、奖励和价格，由私有账务模块提供"
+      },
+      "retention": {
+        "title": "数据留存",
+        "summary": "各类数据的留存期限"
+      }
+    }
+  },
+  "console": {
+    "selectItem": "从列表中选择一项查看详情",
+    "moreFilters": "更多筛选"
   }
 }

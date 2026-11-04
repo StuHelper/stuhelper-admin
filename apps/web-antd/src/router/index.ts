@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
 import { verification } from '#/api/verification';
+import { prototypeRoutes } from '#/prototypes';
 
 export const router = createRouter({
   history: createWebHistory(import.meta.env.VITE_BASE),
@@ -28,12 +29,16 @@ export const router = createRouter({
       }, {
         name: 'AcademicCatalog', path: '/academic/catalog', component: () => import('#/academic/CatalogView.vue'),
         meta: { title: 'page.academic.catalogTitle', academicConsole: true },
+      }, {
+        name: 'Settings', path: 'settings', component: () => import('#/views/settings.vue'),
+        meta: { title: 'page.settings.title', frameworkPublic: true },
       }, {name:'Resources',path:'/resources',component:()=>import('#/resources/AdminView.vue'),meta:{title:'page.resources.adminTitle',serverAuthorized:true}},
       {name:'ResourcesMine',path:'/resources/me',component:()=>import('#/resources/BrowseView.vue'),meta:{title:'page.resources.mine',serverAuthorized:true}},
       {name:'ResourcesNew',path:'/resources/new',component:()=>import('#/resources/EditorView.vue'),meta:{title:'page.resources.upload',serverAuthorized:true}},
       {name:'ResourcesEdit',path:'/resources/items/:id/edit',component:()=>import('#/resources/EditorView.vue'),meta:{title:'page.resources.edit',serverAuthorized:true}},
       {name:'ResourcesDetail',path:'/resources/items/:id',component:()=>import('#/resources/DetailView.vue'),meta:{title:'page.resources.title',serverAuthorized:true}},
       {name:'ResourcesRequests',path:'/resources/requests',component:()=>import('#/resources/RequestsView.vue'),meta:{title:'page.resources.myRequests',serverAuthorized:true}},
+      ...prototypeRoutes,
       ],
     },
     {
