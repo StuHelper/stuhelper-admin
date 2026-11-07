@@ -7,7 +7,6 @@ const api = vi.hoisted(() => ({ call: vi.fn(), objectOptions: vi.fn() }));
 vi.mock('./api', async importOriginal => ({ ...await importOriginal<typeof import('./api')>(), ...api }));
 vi.mock('@vben/locales', () => ({ useI18n: () => ({ t: (key: string) => key, d: () => 'date' }) }));
 vi.mock('@vben/common-ui', () => ({ Page: { template: '<main><slot /></main>' } }));
-vi.mock('ant-design-vue', () => ({ Card: { template: '<div><slot /></div>' } }));
 vi.mock('./BatchPanel.vue', () => ({ default: { props: ['tasks'], template: '<div class="batch-input">{{ tasks.map(t => t.id).join() }}</div>' } }));
 let app: App | undefined; let root: HTMLDivElement;
 afterEach(()=>{app?.unmount();root?.remove();vi.clearAllMocks();});

@@ -4,7 +4,10 @@ import { onBeforeRouteLeave } from 'vue-router';
 
 import { useI18n } from '@vben/locales';
 
+import { Alert, Button, Checkbox, Collapse, CollapsePanel, Descriptions, DescriptionsItem, Select, Space, Tag, Textarea, Timeline, TimelineItem } from 'ant-design-vue';
+
 import { confirmLeave } from '#/confirm-leave';
+import { tagColor } from '#/console-ui';
 
 import { AcademicError,type AdminEntry,type AttributionPreview,call,type Decision,lookupObjects,Mutation,query,type Task } from './api';
 import StatusBlock from './StatusBlock.vue';
@@ -86,14 +89,75 @@ async function inspectAttribution(){if(!data.data.value)return;attributionBusy.v
 const names=['recommendation','quality','difficulty','workload','grading'] as const;
 </script>
 <template>
-  <section>
-<div class="admin-actions"><button type="button" :disabled="busy || uncertain" @click="load(true)">{{ t('page.academic.reloadCompare') }}</button><button type="button" :disabled="busy" @click="close">{{ t('page.academic.cancel') }}</button></div><StatusBlock :busy="data.busy.value" :error="data.error.value" @retry="load(true)" />
+  <section class="admin-form">
+    <Space wrap>
+      <Button :disabled="busy || uncertain" @click="load(true)">{{ t('page.academic.reloadCompare') }}</Button>
+      <Button :disabled="busy" @click="close">{{ t('page.academic.cancel') }}</Button>
+    </Space>
+    <StatusBlock :busy="data.busy.value" :error="data.error.value" @retry="load(true)" />
     <template v-if="data.data.value">
-<h2>{{ t('page.academic.originalContent') }}</h2><p>{{ t(`page.academic.kind.${data.data.value.entry.input.kind}`) }} {{ t(`page.academic.states.${data.data.value.entry.state}`) }}</p><p>{{ t('page.academic.revision',{value:n(data.data.value.entry.revision)}) }}</p><h3>{{ data.data.value.entry.input.title }}</h3><div class="admin-body">{{ data.data.value.entry.input.body }}</div><dl v-if="data.data.value.entry.input.kind === 'course'" class="admin-facts"><div v-for="(name,index) in names" :key="name"><dt>{{ t(`page.academic.ratings.${name}.label`) }}</dt><dd>{{ t(`page.academic.ratings.${name}.level${data.data.value.entry.input.ratings[index]}`) }}</dd></div></dl>
-      <div v-if="task" class="admin-notice"><h3>{{ t(`page.academic.requestKinds.${task.submission.kind}`) }}</h3><p v-if="task.submission.reason !== 'content_review'">{{ task.submission.reason }}</p><p v-for="(item,index) in task.submission.evidence" :key="index">{{ item }}</p><p>{{ t(`page.academic.taskStates.${task.state}`) }}</p><p v-if="task.decision">{{ task.decision.reason }}</p><button v-if="task.state === 'failed' && task.error_code === 'unavailable'" :disabled="busy" @click="retry">{{ t('page.academic.retryDelivery') }}</button></div>
-      <form v-if="!task || task.state === 'waiting' || (uncertain && !retryMutation.uncertain)" class="admin-form" @submit.prevent="decide"><fieldset :disabled="busy || uncertain"><label>{{ t('page.academic.moderationAction') }}<select v-model="action" required><option :value="undefined">{{ t('page.academic.choose') }}</option><option v-for="value in actions" :key="value" :value="value">{{ t(`page.academic.actions.${value}`) }}</option></select></label><template v-if="action === 'reassign'"><label>{{ t('page.academic.taughtBy') }}<select v-model="teacher"><option value="">{{ t('page.academic.noTeacher') }}</option><option v-for="[id,name] in teacherNames" :key="id" :value="id">{{ name }}</option></select></label><button type="button" :disabled="attributionBusy" @click="inspectAttribution">{{ t('page.academic.previewAttribution') }}</button><p v-if="attribution">{{ attribution.teacher_ids.map(id=>teacherNames.get(id) ?? id).join(' ') }}</p></template><label v-if="action === 'edit'">{{ t('page.academic.proposedBody') }}<textarea v-model="body" rows="10" maxlength="16000" required></textarea></label><template v-if="action === 'identity'"><p>{{ t('page.academic.wholeDiscussion') }}</p><label class="checkbox"><input v-model="signed" type="checkbox" />{{ t('page.academic.signed') }}</label></template><label>{{ t('page.academic.decisionReason') }}<textarea v-model="reason" rows="3" maxlength="2000" required></textarea></label></fieldset><button type="submit" :disabled="busy || (action === 'reassign' && !attribution)">{{ t(uncertain ? 'page.academic.retry' : 'page.academic.applyDecision') }}</button></form>
+      <div class="console-row-head">
+        <h2>{{ t('page.academic.originalContent') }}</h2>
+        <Space :size="4"><Tag>{{ t(`page.academic.kind.${data.data.value.entry.input.kind}`) }}</Tag><Tag :color="tagColor(data.data.value.entry.state)">{{ t(`page.academic.states.${data.data.value.entry.state}`) }}</Tag></Space>
+      </div>
+      <p class="meta">{{ t('page.academic.revision',{value:n(data.data.value.entry.revision)}) }}</p>
+      <h3>{{ data.data.value.entry.input.title }}</h3>
+      <div class="admin-body">{{ data.data.value.entry.input.body }}</div>
+      <Descriptions v-if="data.data.value.entry.input.kind === 'course'" size="small" :column="{ xs: 1, sm: 2, xl: 5 }" layout="vertical">
+        <DescriptionsItem v-for="(name,index) in names" :key="name" :label="t(`page.academic.ratings.${name}.label`)">{{ t(`page.academic.ratings.${name}.level${data.data.value.entry.input.ratings[index]}`) }}</DescriptionsItem>
+      </Descriptions>
+      <Alert v-if="task" type="info" :message="t(`page.academic.requestKinds.${task.submission.kind}`)">
+        <template #description>
+          <p v-if="task.submission.reason !== 'content_review'">{{ task.submission.reason }}</p>
+          <p v-for="(item,index) in task.submission.evidence" :key="index">{{ item }}</p>
+          <p><Tag :color="tagColor(task.state)">{{ t(`page.academic.taskStates.${task.state}`) }}</Tag></p>
+          <p v-if="task.decision">{{ task.decision.reason }}</p>
+        </template>
+        <template v-if="task.state === 'failed' && task.error_code === 'unavailable'" #action>
+          <Button size="small" :disabled="busy" @click="retry">{{ t('page.academic.retryDelivery') }}</Button>
+        </template>
+      </Alert>
+      <form v-if="!task || task.state === 'waiting' || (uncertain && !retryMutation.uncertain)" class="admin-form" @submit.prevent="decide">
+        <label>{{ t('page.academic.moderationAction') }}
+          <Select v-model:value="action" :disabled="busy || uncertain" :placeholder="t('page.academic.choose')" :options="actions.map(value => ({ value, label: t(`page.academic.actions.${value}`) }))" />
+        </label>
+        <template v-if="action === 'reassign'">
+          <label>{{ t('page.academic.taughtBy') }}
+            <Select v-model:value="teacher" :disabled="busy || uncertain" :options="[{ value: '', label: t('page.academic.noTeacher') }, ...[...teacherNames].map(([id,name]) => ({ value: id, label: name }))]" />
+          </label>
+          <Button :loading="attributionBusy" @click="inspectAttribution">{{ t('page.academic.previewAttribution') }}</Button>
+          <p v-if="attribution">{{ attribution.teacher_ids.map(id=>teacherNames.get(id) ?? id).join(' ') }}</p>
+        </template>
+        <label v-if="action === 'edit'">{{ t('page.academic.proposedBody') }}<Textarea v-model:value="body" :rows="10" :maxlength="16000" required :disabled="busy || uncertain" /></label>
+        <template v-if="action === 'identity'">
+          <p>{{ t('page.academic.wholeDiscussion') }}</p>
+          <Checkbox v-model:checked="signed" :disabled="busy || uncertain">{{ t('page.academic.signed') }}</Checkbox>
+        </template>
+        <label>{{ t('page.academic.decisionReason') }}<Textarea v-model:value="reason" :rows="3" :maxlength="2000" required :disabled="busy || uncertain" /></label>
+        <Button type="primary" html-type="submit" block :loading="busy" :disabled="!action || !reason.trim() || (action === 'reassign' && !attribution)">{{ t(uncertain ? 'page.academic.retry' : 'page.academic.applyDecision') }}</Button>
+      </form>
+      <Collapse ghost>
+        <CollapsePanel key="history" :header="t('page.academic.objectHistory')">
+          <StatusBlock :busy="history.busy.value" :error="history.error.value" @retry="history.load" />
+          <Timeline>
+            <TimelineItem v-for="item in history.data.value" :key="item.id">
+              <Tag :color="tagColor(item.state)">{{ t(`page.academic.taskStates.${item.state}`) }}</Tag>{{ t(`page.academic.requestKinds.${item.submission.kind}`) }}
+              <p class="meta">{{ item.decision?.reason ?? item.submission.reason }}</p>
+            </TimelineItem>
+          </Timeline>
+          <StatusBlock :busy="versions.busy.value" :error="versions.error.value" @retry="versions.load" />
+          <article v-for="version in versions.data.value" :key="version.revision" class="admin-list-item">
+            <h4>{{ t('page.academic.revision',{value:n(version.revision)}) }}</h4>
+            <p>{{ version.input.title }}</p>
+            <p class="admin-body">{{ version.input.body }}</p>
+            <p>{{ version.change_reason }}</p>
+          </article>
+          <Button v-if="versions.data.value?.length === 20" @click="historyBefore = String(versions.data.value.at(-1)?.revision ?? 0);versions.load()">{{ t('page.academic.next') }}</Button>
+        </CollapsePanel>
+      </Collapse>
     </template>
-    <details v-if="data.data.value"><summary>{{ t('page.academic.objectHistory') }}</summary><StatusBlock :busy="history.busy.value" :error="history.error.value" @retry="history.load" /><ul class="admin-list"><li v-for="item in history.data.value" :key="item.id"><p>{{ t(`page.academic.requestKinds.${item.submission.kind}`) }} {{ t(`page.academic.taskStates.${item.state}`) }}</p><p>{{ item.decision?.reason ?? item.submission.reason }}</p></li></ul><StatusBlock :busy="versions.busy.value" :error="versions.error.value" @retry="versions.load" /><article v-for="version in versions.data.value" :key="version.revision" class="admin-list-item"><h4>{{ t('page.academic.revision',{value:n(version.revision)}) }}</h4><p>{{ version.input.title }}</p><p class="admin-body">{{ version.input.body }}</p><p>{{ version.change_reason }}</p></article><button v-if="versions.data.value?.length === 20" @click="historyBefore = String(versions.data.value.at(-1)?.revision ?? 0);versions.load()">{{ t('page.academic.next') }}</button></details>
-    <p v-if="error" role="alert">{{ t(`page.academic.errors.${error}`) }}</p><p v-if="notice" role="status">{{ t(`page.academic.${notice}`) }}</p><p v-if="uncertain" role="status">{{ t('page.academic.uncertain') }}</p>
+    <Alert v-if="error" type="error" show-icon :message="t(`page.academic.errors.${error}`)" />
+    <Alert v-if="notice" type="success" show-icon :message="t(`page.academic.${notice}`)" />
+    <Alert v-if="uncertain" type="warning" show-icon :message="t('page.academic.uncertain')" />
   </section>
 </template>

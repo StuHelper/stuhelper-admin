@@ -3,6 +3,8 @@ import { computed, ref } from 'vue';
 
 import { useI18n } from '@vben/locales';
 
+import { Input, Select } from 'ant-design-vue';
+
 import { attribute, type Field, name, type Value } from './api';
 const props = defineProps<{
   disabled?: boolean;
@@ -19,43 +21,40 @@ const raw = computed(
     props.modelValue?.option ??
     String(props.modelValue?.number ?? ''),
 );
-function change(event: Event) {
-  const input = event.target;
-  if (
-    !(input instanceof HTMLInputElement || input instanceof HTMLSelectElement)
-  )
-    return;
+// Text and number inputs keep the browser validity message; choices only show the error state.
+function apply(raw: string, input?: HTMLInputElement) {
   try {
-    const value = attribute(props.field, input.value);
+    const value = attribute(props.field, raw);
     invalid.value = false;
-    input.setCustomValidity('');
+    input?.setCustomValidity('');
     emit('update:modelValue', value);
   } catch {
     invalid.value = true;
-    input.setCustomValidity(t('page.resources.errors.invalid_input'));
+    input?.setCustomValidity(t('page.resources.errors.invalid_input'));
   }
+}
+function change(event: Event) {
+  const input = event.target;
+  if (input instanceof HTMLInputElement) apply(input.value, input);
+}
+function choose(value: string) {
+  apply(value);
 }
 </script>
 <template>
-  <label class="resource-field">{{ name(field.names, locale)
-    }}<select
+  <label class="resource-field">{{ name(field.names, locale) }}
+    <Select
       v-if="field.kind === 'choice'"
       :value="raw"
-      :aria-invalid="invalid"
-      :required="!filter && field.required"
+      :status="invalid ? 'error' : undefined"
       :disabled="disabled"
-      @change="change"
-    >
-      <option value="">{{ t('page.resources.choose') }}</option>
-      <option
-        v-for="option in field.options"
-        :key="option.id"
-        :value="option.id"
-      >
-        {{ name(option.names, locale) }}
-      </option></select><input
+      :options="[{ value: '', label: t('page.resources.choose') }, ...(field.options ?? []).map((option) => ({ value: option.id, label: name(option.names, locale) }))]"
+      @change="choose(String($event ?? ''))"
+    />
+    <Input
       v-else
       :value="raw"
+      :status="invalid ? 'error' : undefined"
       :aria-invalid="invalid"
       :type="field.kind === 'integer' ? 'number' : 'text'"
       :min="field.min"
@@ -64,6 +63,7 @@ function change(event: Event) {
       :step="field.kind === 'integer' ? 1 : undefined"
       :required="!filter && field.required"
       :disabled="disabled"
-      @input="change"
-  /></label>
+      @change="change"
+    />
+  </label>
 </template>

@@ -7,9 +7,9 @@ import { Page } from '@vben/common-ui';
 import { createFormatters, useI18n } from '@vben/locales';
 import { preferences } from '@vben/preferences';
 
-import { Alert, Button, Card, ConfigProvider, Modal } from 'ant-design-vue';
+import { Alert, Button, Card, ConfigProvider, Modal, Tag } from 'ant-design-vue';
 
-import { stateTone } from '#/console-ui';
+import { tagColor } from '#/console-ui';
 
 import { useContributions } from '../composables/useContributions';
 
@@ -42,7 +42,7 @@ function retry(item: Contribution) { prepare({ kind: 'retry', id: item.id, key: 
         <Card v-if="data.items.length === 0"><p>{{ t('page.contribution.empty') }}</p></Card>
         <div class="console-inventory">
           <article v-for="item in data.items" :key="item.id" class="console-entry">
-            <div class="console-row-head"><h2><bdi>{{ item.adapter }}</bdi></h2><span class="console-badge" :data-tone="stateTone(item.state)">{{ state(item.state) }}</span></div><p class="console-identifier"><bdi>{{ item.id }}</bdi></p>
+            <div class="console-row-head"><h2><bdi>{{ item.adapter }}</bdi></h2><Tag :color="tagColor(item.state)">{{ state(item.state) }}</Tag></div><p class="console-identifier"><bdi>{{ item.id }}</bdi></p>
             <dl class="console-tiles"><div><dt>{{ t('page.contribution.requested') }}</dt><dd>{{ target(item.desired_state) }}</dd></div><div><dt>{{ t('page.contribution.actual') }}</dt><dd>{{ state(item.state) }}</dd></div><div><dt>{{ t('page.contribution.quota') }}</dt><dd>{{ bytes(item.conditions.limit_bytes) }}</dd></div><div><dt>{{ t('page.contribution.personal') }}</dt><dd>{{ bytes(item.conditions.personal_reserve) }}</dd></div></dl>
             <p v-if="item.reason">{{ reason(item.reason) }}</p>
             <p>{{ t('page.contribution.until', { time: format.dateTime(item.conditions.until) }) }}</p>

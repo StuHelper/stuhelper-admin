@@ -3,6 +3,8 @@ import { ref, watch } from 'vue';
 
 import { useI18n } from '@vben/locales';
 
+import { Button, Input, Select, Space } from 'ant-design-vue';
+
 import {
   type AcademicObject,
   call,
@@ -68,49 +70,27 @@ watch(
   },
   { immediate: true },
 );
-function choose(event: Event) {
-  const target = event.target;
-  return target instanceof HTMLSelectElement ? target.value : '';
-}
 </script>
 <template>
   <div class="resource-field">
-    <label>{{ t(`page.resources.catalog.${kind}`)
-      }}<select
+    <label>{{ t(`page.resources.catalog.${kind}`) }}
+      <Select
         :value="modelValue ?? ''"
-        :required="required"
         :disabled="disabled || busy"
-        @change="$emit('update:modelValue', choose($event))"
-      >
-        <option value="">{{ t('page.resources.unknown') }}</option>
-        <option
-          v-if="modelValue && !items.some((x) => x.id === modelValue)"
-          :value="modelValue"
-        >
-          {{ modelValue }}
-        </option>
-        <option v-for="item in items" :key="item.id" :value="item.id">
-          {{ item.name }}
-        </option>
-      </select></label>
-    <div class="resource-actions">
-      <input
-        v-model="search"
-        type="search"
-        :aria-label="t('page.resources.searchOptions')"
-        :disabled="disabled"
-        @keydown.enter.prevent="load()"
-      /><button type="button" :disabled="disabled || busy" @click="load()">
-        {{ t('page.resources.search') }}
-</button><button
-        v-if="after"
-        type="button"
-        :disabled="disabled || busy"
-        @click="load(true)"
-      >
-        {{ t('page.resources.more') }}
-      </button>
-    </div>
+        :status="required && !modelValue ? 'warning' : undefined"
+        :options="[
+          { value: '', label: t('page.resources.unknown') },
+          ...(modelValue && !items.some((x) => x.id === modelValue) ? [{ value: modelValue, label: modelValue }] : []),
+          ...items.map((item) => ({ value: item.id, label: item.name })),
+        ]"
+        @change="$emit('update:modelValue', String($event ?? ''))"
+      />
+    </label>
+    <Space.Compact class="w-full">
+      <Input v-model:value="search" type="search" :aria-label="t('page.resources.searchOptions')" :disabled="disabled" @press-enter.prevent="load()" />
+      <Button :disabled="disabled || busy" @click="load()">{{ t('page.resources.search') }}</Button>
+      <Button v-if="after" :disabled="disabled || busy" @click="load(true)">{{ t('page.resources.more') }}</Button>
+    </Space.Compact>
     <StatusBlock :error="error" @retry="load()" />
   </div>
 </template>

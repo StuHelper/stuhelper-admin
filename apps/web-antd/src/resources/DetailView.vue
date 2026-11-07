@@ -2,7 +2,12 @@
 import { computed, ref, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 
+import { Page } from '@vben/common-ui';
 import { useI18n } from '@vben/locales';
+
+import { Alert, Button, Descriptions, DescriptionsItem, Space, Tag } from 'ant-design-vue';
+
+import { tagColor } from '#/console-ui';
 
 import { name, type Resource, type Schema, segment, shown } from './api';
 import RequestForm from './RequestForm.vue';
@@ -53,83 +58,41 @@ watch(
 );
 </script>
 <template>
-  <section class="resources-page">
-    <RouterLink to="/resources">
-      {{ t('page.resources.title') }}
-</RouterLink><StatusBlock :busy="busy" :error="error" @retry="state.retry" /><template
-      v-if="entry && version"
-    >
-      <article class="resource-card">
-        <h1>{{ version.metadata.title }}</h1>
-        <div class="resource-meta">
-          <span>{{ name(version.category.names, locale) }}</span><span>{{ t(`page.resources.states.${version.state}`) }}</span><time>{{ d(new Date(version.created_at), 'date') }}</time>
-        </div>
-        <p class="resource-details">
-          {{ version.metadata.description }}
-        </p>
-        <dl>
-          <template v-for="field in version.category.fields" :key="field.key">
-            <dt>{{ name(field.names, locale) }}</dt>
-            <dd>
-              {{
-                shown(field, version.metadata.attributes[field.key], locale) ||
-                t('page.resources.unknown')
-              }}
-            </dd>
-          </template>
-          <dt>{{ t('page.resources.origin') }}</dt>
-          <dd>
-            {{ t(`page.resources.origins.${version.metadata.origin.kind}`) }}
-          </dd>
-          <template v-if="version.metadata.origin.source">
-            <dt>{{ t('page.resources.source') }}</dt>
-            <dd>{{ version.metadata.origin.source }}</dd>
-</template><template v-if="version.metadata.origin.author">
-            <dt>{{ t('page.resources.author') }}</dt>
-            <dd>{{ version.metadata.origin.author }}</dd>
-</template><template v-if="version.metadata.origin.license">
-            <dt>{{ t('page.resources.license') }}</dt>
-            <dd>{{ version.metadata.origin.license }}</dd>
-          </template>
-        </dl>
-        <p v-if="version.file">
-          {{ version.file.filename }} {{ n(version.file.size) }}
-          {{ t('page.resources.bytes') }}
-        </p>
-        <p v-if="entry.proposal && entry.current" role="status">
-          {{ t('page.resources.oldVersionContinues') }}
-        </p>
-        <p v-if="!entry.download_allowed">
-          {{ t('page.resources.accessRequired') }}
-        </p>
-        <div class="resource-actions">
-          <button
-            v-if="entry.download_allowed"
-            :disabled="busy"
-            @click="download"
-          >
-            {{ t('page.resources.download') }}
-</button><RouterLink
-            v-if="entry.owned"
-            :to="`/resources/items/${entry.id}/edit`"
-          >
-            {{ t('page.resources.edit') }}
-</RouterLink><span v-if="version.metadata.associations.course_id">
-            {{ t('page.resources.catalog.course') }} {{ version.metadata.associations.course_id }}
-</span><button @click="showRequest = !showRequest">
-            {{ t('page.resources.request') }}
-          </button>
-        </div>
-      </article>
-      <section v-if="showRequest" class="resource-card">
-        <RequestForm
-          :resource-id="entry.id"
-          :owned="entry.owned"
-          @saved="receipt = $event"
-        /><RouterLink v-if="receipt" to="/resources/requests">
-          {{ t('page.resources.myRequests') }}
-        </RouterLink>
-      </section>
-    </template>
-  </section>
+  <Page :title="version?.metadata.title ?? t('page.resources.title')">
+    <template #extra><RouterLink to="/resources">{{ t('page.resources.title') }}</RouterLink></template>
+    <section class="resources-page">
+      <StatusBlock :busy="busy" :error="error" @retry="state.retry" />
+      <template v-if="entry && version">
+        <article class="resource-card resource-form">
+          <h1 class="text-lg font-semibold">{{ version.metadata.title }}</h1>
+          <Space wrap>
+            <Tag>{{ name(version.category.names, locale) }}</Tag>
+            <Tag :color="tagColor(version.state)">{{ t(`page.resources.states.${version.state}`) }}</Tag>
+            <time class="resource-muted">{{ d(new Date(version.created_at), 'date') }}</time>
+          </Space>
+          <p class="resource-details">{{ version.metadata.description }}</p>
+          <Descriptions :column="{ xs: 1, md: 2 }" size="small" bordered>
+            <DescriptionsItem v-for="field in version.category.fields" :key="field.key" :label="name(field.names, locale)">{{ shown(field, version.metadata.attributes[field.key], locale) || t('page.resources.unknown') }}</DescriptionsItem>
+            <DescriptionsItem :label="t('page.resources.origin')">{{ t(`page.resources.origins.${version.metadata.origin.kind}`) }}</DescriptionsItem>
+            <DescriptionsItem v-if="version.metadata.origin.source" :label="t('page.resources.source')">{{ version.metadata.origin.source }}</DescriptionsItem>
+            <DescriptionsItem v-if="version.metadata.origin.author" :label="t('page.resources.author')">{{ version.metadata.origin.author }}</DescriptionsItem>
+            <DescriptionsItem v-if="version.metadata.origin.license" :label="t('page.resources.license')">{{ version.metadata.origin.license }}</DescriptionsItem>
+          </Descriptions>
+          <p v-if="version.file">{{ version.file.filename }} {{ n(version.file.size) }} {{ t('page.resources.bytes') }}</p>
+          <Alert v-if="entry.proposal && entry.current" type="info" show-icon role="status" :message="t('page.resources.oldVersionContinues')" />
+          <Alert v-if="!entry.download_allowed" type="warning" show-icon :message="t('page.resources.accessRequired')" />
+          <Space wrap>
+            <Button v-if="entry.download_allowed" type="primary" :disabled="busy" @click="download">{{ t('page.resources.download') }}</Button>
+            <RouterLink v-if="entry.owned" :to="`/resources/items/${entry.id}/edit`">{{ t('page.resources.edit') }}</RouterLink>
+            <span v-if="version.metadata.associations.course_id">{{ t('page.resources.catalog.course') }} {{ version.metadata.associations.course_id }}</span>
+            <Button @click="showRequest = !showRequest">{{ t('page.resources.request') }}</Button>
+          </Space>
+        </article>
+        <section v-if="showRequest" class="resource-card">
+          <RequestForm :resource-id="entry.id" :owned="entry.owned" @saved="receipt = $event" />
+          <RouterLink v-if="receipt" to="/resources/requests">{{ t('page.resources.myRequests') }}</RouterLink>
+        </section>
+      </template>
+    </section>
+  </Page>
 </template>

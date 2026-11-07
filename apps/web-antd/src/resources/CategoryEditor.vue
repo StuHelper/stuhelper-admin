@@ -3,6 +3,8 @@ import { ref, watch } from 'vue';
 
 import { useI18n } from '@vben/locales';
 
+import { Button, Card, Checkbox, Input, InputNumber, Select, Space } from 'ant-design-vue';
+
 import { snapshot } from './api';
 import { type Category, name, type Schema, segment } from './api';
 import NamesInput from './NamesInput.vue';
@@ -92,125 +94,48 @@ async function save() {
     <fieldset :disabled="busy || uncertain">
       <legend>{{ t('page.resources.taxonomy') }}</legend>
       <div class="resource-grid">
-        <label class="resource-field">{{ t('page.resources.identifier')
-          }}<input
-            v-model="id"
-            required
-            maxlength="128"
-            pattern="[A-Za-z0-9_-]+"
-            :readonly="!!category"
-/></label><label class="resource-field">{{ t('page.resources.order')
-          }}<input
-            v-model.number="value.order"
-            type="number"
-            required
-            min="-100000"
-            max="100000"
-/></label><label class="resource-inline"><input v-model="value.enabled" type="checkbox" />{{
-            t('page.resources.enabled')
-          }}</label>
+        <label class="resource-field">{{ t('page.resources.identifier') }}<Input v-model:value="id" required :maxlength="128" pattern="[A-Za-z0-9_-]+" :readonly="!!category" /></label>
+        <label class="resource-field">{{ t('page.resources.order') }}<InputNumber v-model:value="value.order" :min="-100000" :max="100000" class="w-full" /></label>
+        <Checkbox v-model:checked="value.enabled" class="self-end">{{ t('page.resources.enabled') }}</Checkbox>
       </div>
       <NamesInput v-model="value.names" />
       <h3>{{ t('page.resources.fields') }}</h3>
-      <section
-        v-for="(field, index) in value.fields"
-        :key="index"
-        class="resource-card resource-form"
-      >
-        <div class="resource-grid">
-          <label class="resource-field">{{ t('page.resources.identifier')
-            }}<input
-              v-model="field.key"
-              required
-              maxlength="64"
-              pattern="[a-z][a-z0-9_-]*"
-/></label><label class="resource-field">{{ t('page.resources.fieldKind')
-            }}<select v-model="field.kind" @change="mode(index)">
-              <option
-                v-for="kind in ['text', 'integer', 'choice']"
-                :key="kind"
-                :value="kind"
-              >
-                {{ t(`page.resources.${kind}`) }}
-              </option>
-            </select></label>
-        </div>
-        <NamesInput v-model="field.names" />
-        <div class="resource-actions">
-          <label class="resource-inline"><input v-model="field.required" type="checkbox" />{{
-              t('page.resources.required')
-            }}</label><label class="resource-inline"><input v-model="field.filterable" type="checkbox" />{{
-              t('page.resources.filterable')
-            }}</label><label class="resource-inline"><input v-model="field.groupable" type="checkbox" />{{
-              t('page.resources.groupable')
-            }}</label>
-        </div>
-        <div v-if="field.kind === 'integer'" class="resource-grid">
-          <label class="resource-field">{{ t('page.resources.min')
-            }}<input
-              v-model.number="field.min"
-              type="number"
-              min="-1000000000"
-              max="1000000000"
-/></label><label class="resource-field">{{ t('page.resources.max')
-            }}<input
-              v-model.number="field.max"
-              type="number"
-              min="-1000000000"
-              max="1000000000"
-          /></label>
-        </div>
-        <label v-if="field.kind === 'text'" class="resource-field">{{ t('page.resources.maxLength')
-          }}<input
-            v-model.number="field.max_length"
-            type="number"
-            required
-            min="1"
-            max="1000"
-        /></label>
-        <section v-if="field.kind === 'choice'">
-          <h4>{{ t('page.resources.options') }}</h4>
-          <div
-            v-for="(option, optionIndex) in field.options"
-            :key="optionIndex"
-            class="resource-card"
-          >
-            <label class="resource-field">{{ t('page.resources.identifier')
-              }}<input v-model="option.id" required maxlength="128" /></label><NamesInput v-model="option.names" /><button
-              type="button"
-              @click="field.options?.splice(optionIndex, 1)"
-            >
-              {{ t('page.resources.remove') }}
-            </button>
+      <Card v-for="(field, index) in value.fields" :key="index" size="small" class="mb-3">
+        <div class="resource-form">
+          <div class="resource-grid">
+            <label class="resource-field">{{ t('page.resources.identifier') }}<Input v-model:value="field.key" required :maxlength="64" pattern="[a-z][a-z0-9_-]*" /></label>
+            <label class="resource-field">{{ t('page.resources.fieldKind') }}
+              <Select v-model:value="field.kind" :disabled="busy || uncertain" :options="['text', 'integer', 'choice'].map((kind) => ({ value: kind, label: t(`page.resources.${kind}`) }))" @change="mode(index)" />
+            </label>
           </div>
-          <button
-            type="button"
-            :disabled="(field.options?.length ?? 0) >= 100"
-            @click="field.options?.push({ id: '', names: {} })"
-          >
-            {{ t('page.resources.addOption') }}
-          </button>
-        </section>
-        <button type="button" @click="remove(index)">
-          {{ t('page.resources.remove') }}
-        </button>
-      </section>
-      <button type="button" :disabled="value.fields.length >= 20" @click="add">
-        {{ t('page.resources.addField') }}
-</button><label class="resource-field">{{ t('page.resources.groupBy')
-        }}<select v-model="value.group_by">
-          <option value="">{{ t('page.resources.noGrouping') }}</option>
-          <option
-            v-for="field in value.fields.filter((x) => x.groupable && x.key)"
-            :key="field.key"
-            :value="field.key"
-          >
-            {{ name(field.names, locale) || field.key }}
-          </option>
-        </select></label>
+          <NamesInput v-model="field.names" />
+          <Space wrap>
+            <Checkbox v-model:checked="field.required">{{ t('page.resources.required') }}</Checkbox>
+            <Checkbox v-model:checked="field.filterable">{{ t('page.resources.filterable') }}</Checkbox>
+            <Checkbox v-model:checked="field.groupable">{{ t('page.resources.groupable') }}</Checkbox>
+          </Space>
+          <div v-if="field.kind === 'integer'" class="resource-grid">
+            <label class="resource-field">{{ t('page.resources.min') }}<InputNumber v-model:value="field.min" :min="-1000000000" :max="1000000000" class="w-full" /></label>
+            <label class="resource-field">{{ t('page.resources.max') }}<InputNumber v-model:value="field.max" :min="-1000000000" :max="1000000000" class="w-full" /></label>
+          </div>
+          <label v-if="field.kind === 'text'" class="resource-field">{{ t('page.resources.maxLength') }}<InputNumber v-model:value="field.max_length" :min="1" :max="1000" class="w-full" /></label>
+          <section v-if="field.kind === 'choice'" class="resource-form">
+            <h4>{{ t('page.resources.options') }}</h4>
+            <Card v-for="(option, optionIndex) in field.options" :key="optionIndex" size="small">
+              <label class="resource-field">{{ t('page.resources.identifier') }}<Input v-model:value="option.id" required :maxlength="128" /></label>
+              <NamesInput v-model="option.names" />
+              <Button danger size="small" @click="field.options?.splice(optionIndex, 1)">{{ t('page.resources.remove') }}</Button>
+            </Card>
+            <Button class="justify-self-start" :disabled="(field.options?.length ?? 0) >= 100" @click="field.options?.push({ id: '', names: {} })">{{ t('page.resources.addOption') }}</Button>
+          </section>
+          <Button danger class="justify-self-start" @click="remove(index)">{{ t('page.resources.remove') }}</Button>
+        </div>
+      </Card>
+      <Button class="mb-3" :disabled="value.fields.length >= 20" @click="add">{{ t('page.resources.addField') }}</Button>
+      <label class="resource-field">{{ t('page.resources.groupBy') }}
+        <Select v-model:value="value.group_by" :disabled="busy || uncertain" :options="[{ value: '', label: t('page.resources.noGrouping') }, ...value.fields.filter((x) => x.groupable && x.key).map((field) => ({ value: field.key, label: name(field.names, locale) || field.key }))]" />
+      </label>
     </fieldset>
-    <button type="submit" :disabled="busy">
-      {{ t(uncertain ? 'page.resources.retry' : 'page.resources.save') }}
-    </button>
+    <Button type="primary" html-type="submit" class="justify-self-start" :loading="busy" :disabled="value.order === null">{{ t(uncertain ? 'page.resources.retry' : 'page.resources.save') }}</Button>
   </form>
 </template>

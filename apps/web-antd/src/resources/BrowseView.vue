@@ -2,7 +2,12 @@
 import { computed, ref, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 
+import { Page } from '@vben/common-ui';
 import { useI18n } from '@vben/locales';
+
+import { Button, Checkbox, CheckboxGroup, Input, Select, Space, Tag } from 'ant-design-vue';
+
+import { tagColor } from '#/console-ui';
 
 import {
   type Category,
@@ -181,192 +186,73 @@ watch(
 );
 </script>
 <template>
-  <section class="resources-page">
-    <header>
-      <h1>{{ t(mine ? 'page.resources.mine' : 'page.resources.title') }}</h1>
-      <nav class="resource-actions">
-        <RouterLink to="/resources">
-          {{ t('page.resources.title') }}
-</RouterLink><RouterLink to="/resources/me">
-          {{ t('page.resources.mine') }}
-</RouterLink><RouterLink to="/resources/requests">
-          {{ t('page.resources.myRequests') }}
-</RouterLink><RouterLink to="/resources/new">
-          {{ t('page.resources.upload') }}
-        </RouterLink>
+  <Page :title="t(mine ? 'page.resources.mine' : 'page.resources.title')">
+    <section class="resources-page">
+      <nav class="console-controls">
+        <RouterLink to="/resources">{{ t('page.resources.title') }}</RouterLink>
+        <RouterLink to="/resources/me">{{ t('page.resources.mine') }}</RouterLink>
+        <RouterLink to="/resources/requests">{{ t('page.resources.myRequests') }}</RouterLink>
+        <RouterLink to="/resources/new">{{ t('page.resources.upload') }}</RouterLink>
       </nav>
-    </header>
-    <form class="resource-card resource-form" @submit.prevent="filter">
-      <div class="resource-grid">
-        <CatalogSelect
-          v-model="school"
-          kind="school"
-          :disabled="busy || uncertain"
-        /><CatalogSelect
-          v-model="course"
-          kind="course"
-          :school="school"
-          :disabled="busy || uncertain"
-        /><label class="resource-field">{{ t('page.resources.category')
-          }}<select v-model="category" :disabled="busy || uncertain">
-            <option value="">{{ t('page.resources.all') }}</option>
-            <option v-for="item in categories" :key="item.id" :value="item.id">
-              {{ name(item.names, locale) }}
-            </option>
-          </select></label><label class="resource-field">{{ t('page.resources.search')
-          }}<input
-            v-model="text"
-            type="search"
-            maxlength="200"
-            :disabled="busy || uncertain"
-/></label><FieldInput
-          v-for="field in active?.fields.filter((x) => x.filterable)"
-          :key="field.key"
-          v-model="fields[field.key]"
-          :field="field"
-          filter
-          :disabled="busy || uncertain"
-        />
-      </div>
-      <button type="submit" :disabled="busy || uncertain">
-        {{ t('page.resources.filter') }}
-      </button>
-    </form>
-    <StatusBlock
-      :busy="busy"
-      :error="error"
-      :empty="items.length === 0 && directories.length === 0"
-      @retry="state.retry"
-    />
-    <section v-if="school" class="resource-card">
-      <h2>{{ t('page.resources.directories') }}</h2>
-      <div class="resource-actions">
-        <button
-          v-if="directory"
-          :disabled="busy || uncertain"
-          @click="changeDirectory()"
-        >
-          {{ t('page.resources.parent') }}
-</button><span>{{
-          directory ? name(directory.names, locale) : t('page.resources.root')
-        }}</span><button
-          v-for="item in directories"
-          :key="item.id"
-          :disabled="busy || uncertain"
-          @click="changeDirectory(item)"
-        >
-          {{ name(item.names, locale) }}
-</button><button
-          v-if="dirNext"
-          :disabled="busy || uncertain"
-          @click="
-            dirAfter = dirNext;
-            state.run(read);
-          "
-        >
-          {{ t('page.resources.more') }}
-</button><button v-if="directory" :disabled="busy" @click="pack(true)">
-          {{
-            t(
-              uncertain
-                ? 'page.resources.retry'
-                : 'page.resources.downloadDirectory',
-            )
-          }}
-        </button>
-      </div>
-    </section>
-    <p v-if="active?.group_by" class="resource-muted">
-      {{ t('page.resources.pageGroups') }}
-    </p>
-    <section v-for="[label, rows] in groups" :key="label">
-      <h2 v-if="label">
-        {{ label }}
-      </h2>
-      <ul class="resource-list">
-        <li v-for="item in rows" :key="item.id" class="resource-card">
-          <div class="resource-actions">
-            <input
-              v-if="item.download_allowed"
-              v-model="selected"
-              type="checkbox"
-              :value="item.id"
-              :aria-label="`${t('page.resources.select')} ${item.current?.metadata.title ?? ''}`"
-              :disabled="busy || uncertain"
-            /><RouterLink :to="`/resources/items/${item.id}`">
-              {{
-                (mine ? (item.proposal ?? item.current) : item.current)
-                  ?.metadata.title
-              }}
-</RouterLink><span class="resource-state">{{
-              t(
-                `page.resources.states.${mine ? (item.proposal?.state ?? item.state) : item.state}`,
-              )
-            }}</span>
-          </div>
-          <p>
-            {{
-              (mine ? (item.proposal ?? item.current) : item.current)?.metadata
-                .description
-            }}
-          </p>
-          <div class="resource-meta">
-            <span>{{
-              name(
-                (item.proposal ?? item.current)?.category.names ?? {},
-                locale,
-              )
-            }}</span><span v-if="item.current?.file">{{ n(item.current.file.size) }}
-              {{ t('page.resources.bytes') }}</span>
-          </div>
-        </li>
-      </ul>
-    </section>
-    <div class="resource-actions">
-      <button
-        v-if="selected.length > 0 || uncertain"
-        :disabled="busy"
-        @click="pack()"
-      >
-        {{
-          t(
-            uncertain
-              ? 'page.resources.retry'
-              : 'page.resources.downloadSelected',
-          )
-        }}
-</button><button
-        v-if="next"
-        :disabled="busy || uncertain"
-        @click="
-          after = next;
-          state.run(read);
-        "
-      >
-        {{ t('page.resources.more') }}
-      </button>
-    </div>
-    <section v-if="bundle" class="resource-card">
-      <h2>{{ t('page.resources.packages') }}</h2>
-      <p>
-        {{
-          t('page.resources.packageInstructions', {
-            count: bundle.parts.length,
-          })
-        }}
-      </p>
-      <ul>
-        <li v-for="part in bundle.parts" :key="part.number">
-          <button :disabled="busy" @click="downloadPart(part.number)">
-            {{ t('page.resources.part', { number: n(part.number) }) }}
-</button><span>{{ n(part.bytes) }} {{ t('page.resources.bytes') }}</span>
-          <ul>
-            <li v-for="entry in part.files" :key="entry.version_id">
-              {{ entry.filename }}
+      <form class="resource-card resource-form" @submit.prevent="filter">
+        <div class="resource-grid">
+          <CatalogSelect v-model="school" kind="school" :disabled="busy || uncertain" />
+          <CatalogSelect v-model="course" kind="course" :school="school" :disabled="busy || uncertain" />
+          <label class="resource-field">{{ t('page.resources.category') }}
+            <Select v-model:value="category" :disabled="busy || uncertain" :options="[{ value: '', label: t('page.resources.all') }, ...categories.map((item) => ({ value: item.id, label: name(item.names, locale) }))]" />
+          </label>
+          <label class="resource-field">{{ t('page.resources.search') }}<Input v-model:value="text" type="search" :maxlength="200" allow-clear :disabled="busy || uncertain" /></label>
+          <FieldInput v-for="field in active?.fields.filter((x) => x.filterable)" :key="field.key" v-model="fields[field.key]" :field="field" filter :disabled="busy || uncertain" />
+        </div>
+        <Button type="primary" html-type="submit" class="justify-self-start" :disabled="busy || uncertain">{{ t('page.resources.filter') }}</Button>
+      </form>
+      <StatusBlock :busy="busy" :error="error" :empty="items.length === 0 && directories.length === 0" @retry="state.retry" />
+      <section v-if="school" class="resource-card">
+        <h2>{{ t('page.resources.directories') }}</h2>
+        <Space wrap>
+          <Button v-if="directory" :disabled="busy || uncertain" @click="changeDirectory()">{{ t('page.resources.parent') }}</Button>
+          <span>{{ directory ? name(directory.names, locale) : t('page.resources.root') }}</span>
+          <Button v-for="item in directories" :key="item.id" type="dashed" :disabled="busy || uncertain" @click="changeDirectory(item)">{{ name(item.names, locale) }}</Button>
+          <Button v-if="dirNext" :disabled="busy || uncertain" @click="dirAfter = dirNext; state.run(read);">{{ t('page.resources.more') }}</Button>
+          <Button v-if="directory" :disabled="busy" @click="pack(true)">{{ t(uncertain ? 'page.resources.retry' : 'page.resources.downloadDirectory') }}</Button>
+        </Space>
+      </section>
+      <p v-if="active?.group_by" class="resource-muted">{{ t('page.resources.pageGroups') }}</p>
+      <section v-for="[label, rows] in groups" :key="label">
+        <h2 v-if="label">{{ label }}</h2>
+        <CheckboxGroup v-model:value="selected" class="block" :disabled="busy || uncertain">
+          <ul class="resource-list">
+            <li v-for="item in rows" :key="item.id" class="resource-card">
+              <div class="console-row-head">
+                <Space>
+                  <Checkbox v-if="item.download_allowed" :value="item.id" :aria-label="`${t('page.resources.select')} ${item.current?.metadata.title ?? ''}`" />
+                  <RouterLink :to="`/resources/items/${item.id}`">{{ (mine ? (item.proposal ?? item.current) : item.current)?.metadata.title }}</RouterLink>
+                </Space>
+                <Tag :color="tagColor(mine ? (item.proposal?.state ?? item.state) : item.state)">{{ t(`page.resources.states.${mine ? (item.proposal?.state ?? item.state) : item.state}`) }}</Tag>
+              </div>
+              <p>{{ (mine ? (item.proposal ?? item.current) : item.current)?.metadata.description }}</p>
+              <div class="resource-meta">
+                <span>{{ name((item.proposal ?? item.current)?.category.names ?? {}, locale) }}</span>
+                <span v-if="item.current?.file">{{ n(item.current.file.size) }} {{ t('page.resources.bytes') }}</span>
+              </div>
             </li>
           </ul>
-        </li>
-      </ul>
+        </CheckboxGroup>
+      </section>
+      <Space wrap>
+        <Button v-if="selected.length > 0 || uncertain" type="primary" :disabled="busy" @click="pack()">{{ t(uncertain ? 'page.resources.retry' : 'page.resources.downloadSelected') }}</Button>
+        <Button v-if="next" :disabled="busy || uncertain" @click="after = next; state.run(read);">{{ t('page.resources.more') }}</Button>
+      </Space>
+      <section v-if="bundle" class="resource-card">
+        <h2>{{ t('page.resources.packages') }}</h2>
+        <p>{{ t('page.resources.packageInstructions', { count: bundle.parts.length }) }}</p>
+        <ul class="resource-list">
+          <li v-for="part in bundle.parts" :key="part.number">
+            <Space><Button :disabled="busy" @click="downloadPart(part.number)">{{ t('page.resources.part', { number: n(part.number) }) }}</Button><span>{{ n(part.bytes) }} {{ t('page.resources.bytes') }}</span></Space>
+            <ul><li v-for="entry in part.files" :key="entry.version_id">{{ entry.filename }}</li></ul>
+          </li>
+        </ul>
+      </section>
     </section>
-  </section>
+  </Page>
 </template>

@@ -4,8 +4,10 @@ import { onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import { Page } from '@vben/common-ui';
 import { useI18n } from '@vben/locales';
 
+import { Alert, AutoComplete, Button, Card, Checkbox, CheckboxGroup, DatePicker, Descriptions, DescriptionsItem, Empty, Image, Input, InputNumber, Select, Space, Spin, TabPane, Tabs, Tag, Textarea } from 'ant-design-vue';
+
 import { methods, type Schemas, verification, VerificationError } from '#/api/verification';
-import { stateTone } from '#/console-ui';
+import { tagColor } from '#/console-ui';
 
 const { t, d, n } = useI18n();
 const schoolId = ref('');
@@ -18,7 +20,7 @@ const studentProfile = ref<Schemas['StudentProfile']>();
 const credential = ref<Schemas['Credential']>(); const credentialId = ref(''); const expiry = ref(''); const note = ref('');
 const removalNotes = reactive<Record<string, string>>({}); const suggestionNotes = reactive<Record<string, string>>({});
 const config = reactive<Schemas['School']>({ id: '', name: '', enabled: false, methods: [], notice_version: 'v1', opening_date: '', newcomer_days: 90, email_domain: '', material_types: ['student_card', 'admission_letter'], revision: 0 });
-const materialTypes = ref('student_card,admission_letter');
+const materialTypeList = ref<string[]>(['student_card', 'admission_letter']);
 const after = ref(''); const more = ref(false);
 function clearPictures() { for (const picture of pictures.value) URL.revokeObjectURL(picture.url); pictures.value = []; }
 async function action(fn: () => Promise<void>) { if (busy.value) return; busy.value = true; error.value = ''; notice.value = ''; try { await fn(); } catch (error_) { error.value = error_ instanceof VerificationError ? error_.code : 'network'; } finally { busy.value = false; } }
@@ -33,7 +35,7 @@ async function load(append = false) {
       if (!schoolId.value) throw new VerificationError('invalid_input');
       try { Object.assign(config, await verification.get('School', `/api/v1/admin/verification/schools/${encodeURIComponent(schoolId.value)}`)); }
       catch (error_) { if (!(error_ instanceof VerificationError && error_.code === 'not_found')) throw error_; Object.assign(config, { id: schoolId.value, name: '', enabled: false, methods: [], notice_version: 'v1', opening_date: '', newcomer_days: 90, email_domain: '', material_types: ['student_card', 'admission_letter'], revision: 0 }); }
-      materialTypes.value = config.material_types.join(','); more.value = false;
+      materialTypeList.value = [...config.material_types]; more.value = false;
 
     break;
     }
@@ -71,17 +73,17 @@ async function openReview(row: Schemas['Application']) {
 async function review(decision: Schemas['ReviewInput']['decision']) {
   await action(async () => {
     if (!application.value) return;
-    const payload: Schemas['ReviewInput'] = { decision, note: note.value, revision: application.value.revision, expires_at: decision === 'approve' && expiry.value ? new Date(`${expiry.value}Z`).toISOString() : null };
+    const payload: Schemas['ReviewInput'] = { decision, note: note.value.trim(), revision: application.value.revision, expires_at: decision === 'approve' && expiry.value ? new Date(`${expiry.value}Z`).toISOString() : null };
     await verification.write('Application', `/api/v1/admin/verification/applications/${application.value.id}/review`, payload);
     applications.value = applications.value.filter(a => a.id !== application.value?.id); clearSelection(); notice.value = 'saved';
   });
 }
-async function decideRemoval(row: Schemas['RemovalRequest'], approve: boolean) { await action(async () => { await verification.write('RemovalRequest', `/api/v1/admin/verification/requests/${row.id}/review`, { approve, note: removalNotes[row.id] ?? '', revision: row.revision } satisfies Schemas['DecisionInput']); removals.value = removals.value.filter(r => r.id !== row.id); notice.value = 'saved'; }); }
-async function saveConfig() { await action(async () => { const saved = await verification.write('School', `/api/v1/admin/verification/schools/${encodeURIComponent(config.id)}`, { ...config, material_types: materialTypes.value.split(',').map(s => s.trim()).filter(Boolean) }, 'PUT'); Object.assign(config, saved); notice.value = 'saved'; }); }
-async function lookupCredential() { await action(async () => { studentProfile.value = undefined; credential.value = undefined; note.value = ''; credential.value = await verification.get('Credential', `/api/v1/admin/verification/credentials/${encodeURIComponent(credentialId.value)}`); note.value = ''; }); }
-async function manageCredential(actionName: 'graduate' | 'revoke') { await action(async () => { if (!credential.value) return; credential.value = await verification.write('Credential', `/api/v1/admin/verification/credentials/${credential.value.id}/${actionName}`, { approve: true, note: note.value, revision: credential.value.revision } satisfies Schemas['DecisionInput']); notice.value = 'saved'; }); }
+async function decideRemoval(row: Schemas['RemovalRequest'], approve: boolean) { await action(async () => { await verification.write('RemovalRequest', `/api/v1/admin/verification/requests/${row.id}/review`, { approve, note: (removalNotes[row.id] ?? '').trim(), revision: row.revision } satisfies Schemas['DecisionInput']); removals.value = removals.value.filter(r => r.id !== row.id); notice.value = 'saved'; }); }
+async function saveConfig() { await action(async () => { const saved = await verification.write('School', `/api/v1/admin/verification/schools/${encodeURIComponent(config.id)}`, { ...config, material_types: materialTypeList.value.map(s => s.trim()).filter(Boolean) }, 'PUT'); Object.assign(config, saved); notice.value = 'saved'; }); }
+async function lookupCredential() { await action(async () => { studentProfile.value = undefined; credential.value = undefined; note.value = ''; credential.value = await verification.get('Credential', `/api/v1/admin/verification/credentials/${encodeURIComponent(credentialId.value.trim())}`); note.value = ''; }); }
+async function manageCredential(actionName: 'graduate' | 'revoke') { await action(async () => { if (!credential.value) return; credential.value = await verification.write('Credential', `/api/v1/admin/verification/credentials/${credential.value.id}/${actionName}`, { approve: true, note: note.value.trim(), revision: credential.value.revision } satisfies Schemas['DecisionInput']); notice.value = 'saved'; }); }
 async function retryJob(job: Schemas['Job']) { await action(async () => { const updated = await verification.write('Job', `/api/v1/admin/verification/jobs/${encodeURIComponent(job.id)}/retry`); jobs.value = jobs.value.map(j => j.id === updated.id ? updated : j); notice.value = 'saved'; }); }
-async function decideSuggestion(row: Schemas['Suggestion'], approve: boolean) { await action(async () => { const saved = await verification.write('Suggestion', `/api/v1/admin/verification/suggestions/${row.id}/review`, { approve, note: suggestionNotes[row.id] ?? '', revision: row.revision } satisfies Schemas['DecisionInput']); suggestions.value = suggestions.value.map(s => s.id === saved.id ? saved : s); notice.value = 'saved'; }); }
+async function decideSuggestion(row: Schemas['Suggestion'], approve: boolean) { await action(async () => { const saved = await verification.write('Suggestion', `/api/v1/admin/verification/suggestions/${row.id}/review`, { approve, note: (suggestionNotes[row.id] ?? '').trim(), revision: row.revision } satisfies Schemas['DecisionInput']); suggestions.value = suggestions.value.map(s => s.id === saved.id ? saved : s); notice.value = 'saved'; }); }
 async function showProfile(mode: 'basic' | 'document' | 'full' | 'raw' = 'basic') {
   await action(async () => { if (!credential.value) return; studentProfile.value = undefined; studentProfile.value = await verification.get('StudentProfile', `/api/v1/admin/verification/credentials/${credential.value.id}/profile?full=${mode === 'full' || mode === 'raw'}&document=${mode === 'document' || mode === 'raw'}&raw=${mode === 'raw'}`); });
 }
@@ -90,7 +92,7 @@ function profileValue(value: unknown, field: number | string) {
   if (field === 'identity_valid_until' && typeof value === 'string' && Number.isFinite(Date.parse(value))) return d(new Date(value), 'dateTime')
   return typeof value === 'string' ? value : JSON.stringify(value)
 }
-watch(schoolId, () => { after.value = ''; more.value = false; applications.value = []; jobs.value = []; removals.value = []; clearSelection(); });
+watch(schoolId, (value) => { if (value !== value.trim()) { schoolId.value = value.trim(); return; } after.value = ''; more.value = false; applications.value = []; jobs.value = []; removals.value = []; clearSelection(); });
 watch(credentialId, () => { credential.value = undefined; studentProfile.value = undefined; note.value = ''; });
 onMounted(async () => { await action(async () => { schools.value = await verification.list('School', '/api/v1/verification/schools?limit=100'); schoolId.value = schools.value[0]?.id ?? ''; }); if (schoolId.value) await load(); });
 onBeforeUnmount(clearPictures);
@@ -99,56 +101,176 @@ onBeforeUnmount(clearPictures);
 <template>
   <Page :title="t('page.verification.adminTitle')" :description="t('page.verification.adminDescription')">
     <div class="verification-admin">
-      <p v-if="error" class="admin-message error" role="alert">{{ t(`page.verification.errors.${error}`) }}</p>
-      <p v-if="notice" class="admin-message" role="status">{{ t(`page.verification.${notice}`) }}</p>
-      <p v-if="busy" role="status">{{ t('page.verification.loading') }}</p>
-      <form class="admin-toolbar" @submit.prevent="load()"><label>{{ t('page.verification.schoolId') }}<input v-model.trim="schoolId" list="verification-schools" maxlength="64" :disabled="busy" /><datalist id="verification-schools"><option v-for="s in schools" :key="s.id" :value="s.id">{{ s.name }}</option></datalist></label><button :disabled="busy">{{ t('page.verification.load') }}</button></form>
-      <nav class="admin-tabs" :aria-label="t('page.verification.adminTitle')">
-        <button class="admin-tab" :aria-pressed="tab === 'reviews'" :disabled="busy" @click="changeTab('reviews')">{{ t('page.verification.reviewQueue') }}</button>
-        <button class="admin-tab" :aria-pressed="tab === 'requests'" :disabled="busy" @click="changeTab('requests')">{{ t('page.verification.requests') }}</button>
-        <button class="admin-tab" :aria-pressed="tab === 'configuration'" :disabled="busy" @click="changeTab('configuration')">{{ t('page.verification.configuration') }}</button>
-        <button class="admin-tab" :aria-pressed="tab === 'credentials'" :disabled="busy" @click="changeTab('credentials')">{{ t('page.verification.credentialManagement') }}</button>
-        <button class="admin-tab" :aria-pressed="tab === 'jobs'" :disabled="busy" @click="changeTab('jobs')">{{ t('page.verification.jobs') }}</button>
-        <button class="admin-tab" :aria-pressed="tab === 'suggestions'" :disabled="busy" @click="changeTab('suggestions')">{{ t('page.verification.suggestions') }}</button>
-      </nav>
+      <Alert v-if="error" type="error" show-icon :message="t(`page.verification.errors.${error}`)" />
+      <Alert v-if="notice" type="success" show-icon :message="t(`page.verification.${notice}`)" />
+      <Card :bordered="false">
+        <form class="admin-toolbar" @submit.prevent="load()">
+          <label class="verification-school">{{ t('page.verification.schoolId') }}
+            <AutoComplete v-model:value="schoolId" :maxlength="64" :disabled="busy" :options="schools.map(s => ({ value: s.id, label: `${s.id} · ${s.name}` }))" />
+          </label>
+          <Button type="primary" html-type="submit" :loading="busy">{{ t('page.verification.load') }}</Button>
+        </form>
+        <Tabs class="mt-2" :active-key="tab" @change="changeTab($event as typeof tab)">
+          <TabPane key="reviews" :tab="t('page.verification.reviewQueue')" :disabled="busy && tab !== 'reviews'" />
+          <TabPane key="requests" :tab="t('page.verification.requests')" :disabled="busy && tab !== 'requests'" />
+          <TabPane key="configuration" :tab="t('page.verification.configuration')" :disabled="busy && tab !== 'configuration'" />
+          <TabPane key="credentials" :tab="t('page.verification.credentialManagement')" :disabled="busy && tab !== 'credentials'" />
+          <TabPane key="jobs" :tab="t('page.verification.jobs')" :disabled="busy && tab !== 'jobs'" />
+          <TabPane key="suggestions" :tab="t('page.verification.suggestions')" :disabled="busy && tab !== 'suggestions'" />
+        </Tabs>
+      </Card>
+
       <section v-if="tab === 'reviews'" class="admin-grid">
-        <div class="admin-panel"><h2>{{ t('page.verification.reviewQueue') }}</h2><p v-if="applications.length === 0 && !busy">{{ t('page.verification.empty') }}</p><article v-for="a in applications" :key="a.id" :class="{ 'is-selected': application?.id === a.id }"><strong>{{ t(`page.verification.stages.${a.stage}`) }} {{ t(`page.verification.kinds.${a.kind}`) }}</strong><p>{{ d(new Date(a.created_at), 'dateTime') }}</p><button :disabled="busy" @click="openReview(a)">{{ t('page.verification.review') }}</button></article></div>
-        <div v-if="!application || !form" class="console-placeholder">{{ t('page.console.selectItem') }}</div>
-        <div v-else class="admin-panel console-detail"><h2>{{ t('page.verification.review') }}</h2><dl><dt>{{ t('page.verification.studentId') }}</dt><dd>{{ form.student_id }}</dd><dt>{{ t('page.verification.name') }}</dt><dd>{{ form.name }}</dd><dt>{{ t('page.verification.department') }}</dt><dd>{{ form.department }}</dd><dt>{{ t('page.verification.contactEmail') }}</dt><dd>{{ form.email }}</dd><dt>{{ t('page.verification.materialType') }}</dt><dd>{{ t(`page.verification.materialTypes.${form.material_type}`, form.material_type) }}</dd></dl><div class="admin-pictures"><template v-for="picture in pictures" :key="picture.id"><a v-if="picture.type === 'application/pdf'" :href="picture.url" download>{{ t('page.verification.legacyMaterial') }}</a><img v-else :src="picture.url" :alt="t('page.verification.photoPreview')" /></template></div><form @submit.prevent="review('approve')"><label>{{ t('page.verification.note') }}<textarea v-model.trim="note" maxlength="500" required></textarea></label><label v-if="application.kind === 'newcomer'">{{ t('page.verification.expiryOverride') }}<input v-model="expiry" type="datetime-local" /></label><div class="admin-actions"><button class="is-primary" :disabled="busy || !note">{{ t('page.verification.approve') }}</button><button type="button" :disabled="busy || !note" @click="review('supplement')">{{ t('page.verification.supplement') }}</button><button class="is-danger" type="button" :disabled="busy || !note" @click="review('reject')">{{ t('page.verification.reject') }}</button></div></form></div>
+        <Card :bordered="false" :title="t('page.verification.reviewQueue')" class="admin-panel">
+          <Spin v-if="busy && applications.length === 0" />
+          <Empty v-else-if="applications.length === 0" :image="Empty.PRESENTED_IMAGE_SIMPLE" :description="t('page.verification.empty')" />
+          <article v-for="a in applications" :key="a.id" :class="{ 'is-selected': application?.id === a.id }">
+            <strong>{{ t(`page.verification.stages.${a.stage}`) }} {{ t(`page.verification.kinds.${a.kind}`) }}</strong>
+            <p class="meta">{{ d(new Date(a.created_at), 'dateTime') }}</p>
+            <Button type="link" size="small" :disabled="busy" @click="openReview(a)">{{ t('page.verification.review') }}</Button>
+          </article>
+        </Card>
+        <Empty v-if="!application || !form" class="console-placeholder" :image="Empty.PRESENTED_IMAGE_SIMPLE" :description="t('page.console.selectItem')" />
+        <Card v-else :bordered="false" :title="t('page.verification.review')" class="admin-panel console-detail">
+          <Descriptions :column="1" size="small" bordered>
+            <DescriptionsItem :label="t('page.verification.studentId')">{{ form.student_id }}</DescriptionsItem>
+            <DescriptionsItem :label="t('page.verification.name')">{{ form.name }}</DescriptionsItem>
+            <DescriptionsItem :label="t('page.verification.department')">{{ form.department }}</DescriptionsItem>
+            <DescriptionsItem :label="t('page.verification.contactEmail')">{{ form.email }}</DescriptionsItem>
+            <DescriptionsItem :label="t('page.verification.materialType')">{{ t(`page.verification.materialTypes.${form.material_type}`, form.material_type) }}</DescriptionsItem>
+          </Descriptions>
+          <div class="admin-pictures">
+            <template v-for="picture in pictures" :key="picture.id">
+              <a v-if="picture.type === 'application/pdf'" :href="picture.url" download>{{ t('page.verification.legacyMaterial') }}</a>
+              <Image v-else :src="picture.url" :alt="t('page.verification.photoPreview')" />
+            </template>
+          </div>
+          <form class="admin-form" @submit.prevent="review('approve')">
+            <label class="admin-wide">{{ t('page.verification.note') }}<Textarea v-model:value="note" :maxlength="500" :rows="3" required :disabled="busy" /></label>
+            <label v-if="application.kind === 'newcomer'" class="admin-wide">{{ t('page.verification.expiryOverride') }}<DatePicker v-model:value="expiry" show-time value-format="YYYY-MM-DDTHH:mm" :disabled="busy" /></label>
+            <Space class="admin-wide" wrap>
+              <Button type="primary" html-type="submit" :disabled="busy || !note.trim()">{{ t('page.verification.approve') }}</Button>
+              <Button :disabled="busy || !note.trim()" @click="review('supplement')">{{ t('page.verification.supplement') }}</Button>
+              <Button danger :disabled="busy || !note.trim()" @click="review('reject')">{{ t('page.verification.reject') }}</Button>
+            </Space>
+          </form>
+        </Card>
       </section>
-      <section v-if="tab === 'requests'" class="admin-panel"><h2>{{ t('page.verification.requests') }}</h2><p v-if="removals.length === 0 && !busy">{{ t('page.verification.empty') }}</p><article v-for="r in removals" :key="r.id"><h3>{{ t(r.kind === 'delete' ? 'page.verification.requestDelete' : 'page.verification.requestRevoke') }}</h3><p>{{ r.reason }}</p><p>{{ t('page.verification.credentialId') }} {{ r.credential_id }}</p><label>{{ t('page.verification.note') }}<textarea v-model.trim="removalNotes[r.id]" maxlength="500"></textarea></label><div class="admin-actions"><button class="is-primary" :disabled="busy || !removalNotes[r.id]" @click="decideRemoval(r, true)">{{ t('page.verification.approve') }}</button><button class="is-danger" :disabled="busy || !removalNotes[r.id]" @click="decideRemoval(r, false)">{{ t('page.verification.reject') }}</button></div></article></section>
-      <section v-if="tab === 'configuration'" class="admin-panel"><h2>{{ t('page.verification.configuration') }}</h2><form class="admin-form" @submit.prevent="saveConfig"><label>{{ t('page.verification.schoolId') }}<input v-model="config.id" readonly required /></label><label>{{ t('page.verification.schoolName') }}<input v-model.trim="config.name" maxlength="100" required /></label><label class="admin-checkbox"><input v-model="config.enabled" type="checkbox" />{{ t('page.verification.enabled') }}</label><label>{{ t('page.verification.noticeVersion') }}<input v-model.trim="config.notice_version" maxlength="64" required /></label><fieldset class="admin-wide"><legend>{{ t('page.verification.method') }}</legend><label v-for="m in methods" :key="m" class="admin-checkbox"><input v-model="config.methods" type="checkbox" :value="m" />{{ t(`page.verification.methods.${m}`) }}</label></fieldset><label>{{ t('page.verification.openingDate') }}<input v-model="config.opening_date" type="date" /></label><label>{{ t('page.verification.newcomerDays') }}<input v-model.number="config.newcomer_days" type="number" min="1" max="366" required /></label><label>{{ t('page.verification.emailDomain') }}<input v-model.trim="config.email_domain" maxlength="253" /></label><label>{{ t('page.verification.materialTypesLabel') }}<input v-model="materialTypes" required /></label><p>{{ t('page.verification.revision') }} {{ n(config.revision) }}</p><div class="admin-wide"><button class="is-primary" :disabled="busy || !config.id">{{ t('page.verification.save') }}</button></div></form></section>
-      <section v-if="tab === 'credentials'" class="admin-panel"><h2>{{ t('page.verification.credentialManagement') }}</h2><form class="admin-toolbar" @submit.prevent="lookupCredential"><label>{{ t('page.verification.credentialId') }}<input v-model.trim="credentialId" :disabled="busy" required /></label><button :disabled="busy">{{ t('page.verification.load') }}</button></form><div v-if="credential"><p>{{ credential.school_id }} {{ credential.student_display }} {{ t(`page.verification.kinds.${credential.kind}`) }} {{ t(`page.verification.states.${credential.state}`) }}</p><div class="admin-actions"><button :disabled="busy" @click="showProfile()">{{ t('page.verification.viewProfile') }}</button><button :disabled="busy" @click="showProfile('full')">{{ t('page.verification.fullProfile') }}</button><button :disabled="busy" @click="showProfile('document')">{{ t('page.verification.documentProfile') }}</button><button :disabled="busy" @click="showProfile('raw')">{{ t('page.verification.rawProfile') }}</button></div><section v-if="studentProfile"><h3>{{ t('page.verification.profileTitle') }}</h3><p>{{ t(`page.verification.profileStatus.${studentProfile.data_status}`) }}</p><p v-if="studentProfile.collected_at">{{ t('page.verification.collectedAt') }} {{ d(new Date(studentProfile.collected_at), 'dateTime') }}</p><dl><template v-for="(value, field) in studentProfile.fields" :key="field"><dt>{{ t(`page.verification.profileFields.${field}`) }}<small v-if="studentProfile.field_sources[field]"> {{ t(`page.verification.profileSources.${studentProfile.field_sources[field]}`) }}</small></dt><dd>{{ profileValue(value, field) }}</dd></template></dl><pre v-if="studentProfile.raw_data">{{ studentProfile.raw_data }}</pre></section><label>{{ t('page.verification.note') }}<textarea v-model.trim="note" maxlength="500"></textarea></label><div class="admin-actions"><button class="is-danger" :disabled="busy || !note || credential.state !== 'active'" @click="manageCredential('revoke')">{{ t('page.verification.revoke') }}</button><button :disabled="busy || !note || credential.state !== 'active' || credential.kind !== 'student'" @click="manageCredential('graduate')">{{ t('page.verification.graduate') }}</button></div></div></section>
-      <section v-if="tab === 'jobs'" class="admin-panel"><h2>{{ t('page.verification.jobs') }}</h2><p v-if="jobs.length === 0 && !busy">{{ t('page.verification.empty') }}</p><article v-for="job in jobs" :key="job.id"><strong>{{ t(job.kind === 'mail' ? 'page.verification.mailJob' : 'page.verification.eventJob') }}</strong><p><span class="console-badge" :data-tone="stateTone(job.state)">{{ t(`page.verification.states.${job.state}`) }}</span> {{ n(job.attempts) }}</p><p v-if="job.code">{{ t(`page.verification.errors.${job.code}`, job.code) }}</p><button v-if="job.state === 'manual'" :disabled="busy" @click="retryJob(job)">{{ t('page.verification.retryJob') }}</button></article></section>
-      <section v-if="tab === 'suggestions'" class="admin-panel"><h2>{{ t('page.verification.suggestions') }}</h2><p v-if="suggestions.length === 0 && !busy">{{ t('page.verification.empty') }}</p><article v-for="s in suggestions" :key="s.id"><strong>{{ s.name }}</strong><p>{{ s.website }}</p><p><span class="console-badge" :data-tone="stateTone(s.state)">{{ t(`page.verification.states.${s.state}`) }}</span></p><template v-if="s.state === 'pending'"><label>{{ t('page.verification.note') }}<textarea v-model.trim="suggestionNotes[s.id]" maxlength="500"></textarea></label><div class="admin-actions"><button class="is-primary" :disabled="busy || !suggestionNotes[s.id]" @click="decideSuggestion(s, true)">{{ t('page.verification.approve') }}</button><button class="is-danger" :disabled="busy || !suggestionNotes[s.id]" @click="decideSuggestion(s, false)">{{ t('page.verification.reject') }}</button></div></template><p v-else>{{ s.note }}</p></article></section>
-      <button v-if="more" class="load-more" :disabled="busy" @click="load(true)">{{ t('page.verification.loadMore') }}</button>
+
+      <Card v-if="tab === 'requests'" :bordered="false" :title="t('page.verification.requests')" class="admin-panel">
+        <Empty v-if="removals.length === 0 && !busy" :image="Empty.PRESENTED_IMAGE_SIMPLE" :description="t('page.verification.empty')" />
+        <article v-for="r in removals" :key="r.id">
+          <h3>{{ t(r.kind === 'delete' ? 'page.verification.requestDelete' : 'page.verification.requestRevoke') }}</h3>
+          <p>{{ r.reason }}</p>
+          <p class="meta">{{ t('page.verification.credentialId') }} {{ r.credential_id }}</p>
+          <label>{{ t('page.verification.note') }}<Textarea v-model:value="removalNotes[r.id]" :maxlength="500" :rows="2" :disabled="busy" /></label>
+          <Space class="mt-2" wrap>
+            <Button type="primary" :disabled="busy || !removalNotes[r.id]?.trim()" @click="decideRemoval(r, true)">{{ t('page.verification.approve') }}</Button>
+            <Button danger :disabled="busy || !removalNotes[r.id]?.trim()" @click="decideRemoval(r, false)">{{ t('page.verification.reject') }}</Button>
+          </Space>
+        </article>
+      </Card>
+
+      <Card v-if="tab === 'configuration'" :bordered="false" :title="t('page.verification.configuration')" class="admin-panel">
+        <form class="admin-form" @submit.prevent="saveConfig">
+          <label>{{ t('page.verification.schoolId') }}<Input v-model:value="config.id" readonly required /></label>
+          <label>{{ t('page.verification.schoolName') }}<Input v-model:value="config.name" :maxlength="100" required :disabled="busy" /></label>
+          <Checkbox v-model:checked="config.enabled" :disabled="busy">{{ t('page.verification.enabled') }}</Checkbox>
+          <label>{{ t('page.verification.noticeVersion') }}<Input v-model:value="config.notice_version" :maxlength="64" required :disabled="busy" /></label>
+          <fieldset class="admin-wide">
+            <legend>{{ t('page.verification.method') }}</legend>
+            <CheckboxGroup v-model:value="config.methods" :disabled="busy" :options="methods.map(m => ({ value: m, label: t(`page.verification.methods.${m}`) }))" />
+          </fieldset>
+          <label>{{ t('page.verification.openingDate') }}<DatePicker v-model:value="config.opening_date" value-format="YYYY-MM-DD" :disabled="busy" /></label>
+          <label>{{ t('page.verification.newcomerDays') }}<InputNumber v-model:value="config.newcomer_days" :min="1" :max="366" class="w-full" :disabled="busy" /></label>
+          <label>{{ t('page.verification.emailDomain') }}<Input v-model:value="config.email_domain" :maxlength="253" :disabled="busy" /></label>
+          <label>{{ t('page.verification.materialTypesLabel') }}<Select v-model:value="materialTypeList" mode="tags" :disabled="busy" :token-separators="[',']" /></label>
+          <Space class="admin-wide" align="center">
+            <Button type="primary" html-type="submit" :loading="busy" :disabled="!config.id || !config.name.trim() || !config.notice_version.trim() || !config.newcomer_days || materialTypeList.length === 0">{{ t('page.verification.save') }}</Button>
+            <span class="meta">{{ t('page.verification.revision') }} {{ n(config.revision) }}</span>
+          </Space>
+        </form>
+      </Card>
+
+      <Card v-if="tab === 'credentials'" :bordered="false" :title="t('page.verification.credentialManagement')" class="admin-panel">
+        <form class="admin-toolbar" @submit.prevent="lookupCredential">
+          <label>{{ t('page.verification.credentialId') }}<Input v-model:value="credentialId" :disabled="busy" required /></label>
+          <Button type="primary" html-type="submit" :loading="busy" :disabled="!credentialId.trim()">{{ t('page.verification.load') }}</Button>
+        </form>
+        <div v-if="credential" class="mt-4">
+          <Descriptions :column="{ xs: 1, md: 4 }" size="small">
+            <DescriptionsItem :label="t('page.verification.schoolId')">{{ credential.school_id }}</DescriptionsItem>
+            <DescriptionsItem :label="t('page.verification.name')">{{ credential.student_display }}</DescriptionsItem>
+            <DescriptionsItem><Tag>{{ t(`page.verification.kinds.${credential.kind}`) }}</Tag></DescriptionsItem>
+            <DescriptionsItem><Tag :color="tagColor(credential.state)">{{ t(`page.verification.states.${credential.state}`) }}</Tag></DescriptionsItem>
+          </Descriptions>
+          <Space wrap>
+            <Button :disabled="busy" @click="showProfile()">{{ t('page.verification.viewProfile') }}</Button>
+            <Button :disabled="busy" @click="showProfile('full')">{{ t('page.verification.fullProfile') }}</Button>
+            <Button :disabled="busy" @click="showProfile('document')">{{ t('page.verification.documentProfile') }}</Button>
+            <Button :disabled="busy" @click="showProfile('raw')">{{ t('page.verification.rawProfile') }}</Button>
+          </Space>
+          <section v-if="studentProfile" class="mt-4">
+            <h3>{{ t('page.verification.profileTitle') }}</h3>
+            <p><Tag>{{ t(`page.verification.profileStatus.${studentProfile.data_status}`) }}</Tag><span v-if="studentProfile.collected_at" class="meta">{{ t('page.verification.collectedAt') }} {{ d(new Date(studentProfile.collected_at), 'dateTime') }}</span></p>
+            <Descriptions :column="1" size="small" bordered>
+              <DescriptionsItem v-for="(value, field) in studentProfile.fields" :key="field">
+                <template #label>{{ t(`page.verification.profileFields.${field}`) }}<small v-if="studentProfile.field_sources[field]" class="block opacity-70">{{ t(`page.verification.profileSources.${studentProfile.field_sources[field]}`) }}</small></template>
+                {{ profileValue(value, field) }}
+              </DescriptionsItem>
+            </Descriptions>
+            <pre v-if="studentProfile.raw_data">{{ studentProfile.raw_data }}</pre>
+          </section>
+          <label class="mt-4">{{ t('page.verification.note') }}<Textarea v-model:value="note" :maxlength="500" :rows="2" :disabled="busy" /></label>
+          <Space class="mt-2" wrap>
+            <Button danger :disabled="busy || !note.trim() || credential.state !== 'active'" @click="manageCredential('revoke')">{{ t('page.verification.revoke') }}</Button>
+            <Button :disabled="busy || !note.trim() || credential.state !== 'active' || credential.kind !== 'student'" @click="manageCredential('graduate')">{{ t('page.verification.graduate') }}</Button>
+          </Space>
+        </div>
+      </Card>
+
+      <Card v-if="tab === 'jobs'" :bordered="false" :title="t('page.verification.jobs')" class="admin-panel">
+        <Empty v-if="jobs.length === 0 && !busy" :image="Empty.PRESENTED_IMAGE_SIMPLE" :description="t('page.verification.empty')" />
+        <article v-for="job in jobs" :key="job.id">
+          <div class="console-row-head"><strong>{{ t(job.kind === 'mail' ? 'page.verification.mailJob' : 'page.verification.eventJob') }}</strong><Tag :color="tagColor(job.state)">{{ t(`page.verification.states.${job.state}`) }}</Tag></div>
+          <p class="meta">{{ n(job.attempts) }}</p>
+          <p v-if="job.code">{{ t(`page.verification.errors.${job.code}`, job.code) }}</p>
+          <Button v-if="job.state === 'manual'" size="small" :disabled="busy" @click="retryJob(job)">{{ t('page.verification.retryJob') }}</Button>
+        </article>
+      </Card>
+
+      <Card v-if="tab === 'suggestions'" :bordered="false" :title="t('page.verification.suggestions')" class="admin-panel">
+        <Empty v-if="suggestions.length === 0 && !busy" :image="Empty.PRESENTED_IMAGE_SIMPLE" :description="t('page.verification.empty')" />
+        <article v-for="s in suggestions" :key="s.id">
+          <div class="console-row-head"><strong>{{ s.name }}</strong><Tag :color="tagColor(s.state)">{{ t(`page.verification.states.${s.state}`) }}</Tag></div>
+          <p class="meta">{{ s.website }}</p>
+          <template v-if="s.state === 'pending'">
+            <label>{{ t('page.verification.note') }}<Textarea v-model:value="suggestionNotes[s.id]" :maxlength="500" :rows="2" :disabled="busy" /></label>
+            <Space class="mt-2" wrap>
+              <Button type="primary" :disabled="busy || !suggestionNotes[s.id]?.trim()" @click="decideSuggestion(s, true)">{{ t('page.verification.approve') }}</Button>
+              <Button danger :disabled="busy || !suggestionNotes[s.id]?.trim()" @click="decideSuggestion(s, false)">{{ t('page.verification.reject') }}</Button>
+            </Space>
+          </template>
+          <p v-else>{{ s.note }}</p>
+        </article>
+      </Card>
+      <Button v-if="more" class="load-more" :loading="busy" @click="load(true)">{{ t('page.verification.loadMore') }}</Button>
     </div>
   </Page>
 </template>
 
 <style scoped>
-.admin-toolbar, .admin-actions { display: flex; flex-wrap: wrap; gap: .5rem; align-items: end; margin-block: .75rem; }
-.admin-toolbar { margin-block: 0; }
+.admin-toolbar { display: flex; flex-wrap: wrap; gap: .5rem; align-items: end; }
 .admin-toolbar label { flex: 1; max-width: 25rem; }
 .admin-grid { display: grid; grid-template-columns: minmax(16rem, 1fr) minmax(20rem, 2fr); gap: 1rem; align-items: start; }
-.admin-panel { padding: 1.25rem; border: 1px solid hsl(var(--border)); border-radius: 8px; background: hsl(var(--card)); }
-.admin-panel h2 { font-size: 1rem; margin-block-end: .75rem; font-weight: 600; }
 .admin-panel h3 { font-weight: 600; }
 .admin-panel article { padding: .75rem; margin-block-end: .5rem; border: 1px solid hsl(var(--border)); border-radius: 6px; }
-.admin-panel p { margin-block: .5rem; overflow-wrap: anywhere; }
-.verification-admin label { display: flex; flex-direction: column; gap: .35rem; }
-.admin-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.admin-panel p { margin-block: .35rem; }
+.admin-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; align-items: end; }
 .admin-wide { grid-column: 1 / -1; }
-.admin-form fieldset { display: flex; flex-wrap: wrap; gap: 1rem; }
-.verification-admin .admin-checkbox { flex-direction: row; align-items: center; gap: .5rem; padding-block: .25rem; }
+.admin-form fieldset { display: grid; gap: .5rem; }
 .admin-pictures { display: grid; gap: .6rem; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); margin-block: 1rem; }
-.admin-pictures img { width: 100%; max-height: 20rem; object-fit: contain; border-radius: 6px; }
-.admin-panel dl { display: grid; grid-template-columns: minmax(6rem, 1fr) 2fr; gap: .5rem; }
-.admin-panel dt { color: hsl(var(--muted-foreground)); }
-.admin-panel dd, .admin-panel pre { overflow-wrap: anywhere; white-space: pre-wrap; max-width: 100%; }
-.admin-panel dt small { display: block; opacity: .7; }
-.admin-message { border-inline-start: 3px solid hsl(var(--primary)); padding: .65rem 1rem; border-radius: 6px; background: hsl(var(--card)); }
-.admin-message.error { border-inline-start-color: hsl(var(--destructive)); }
+.admin-panel pre { overflow-wrap: anywhere; white-space: pre-wrap; max-width: 100%; }
 .load-more { justify-self: start; }
 @media(max-width: 900px) { .admin-grid { grid-template-columns: 1fr; } }
 @media(max-width: 600px) { .admin-form { grid-template-columns: 1fr; } .admin-toolbar label { max-width: none; min-width: 100%; } }

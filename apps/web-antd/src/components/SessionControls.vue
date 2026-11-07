@@ -3,6 +3,8 @@ import { onMounted, ref } from 'vue';
 
 import { useI18n } from '@vben/locales';
 
+import { Avatar, Button, Dropdown, Input, Menu, MenuDivider, MenuItem, Modal, Tooltip } from 'ant-design-vue';
+
 import {
   getSession,
   saveProfile,
@@ -61,92 +63,50 @@ async function save() {
     busy.value = false;
   }
 }
+const editing = ref(false);
+async function saveAndClose() {
+  await save();
+  if (!error.value) editing.value = false;
+}
+function onMenu({ key }: { key: number | string }) {
+  if (key === 'profile') { nickname.value = current.value?.profile.nickname ?? ''; editing.value = true; }
+  else void logout(key === 'signOutAll');
+}
 onMounted(reload);
 </script>
 <template>
   <div class="session-controls">
-    <template v-if="current">
-      <span>{{ current.profile.nickname }}</span>
-      <details>
-        <summary>{{ t('page.auth.profile') }}</summary>
-        <form @submit.prevent="save">
-          <label>{{ t('page.auth.nickname')
-            }}<input v-model="nickname" maxlength="64" required /></label>
-          <button :disabled="busy" type="submit">
-            {{ t('page.auth.save') }}
-          </button>
-        </form>
-      </details>
-      <button :disabled="busy" type="button" @click="logout(false)">
-        {{ t('page.auth.signOut') }}
-      </button>
-      <button :disabled="busy" type="button" @click="logout(true)">
-        {{ t('page.auth.signOutAll') }}
-      </button>
-    </template>
-    <button v-else type="button" @click="signIn">
-      {{ t('page.auth.signIn') }}
-    </button>
-    <span v-if="error" role="status"><span class="status-text">{{ t('page.auth.unavailable') }}</span>
-      <button type="button" @click="reload">
-        {{ t('page.auth.retry') }}
-      </button></span>
+    <Dropdown v-if="current" :trigger="['click']" placement="bottomRight">
+      <Button type="text" class="session-user" :loading="busy">
+        <Avatar size="small" class="session-avatar">{{ [...current.profile.nickname][0] }}</Avatar>
+        <span class="session-name">{{ current.profile.nickname }}</span>
+      </Button>
+      <template #overlay>
+        <Menu @click="onMenu">
+          <MenuItem key="profile">{{ t('page.auth.profile') }}</MenuItem>
+          <MenuDivider />
+          <MenuItem key="signOut">{{ t('page.auth.signOut') }}</MenuItem>
+          <MenuItem key="signOutAll" danger>{{ t('page.auth.signOutAll') }}</MenuItem>
+        </Menu>
+      </template>
+    </Dropdown>
+    <Button v-else type="primary" size="small" @click="signIn">{{ t('page.auth.signIn') }}</Button>
+    <span v-if="error" role="status" class="session-error">
+      <Tooltip :title="t('page.auth.unavailable')"><span class="status-text">{{ t('page.auth.unavailable') }}</span></Tooltip>
+      <Button size="small" @click="reload">{{ t('page.auth.retry') }}</Button>
+    </span>
+    <Modal v-model:open="editing" :title="t('page.auth.profile')" :ok-text="t('page.auth.save')" :confirm-loading="busy" :ok-button-props="{ disabled: !nickname.trim() }" @ok="saveAndClose">
+      <label class="grid gap-1">{{ t('page.auth.nickname') }}<Input v-model:value="nickname" :maxlength="64" /></label>
+    </Modal>
   </div>
 </template>
 <style scoped>
-.session-controls {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  max-width: 100%;
-  font-size: 0.85rem;
-  white-space: nowrap;
-}
-.session-controls button,
-.session-controls input {
-  font: inherit;
-  min-height: 32px;
-  padding: 0.2rem 0.65rem;
-  border: 1px solid hsl(var(--border));
-  border-radius: 6px;
-  background: transparent;
-  color: inherit;
-  max-width: 100%;
-}
-.session-controls button:hover:not(:disabled) {
-  border-color: hsl(var(--primary));
-  color: hsl(var(--primary));
-}
-.session-controls [role='status'] {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: hsl(var(--muted-foreground));
-}
-.session-controls form {
-  position: absolute;
-  inset-block-start: calc(100% + 0.5rem);
-  inset-inline-end: 0;
-  z-index: 20;
-  display: grid;
-  gap: 0.5rem;
-  min-width: 14rem;
-  padding: 0.75rem;
-  border: 1px solid hsl(var(--border));
-  border-radius: 8px;
-  background: hsl(var(--popover));
-}
-.session-controls label {
-  display: grid;
-  gap: 0.25rem;
-}
-.session-controls summary {
-  cursor: pointer;
-}
+.session-controls { display: flex; align-items: center; gap: .5rem; max-width: 100%; white-space: nowrap; }
+.session-user { display: inline-flex; align-items: center; gap: .4rem; max-width: 12rem; }
+.session-name { overflow: hidden; text-overflow: ellipsis; }
+.session-avatar { background: hsl(var(--primary)); flex: none; }
+.session-error { display: inline-flex; align-items: center; gap: .4rem; color: hsl(var(--muted-foreground)); font-size: .85rem; }
 @media (max-width: 767px) {
-  .session-controls .status-text {
-    display: none;
-  }
+  .session-name, .status-text { display: none; }
 }
 </style>

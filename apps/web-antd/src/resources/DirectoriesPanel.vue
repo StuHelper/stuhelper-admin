@@ -3,6 +3,8 @@ import { computed, ref, watch } from 'vue';
 
 import { useI18n } from '@vben/locales';
 
+import { Button, Checkbox, Input, Space } from 'ant-design-vue';
+
 import { name, query, type Schema, segment } from './api';
 import CatalogSelect from './CatalogSelect.vue';
 import NamesInput from './NamesInput.vue';
@@ -109,58 +111,33 @@ watch(
 <template>
   <section class="resource-form">
     <StatusBlock :busy="busy" :error="error" @retry="state.retry" />
-    <div class="resource-actions">
-      <button v-if="parent" :disabled="busy || uncertain" @click="enter()">
-        {{ t('page.resources.parent') }}
-      </button>
-      <h2>
-        {{ parent ? name(parent.names, locale) : t('page.resources.root') }}
-      </h2>
-      <button :disabled="busy || uncertain" @click="open()">
-        {{ t('page.resources.newDirectory') }}
-      </button>
+    <div class="console-row-head">
+      <Space>
+        <Button v-if="parent" :disabled="busy || uncertain" @click="enter()">{{ t('page.resources.parent') }}</Button>
+        <h2>{{ parent ? name(parent.names, locale) : t('page.resources.root') }}</h2>
+      </Space>
+      <Button type="primary" :disabled="busy || uncertain" @click="open()">{{ t('page.resources.newDirectory') }}</Button>
     </div>
     <ul class="resource-list">
-      <li v-for="row in rows" :key="row.id">
-        <span>{{ name(row.names, locale) }}</span><button :disabled="busy || uncertain" @click="enter(row)">
-          {{ t('page.resources.directories') }}
-</button><button :disabled="busy || uncertain" @click="open(row)">
-          {{ t('page.resources.edit') }}
-        </button>
+      <li v-for="row in rows" :key="row.id" class="resource-card console-row-head">
+        <span>{{ name(row.names, locale) }}</span>
+        <Space :size="0">
+          <Button type="link" size="small" :disabled="busy || uncertain" @click="enter(row)">{{ t('page.resources.directories') }}</Button>
+          <Button type="link" size="small" :disabled="busy || uncertain" @click="open(row)">{{ t('page.resources.edit') }}</Button>
+        </Space>
       </li>
     </ul>
-    <button
-      v-if="next"
-      :disabled="busy || uncertain"
-      @click="
-        after = next;
-        load();
-      "
-    >
-      {{ t('page.resources.more') }}
-    </button>
-    <form v-if="form" class="resource-form" @submit.prevent="save">
+    <Button v-if="next" class="justify-self-start" :disabled="busy || uncertain" @click="after = next; load();">{{ t('page.resources.more') }}</Button>
+    <form v-if="form" class="resource-form resource-card" @submit.prevent="save">
       <fieldset :disabled="busy || uncertain">
         <legend>{{ t('page.resources.directories') }}</legend>
-        <label class="resource-field">{{ t('page.resources.identifier')
-          }}<input
-            v-model="id"
-            required
-            maxlength="128"
-            :readonly="editing"
-/></label><NamesInput v-model="form.names" /><CatalogSelect
-          v-model="form.course_id"
-          kind="course"
-          :school="school"
-          :disabled="editing"
-        /><label class="resource-field">{{ t('page.resources.parent')
-          }}<input v-model="form.parent_id" maxlength="128" /></label><label class="resource-inline"><input v-model="form.enabled" type="checkbox" />{{
-            t('page.resources.enabled')
-          }}</label>
+        <label class="resource-field">{{ t('page.resources.identifier') }}<Input v-model:value="id" required :maxlength="128" :readonly="editing" /></label>
+        <NamesInput v-model="form.names" />
+        <CatalogSelect v-model="form.course_id" kind="course" :school="school" :disabled="editing || busy || uncertain" />
+        <label class="resource-field">{{ t('page.resources.parent') }}<Input v-model:value="form.parent_id" :maxlength="128" /></label>
+        <Checkbox v-model:checked="form.enabled">{{ t('page.resources.enabled') }}</Checkbox>
       </fieldset>
-      <button type="submit" :disabled="busy">
-        {{ t(uncertain ? 'page.resources.retry' : 'page.resources.save') }}
-      </button>
+      <Button type="primary" html-type="submit" class="justify-self-start" :loading="busy">{{ t(uncertain ? 'page.resources.retry' : 'page.resources.save') }}</Button>
     </form>
   </section>
 </template>

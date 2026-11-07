@@ -4,6 +4,8 @@ import { onBeforeRouteLeave } from 'vue-router';
 
 import { useI18n } from '@vben/locales';
 
+import { Alert, Button, Select, Space, Tag, Textarea } from 'ant-design-vue';
+
 import { confirmLeave } from '#/confirm-leave';
 
 import { AcademicError,call,Mutation,type PolicyView,query } from './api';
@@ -33,8 +35,30 @@ async function save(){
 </script>
 <template>
   <section class="admin-form">
-<h2>{{ t('page.academic.policyManagement') }}</h2><div class="admin-filters"><label>{{ t('page.academic.policyScope') }}<select v-model="scope" :disabled="busy || uncertain || dirty"><option :value="schoolId">{{ t('page.academic.school') }}</option><option value="*">{{ t('page.academic.globalScope') }}</option></select></label><label>{{ t('page.academic.contentKind') }}<select v-model="kind" :disabled="busy || uncertain || dirty"><option v-for="item in ['course','mentor','reply']" :key="item" :value="item">{{ t(`page.academic.kind.${item}`) }}</option></select></label></div>
+    <h2>{{ t('page.academic.policyManagement') }}</h2>
+    <div class="admin-filters">
+      <label>{{ t('page.academic.policyScope') }}
+        <Select v-model:value="scope" :disabled="busy || uncertain || dirty" :options="[{ value: schoolId, label: t('page.academic.school') }, { value: '*', label: t('page.academic.globalScope') }]" />
+      </label>
+      <label>{{ t('page.academic.contentKind') }}
+        <Select v-model:value="kind" :disabled="busy || uncertain || dirty" :options="['course','mentor','reply'].map(value => ({ value, label: t(`page.academic.kind.${value}`) }))" />
+      </label>
+    </div>
     <StatusBlock :busy="data.busy.value" :error="data.error.value" @retry="load" />
-    <form v-if="data.data.value" class="admin-form" @submit.prevent="save"><p>{{ t(`page.academic.policySources.${data.data.value.source}`) }}</p><fieldset :disabled="busy || uncertain"><label>{{ t('page.academic.policyMode') }}<select v-model="mode"><option v-for="item in ['published','pending','review']" :key="item" :value="item">{{ t(`page.academic.policyModes.${item}`) }}</option></select></label><label>{{ t('page.academic.blockedTerms') }}<textarea v-model="words" rows="8" maxlength="10099"></textarea></label></fieldset><p v-if="error" role="alert">{{ t(`page.academic.errors.${error}`) }}</p><p v-if="notice" role="status">{{ t(`page.academic.${notice}`) }}</p><p v-if="uncertain" role="status">{{ t('page.academic.uncertain') }}</p><div class="admin-actions"><button type="submit" :disabled="busy">{{ t(uncertain ? 'page.academic.retry' : 'page.academic.savePolicy') }}</button><button v-if="error === 'conflict'" type="button" :disabled="busy || uncertain" @click="load(true)">{{ t('page.academic.reloadCompare') }}</button><button type="button" :disabled="busy || uncertain" @click="reset">{{ t('page.academic.cancel') }}</button></div></form>
+    <form v-if="data.data.value" class="admin-form" @submit.prevent="save">
+      <Tag class="justify-self-start">{{ t(`page.academic.policySources.${data.data.value.source}`) }}</Tag>
+      <label>{{ t('page.academic.policyMode') }}
+        <Select v-model:value="mode" :disabled="busy || uncertain" :options="['published','pending','review'].map(value => ({ value, label: t(`page.academic.policyModes.${value}`) }))" />
+      </label>
+      <label>{{ t('page.academic.blockedTerms') }}<Textarea v-model:value="words" :rows="8" :maxlength="10099" :disabled="busy || uncertain" /></label>
+      <Alert v-if="error" type="error" show-icon :message="t(`page.academic.errors.${error}`)" />
+      <Alert v-if="notice" type="success" show-icon :message="t(`page.academic.${notice}`)" />
+      <Alert v-if="uncertain" type="warning" show-icon :message="t('page.academic.uncertain')" />
+      <Space wrap>
+        <Button type="primary" html-type="submit" :loading="busy">{{ t(uncertain ? 'page.academic.retry' : 'page.academic.savePolicy') }}</Button>
+        <Button v-if="error === 'conflict'" :disabled="busy || uncertain" @click="load(true)">{{ t('page.academic.reloadCompare') }}</Button>
+        <Button :disabled="busy || uncertain" @click="reset">{{ t('page.academic.cancel') }}</Button>
+      </Space>
+    </form>
   </section>
 </template>

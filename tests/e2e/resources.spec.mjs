@@ -5,6 +5,11 @@ import process from 'node:process';
 
 import { expect, test } from '../session-fixture.mjs';
 import { fixture, routes } from './resource-fixture.mjs';
+// antd Select renders a combobox without native options, so tests open it and click the visible option.
+async function chooseOption(page, label, option) {
+  await page.locator('label', { hasText: label }).locator('.ant-select').first().click();
+  await page.locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden) .ant-select-item-option', { hasText: option }).first().click();
+}
 async function setup(page, info) {
   const errors = [];
     const locale = info.project.metadata.locale;
@@ -23,7 +28,7 @@ async function setup(page, info) {
   await routes(page, s);
   await page.goto(`http://127.0.0.1:18786/resources?lang=${locale}`);
   await expect(
-    page.getByRole('button', { name: m.taxonomy, exact: true }),
+    page.getByRole('tab', { name: m.taxonomy, exact: true }),
   ).toBeVisible();
   return { m, s, errors, locale };
 }
@@ -44,7 +49,7 @@ test('category configuration preserves stable ids, fields and original-request r
   page,
 }, info) => {
   const { m, s, errors, locale } = await setup(page, info);
-  await page.getByRole('button', { name: m.taxonomy, exact: true }).click();
+  await page.getByRole('tab', { name: m.taxonomy, exact: true }).click();
   await page.getByRole('button', { name: m.edit, exact: true }).click();
   const group = page.getByRole('group', { name: m.names, exact: true }).first();
   await group.getByLabel('zh-CN', { exact: true }).fill('按配置更名');
@@ -78,9 +83,7 @@ test('grant creation and revocation retain the subject and respect current permi
   page,
 }, info) => {
   const { m, s, errors, locale } = await setup(page, info);
-  await page
-    .getByRole('combobox', { name: m.catalog.school, exact: true })
-    .selectOption('school');
+  await chooseOption(page, m.catalog.school, 'Fixture School');
   await page.getByRole('button', { name: m.view, exact: true }).click();
   await page.getByLabel(m.subjectKey, { exact: true }).fill('issuer:reader');
   await page.getByRole('button', { name: m.grant, exact: true }).click();
@@ -106,10 +109,8 @@ test('review reads the pending file and retries an unknown decision without dupl
   page,
 }, info) => {
   const { m, s, errors, locale } = await setup(page, info);
-  await page
-    .getByRole('combobox', { name: m.catalog.school, exact: true })
-    .selectOption('school');
-  await page.getByRole('button', { name: m.reviewQueue, exact: true }).click();
+  await chooseOption(page, m.catalog.school, 'Fixture School');
+  await page.getByRole('tab', { name: m.reviewQueue, exact: true }).click();
   await page.getByRole('button', { name: m.view, exact: true }).click();
   await expect(
     page.getByRole('heading', { name: 'Fixture notes', exact: true }),
@@ -149,10 +150,8 @@ test('directory editing saves revision and configured names', async ({
   page,
 }, info) => {
   const { m, s, errors, locale } = await setup(page, info);
-  await page
-    .getByRole('combobox', { name: m.catalog.school, exact: true })
-    .selectOption('school');
-  await page.getByRole('button', { name: m.directories, exact: true }).click();
+  await chooseOption(page, m.catalog.school, 'Fixture School');
+  await page.getByRole('tab', { name: m.directories, exact: true }).click();
   await page.getByRole('button', { name: m.edit, exact: true }).click();
   await page
     .getByRole('group', { name: m.names, exact: true })
@@ -167,7 +166,7 @@ test('directory editing saves revision and configured names', async ({
 
 test('owned file reuse avoids content transfer and keeps separate review',async({page},info)=>{
  const {m,s,errors,locale}=await setup(page,info);await page.goto(`http://127.0.0.1:18786/resources/new?school_id=school&course_id=course&lang=${locale}`);
- await page.getByLabel(m.resourceTitle,{exact:true}).fill('Reused lecture');await page.getByRole('combobox',{name:m.origin,exact:true}).selectOption('original');await page.getByLabel(m.acceptTerms,{exact:true}).check();await page.getByRole('button',{name:m.save,exact:true}).click();await expect(page.getByText(m.saved,{exact:true})).toBeVisible();
+ await page.getByLabel(m.resourceTitle,{exact:true}).fill('Reused lecture');await chooseOption(page,m.origin,m.origins.original);await page.getByLabel(m.acceptTerms,{exact:true}).check();await page.getByRole('button',{name:m.save,exact:true}).click();await expect(page.getByText(m.saved,{exact:true})).toBeVisible();
  s.media.reused=true;s.media.state='verifying';await page.getByLabel(m.chooseFile,{exact:true}).setInputFiles({name:'lecture.txt',mimeType:'text/plain',buffer:Buffer.from('hello')});await page.getByRole('button',{name:m.uploadFile,exact:true}).click();await expect(page.getByText(m.errors.reuse_pending,{exact:true})).toBeVisible();
  expect(s.calls.filter(x=>x.path?.startsWith('/api/v1/media')&&x.method==='PUT')).toHaveLength(0);s.media.state='awaiting_approval';await page.getByRole('button',{name:m.uploadFile,exact:true}).click();await expect(page.getByText(m.reusedFile,{exact:true})).toBeVisible();await expect(page.getByText(m.uploadStates.attached,{exact:true})).toBeVisible();expect(s.calls.filter(x=>x.path==='/api/v1/media/uploads')).toHaveLength(1);expect(s.calls.find(x=>x.path==='/api/v1/media/uploads').body.reuse_existing).toBe(true);expect(s.calls.filter(x=>x.path?.startsWith('/api/v1/media')&&x.method==='PUT')).toHaveLength(0);await page.getByRole('button',{name:m.submit,exact:true}).click();await expect(page.getByText(m.states.pending,{exact:true})).toBeVisible();await layout(page,errors,locale);
 });

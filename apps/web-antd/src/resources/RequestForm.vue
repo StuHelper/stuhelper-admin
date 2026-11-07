@@ -3,6 +3,8 @@ import { ref } from 'vue';
 
 import { useI18n } from '@vben/locales';
 
+import { Alert, Button, Input, Select, Textarea } from 'ant-design-vue';
+
 import { type Schema, segment } from './api';
 import StatusBlock from './StatusBlock.vue';
 import { useResources } from './useResources';
@@ -51,43 +53,25 @@ async function submit() {
   <form class="resource-form" @submit.prevent="submit">
     <h2>{{ t('page.resources.request') }}</h2>
     <StatusBlock :busy="busy" :error="error" @retry="state.retry" />
-    <p v-if="done" role="status">
-      {{ t('page.resources.requestReceived') }}
-    </p>
+    <Alert v-if="done" type="success" show-icon role="status" :message="t('page.resources.requestReceived')" />
     <fieldset :disabled="busy || uncertain || done">
       <legend>{{ t('page.resources.requestInformation') }}</legend>
-      <label class="resource-field">{{ t('page.resources.requestKind')
-        }}<select v-model="kind">
-          <option v-if="!previousTaskId" value="complaint">
-            {{ t('page.resources.requestKinds.complaint') }}
-          </option>
-          <option v-if="owned && !previousTaskId" value="withdrawal">
-            {{ t('page.resources.requestKinds.withdrawal') }}
-          </option>
-          <option v-if="previousTaskId" value="appeal">
-            {{ t('page.resources.requestKinds.appeal') }}
-          </option>
-        </select></label><label class="resource-field">{{ t('page.resources.reason')
-        }}<textarea
-          v-model="reason"
-          required
-          maxlength="2000"
-        ></textarea></label><label class="resource-field">{{ t('page.resources.contact')
-        }}<input
-          v-model="contact"
-          :required="kind === 'complaint'"
-          maxlength="500"
-/></label><label class="resource-field">{{ t('page.resources.evidence')
-        }}<textarea
-          v-model="evidence"
-          :required="kind === 'complaint'"
-          maxlength="8003"
-        ></textarea>
+      <label class="resource-field">{{ t('page.resources.requestKind') }}
+        <Select
+          v-model:value="kind"
+          :disabled="busy || uncertain || done"
+          :options="[
+            ...(!previousTaskId ? [{ value: 'complaint', label: t('page.resources.requestKinds.complaint') }] : []),
+            ...(owned && !previousTaskId ? [{ value: 'withdrawal', label: t('page.resources.requestKinds.withdrawal') }] : []),
+            ...(previousTaskId ? [{ value: 'appeal', label: t('page.resources.requestKinds.appeal') }] : []),
+          ]"
+        />
       </label>
-      <p>{{ t('page.resources.evidenceHint') }}</p>
+      <label class="resource-field">{{ t('page.resources.reason') }}<Textarea v-model:value="reason" required :maxlength="2000" /></label>
+      <label class="resource-field">{{ t('page.resources.contact') }}<Input v-model:value="contact" :required="kind === 'complaint'" :maxlength="500" /></label>
+      <label class="resource-field">{{ t('page.resources.evidence') }}<Textarea v-model:value="evidence" :required="kind === 'complaint'" :maxlength="8003" /></label>
+      <p class="resource-muted">{{ t('page.resources.evidenceHint') }}</p>
     </fieldset>
-    <button v-if="!done" type="submit" :disabled="busy">
-      {{ t(uncertain ? 'page.resources.retry' : 'page.resources.sendRequest') }}
-    </button>
+    <Button v-if="!done" type="primary" html-type="submit" class="justify-self-start" :loading="busy">{{ t(uncertain ? 'page.resources.retry' : 'page.resources.sendRequest') }}</Button>
   </form>
 </template>

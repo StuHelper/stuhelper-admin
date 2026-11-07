@@ -4,6 +4,10 @@ import { RouterLink } from 'vue-router';
 
 import { useI18n } from '@vben/locales';
 
+import { Button, Descriptions, DescriptionsItem, Select, Space, Tag, Textarea } from 'ant-design-vue';
+
+import { tagColor } from '#/console-ui';
+
 import {
   name,
   query,
@@ -134,122 +138,55 @@ watch(
 </script>
 <template>
   <section class="resource-form">
-    <form
-      class="resource-actions"
-      @submit.prevent="
-        after = '';
-        load();
-      "
-    >
-      <label>{{ t('page.resources.checkStatus')
-        }}<select v-model="taskState" :disabled="busy || pending">
-          <option
-            v-for="value in ['waiting', 'decided', 'applied', 'failed']"
-            :key="value"
-            :value="value"
-          >
-            {{ t(`page.resources.states.${value}`) }}
-          </option>
-        </select></label><button type="submit" :disabled="busy || pending">
-        {{ t('page.resources.filter') }}
-      </button>
+    <form class="console-controls" @submit.prevent="after = ''; load();">
+      <label class="resource-field">{{ t('page.resources.checkStatus') }}
+        <Select v-model:value="taskState" class="min-w-40" :disabled="busy || pending" :options="['waiting', 'decided', 'applied', 'failed'].map((value) => ({ value, label: t(`page.resources.states.${value}`) }))" />
+      </label>
+      <Button html-type="submit" class="self-end" :disabled="busy || pending">{{ t('page.resources.filter') }}</Button>
     </form>
-    <StatusBlock
-      :busy="busy"
-      :error="error"
-      :empty="tasks.length === 0"
-      @retry="state.retry"
-    />
-    <ul class="resource-list">
-      <li v-for="task in tasks" :key="task.id" class="resource-card">
-        <h3>{{ t(`page.academic.requestKinds.${task.submission.kind}`) }}</h3>
-        <p>{{ t(`page.resources.states.${task.state}`) }}</p>
-        <p v-if="task.submission.reason !== 'content_review'">
-          {{ task.submission.reason }}
-        </p>
-        <button :disabled="busy || pending" @click="open(task)">
-          {{ t('page.resources.view') }}
-        </button>
-      </li>
-    </ul>
-    <button
-      v-if="tasks.length === 25"
-      :disabled="busy || pending"
-      @click="
-        after = tasks.at(-1)?.id ?? '';
-        load();
-      "
-    >
-      {{ t('page.resources.more') }}
-    </button>
-    <section
-      v-if="selected && entry && version"
-      class="resource-card resource-form"
-    >
-      <h2>{{ version.metadata.title }}</h2>
-      <p>{{ version.metadata.description }}</p>
-      <p>{{ name(version.category.names, locale) }}</p>
-      <p>{{ version.metadata.origin.source }}</p>
-      <p>{{ version.metadata.origin.license }}</p>
-      <ul>
-        <li v-for="evidence in selected.submission.evidence" :key="evidence">
-          {{ evidence }}
+    <StatusBlock :busy="busy" :error="error" :empty="tasks.length === 0" @retry="state.retry" />
+    <div class="resource-columns">
+      <ul class="resource-list">
+        <li v-for="task in tasks" :key="task.id" class="resource-card" :class="{ 'is-selected': selected?.id === task.id }">
+          <div class="console-row-head">
+            <h3>{{ t(`page.academic.requestKinds.${task.submission.kind}`) }}</h3>
+            <Tag :color="tagColor(task.state)">{{ t(`page.resources.states.${task.state}`) }}</Tag>
+          </div>
+          <p v-if="task.submission.reason !== 'content_review'">{{ task.submission.reason }}</p>
+          <Button type="link" size="small" :disabled="busy || pending" @click="open(task)">{{ t('page.resources.view') }}</Button>
         </li>
       </ul>
-      <p role="status">{{ t(`page.resources.states.${selected.state}`) }}</p>
-      <p v-if="selected.decision">{{ selected.decision.reason }}</p>
-      <div class="resource-actions">
-        <button
-          v-if="version.file"
-          :disabled="busy || pending"
-          @click="download"
-        >
-          {{ t('page.resources.download') }}
-</button><button :disabled="busy || pending" @click="open(selected)">
-          {{ t('page.resources.reload') }}
-</button><RouterLink :to="`/resources/items/${entry.id}/edit`">
-{{
-          t('page.resources.edit')
-        }}
-</RouterLink>
-      </div>
-      <form
-        v-if="selected.state === 'waiting' || pending"
-        class="resource-form"
-        @submit.prevent="decide"
-      >
-        <fieldset :disabled="busy || pending">
-          <legend>{{ t('page.resources.reviewQueue') }}</legend>
-          <label class="resource-field">{{ t('page.resources.confirm')
-            }}<select v-model="action">
-              <option
-                v-for="item in [
-                  'publish',
-                  'hide',
-                  'restore',
-                  'delete',
-                  'dismiss',
-                ]"
-                :key="item"
-                :value="item"
-              >
-                {{ t(`page.resources.${item}`) }}
-              </option>
-            </select></label><label class="resource-field">{{ t('page.resources.reason')
-            }}<textarea v-model="reason" required maxlength="2000"></textarea>
-          </label>
-        </fieldset>
-        <button type="submit" :disabled="busy">
-          {{ t(pending ? 'page.resources.retry' : 'page.resources.confirm') }}
-        </button>
-      </form>
-      <button
-        v-if="selected.state === 'failed'"
-        :disabled="busy"
-        @click="retry"
-      >
-        {{ t('page.resources.retry') }}
-      </button>
-    </section>
+      <section v-if="selected && entry && version" class="resource-card resource-form console-detail">
+        <h2>{{ version.metadata.title }}</h2>
+        <p>{{ version.metadata.description }}</p>
+        <Descriptions :column="1" size="small">
+          <DescriptionsItem :label="t('page.resources.category')">{{ name(version.category.names, locale) }}</DescriptionsItem>
+          <DescriptionsItem :label="t('page.resources.source')">{{ version.metadata.origin.source }}</DescriptionsItem>
+          <DescriptionsItem :label="t('page.resources.license')">{{ version.metadata.origin.license }}</DescriptionsItem>
+        </Descriptions>
+        <ul>
+          <li v-for="evidence in selected.submission.evidence" :key="evidence">{{ evidence }}</li>
+        </ul>
+        <p role="status"><Tag :color="tagColor(selected.state)">{{ t(`page.resources.states.${selected.state}`) }}</Tag></p>
+        <p v-if="selected.decision">{{ selected.decision.reason }}</p>
+        <Space wrap>
+          <Button v-if="version.file" :disabled="busy || pending" @click="download">{{ t('page.resources.download') }}</Button>
+          <Button :disabled="busy || pending" @click="open(selected)">{{ t('page.resources.reload') }}</Button>
+          <RouterLink :to="`/resources/items/${entry.id}/edit`">{{ t('page.resources.edit') }}</RouterLink>
+        </Space>
+        <form v-if="selected.state === 'waiting' || pending" class="resource-form" @submit.prevent="decide">
+          <fieldset :disabled="busy || pending">
+            <legend>{{ t('page.resources.reviewQueue') }}</legend>
+            <label class="resource-field">{{ t('page.resources.confirm') }}
+              <Select v-model:value="action" :disabled="busy || pending" :options="['publish', 'hide', 'restore', 'delete', 'dismiss'].map((item) => ({ value: item, label: t(`page.resources.${item}`) }))" />
+            </label>
+            <label class="resource-field">{{ t('page.resources.reason') }}<Textarea v-model:value="reason" required :maxlength="2000" /></label>
+          </fieldset>
+          <Button type="primary" html-type="submit" class="justify-self-start" :loading="busy">{{ t(pending ? 'page.resources.retry' : 'page.resources.confirm') }}</Button>
+        </form>
+        <Button v-if="selected.state === 'failed'" class="justify-self-start" :disabled="busy" @click="retry">{{ t('page.resources.retry') }}</Button>
+      </section>
+    </div>
+    <Button v-if="tasks.length === 25" class="justify-self-start" :disabled="busy || pending" @click="after = tasks.at(-1)?.id ?? ''; load();">{{ t('page.resources.more') }}</Button>
   </section>
 </template>

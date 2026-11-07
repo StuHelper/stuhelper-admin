@@ -4,6 +4,8 @@ import { RouterLink } from 'vue-router';
 
 import { useI18n } from '@vben/locales';
 
+import { Button, DatePicker, Divider, Input, Select, Space, Tag, Textarea } from 'ant-design-vue';
+
 import { query, type Resource, type Schema, segment } from './api';
 import StatusBlock from './StatusBlock.vue';
 import { useResources } from './useResources';
@@ -95,71 +97,42 @@ watch(
 </script>
 <template>
   <section class="resource-form">
-    <StatusBlock :busy="busy" :error="error" @retry="state.retry" /><template
-      v-if="entry"
-      >
-<h2>{{ (entry.proposal ?? entry.current)?.metadata.title }}</h2>
-      <RouterLink :to="`/resources/items/${id}/edit`">
-{{
-        t('page.resources.edit')
-      }}
-</RouterLink>
+    <StatusBlock :busy="busy" :error="error" @retry="state.retry" />
+    <template v-if="entry">
+      <div class="console-row-head">
+        <h2>{{ (entry.proposal ?? entry.current)?.metadata.title }}</h2>
+        <RouterLink :to="`/resources/items/${id}/edit`">{{ t('page.resources.edit') }}</RouterLink>
+      </div>
       <form class="resource-form" @submit.prevent="change">
         <fieldset :disabled="busy || uncertain">
           <legend>{{ t('page.resources.stateChange') }}</legend>
-          <label class="resource-field">{{ t('page.resources.stateChange')
-            }}<select v-model="status">
-              <option
-                v-for="item in ['unlisted', 'blocked', 'published']"
-                :key="item"
-                :value="item"
-              >
-                {{ t(`page.resources.states.${item}`) }}
-              </option>
-            </select></label><label class="resource-field">{{ t('page.resources.reason')
-            }}<textarea v-model="reason" required maxlength="2000"></textarea>
+          <label class="resource-field">{{ t('page.resources.stateChange') }}
+            <Select v-model:value="status" :disabled="busy || uncertain" :options="['unlisted', 'blocked', 'published'].map((item) => ({ value: item, label: t(`page.resources.states.${item}`) }))" />
           </label>
+          <label class="resource-field">{{ t('page.resources.reason') }}<Textarea v-model:value="reason" required :maxlength="2000" /></label>
         </fieldset>
-        <button type="submit" :disabled="busy">
-          {{ t(uncertain ? 'page.resources.retry' : 'page.resources.confirm') }}
-        </button>
+        <Button type="primary" html-type="submit" class="justify-self-start" :loading="busy">{{ t(uncertain ? 'page.resources.retry' : 'page.resources.confirm') }}</Button>
       </form>
+      <Divider />
       <h3>{{ t('page.resources.grants') }}</h3>
       <ul class="resource-list">
-        <li v-for="item in grants" :key="item.id">
+        <li v-for="item in grants" :key="item.id" class="console-row-head">
           <p>{{ item.subject_key }}</p>
-          <span>{{
-            t(item.revoked ? 'page.resources.revoked' : 'page.resources.active')
-          }}</span><button
-            v-if="!item.revoked"
-            :disabled="busy || uncertain"
-            @click="grant(item)"
-          >
-            {{ t('page.resources.revoke') }}
-          </button>
+          <Space>
+            <Tag :color="item.revoked ? 'default' : 'success'">{{ t(item.revoked ? 'page.resources.revoked' : 'page.resources.active') }}</Tag>
+            <Button v-if="!item.revoked" danger size="small" :disabled="busy || uncertain" @click="grant(item)">{{ t('page.resources.revoke') }}</Button>
+          </Space>
         </li>
       </ul>
-      <button
-        v-if="next"
-        :disabled="busy || uncertain"
-        @click="
-          after = next;
-          load();
-        "
-      >
-        {{ t('page.resources.more') }}
-      </button>
+      <Button v-if="next" class="justify-self-start" :disabled="busy || uncertain" @click="after = next; load();">{{ t('page.resources.more') }}</Button>
       <form class="resource-form" @submit.prevent="grant()">
         <fieldset :disabled="busy || uncertain">
           <legend>{{ t('page.resources.grant') }}</legend>
-          <label class="resource-field">{{ t('page.resources.subjectKey')
-            }}<input v-model="subject" required maxlength="1100" /></label><label class="resource-field">{{ t('page.resources.expires')
-            }}<input v-model="expires" type="datetime-local" /></label>
+          <label class="resource-field">{{ t('page.resources.subjectKey') }}<Input v-model:value="subject" required :maxlength="1100" /></label>
+          <label class="resource-field">{{ t('page.resources.expires') }}<DatePicker v-model:value="expires" show-time value-format="YYYY-MM-DDTHH:mm" :disabled="busy || uncertain" /></label>
         </fieldset>
-        <button type="submit" :disabled="busy">
-          {{ t(uncertain ? 'page.resources.retry' : 'page.resources.grant') }}
-        </button>
+        <Button type="primary" html-type="submit" class="justify-self-start" :loading="busy">{{ t(uncertain ? 'page.resources.retry' : 'page.resources.grant') }}</Button>
       </form>
-</template>
+    </template>
   </section>
 </template>

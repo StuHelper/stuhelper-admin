@@ -2,7 +2,12 @@
 import { computed, ref, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 
+import { Page } from '@vben/common-ui';
 import { useI18n } from '@vben/locales';
+
+import { Alert, Button, Checkbox, Input, Select, Space, Tag, Textarea } from 'ant-design-vue';
+
+import { tagColor } from '#/console-ui';
 
 import { snapshot } from './api';
 import {
@@ -215,184 +220,75 @@ async function submit() {
 void load();
 </script>
 <template>
-  <section class="resources-page">
-    <header>
-      <h1>{{ t(entry ? 'page.resources.edit' : 'page.resources.upload') }}</h1>
-      <RouterLink to="/resources/me">
-        {{ t('page.resources.mine') }}
-      </RouterLink>
-    </header>
-    <StatusBlock :busy="busy" :error="error" @retry="state.retry" />
-    <div class="resource-editor-grid">
-      <form class="resource-card resource-form" @submit.prevent="save">
-        <fieldset :disabled="busy || uncertain">
-          <legend>{{ t('page.resources.metadata') }}</legend>
-          <label class="resource-field">{{ t('page.resources.resourceTitle')
-            }}<input v-model="metadata.title" required maxlength="200" /></label><label class="resource-field">{{ t('page.resources.description')
-            }}<textarea
-              v-model="metadata.description"
-              maxlength="10000"
-            ></textarea>
-          </label>
-          <div class="resource-grid">
-            <label class="resource-field">{{ t('page.resources.category')
-              }}<select
-                v-model="metadata.category_id"
-                required
-                @change="changeCategory"
-              >
-                <option
-                  v-for="item in categories"
-                  :key="item.id"
-                  :value="item.id"
-                >
-                  {{ name(item.names, locale) }}
-                </option>
-              </select></label><FieldInput
-              v-for="field in category?.fields"
-              :key="field.key"
-              v-model="metadata.attributes[field.key]"
-              :field="field"
-            /><label class="resource-field">{{ t('page.resources.tags')
-              }}<input v-model="tagText" maxlength="1000" /></label><label class="resource-field">{{ t('page.resources.access')
-              }}<select v-model="metadata.access">
-                <option value="public">{{ t('page.resources.public') }}</option>
-                <option value="restricted">
-                  {{ t('page.resources.restricted') }}
-                </option>
-              </select></label>
-          </div>
-          <CatalogSelect
-            v-model="metadata.associations.school_id"
-            kind="school"
-            :disabled="!!entry"
-          /><CatalogSelect
-            v-model="metadata.associations.course_id"
-            kind="course"
-            :school="metadata.associations.school_id"
-          /><CatalogSelect
-            v-model="metadata.associations.term_id"
-            kind="term"
-            :school="metadata.associations.school_id"
-          /><CatalogSelect
-            v-model="metadata.associations.offering_id"
-            kind="term_course"
-            :school="metadata.associations.school_id"
-            :course="metadata.associations.course_id"
-            :term="metadata.associations.term_id"
-          /><CatalogSelect
-            v-model="metadata.associations.teacher_id"
-            kind="teacher"
-            :school="metadata.associations.school_id"
-            :course="metadata.associations.course_id"
-          /><label class="resource-field">{{ t('page.resources.directorySuggestion')
-            }}<input v-model="metadata.directory_id" maxlength="128" /></label><label class="resource-field">{{ t('page.resources.origin')
-            }}<select v-model="metadata.origin.kind">
-              <option
-                v-for="kind in ['original', 'known', 'unknown']"
-                :key="kind"
-                :value="kind"
-              >
-                {{ t(`page.resources.origins.${kind}`) }}
-              </option>
-            </select></label><label v-if="metadata.origin.kind === 'known'" class="resource-field">{{ t('page.resources.source')
-            }}<input
-              v-model="metadata.origin.source"
-              required
-              maxlength="2000"
-/></label><label class="resource-field">{{ t('page.resources.author')
-            }}<input v-model="metadata.origin.author" maxlength="500" /></label><label class="resource-field">{{ t('page.resources.license')
-            }}<input v-model="metadata.origin.license" maxlength="2000" /></label>
-          <div v-if="metadata.origin.kind === 'original' && capabilities">
-            <p>{{ t('page.resources.consentNotice') }}</p>
-            <a
-              :href="capabilities.terms.url"
-              target="_blank"
-              rel="noopener noreferrer"
-              >{{ t('page.resources.terms') }}</a><label class="resource-inline"><input v-model="consent" type="checkbox" required />{{
-                t('page.resources.acceptTerms')
-              }}</label>
-          </div>
-        </fieldset>
-        <button type="submit" :disabled="busy">
-          {{ t(uncertain ? 'page.resources.retry' : 'page.resources.save') }}
-        </button>
-        <p v-if="saved" role="status">
-          {{ t('page.resources.saved') }}
-        </p>
-      </form>
-      <aside class="resource-form">
-        <section class="resource-card resource-form">
-          <h2>{{ t('page.resources.file') }}</h2>
-          <p v-if="capabilities">
-            {{
-              t('page.resources.uploadLimits', {
-                size: n(capabilities.max_file_size),
-                types: capabilities.allowed_types.join(', '),
-              })
-            }}
-          </p>
-          <p v-if="!profile">
-            {{ t('page.resources.noUploadProfile') }}
-          </p>
-          <label class="resource-field">{{ t('page.resources.chooseFile')
-            }}<input
-              type="file"
-              :accept="capabilities?.allowed_types.join(',')"
-              :disabled="
-                busy ||
-                uncertain ||
-                (!!uploadState && uploadState !== 'cancelled')
-              "
-              @change="chooseFile"
-          /></label>
-          <p v-if="entry?.proposal?.file">
-            {{ entry.proposal.file.filename }}
-          </p>
-          <p v-if="uploadState" role="status">
-            {{ t(`page.resources.uploadStates.${uploadState}`) }}
-          </p>
-          <p v-if="reusedFile" role="status">{{ t('page.resources.reusedFile') }}</p>
-          <p v-if="dirty">
-            {{ t('page.resources.saveBeforeFile') }}
-          </p>
-          <button
-            :disabled="
-              busy ||
-              !selected ||
-              !entry ||
-              dirty ||
-              !profile ||
-              uploadState === 'attached'
-            "
-            @click="sendFile"
-          >
-            {{
-              t(
-                uploadState
-                  ? 'page.resources.retry'
-                  : 'page.resources.uploadFile',
-              )
-            }}
-</button><button
-            v-if="selected && uploadState !== 'attached'"
-            @click="cancel"
-          >
-            {{ t('page.resources.cancelUpload') }}
-          </button>
-        </section>
-        <section class="resource-card resource-form">
-          <p>{{ t('page.resources.reviewNotice') }}</p>
-          <p v-if="entry?.proposal" role="status">
-            {{ t(`page.resources.states.${entry.proposal.state}`) }}
-          </p>
-          <button :disabled="busy || !canSubmit" @click="submit">
-            {{ t('page.resources.submit') }}
-</button><RouterLink v-if="entry" :to="`/resources/items/${entry.id}`">
-            {{ t('page.resources.view') }}
-          </RouterLink>
-        </section>
-      </aside>
-    </div>
-  </section>
+  <Page :title="t(entry ? 'page.resources.edit' : 'page.resources.upload')">
+    <template #extra><RouterLink to="/resources/me">{{ t('page.resources.mine') }}</RouterLink></template>
+    <section class="resources-page">
+      <StatusBlock :busy="busy" :error="error" @retry="state.retry" />
+      <div class="resource-editor-grid">
+        <form class="resource-card resource-form" @submit.prevent="save">
+          <fieldset :disabled="busy || uncertain">
+            <legend>{{ t('page.resources.metadata') }}</legend>
+            <label class="resource-field">{{ t('page.resources.resourceTitle') }}<Input v-model:value="metadata.title" required :maxlength="200" /></label>
+            <label class="resource-field">{{ t('page.resources.description') }}<Textarea v-model:value="metadata.description" :maxlength="10000" :rows="4" /></label>
+            <div class="resource-grid">
+              <label class="resource-field">{{ t('page.resources.category') }}
+                <Select v-model:value="metadata.category_id" :disabled="busy || uncertain" :options="categories.map((item) => ({ value: item.id, label: name(item.names, locale) }))" @change="changeCategory" />
+              </label>
+              <FieldInput v-for="field in category?.fields" :key="field.key" v-model="metadata.attributes[field.key]" :field="field" :disabled="busy || uncertain" />
+              <label class="resource-field">{{ t('page.resources.tags') }}<Input v-model:value="tagText" :maxlength="1000" /></label>
+              <label class="resource-field">{{ t('page.resources.access') }}
+                <Select v-model:value="metadata.access" :disabled="busy || uncertain" :options="[{ value: 'public', label: t('page.resources.public') }, { value: 'restricted', label: t('page.resources.restricted') }]" />
+              </label>
+            </div>
+            <CatalogSelect v-model="metadata.associations.school_id" kind="school" :disabled="!!entry || busy || uncertain" />
+            <CatalogSelect v-model="metadata.associations.course_id" kind="course" :school="metadata.associations.school_id" :disabled="busy || uncertain" />
+            <CatalogSelect v-model="metadata.associations.term_id" kind="term" :school="metadata.associations.school_id" :disabled="busy || uncertain" />
+            <CatalogSelect v-model="metadata.associations.offering_id" kind="term_course" :school="metadata.associations.school_id" :course="metadata.associations.course_id" :term="metadata.associations.term_id" :disabled="busy || uncertain" />
+            <CatalogSelect v-model="metadata.associations.teacher_id" kind="teacher" :school="metadata.associations.school_id" :course="metadata.associations.course_id" :disabled="busy || uncertain" />
+            <label class="resource-field">{{ t('page.resources.directorySuggestion') }}<Input v-model:value="metadata.directory_id" :maxlength="128" /></label>
+            <label class="resource-field">{{ t('page.resources.origin') }}
+              <Select v-model:value="metadata.origin.kind" :disabled="busy || uncertain" :options="['original', 'known', 'unknown'].map((kind) => ({ value: kind, label: t(`page.resources.origins.${kind}`) }))" />
+            </label>
+            <label v-if="metadata.origin.kind === 'known'" class="resource-field">{{ t('page.resources.source') }}<Input v-model:value="metadata.origin.source" required :maxlength="2000" /></label>
+            <label class="resource-field">{{ t('page.resources.author') }}<Input v-model:value="metadata.origin.author" :maxlength="500" /></label>
+            <label class="resource-field">{{ t('page.resources.license') }}<Input v-model:value="metadata.origin.license" :maxlength="2000" /></label>
+            <Alert v-if="metadata.origin.kind === 'original' && capabilities" type="info" :message="t('page.resources.consentNotice')">
+              <template #description>
+                <a :href="capabilities.terms.url" target="_blank" rel="noopener noreferrer">{{ t('page.resources.terms') }}</a>
+                <div><Checkbox v-model:checked="consent">{{ t('page.resources.acceptTerms') }}</Checkbox></div>
+              </template>
+            </Alert>
+          </fieldset>
+          <Button type="primary" html-type="submit" class="justify-self-start" :loading="busy" :disabled="!metadata.category_id || (metadata.origin.kind === 'original' && !!capabilities && !consent)">{{ t(uncertain ? 'page.resources.retry' : 'page.resources.save') }}</Button>
+          <Alert v-if="saved" type="success" show-icon role="status" :message="t('page.resources.saved')" />
+        </form>
+        <aside class="resource-form">
+          <section class="resource-card resource-form">
+            <h2>{{ t('page.resources.file') }}</h2>
+            <p v-if="capabilities" class="resource-muted">{{ t('page.resources.uploadLimits', { size: n(capabilities.max_file_size), types: capabilities.allowed_types.join(', ') }) }}</p>
+            <Alert v-if="!profile" type="warning" show-icon :message="t('page.resources.noUploadProfile')" />
+            <label class="resource-field">{{ t('page.resources.chooseFile') }}
+              <input class="resource-file" type="file" :accept="capabilities?.allowed_types.join(',')" :disabled="busy || uncertain || (!!uploadState && uploadState !== 'cancelled')" @change="chooseFile" />
+            </label>
+            <p v-if="entry?.proposal?.file">{{ entry.proposal.file.filename }}</p>
+            <p v-if="uploadState" role="status"><Tag :color="uploadState === 'attached' ? 'success' : 'processing'">{{ t(`page.resources.uploadStates.${uploadState}`) }}</Tag></p>
+            <p v-if="reusedFile" role="status">{{ t('page.resources.reusedFile') }}</p>
+            <Alert v-if="dirty" type="info" :message="t('page.resources.saveBeforeFile')" />
+            <Space wrap>
+              <Button type="primary" :disabled="busy || !selected || !entry || dirty || !profile || uploadState === 'attached'" @click="sendFile">{{ t(uploadState ? 'page.resources.retry' : 'page.resources.uploadFile') }}</Button>
+              <Button v-if="selected && uploadState !== 'attached'" @click="cancel">{{ t('page.resources.cancelUpload') }}</Button>
+            </Space>
+          </section>
+          <section class="resource-card resource-form">
+            <p class="resource-muted">{{ t('page.resources.reviewNotice') }}</p>
+            <p v-if="entry?.proposal" role="status"><Tag :color="tagColor(entry.proposal.state)">{{ t(`page.resources.states.${entry.proposal.state}`) }}</Tag></p>
+            <Space wrap>
+              <Button type="primary" :disabled="busy || !canSubmit" @click="submit">{{ t('page.resources.submit') }}</Button>
+              <RouterLink v-if="entry" :to="`/resources/items/${entry.id}`">{{ t('page.resources.view') }}</RouterLink>
+            </Space>
+          </section>
+        </aside>
+      </div>
+    </section>
+  </Page>
 </template>

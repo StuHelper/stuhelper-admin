@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from '@vben/locales';
+
+import { Input } from 'ant-design-vue';
 defineProps<{ disabled?: boolean; modelValue: Record<string, string> }>();
 const emit = defineEmits<{
   'update:modelValue': [value: Record<string, string>];
@@ -29,19 +31,16 @@ function change(event: Event, language: string, value: Record<string, string>) {
   <fieldset :disabled="disabled">
     <legend>{{ t('page.resources.names') }}</legend>
     <div class="resource-grid">
-      <label
-        v-for="language in languages"
-        :key="language"
-        class="resource-field"
-        >{{ language
-        }}<input
+      <label v-for="language in languages" :key="language" class="resource-field">{{ language }}
+        <Input
           :value="modelValue[language] ?? ''"
           :lang="language"
           :dir="language === 'ar-EG' ? 'rtl' : 'ltr'"
           :required="language === 'zh-CN'"
-          maxlength="200"
-          @input="change($event, language, modelValue)"
-      /></label>
+          :maxlength="200"
+          @change="change($event, language, modelValue)"
+        />
+      </label>
     </div>
   </fieldset>
 </template>

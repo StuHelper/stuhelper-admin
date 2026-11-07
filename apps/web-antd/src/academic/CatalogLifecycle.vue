@@ -4,6 +4,8 @@ import {onBeforeRouteLeave} from 'vue-router';
 
 import {useI18n} from '@vben/locales';
 
+import { Alert, Button, Descriptions, DescriptionsItem, Select, Space, Textarea } from 'ant-design-vue';
+
 import { confirmLeave } from '#/confirm-leave';
 
 import {AcademicError,type AcademicObject,call,type MergePreview,Mutation,objectOptions} from './api';
@@ -24,11 +26,33 @@ async function apply(action:'merge'|'state'){
 }
 </script>
 <template>
- <section class="admin-form">
-<h3>{{ t('page.academic.mergeTitle') }}</h3><p>{{ t('page.academic.mergeHint') }}</p><StatusBlock :busy="targets.busy.value" :error="targets.error.value" @retry="targets.load" />
- <fieldset :disabled="disabled || busy || uncertain"><label>{{ t('page.academic.mergeTarget') }}<select v-model="target"><option value="">{{ t('page.academic.choose') }}</option><option v-for="item in targets.data.value?.items.filter(item=>item.id !== entry.id)" :key="item.id" :value="item.id">{{ item.name }}</option></select></label><label>{{ t('page.academic.reason') }}<textarea v-model="reason" maxlength="2000" rows="3"></textarea></label></fieldset>
- <div v-if="plan" class="admin-notice"><article v-for="(record, index) in [plan.source, plan.target]" :key="record.id"><h4>{{ index === 0 ? t('page.academic.mergeSource') : t('page.academic.mergeTarget') }} {{ record.name }}</h4><p>{{ t('page.academic.revision',{value:record.revision}) }}</p><p v-if="record.biography">{{ record.biography }}</p><p v-if="record.credits != null">{{ t('page.academic.credits',{credits:record.credits}) }}</p></article><p>{{ t('page.academic.mergeHint') }}</p></div>
- <p v-if="error" role="alert">{{ t(`page.academic.errors.${error}`) }}</p><p v-if="uncertain" role="status">{{ t('page.academic.uncertain') }}</p>
- <div class="admin-actions"><button v-if="uncertain" :disabled="busy" @click="apply(intent)">{{ t('page.academic.retry') }}</button><template v-else><button :disabled="disabled || busy || !selected || !reason.trim()" @click="preview">{{ t('page.academic.previewMerge') }}</button><button v-if="plan" :disabled="disabled || busy" @click="apply('merge')">{{ t('page.academic.confirmMerge') }}</button><button :disabled="disabled || busy || !reason.trim()" @click="apply('state')">{{ t(entry.inactive ? 'page.academic.enableObject' : 'page.academic.disableObject') }}</button><button :disabled="busy" @click="reason = '';plan = undefined">{{ t('page.academic.cancel') }}</button></template></div>
- </section>
+  <section class="admin-form">
+    <h3>{{ t('page.academic.mergeTitle') }}</h3>
+    <p class="meta">{{ t('page.academic.mergeHint') }}</p>
+    <StatusBlock :busy="targets.busy.value" :error="targets.error.value" @retry="targets.load" />
+    <label>{{ t('page.academic.mergeTarget') }}
+      <Select v-model:value="target" show-search option-filter-prop="label" :disabled="disabled || busy || uncertain" :options="[{ value: '', label: t('page.academic.choose') }, ...(targets.data.value?.items ?? []).filter(item => item.id !== entry.id).map(item => ({ value: item.id, label: item.name }))]" />
+    </label>
+    <label>{{ t('page.academic.reason') }}<Textarea v-model:value="reason" :maxlength="2000" :rows="3" :disabled="disabled || busy || uncertain" /></label>
+    <Alert v-if="plan" type="info" :message="t('page.academic.mergeHint')">
+      <template #description>
+        <Descriptions v-for="(record, index) in [plan.source, plan.target]" :key="record.id" size="small" :column="1" :title="`${index === 0 ? t('page.academic.mergeSource') : t('page.academic.mergeTarget')} ${record.name}`">
+          <DescriptionsItem>{{ t('page.academic.revision',{value:record.revision}) }}</DescriptionsItem>
+          <DescriptionsItem v-if="record.biography" :label="t('page.academic.biography')">{{ record.biography }}</DescriptionsItem>
+          <DescriptionsItem v-if="record.credits != null" :label="t('page.academic.creditsLabel')">{{ t('page.academic.credits',{credits:record.credits}) }}</DescriptionsItem>
+        </Descriptions>
+      </template>
+    </Alert>
+    <Alert v-if="error" type="error" show-icon :message="t(`page.academic.errors.${error}`)" />
+    <Alert v-if="uncertain" type="warning" show-icon :message="t('page.academic.uncertain')" />
+    <Space wrap>
+      <Button v-if="uncertain" type="primary" :loading="busy" @click="apply(intent)">{{ t('page.academic.retry') }}</Button>
+      <template v-else>
+        <Button :disabled="disabled || busy || !selected || !reason.trim()" @click="preview">{{ t('page.academic.previewMerge') }}</Button>
+        <Button v-if="plan" type="primary" :disabled="disabled || busy" @click="apply('merge')">{{ t('page.academic.confirmMerge') }}</Button>
+        <Button :danger="!entry.inactive" :disabled="disabled || busy || !reason.trim()" @click="apply('state')">{{ t(entry.inactive ? 'page.academic.enableObject' : 'page.academic.disableObject') }}</Button>
+        <Button :disabled="busy" @click="reason = '';plan = undefined">{{ t('page.academic.cancel') }}</Button>
+      </template>
+    </Space>
+  </section>
 </template>

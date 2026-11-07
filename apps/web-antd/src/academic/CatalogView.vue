@@ -5,7 +5,7 @@ import { onBeforeRouteLeave } from 'vue-router';
 import { Page } from '@vben/common-ui';
 import { useI18n } from '@vben/locales';
 
-import { Card } from 'ant-design-vue';
+import { Alert, Button, Card, Checkbox, Collapse, CollapsePanel, Divider, Empty, Input, InputNumber, Select, Space, Tag, Textarea } from 'ant-design-vue';
 
 import { confirmLeave } from '#/confirm-leave';
 import { rememberedSchool,rememberSchool } from '#/console-ui';
@@ -34,6 +34,7 @@ watch(school,rememberSchool);
 watch([school,kind],()=>{after.value='';history.value=[];selectedId.value='';baseline.value='';if(school.value){void options.load();void directory.load()}},{immediate:true});
 async function canLeave(){return !(dirty.value||busy.value||uncertain.value)||confirmLeave(t(uncertain.value?'page.academic.uncertain':'page.academic.unsavedChanges'))}
 onBeforeRouteLeave(canLeave);
+const locked=computed(()=>busy.value||uncertain.value||dirty.value||operationPending.value||importPending.value);
 function apply(){if(busy.value||uncertain.value||dirty.value)return;after.value='';history.value=[];void directory.load()}
 async function open(id:string,preserve=false,confirmed=false){
   if(!preserve&&!confirmed&&!(await canLeave()))return;
@@ -59,19 +60,85 @@ function previous(){after.value=history.value.pop()??'';void directory.load()}
 </script>
 <template>
   <Page :title="t('page.academic.catalogTitle')" :description="t('page.academic.catalogIntro')">
-<div class="academic-console">
-    <Card :bordered="false"><form class="admin-filters" @submit.prevent="apply"><label>{{ t('page.academic.school') }}<select v-model="school" :disabled="busy || uncertain || dirty || operationPending || importPending"><option value="">{{ t('page.academic.choose') }}</option><option v-for="item in schools.data.value?.items" :key="item.id" :value="item.id">{{ item.name }}</option></select></label><label>{{ t('page.academic.contentKind') }}<select v-model="kind" :disabled="busy || uncertain || dirty || operationPending || importPending"><option value="course">{{ t('page.academic.courses') }}</option><option value="teacher">{{ t('page.academic.teachers') }}</option></select></label><label>{{ t('page.academic.search') }}<input v-model="search" type="search" maxlength="200" :disabled="busy || uncertain || dirty || operationPending || importPending" /></label><button type="submit" :disabled="busy || uncertain || dirty || operationPending || importPending || !school">{{ t('page.academic.filter') }}</button></form><StatusBlock :busy="schools.busy.value" :error="schools.error.value" @retry="schools.load" /><p v-if="!school">{{ t('page.academic.selectSchool') }}</p></Card>
-    <div v-if="school" class="admin-columns">
-<Card :bordered="false"><StatusBlock :busy="directory.busy.value" :error="directory.error.value" :empty="directory.data.value?.items.length === 0" @retry="directory.load" /><ul class="admin-list"><li v-for="entry in directory.data.value?.items" :key="entry.id" class="admin-list-item" :class="{ 'is-selected': selectedId === entry.id }"><div class="console-row-head"><h3>{{ entry.name }}</h3><span v-if="entry.inactive" class="console-badge">{{ t('page.academic.inactive') }}</span></div><p v-if="entry.kind === 'course'" class="meta">{{ entry.code }}</p><button :disabled="busy || uncertain || operationPending || importPending" @click="open(entry.id)">{{ t('page.academic.openItem') }}</button></li></ul><div class="admin-actions"><button v-if="history.length > 0" :disabled="busy || uncertain || dirty || operationPending || importPending" @click="previous">{{ t('page.academic.previous') }}</button><button v-if="directory.data.value?.next" :disabled="busy || uncertain || dirty || operationPending || importPending" @click="next">{{ t('page.academic.next') }}</button></div></Card>
-      <div v-if="!selectedId" class="console-placeholder">{{ t('page.console.selectItem') }}</div><Card v-else class="console-detail" :bordered="false">
-<StatusBlock :busy="selected.busy.value || options.busy.value" :error="selected.error.value || options.error.value" @retry="open(selectedId,true)" /><template v-if="selected.data.value">
-<h2>{{ selected.data.value.object.name }}</h2><p v-if="selected.data.value.object.inactive">{{ t('page.academic.inactive') }}</p><p>{{ selected.data.value.school.name }} {{ t('page.academic.revision',{value:n(selected.data.value.object.revision)}) }}</p><p>{{ d(new Date(selected.data.value.object.updated_at),'dateTime') }}</p><div v-if="notice === 'compareNotice'" class="admin-notice"><h3>{{ t('page.academic.originalContent') }}</h3><p>{{ selected.data.value.object.name }}</p><p class="admin-body">{{ selected.data.value.object.biography }}</p><p v-if="kind === 'course'">{{ selected.data.value.object.credits === null ? t('page.academic.unknownCredits') : t('page.academic.credits',{credits:n(selected.data.value.object.credits)}) }}</p></div>
-        <form class="admin-form" @submit.prevent="save"><fieldset :disabled="busy || uncertain"><label>{{ t('page.academic.recordName') }}<input v-model="name" maxlength="256" required /></label><label>{{ t('page.academic.biography') }}<textarea v-model="biography" rows="7" maxlength="8000"></textarea></label><label>{{ t(kind === 'course' ? 'page.academic.college' : 'page.academic.department') }}<select v-model="department"><option value="">{{ t('page.academic.unknown') }}</option><option v-for="item in options.data.value?.departments" :key="item.id" :value="item.id">{{ item.name }}</option></select></label><template v-if="kind === 'course'"><label>{{ t('page.academic.code') }}<input v-model="code" maxlength="128" /></label><label class="checkbox"><input v-model="unknownCredits" type="checkbox" />{{ t('page.academic.unknownCreditsToggle') }}</label><label>{{ t('page.academic.creditsLabel') }}<input v-model="credits" type="number" min="0" max="100" step="any" :disabled="unknownCredits" :required="!unknownCredits" /></label><label>{{ t('page.academic.category') }}<select v-model="category"><option value="">{{ t('page.academic.unknown') }}</option><option v-for="item in options.data.value?.categories" :key="item.id" :value="item.id">{{ item.name }}</option></select></label><label>{{ t('page.academic.nature') }}<select v-model="nature"><option value="">{{ t('page.academic.unknown') }}</option><option v-for="item in options.data.value?.natures" :key="item.id" :value="item.id">{{ item.name }}</option></select></label></template></fieldset><p v-if="error" role="alert">{{ t(`page.academic.errors.${error}`) }}</p><p v-if="notice" role="status">{{ t(`page.academic.${notice}`) }}</p><p v-if="uncertain" role="status">{{ t('page.academic.uncertain') }}</p><div class="admin-actions"><button type="submit" :disabled="busy">{{ t(uncertain ? 'page.academic.retry' : 'page.academic.saveChanges') }}</button><button v-if="error === 'conflict'" type="button" :disabled="busy || uncertain || operationPending || importPending" @click="open(selectedId,true)">{{ t('page.academic.reloadCompare') }}</button><button type="button" :disabled="busy" @click="close">{{ t('page.academic.cancel') }}</button></div></form>
-        <CatalogLifecycle :key="`${selected.data.value.object.id}-${selected.data.value.object.revision}`" :entry="selected.data.value.object" :disabled="busy || uncertain || dirty" @pending="operationPending = $event" @complete="open($event,false,true);directory.load()" />
-      </template>
-</Card>
+    <div class="academic-console">
+      <Card :bordered="false">
+        <form class="admin-filters" @submit.prevent="apply">
+          <label>{{ t('page.academic.school') }}
+            <Select v-model:value="school" :disabled="locked" :options="[{ value: '', label: t('page.academic.choose') }, ...(schools.data.value?.items ?? []).map(item => ({ value: item.id, label: item.name }))]" />
+          </label>
+          <label>{{ t('page.academic.contentKind') }}
+            <Select v-model:value="kind" :disabled="locked" :options="[{ value: 'course', label: t('page.academic.courses') }, { value: 'teacher', label: t('page.academic.teachers') }]" />
+          </label>
+          <label>{{ t('page.academic.search') }}<Input v-model:value="search" type="search" :maxlength="200" allow-clear :disabled="locked" /></label>
+          <Button type="primary" html-type="submit" :disabled="locked || !school">{{ t('page.academic.filter') }}</Button>
+        </form>
+        <StatusBlock :busy="schools.busy.value" :error="schools.error.value" @retry="schools.load" />
+        <Alert v-if="!school" type="info" show-icon :message="t('page.academic.selectSchool')" />
+      </Card>
+      <div v-if="school" class="admin-columns">
+        <Card :bordered="false">
+          <StatusBlock :busy="directory.busy.value" :error="directory.error.value" :empty="directory.data.value?.items.length === 0" @retry="directory.load" />
+          <ul class="admin-list">
+            <li v-for="entry in directory.data.value?.items" :key="entry.id" class="admin-list-item" :class="{ 'is-selected': selectedId === entry.id }">
+              <div class="console-row-head"><h3>{{ entry.name }}</h3><Tag v-if="entry.inactive">{{ t('page.academic.inactive') }}</Tag></div>
+              <p v-if="entry.kind === 'course'" class="meta">{{ entry.code }}</p>
+              <Button type="link" size="small" :disabled="busy || uncertain || operationPending || importPending" @click="open(entry.id)">{{ t('page.academic.openItem') }}</Button>
+            </li>
+          </ul>
+          <Space class="mt-3">
+            <Button v-if="history.length > 0" :disabled="locked" @click="previous">{{ t('page.academic.previous') }}</Button>
+            <Button v-if="directory.data.value?.next" :disabled="locked" @click="next">{{ t('page.academic.next') }}</Button>
+          </Space>
+        </Card>
+        <Empty v-if="!selectedId" class="console-placeholder" :image="Empty.PRESENTED_IMAGE_SIMPLE" :description="t('page.console.selectItem')" />
+        <Card v-else class="console-detail" :bordered="false">
+          <StatusBlock :busy="selected.busy.value || options.busy.value" :error="selected.error.value || options.error.value" @retry="open(selectedId,true)" />
+          <template v-if="selected.data.value">
+            <div class="console-row-head"><h2>{{ selected.data.value.object.name }}</h2><Tag v-if="selected.data.value.object.inactive">{{ t('page.academic.inactive') }}</Tag></div>
+            <Space class="meta" wrap><span>{{ selected.data.value.school.name }}</span><span>{{ t('page.academic.revision',{value:n(selected.data.value.object.revision)}) }}</span><span>{{ d(new Date(selected.data.value.object.updated_at),'dateTime') }}</span></Space>
+            <Alert v-if="notice === 'compareNotice'" type="info" class="mb-3" :message="t('page.academic.originalContent')">
+              <template #description>
+                <p>{{ selected.data.value.object.name }}</p>
+                <p class="admin-body">{{ selected.data.value.object.biography }}</p>
+                <p v-if="kind === 'course'">{{ selected.data.value.object.credits === null ? t('page.academic.unknownCredits') : t('page.academic.credits',{credits:n(selected.data.value.object.credits)}) }}</p>
+              </template>
+            </Alert>
+            <form class="admin-form" @submit.prevent="save">
+              <label>{{ t('page.academic.recordName') }}<Input v-model:value="name" :maxlength="256" required :disabled="busy || uncertain" /></label>
+              <label>{{ t('page.academic.biography') }}<Textarea v-model:value="biography" :rows="7" :maxlength="8000" :disabled="busy || uncertain" /></label>
+              <label>{{ t(kind === 'course' ? 'page.academic.college' : 'page.academic.department') }}
+                <Select v-model:value="department" :disabled="busy || uncertain" :options="[{ value: '', label: t('page.academic.unknown') }, ...(options.data.value?.departments ?? []).map(item => ({ value: item.id, label: item.name }))]" />
+              </label>
+              <template v-if="kind === 'course'">
+                <label>{{ t('page.academic.code') }}<Input v-model:value="code" :maxlength="128" :disabled="busy || uncertain" /></label>
+                <Checkbox v-model:checked="unknownCredits" :disabled="busy || uncertain">{{ t('page.academic.unknownCreditsToggle') }}</Checkbox>
+                <label>{{ t('page.academic.creditsLabel') }}<InputNumber v-model:value="credits" string-mode :min="0" :max="100" class="w-full" :disabled="busy || uncertain || unknownCredits" /></label>
+                <label>{{ t('page.academic.category') }}
+                  <Select v-model:value="category" :disabled="busy || uncertain" :options="[{ value: '', label: t('page.academic.unknown') }, ...(options.data.value?.categories ?? []).map(item => ({ value: item.id, label: item.name }))]" />
+                </label>
+                <label>{{ t('page.academic.nature') }}
+                  <Select v-model:value="nature" :disabled="busy || uncertain" :options="[{ value: '', label: t('page.academic.unknown') }, ...(options.data.value?.natures ?? []).map(item => ({ value: item.id, label: item.name }))]" />
+                </label>
+              </template>
+              <Alert v-if="error" type="error" show-icon :message="t(`page.academic.errors.${error}`)" />
+              <Alert v-if="notice" type="success" show-icon :message="t(`page.academic.${notice}`)" />
+              <Alert v-if="uncertain" type="warning" show-icon :message="t('page.academic.uncertain')" />
+              <Space wrap>
+                <Button type="primary" html-type="submit" :loading="busy" :disabled="!name.trim() || (!unknownCredits && kind === 'course' && credits === '')">{{ t(uncertain ? 'page.academic.retry' : 'page.academic.saveChanges') }}</Button>
+                <Button v-if="error === 'conflict'" :disabled="busy || uncertain || operationPending || importPending" @click="open(selectedId,true)">{{ t('page.academic.reloadCompare') }}</Button>
+                <Button :disabled="busy" @click="close">{{ t('page.academic.cancel') }}</Button>
+              </Space>
+            </form>
+            <Divider />
+            <CatalogLifecycle :key="`${selected.data.value.object.id}-${selected.data.value.object.revision}`" :entry="selected.data.value.object" :disabled="busy || uncertain || dirty" @pending="operationPending = $event" @complete="open($event,false,true);directory.load()" />
+          </template>
+        </Card>
+      </div>
+      <Collapse v-if="school" class="console-collapse">
+        <CollapsePanel key="import" :header="t('page.academic.importTitle')">
+          <ImportPanel :school-id="school" :disabled="busy || uncertain || dirty || operationPending" @pending="importPending = $event" @complete="directory.load" />
+        </CollapsePanel>
+      </Collapse>
     </div>
-    <details v-if="school" class="console-section"><summary>{{ t('page.academic.importTitle') }}</summary><ImportPanel :school-id="school" :disabled="busy || uncertain || dirty || operationPending" @pending="importPending = $event" @complete="directory.load" /></details>
-  </div>
-</Page>
+  </Page>
 </template>

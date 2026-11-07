@@ -7,9 +7,9 @@ import { Page } from '@vben/common-ui';
 import { createFormatters, useI18n } from '@vben/locales';
 import { preferences } from '@vben/preferences';
 
-import { Alert, Button, Card, Modal } from 'ant-design-vue';
+import { Alert, Button, Card, Input, Modal, Progress, Tag } from 'ant-design-vue';
 
-import { stateTone } from '#/console-ui';
+import { tagColor } from '#/console-ui';
 
 import { useStorage } from '../composables/useStorage';
 
@@ -53,8 +53,8 @@ function quota(instance: InstanceHealth) {
           <p v-if="data.instances.length === 0">{{ t('page.storage.empty') }}</p>
           <div class="console-inventory">
             <article v-for="instance in data.instances" :key="instance.id" class="console-entry">
-              <div class="console-row-head"><h3><bdi>{{ instance.id }}</bdi></h3><span class="console-badge" :data-tone="stateTone(instance.state)">{{ state(instance.state) }}</span></div>
-              <progress class="console-meter" :value="instance.used_bytes + instance.reserved_bytes" :max="instance.limit_bytes || 1" :aria-label="t('page.storage.used')"></progress>
+              <div class="console-row-head"><h3><bdi>{{ instance.id }}</bdi></h3><Tag :color="tagColor(instance.state)">{{ state(instance.state) }}</Tag></div>
+              <Progress :percent="Math.min(100, Math.round(((instance.used_bytes + instance.reserved_bytes) / (instance.limit_bytes || 1)) * 100))" size="small" :aria-label="t('page.storage.used')" />
               <p v-if="reason(instance.reason)">{{ reason(instance.reason) }}</p>
               <dl class="console-tiles">
                 <div><dt>{{ t('page.storage.limit') }}</dt><dd>{{ bytes(instance.limit_bytes) }}</dd></div>
@@ -71,7 +71,7 @@ function quota(instance: InstanceHealth) {
               </div>
               <form class="quota-form" @submit.prevent="prepareInstance(instance, 'quota', quota(instance))">
                 <label :for="`quota-${instance.id}`">{{ t('page.storage.quotaInput') }}</label>
-                <input :id="`quota-${instance.id}`" v-model="limits[instance.id]" inputmode="numeric" :placeholder="String(instance.limit_bytes)" :disabled="locked" :aria-invalid="quota(instance) === undefined" :aria-describedby="`quota-error-${instance.id}`" />
+                <Input :id="`quota-${instance.id}`" v-model:value="limits[instance.id]" inputmode="numeric" :placeholder="String(instance.limit_bytes)" :disabled="locked" :aria-invalid="quota(instance) === undefined" :aria-describedby="`quota-error-${instance.id}`" />
                 <span :id="`quota-error-${instance.id}`">{{ t('page.storage.quotaHint') }}</span>
                 <Button html-type="submit" :disabled="locked || quota(instance) === undefined">{{ t('page.storage.actions.quota') }}</Button>
               </form>
@@ -82,7 +82,7 @@ function quota(instance: InstanceHealth) {
           <p v-if="data.objects.length === 0">{{ t('page.storage.empty') }}</p>
           <div class="console-inventory">
             <article v-for="object in data.objects" :key="object.id" class="console-entry">
-              <div class="console-row-head"><h3><bdi>{{ object.id }}</bdi></h3><span class="console-badge" :data-tone="stateTone(object.state)">{{ state(object.state) }}</span></div>
+              <div class="console-row-head"><h3><bdi>{{ object.id }}</bdi></h3><Tag :color="tagColor(object.state)">{{ state(object.state) }}</Tag></div>
               <p>{{ t('page.storage.replicas', { healthy: format.number(object.healthy), desired: format.number(object.desired), missing: format.number(object.missing) }) }}</p>
               <p v-if="reason(object.reason)">{{ reason(object.reason) }}</p>
             </article>
@@ -93,7 +93,7 @@ function quota(instance: InstanceHealth) {
           <p v-if="data.failures.length === 0">{{ t('page.storage.empty') }}</p>
           <div class="console-inventory">
             <article v-for="job in data.failures" :key="job.id" class="console-entry">
-              <div class="console-row-head"><h3><bdi>{{ job.id }}</bdi></h3><span class="console-badge" :data-tone="stateTone(job.state)">{{ state(job.state) }}</span></div>
+              <div class="console-row-head"><h3><bdi>{{ job.id }}</bdi></h3><Tag :color="tagColor(job.state)">{{ state(job.state) }}</Tag></div>
               <p>{{ t('page.storage.objectId', { id: job.object_id }) }}</p>
               <p>{{ t('page.storage.attempts', { count: format.number(job.attempts) }) }}</p>
               <p>{{ t('page.storage.errorCode', { code: job.error_code }) }}</p>
@@ -117,6 +117,4 @@ function quota(instance: InstanceHealth) {
 <style scoped>
 .quota-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .35rem .5rem; align-items: center; margin-block-start: 1rem; }
 .quota-form label, .quota-form span { grid-column: 1 / -1; font-size: .8rem; color: hsl(var(--muted-foreground)); }
-.quota-form input { width: 100%; min-width: 0; min-height: 32px; padding: .25rem .5rem; border: 1px solid hsl(var(--border)); border-radius: 6px; background: transparent; }
-.quota-form input:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 2px; }
 </style>

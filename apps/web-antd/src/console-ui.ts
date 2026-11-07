@@ -15,3 +15,6 @@ export function rememberedSchool(ids: string[]) {
 export function rememberSchool(id: string) {
   try { if (id) localStorage.setItem(schoolKey, id); } catch { /* Browser storage is optional. */ }
 }
+
+// antd Tag preset colors share the same names as the tones above.
+export const tagColor = (state: string) => stateTone(state);

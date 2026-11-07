@@ -4,6 +4,8 @@ import {onBeforeRouteLeave} from 'vue-router';
 
 import {useI18n} from '@vben/locales';
 
+import { Alert, Button, Card, Input, InputNumber, Select, Space } from 'ant-design-vue';
+
 import { confirmLeave } from '#/confirm-leave';
 
 import locale7 from '../locales/langs/ar-EG/page.json';
@@ -28,8 +30,42 @@ watch(()=>[props.schoolId,scope.value],()=>{if(scope.value!=='*')scope.value=pro
 async function save(){if(!form.value||busy.value)return;busy.value=true;error.value='';saved.value=false;try{await mutation.run('reviews','/admin/presentation','PresentationView',form.value,'PUT');await load();saved.value=true}catch(error_){error.value=error_ instanceof AcademicError?error_.code:'unavailable'}finally{busy.value=false;uncertain.value=mutation.uncertain}}
 </script>
 <template>
-<section class="admin-form">
-<h2>{{ t('page.academic.presentationTitle') }}</h2><label>{{ t('page.academic.policyScope') }}<select v-model="scope" :disabled="busy || uncertain || dirty"><option :value="schoolId">{{ t('page.academic.school') }}</option><option value="*">{{ t('page.academic.globalScope') }}</option></select></label><StatusBlock :busy="data.busy.value" :error="data.error.value" @retry="load" />
-<section v-if="comparison" class="admin-notice"><h3>{{ t('page.academic.originalContent') }}</h3><p>{{ t('page.academic.guestPreview') }} {{ comparison.guest_preview }}</p><p>{{ t('page.academic.memberPreview') }} {{ comparison.member_preview }}</p><p>{{ t('page.academic.previewRatio') }} {{ comparison.preview_ratio }}</p><p v-for="(row,index) in comparison.rating_texts[editingLocale]" :key="index">{{ row.join(' · ') }}</p></section><form v-if="form" class="admin-form" @submit.prevent="save"><fieldset :disabled="busy || uncertain"><label>{{ t('page.academic.guestPreview') }}<input v-model.number="form.guest_preview" type="number" min="0" max="1000" required /></label><label>{{ t('page.academic.memberPreview') }}<input v-model.number="form.member_preview" type="number" min="0" max="1000" required /></label><label>{{ t('page.academic.previewRatio') }}<input v-model.number="form.preview_ratio" type="number" min="0.001" max="0.999" step="0.001" required /></label><label>{{ t('page.academic.ratingTextLanguage') }}<select v-model="editingLocale"><option v-for="lang in Object.keys(dictionaries)" :key="lang" :value="lang">{{ lang }}</option></select></label><fieldset v-for="(row,index) in form.rating_texts[editingLocale]" :key="index"><legend>{{ t(`page.academic.ratings.${names[index]}.label`) }}</legend><label v-for="(_,level) in row" :key="level">{{ level === 0 ? t('page.academic.recordName') : t(`page.academic.ratings.${names[index]}.level${level}`) }}<input v-model="row[level]" maxlength="100" required /></label></fieldset></fieldset><p v-if="error" role="alert">{{ t(`page.academic.errors.${error}`) }}</p><p v-if="saved" role="status">{{ t('page.academic.saved') }}</p><p v-if="uncertain">{{ t('page.academic.uncertain') }}</p><div class="admin-actions"><button :disabled="busy">{{ t(uncertain ? 'page.academic.retry' : 'page.academic.saveChanges') }}</button><button v-if="error === 'conflict'" type="button" :disabled="busy || uncertain" @click="load(true)">{{ t('page.academic.reloadCompare') }}</button><button type="button" :disabled="busy || uncertain" @click="load()">{{ t('page.academic.cancel') }}</button></div></form>
-</section>
+  <section class="admin-form">
+    <h2>{{ t('page.academic.presentationTitle') }}</h2>
+    <label>{{ t('page.academic.policyScope') }}
+      <Select v-model:value="scope" :disabled="busy || uncertain || dirty" :options="[{ value: schoolId, label: t('page.academic.school') }, { value: '*', label: t('page.academic.globalScope') }]" />
+    </label>
+    <StatusBlock :busy="data.busy.value" :error="data.error.value" @retry="load" />
+    <Alert v-if="comparison" type="info" :message="t('page.academic.originalContent')">
+      <template #description>
+        <p>{{ t('page.academic.guestPreview') }} {{ comparison.guest_preview }}</p>
+        <p>{{ t('page.academic.memberPreview') }} {{ comparison.member_preview }}</p>
+        <p>{{ t('page.academic.previewRatio') }} {{ comparison.preview_ratio }}</p>
+        <p v-for="(row,index) in comparison.rating_texts[editingLocale]" :key="index">{{ row.join(' · ') }}</p>
+      </template>
+    </Alert>
+    <form v-if="form" class="admin-form" @submit.prevent="save">
+      <div class="admin-filters">
+        <label>{{ t('page.academic.guestPreview') }}<InputNumber v-model:value="form.guest_preview" :min="0" :max="1000" class="w-full" :disabled="busy || uncertain" /></label>
+        <label>{{ t('page.academic.memberPreview') }}<InputNumber v-model:value="form.member_preview" :min="0" :max="1000" class="w-full" :disabled="busy || uncertain" /></label>
+        <label>{{ t('page.academic.previewRatio') }}<InputNumber v-model:value="form.preview_ratio" :min="0.001" :max="0.999" :step="0.001" class="w-full" :disabled="busy || uncertain" /></label>
+        <label>{{ t('page.academic.ratingTextLanguage') }}
+          <Select v-model:value="editingLocale" :disabled="busy || uncertain" :options="Object.keys(dictionaries).map(value => ({ value, label: value }))" />
+        </label>
+      </div>
+      <Card v-for="(row,index) in form.rating_texts[editingLocale]" :key="index" size="small" :title="t(`page.academic.ratings.${names[index]}.label`)">
+        <div class="admin-filters">
+          <label v-for="(_,level) in row" :key="level">{{ level === 0 ? t('page.academic.recordName') : t(`page.academic.ratings.${names[index]}.level${level}`) }}<Input v-model:value="row[level]" :maxlength="100" required :disabled="busy || uncertain" /></label>
+        </div>
+      </Card>
+      <Alert v-if="error" type="error" show-icon :message="t(`page.academic.errors.${error}`)" />
+      <Alert v-if="saved" type="success" show-icon :message="t('page.academic.saved')" />
+      <Alert v-if="uncertain" type="warning" show-icon :message="t('page.academic.uncertain')" />
+      <Space wrap>
+        <Button type="primary" html-type="submit" :loading="busy" :disabled="form.guest_preview === null || form.member_preview === null || form.preview_ratio === null">{{ t(uncertain ? 'page.academic.retry' : 'page.academic.saveChanges') }}</Button>
+        <Button v-if="error === 'conflict'" :disabled="busy || uncertain" @click="load(true)">{{ t('page.academic.reloadCompare') }}</Button>
+        <Button :disabled="busy || uncertain" @click="load()">{{ t('page.academic.cancel') }}</Button>
+      </Space>
+    </form>
+  </section>
 </template>

@@ -32,7 +32,7 @@ const tokenTheme = computed(() => {
 </script>
 
 <template>
-  <ConfigProvider :locale="antdLocale" :direction="direction" :theme="tokenTheme">
+  <ConfigProvider :locale="antdLocale" :direction="direction" :theme="tokenTheme" :auto-insert-space-in-button="false">
     <App>
       <RouterView />
     </App>
