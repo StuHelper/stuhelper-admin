@@ -76,7 +76,7 @@ const [ExportModal, exportModal] = useVbenModal({ title: '导出预览', confirm
                 <DescriptionsItem label="姓名">{{ revealed ? '张晓明' : '张*' }}</DescriptionsItem>
                 <DescriptionsItem label="学号">{{ revealed ? '20260101' : '2026****01' }}</DescriptionsItem>
                 <DescriptionsItem label="学校">示例大学 · 计算机学院</DescriptionsItem>
-                <DescriptionsItem label="学生认证"><Tag color="green">有效校园资格</Tag></DescriptionsItem>
+                <DescriptionsItem label="学生认证"><Tag color="green">在校学生 · 有效</Tag></DescriptionsItem>
                 <DescriptionsItem label="QQ">{{ revealed ? '3301021' : 'Q****1021' }}（2026-09-02 绑定）</DescriptionsItem>
               </Descriptions>
             </Card>

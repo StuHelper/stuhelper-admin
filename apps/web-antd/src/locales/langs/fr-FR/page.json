@@ -89,7 +89,7 @@
     "published": "Publié.",
     "uncertain": "Le résultat n’est pas confirmé. Réessayer renvoie la même requête ; confirmez son résultat avant une autre action.",
     "anonymous": "Étudiant anonyme",
-    "previewHint": "Aperçu affiché. Une affiliation universitaire valide est requise pour lire le texte complet.",
+    "previewHint": "Aperçu affiché. Terminez la vérification étudiante pour lire le texte complet.",
     "upvote": "D’accord",
     "downvote": "Pas d’accord",
     "discussion": "Voir la discussion",
@@ -254,7 +254,7 @@
     "clearFilters": "Effacer les filtres",
     "requirements": {
       "login": "Connexion au compte",
-      "campus_eligibility": "Statut étudiant ou diplômé valide",
+      "campus_eligibility": "Vérification étudiante",
       "phone_bound": "Numéro de téléphone associé",
       "identity_verified": "Identité vérifiée",
       "course_enrollment": "Inscription personnelle au cours"
@@ -776,10 +776,10 @@
   "verification": {
     "personalCenter": "Espace personnel",
     "title": "Vérification étudiante et d’identité",
-    "description": "Consultez séparément votre statut étudiant et votre identité, et gérez vos parcours d’études.",
+    "description": "Consultez séparément la vérification étudiante et la vérification d’identité, et gérez vos parcours d’études.",
     "refresh": "Actualiser",
     "loading": "Chargement…",
-    "studentStatus": "Éligibilité universitaire",
+    "studentStatus": "Vérification étudiante",
     "identityStatus": "Identité vérifiée",
     "valid": "Actuellement valide",
     "notVerified": "Non vérifié",
@@ -815,7 +815,7 @@
     "code": "Code de vérification reçu",
     "confirm": "Valider",
     "experiences": "Parcours d’études",
-    "validityHelp": "La vérification ordinaire reste valide sans limite. Le statut de nouvel étudiant expire à la date indiquée ; les diplômés conservent leur statut d’ancien étudiant.",
+    "validityHelp": "La vérification d’étudiant inscrit reste valide sans limite et devient une vérification d’ancien étudiant après le diplôme. La vérification de nouvel étudiant expire à la date indiquée.",
     "empty": "Aucun enregistrement.",
     "permanent": "Sans date d’expiration",
     "requestRevoke": "Demander la révocation",
@@ -864,7 +864,7 @@
     "kinds": {
       "student": "Étudiant inscrit",
       "alumni": "Ancien étudiant",
-      "newcomer": "Nouvel étudiant temporaire",
+      "newcomer": "Nouvel étudiant",
       "unknown": "Non fourni"
     },
     "states": {
@@ -941,7 +941,7 @@
     "eventJob": "Événement de changement de statut",
     "loadMore": "Afficher la suite",
     "legacyMaterial": "Consulter la pièce historique",
-    "newcomerReminder": "Vérifiez la date d’expiration du nouveau statut et terminez la vérification ordinaire à temps.",
+    "newcomerReminder": "Vérifiez la date d’expiration de votre vérification de nouvel étudiant et terminez à temps la vérification d’étudiant inscrit.",
     "schoolFacts": "Le niveau d’études et le statut proviennent des preuves de l’établissement. Les informations absentes restent inconnues et ne sont pas déduites du numéro étudiant.",
     "bitPrivacy": "La connexion à BIT consulte et vérifie le nom, le numéro étudiant, la faculté, la spécialité, la classe, la promotion, les pièces d’identité, les coordonnées enregistrées et les programmes d’études fournis par l’établissement. Les données personnelles sont chiffrées par établissement. Les mots de passe, codes SMS et sessions ne sont pas conservés.",
     "schoolProgress": "Progression de la vérification",

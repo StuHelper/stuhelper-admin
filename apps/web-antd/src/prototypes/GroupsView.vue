@@ -21,12 +21,12 @@ const group = computed(() => groupList.find((g) => g.id === current.value)!);
 const stageColor: Record<string, string> = { 已提醒: 'gold', 宽限期内: 'orange', 已恢复: 'green', 已延长: 'blue', 已豁免: 'purple', 已移出: 'red', 正常: 'default' };
 type Member = { card: string; deadline?: string; nick: string; qq: string; stage: string; status: string };
 const members = reactive<Member[]>([
-  { qq: 'Q****1021', nick: '计科-26-张*', status: '有效校园资格', stage: '正常', card: '合规' },
-  { qq: 'Q****3307', nick: '小王', status: '资格已失效', stage: '宽限期内', card: '不合规：缺少院系', deadline: '2026-11-09' },
-  { qq: 'Q****5512', nick: '数学-25-李*', status: '资格已失效', stage: '已提醒', card: '合规', deadline: '2026-11-15' },
-  { qq: 'Q****7781', nick: '外院-24-陈*', status: '已认证校友', stage: '已豁免', card: '合规' },
+  { qq: 'Q****1021', nick: '计科-26-张*', status: '在校学生', stage: '正常', card: '合规' },
+  { qq: 'Q****3307', nick: '小王', status: '认证已失效', stage: '宽限期内', card: '不合规：缺少院系', deadline: '2026-11-09' },
+  { qq: 'Q****5512', nick: '数学-25-李*', status: '认证已失效', stage: '已提醒', card: '合规', deadline: '2026-11-15' },
+  { qq: 'Q****7781', nick: '外院-24-陈*', status: '校友', stage: '已豁免', card: '合规' },
   { qq: 'Q****9020', nick: '路人甲', status: '未认证', stage: '已移出', card: '资料未就绪（不计违规）' },
-  { qq: 'Q****6634', nick: '计科-26-周*', status: '有效校园资格', stage: '已恢复', card: '合规' },
+  { qq: 'Q****6634', nick: '计科-26-周*', status: '在校学生', stage: '已恢复', card: '合规' },
 ]);
 const reportColor: Record<string, string> = { 建议: 'blue', 待执行: 'orange', 已执行: 'green' };
 const graceStages = new Set(['宽限期内', '已提醒']);
@@ -43,7 +43,7 @@ const [MemberGrid] = useVbenVxeGrid<Member>({
   },
   gridOptions: {
     columns: [
-      { field: 'qq', title: '成员' }, { field: 'nick', title: '群名片' }, { field: 'status', title: '学生资格' }, { field: 'card', title: '名片检查', minWidth: 160 },
+      { field: 'qq', title: '成员' }, { field: 'nick', title: '群名片' }, { field: 'status', title: '学生认证' }, { field: 'card', title: '名片检查', minWidth: 160 },
       { title: '处理阶段', minWidth: 120, slots: { default: 'stage' } }, { title: '操作', width: 120, fixed: 'right', slots: { default: 'action' } },
     ],
     pagerConfig: { enabled: false },
@@ -55,9 +55,9 @@ const [MemberGrid] = useVbenVxeGrid<Member>({
 const [ApplicationGrid] = useMockGrid({
   columns: [{ field: 'qq', title: '申请人' }, { field: 'at', title: '时间' }, { field: 'need', title: '群要求' }, { field: 'progress', title: '进度' }, { field: 'next', title: '下一步' }],
   data: [
-    { qq: 'Q****8812', at: '11-02 09:10', need: '有效校园资格', progress: '等待认证', next: '已引导到学生认证' },
-    { qq: 'Q****4410', at: '11-02 08:55', need: '有效校园资格', progress: '已满足', next: '待机器人批准入群' },
-    { qq: 'Q****2297', at: '11-01 22:31', need: '有效校园资格', progress: '认证被拒', next: '已通知申请人' },
+    { qq: 'Q****8812', at: '11-02 09:10', need: '在校学生或新生', progress: '等待认证', next: '已引导到学生认证' },
+    { qq: 'Q****4410', at: '11-02 08:55', need: '在校学生或新生', progress: '已满足', next: '待机器人批准入群' },
+    { qq: 'Q****2297', at: '11-01 22:31', need: '在校学生或新生', progress: '认证被拒', next: '已通知申请人' },
   ],
 });
 const [ReportGrid] = useMockGrid({
@@ -137,12 +137,12 @@ const [BatchModal, batchModal] = useVbenModal({ title: '批量处置预览', con
               </MemberGrid>
             </TabPane>
             <TabPane key="join" tab="入群申请">
-              <Descriptions size="small" class="mb-3"><DescriptionsItem label="入群方式">{{ group.mode }}</DescriptionsItem><DescriptionsItem label="接受校友">否</DescriptionsItem><DescriptionsItem label="接受临时新生">是</DescriptionsItem></Descriptions>
+              <Descriptions size="small" class="mb-3"><DescriptionsItem label="入群方式">{{ group.mode }}</DescriptionsItem><DescriptionsItem label="接受校友">否</DescriptionsItem><DescriptionsItem label="接受新生">是</DescriptionsItem></Descriptions>
               <ApplicationGrid />
             </TabPane>
             <TabPane key="card" tab="群名片规则">
               <CardForm />
-              <Alert type="info" show-icon message="名片不合规与学生资格失效是两种原因。资格失效的自动移出规则不会扩展到名片不合规。" />
+              <Alert type="info" show-icon message="名片不合规与学生认证失效是两种原因。资格失效的自动移出规则不会扩展到名片不合规。" />
             </TabPane>
             <TabPane key="rules" tab="关键词与防复读">
               <RuleForm />

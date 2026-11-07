@@ -89,7 +89,7 @@
     "published": "Published.",
     "uncertain": "The result is not confirmed. Retry sends the same request; confirm its result before another action.",
     "anonymous": "Anonymous student",
-    "previewHint": "Preview shown. Valid campus eligibility is required to read the full text.",
+    "previewHint": "Preview shown. Complete student verification to read the full text.",
     "upvote": "Agree",
     "downvote": "Disagree",
     "discussion": "View discussion",
@@ -254,7 +254,7 @@
     "clearFilters": "Clear filters",
     "requirements": {
       "login": "Signed-in account",
-      "campus_eligibility": "Valid campus eligibility",
+      "campus_eligibility": "Student verification",
       "phone_bound": "Linked phone number",
       "identity_verified": "Verified identity",
       "course_enrollment": "Personal enrollment record"
@@ -776,10 +776,10 @@
   "verification": {
     "personalCenter": "Personal center",
     "title": "Student and identity verification",
-    "description": "View student eligibility and identity status separately, and manage your study history.",
+    "description": "View student verification and identity verification separately, and manage your study history.",
     "refresh": "Refresh",
     "loading": "Loading…",
-    "studentStatus": "Campus eligibility",
+    "studentStatus": "Student verification",
     "identityStatus": "Identity verification",
     "valid": "Currently valid",
     "notVerified": "Not verified",
@@ -815,12 +815,12 @@
     "code": "Email verification code",
     "confirm": "Confirm",
     "experiences": "Study history",
-    "validityHelp": "Regular verification remains valid indefinitely. Newcomer status has an expiry date; graduates retain alumni eligibility.",
+    "validityHelp": "Current-student verification remains valid indefinitely and continues as alumni verification after graduation. Newcomer verification expires on its stated date.",
     "empty": "No records yet.",
     "permanent": "No expiry date",
     "requestRevoke": "Request revocation",
     "requestDelete": "Request deletion",
-    "removalHelp": "An administrator reviews this request. Eligibility stays unchanged until approval. Deleting student verification preserves independent identity and other entitlements.",
+    "removalHelp": "An administrator reviews this request. Eligibility stays unchanged until approval. Deleting student verification keeps identity verification and other entitlements.",
     "reason": "Reason for request",
     "submitRequest": "Submit request",
     "cancel": "Cancel",
@@ -864,7 +864,7 @@
     "kinds": {
       "student": "Current student",
       "alumni": "Alumnus or alumna",
-      "newcomer": "Temporary newcomer",
+      "newcomer": "Newcomer",
       "unknown": "Not provided"
     },
     "states": {
@@ -941,7 +941,7 @@
     "eventJob": "Eligibility change event",
     "loadMore": "Load more",
     "legacyMaterial": "View historical material",
-    "newcomerReminder": "Check the newcomer expiry date and complete regular verification in time.",
+    "newcomerReminder": "Check when your newcomer verification expires and complete current-student verification in time.",
     "schoolFacts": "Study level and enrollment status come from school evidence. Missing facts remain unknown; student IDs are not used to guess them.",
     "bitPrivacy": "BIT sign-in reads and checks the name, student ID, college and major, class and grade, identity document, school contact details, and study plans supplied by the school. Personal data is stored encrypted by school. Passwords, SMS codes, and school sessions are not stored.",
     "schoolProgress": "School verification progress",

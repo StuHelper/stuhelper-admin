@@ -11,8 +11,8 @@ import { useMockGrid } from './mock-grid';
 import PrototypeNote from './PrototypeNote.vue';
 
 const conditions = [
-  { value: 'guest', label: '允许游客' }, { value: 'login', label: '登录' }, { value: 'campus', label: '有效校园资格' },
-  { value: 'phone', label: '手机号已绑定' }, { value: 'realname', label: '独立实名' }, { value: 'enrollment', label: '本人选课记录' },
+  { value: 'guest', label: '允许游客' }, { value: 'login', label: '登录' }, { value: 'campus', label: '学生认证' },
+  { value: 'phone', label: '已绑定手机号' }, { value: 'realname', label: '实名认证' }, { value: 'enrollment', label: '本人选课记录' },
 ];
 const labelOf = (value: string) => conditions.find((c) => c.value === value)?.label ?? value;
 type Rule = { action: string; group: string; other: string; override?: string[]; overrideRevision?: number; revision: number; site: string[] };

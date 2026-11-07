@@ -12,7 +12,7 @@ type Operation = { action: string; after: string; at: string; before: string; id
 const rows: Operation[] = [
   { id: 'op-9012', at: '2026-11-02 10:42', operator: '王**（学校管理员）', module: '评价审核', action: '隐藏评价', target: '评价 e3 · 高等数学 A', result: '成功', reason: '包含人身攻击内容', before: '已公开', after: '已隐藏' },
   { id: 'op-9011', at: '2026-11-02 10:15', operator: '刘**（内容审核）', module: '评价审核', action: '批量处置（12 项）', target: '待办 12 项', result: '部分失败', reason: '广告批量清理', before: '待处理', after: '11 项已执行，1 项版本冲突' },
-  { id: 'op-9010', at: '2026-11-01 21:03', operator: '赵**（平台管理员）', module: '动作资格', action: '修改规则', target: '发布课程评价 · 示例大学', result: '成功', reason: '新生开学，放宽手机号要求', before: '登录、校园资格、手机号、选课', after: '登录、校园资格、选课' },
+  { id: 'op-9010', at: '2026-11-01 21:03', operator: '赵**（平台管理员）', module: '动作资格', action: '修改规则', target: '发布课程评价 · 示例大学', result: '成功', reason: '新生开学，放宽手机号要求', before: '登录、学生认证、已绑定手机号、选课', after: '登录、学生认证、选课' },
   { id: 'op-9009', at: '2026-11-01 16:30', operator: '赵**（平台管理员）', module: '信息查询', action: '查看完整身份字段', target: '用户 u-55302', result: '成功', reason: '处理退款争议', before: '', after: '' },
   { id: 'op-9008', at: '2026-11-01 09:12', operator: '何**（学校管理员）', module: '学生认证', action: '拒绝认证申请', target: '申请 a17', result: '成功', reason: '材料与学号不一致', before: '待审核', after: '已拒绝' },
   { id: 'op-9007', at: '2026-10-31 18:40', operator: '陈**（群管理）', module: '群聊管理', action: '禁言', target: '群 示例大学 2026 新生群 · 成员 Q****21', result: '失败', reason: '刷屏', before: '', after: '机器人离线，未执行' },

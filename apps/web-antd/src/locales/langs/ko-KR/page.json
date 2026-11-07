@@ -89,7 +89,7 @@
     "published": "게시되었습니다.",
     "uncertain": "결과가 확인되지 않았습니다. 재시도는 같은 요청을 전송합니다. 결과를 확인한 후 다른 작업을 진행하세요.",
     "anonymous": "익명 학생",
-    "previewHint": "미리보기입니다. 유효한 학교 자격이 있어야 전체 내용을 볼 수 있습니다.",
+    "previewHint": "미리보기입니다. 학생 인증을 완료하면 전체 내용을 볼 수 있습니다.",
     "upvote": "동의",
     "downvote": "동의하지 않음",
     "discussion": "토론 보기",
@@ -254,7 +254,7 @@
     "clearFilters": "필터 초기화",
     "requirements": {
       "login": "계정 로그인",
-      "campus_eligibility": "유효한 학교 자격",
+      "campus_eligibility": "학생 인증",
       "phone_bound": "휴대전화 번호 연결",
       "identity_verified": "본인 인증",
       "course_enrollment": "본인 수강 기록"
@@ -776,10 +776,10 @@
   "verification": {
     "personalCenter": "마이페이지",
     "title": "학생 인증 및 본인 확인",
-    "description": "학생 자격과 본인 확인 상태를 각각 확인하고 학업 이력을 관리하세요.",
+    "description": "학생 인증과 본인 확인 상태를 각각 확인하고 학업 이력을 관리하세요.",
     "refresh": "새로고침",
     "loading": "불러오는 중…",
-    "studentStatus": "캠퍼스 이용 자격",
+    "studentStatus": "학생 인증",
     "identityStatus": "본인 확인",
     "valid": "현재 유효",
     "notVerified": "미인증",
@@ -815,7 +815,7 @@
     "code": "이메일 인증 코드",
     "confirm": "확인",
     "experiences": "학업 이력",
-    "validityHelp": "일반 인증은 계속 유효합니다. 신입생 자격은 표시된 만료일까지 유효하며 졸업 후에도 동문 자격을 유지합니다.",
+    "validityHelp": "재학생 인증은 계속 유효하며 졸업 후에는 동문 인증으로 유지됩니다. 신입생 인증은 표시된 만료일까지 유효합니다.",
     "empty": "아직 기록이 없습니다.",
     "permanent": "만료일 없음",
     "requestRevoke": "철회 요청",
@@ -864,7 +864,7 @@
     "kinds": {
       "student": "재학생",
       "alumni": "동문",
-      "newcomer": "임시 신입생",
+      "newcomer": "신입생",
       "unknown": "제공되지 않음"
     },
     "states": {
@@ -941,7 +941,7 @@
     "eventJob": "자격 변경 알림",
     "loadMore": "더 불러오기",
     "legacyMaterial": "과거 자료 보기",
-    "newcomerReminder": "신입생 자격 만료일을 확인하고 기한 내 일반 인증을 완료하세요.",
+    "newcomerReminder": "신입생 인증 만료일을 확인하고 기한 내 재학생 인증을 완료하세요.",
     "schoolFacts": "학업 단계와 재학 상태는 학교의 확인 자료에 따라 기록합니다. 제공되지 않은 정보는 알 수 없는 상태로 유지하며 학번으로 추정하지 않습니다.",
     "bitPrivacy": "베이징이공대 계정 인증은 학교가 제공한 이름, 학번, 단과대·전공, 반·학년, 신분증 정보, 등록 연락처 및 교육과정을 읽고 대조합니다. 개인정보는 학교별로 암호화해 저장합니다. 비밀번호, SMS 코드 및 학교 로그인 세션은 저장하지 않습니다.",
     "schoolProgress": "학교 인증 진행 상황",

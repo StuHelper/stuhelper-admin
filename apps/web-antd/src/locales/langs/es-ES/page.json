@@ -89,7 +89,7 @@
     "published": "Publicado.",
     "uncertain": "El resultado no está confirmado. Reintentar envía la misma solicitud; confirma el resultado antes de otra acción.",
     "anonymous": "Estudiante anónimo",
-    "previewHint": "Se muestra una vista previa. Se requiere una condición universitaria válida para leer el texto completo.",
+    "previewHint": "Se muestra una vista previa. Completa la verificación estudiantil para leer el texto completo.",
     "upvote": "De acuerdo",
     "downvote": "En desacuerdo",
     "discussion": "Ver discusión",
@@ -254,7 +254,7 @@
     "clearFilters": "Borrar filtros",
     "requirements": {
       "login": "Sesión iniciada",
-      "campus_eligibility": "Vinculación académica válida",
+      "campus_eligibility": "Verificación estudiantil",
       "phone_bound": "Número de teléfono vinculado",
       "identity_verified": "Identidad verificada",
       "course_enrollment": "Registro personal de matrícula"
@@ -776,10 +776,10 @@
   "verification": {
     "personalCenter": "Área personal",
     "title": "Verificación estudiantil y de identidad",
-    "description": "Consulta por separado tu condición de estudiante y tu identidad, y gestiona tus estudios.",
+    "description": "Consulta por separado la verificación estudiantil y la de identidad, y gestiona tus estudios.",
     "refresh": "Actualizar",
     "loading": "Cargando…",
-    "studentStatus": "Elegibilidad universitaria",
+    "studentStatus": "Verificación estudiantil",
     "identityStatus": "Verificación de identidad",
     "valid": "Actualmente válida",
     "notVerified": "Sin verificar",
@@ -815,7 +815,7 @@
     "code": "Código del correo",
     "confirm": "Confirmar",
     "experiences": "Historial académico",
-    "validityHelp": "La verificación ordinaria es indefinida. La condición de nuevo estudiante caduca en la fecha indicada; los graduados conservan su elegibilidad.",
+    "validityHelp": "La verificación de estudiante actual no caduca y se mantiene como verificación de egresado tras la graduación. La verificación de nuevo estudiante caduca en la fecha indicada.",
     "empty": "Todavía no hay registros.",
     "permanent": "Sin caducidad",
     "requestRevoke": "Solicitar revocación",
@@ -864,7 +864,7 @@
     "kinds": {
       "student": "Estudiante actual",
       "alumni": "Graduado",
-      "newcomer": "Nuevo estudiante temporal",
+      "newcomer": "Nuevo estudiante",
       "unknown": "No proporcionado"
     },
     "states": {
@@ -941,7 +941,7 @@
     "eventJob": "Evento de cambio de elegibilidad",
     "loadMore": "Cargar más",
     "legacyMaterial": "Ver documento histórico",
-    "newcomerReminder": "Consulta la caducidad del nuevo estudiante y completa la verificación ordinaria a tiempo.",
+    "newcomerReminder": "Consulta la caducidad de tu verificación de nuevo estudiante y completa a tiempo la verificación de estudiante actual.",
     "schoolFacts": "El nivel de estudios y el estado de matrícula se registran según las pruebas de la institución. La información ausente queda como desconocida y no se deduce del número de estudiante.",
     "bitPrivacy": "El acceso a BIT consulta y contrasta el nombre, número de estudiante, facultad, especialidad, clase, promoción, documento de identidad, contactos registrados y planes de estudio. Los datos personales se guardan cifrados por institución. No se guardan contraseñas, códigos SMS ni sesiones de acceso.",
     "schoolProgress": "Progreso de la verificación",

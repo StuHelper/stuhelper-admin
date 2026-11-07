@@ -89,7 +89,7 @@
     "published": "投稿しました。",
     "uncertain": "結果が未確認です。再試行では同じリクエストを送信します。結果を確認してから次の操作をしてください。",
     "anonymous": "匿名の学生",
-    "previewHint": "プレビューを表示しています。有効な大学資格がある場合に全文を閲覧できます。",
+    "previewHint": "プレビューを表示しています。学生認証を完了すると全文を閲覧できます。",
     "upvote": "賛成",
     "downvote": "反対",
     "discussion": "スレッドを表示",
@@ -254,7 +254,7 @@
     "clearFilters": "絞り込みを解除",
     "requirements": {
       "login": "ログイン",
-      "campus_eligibility": "有効な在籍資格",
+      "campus_eligibility": "学生認証",
       "phone_bound": "電話番号の連携",
       "identity_verified": "本人確認",
       "course_enrollment": "本人の履修記録"
@@ -776,10 +776,10 @@
   "verification": {
     "personalCenter": "マイページ",
     "title": "学生認証と本人確認",
-    "description": "学生資格と本人確認の状態を個別に確認し、学歴を管理できます。",
+    "description": "学生認証と本人確認の状態を個別に確認し、学歴を管理できます。",
     "refresh": "更新",
     "loading": "読み込み中…",
-    "studentStatus": "キャンパス利用資格",
+    "studentStatus": "学生認証",
     "identityStatus": "本人確認",
     "valid": "有効",
     "notVerified": "未確認",
@@ -815,7 +815,7 @@
     "code": "メール確認コード",
     "confirm": "確認",
     "experiences": "学歴",
-    "validityHelp": "通常の認証に有効期限はありません。新入生資格は表示された期限まで有効で、卒業後は卒業生資格が維持されます。",
+    "validityHelp": "在学生認証に有効期限はなく、卒業後は卒業生認証として維持されます。新入生認証は表示された期限まで有効です。",
     "empty": "記録はありません。",
     "permanent": "無期限",
     "requestRevoke": "取消を申請",
@@ -864,7 +864,7 @@
     "kinds": {
       "student": "在学生",
       "alumni": "卒業生",
-      "newcomer": "新入生の仮資格",
+      "newcomer": "新入生",
       "unknown": "未提供"
     },
     "states": {
@@ -941,7 +941,7 @@
     "eventJob": "資格変更の通知",
     "loadMore": "さらに読み込む",
     "legacyMaterial": "過去の資料を表示",
-    "newcomerReminder": "新入生資格の有効期限を確認し、期限までに通常の認証を完了してください。",
+    "newcomerReminder": "新入生認証の有効期限を確認し、期限までに在学生認証を完了してください。",
     "schoolFacts": "学習段階と在籍状態は学校の証拠に基づいて記録します。提供されていない情報は不明のままとし、学籍番号から推測しません。",
     "bitPrivacy": "北京理工大学のアカウント認証では、学校が提供する氏名、学籍番号、学部・専攻、クラス・学年、本人確認書類、登録連絡先、履修計画を取得して照合します。個人情報は学校別に暗号化して保存します。パスワード、SMSコード、学校のログインセッションは保存しません。",
     "schoolProgress": "学校認証の進行状況",
