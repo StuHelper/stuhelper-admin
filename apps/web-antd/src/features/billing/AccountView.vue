@@ -17,6 +17,7 @@ import MutationAlert from '#/shared/ui/MutationAlert.vue';
 
 import { purchaseRefundReasons, useBillingAdmin } from './api';
 import { useMoney } from './money';
+import PaymentReview from './PaymentReview.vue';
 
 /**
  * One account's wallet, orders and ledger, with the account-level actions:
@@ -115,6 +116,13 @@ async function refundPurchase() {
   await after(result, t('page.billing.accounts.refunded'));
 }
 
+// Orders whose automatic payment queries ran out, handled with the shared review form.
+const reviewing = shallowRef<Order>();
+async function reviewed(_order: Order, action: string) {
+  reviewing.value = undefined;
+  await after(true, t(`page.billing.refunds.done.review.${action}`));
+}
+
 const rules = shallowRef<Rule[]>([]);
 const rulesError = ref('');
 async function loadRules() {
@@ -201,6 +209,7 @@ const signed = (entry: Account['ledger']['items'][number]) => (entry.asset === '
                   <template v-else-if="column.key === 'state'"><Tag>{{ t(`page.billing.orderState.${record.state}`) }}</Tag></template>
                   <template v-else-if="column.key === 'action'">
                     <Button v-if="record.kind === 'purchase' && record.state === 'succeeded'" type="link" size="small" :disabled="locked" @click="refunding = record as Order">{{ t('page.billing.accounts.refundPurchase') }}</Button>
+                    <Button v-else-if="record.state === 'needs_review'" type="link" size="small" :disabled="locked" @click="reviewing = record as Order">{{ t('page.billing.review.open') }}</Button>
                   </template>
                 </template>
               </Table>
@@ -247,6 +256,10 @@ const signed = (entry: Account['ledger']['items'][number]) => (entry.asset === '
         </Card>
       </template>
     </div>
+
+    <Modal :open="!!reviewing" :title="t('page.billing.review.title')" :footer="null" :mask-closable="false" destroy-on-close @cancel="reviewing = undefined">
+      <PaymentReview v-if="reviewing && target" :order="reviewing" :target="target" @done="reviewed" />
+    </Modal>
 
     <Modal :open="!!refunding" :title="t('page.billing.accounts.refundPurchase')" :footer="null" :mask-closable="false" @cancel="!locked && (refunding = undefined)">
       <template v-if="refunding">

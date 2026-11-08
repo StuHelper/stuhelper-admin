@@ -26,7 +26,10 @@
     "billingGroup": "账务",
     "billingRefunds": "退款处理",
     "billingAccounts": "账号账务",
-    "billingConfig": "账务配置"
+    "billingConfig": "账务配置",
+    "accessGroup": "系统",
+    "accessRoles": "角色授权",
+    "accessAudit": "操作记录"
   },
   "common": {
     "all": "全部",
@@ -106,7 +109,9 @@
     "billing_closure_conflict": "数据已被其他操作更新，或该账号正在注销。请刷新后重试。",
     "billing_insufficient_funds": "余额不足，无法完成操作。",
     "billing_assets_pending": "账号仍有处理中的资产，请稍后再试。",
-    "billing_operation_too_large": "单次操作涉及的数据过多。"
+    "billing_operation_too_large": "单次操作涉及的数据过多。",
+    "billing_conflict": "数据已被其他操作更新，请刷新后重试。",
+    "invalid_request": "请求格式不正确，请检查后重试。"
   },
   "session": {
     "signIn": "登录",
@@ -990,7 +995,9 @@
       "awaiting_manual": "等待人工打款",
       "awaiting_payment": "等待付款",
       "expired": "已过期",
-      "cancelled": "已取消"
+      "cancelled": "已取消",
+      "needs_review": "需要人工核实",
+      "review_query_pending": "等待补充查询"
     },
     "refunds": {
       "title": "退款处理",
@@ -1018,8 +1025,15 @@
         "rejected": "已拒绝退款。",
         "paid": "已登记打款成功。",
         "payoutFailed": "已登记打款失败。",
-        "recorded": "操作结果已确认。"
-      }
+        "recorded": "操作结果已确认。",
+        "review": {
+          "retry_query": "已安排一次补充查询。",
+          "confirm_succeeded": "已登记渠道确认成功。",
+          "confirm_failed": "已登记渠道确认失败。"
+        }
+      },
+      "paymentChannel": "人工付款渠道",
+      "paymentChannelHint": "填写实际付款使用的渠道和付款账户标识，例如“招商银行-对公账户”。同一渠道的流水号不能重复登记。"
     },
     "accounts": {
       "title": "账号账务",
@@ -1102,6 +1116,86 @@
         "offer": "编辑积分方案",
         "rule": "编辑奖励规则"
       }
+    },
+    "review": {
+      "intro": "自动查询已用完次数，渠道结果仍未知。可以再安排一次查询，或在向渠道核实后登记结果。",
+      "action": "处理方式",
+      "retry_query": "再查询一次",
+      "confirm_succeeded": "渠道确认成功",
+      "confirm_failed": "渠道确认失败",
+      "evidence": "核实依据编号",
+      "evidenceHint": "填写渠道工单号、对账单编号等可追溯的编号，不要粘贴支付载荷。",
+      "submit": "提交",
+      "open": "核实处理",
+      "title": "核实支付结果"
+    }
+  },
+  "access": {
+    "title": "角色授权",
+    "intro": "为管理员授予角色及学校、群、业务范围。平台管理员自动拥有全部能力；其他管理员只拥有被授予的能力。每次授予和撤销都要填写原因并记入操作记录。",
+    "administrator": "管理员授权",
+    "subject": "管理员账号标识",
+    "subjectHint": "填写管理员在统一身份中的用户标识（subject）。",
+    "platformAdmin": "该账号是平台管理员，自动拥有全部能力和范围，无需授予角色。",
+    "noGrants": "该管理员还没有授予的角色。",
+    "role": "角色",
+    "roleId": "角色编号",
+    "roleIdHint": "填写要授予的角色编号，可在下方模板或新建角色中查看。",
+    "roleName": "角色名称",
+    "scope": "范围",
+    "school": "学校",
+    "group": "群",
+    "module": "业务模块",
+    "scopeHint": "“*”表示该维度的全部范围；三个维度需要同时满足。",
+    "everywhere": "全部范围",
+    "grantTitle": "授予角色",
+    "grant": "授予",
+    "granted": "已授予角色。",
+    "revoke": "撤销",
+    "revokeTitle": "撤销角色",
+    "confirmRevoke": "确认撤销",
+    "revoked": "已撤销角色。",
+    "templates": "角色模板",
+    "templatesHint": "模板只是起点，本身不授予任何权限。角色创建后不能修改，调整能力需要新建角色。",
+    "useTemplate": "以此新建",
+    "newRole": "新建角色",
+    "newRoleIdHint": "只能使用小写字母、数字、点、下划线和连字符，以字母开头，创建后不能修改。",
+    "capabilities": "能力",
+    "capabilitiesHint": "输入能力标识后回车，例如 billing.manage。",
+    "createRole": "创建角色",
+    "created": "角色已创建。"
+  },
+  "audit": {
+    "title": "操作记录",
+    "intro": "查看有权查询的各模块管理操作，按时间合并。某个模块暂时无法查询时，页面会标明缺少哪些记录。",
+    "time": "时间",
+    "source": "来源模块",
+    "action": "操作",
+    "actor": "操作者",
+    "target": "对象",
+    "result": "结果",
+    "allSources": "全部模块",
+    "from": "开始时间",
+    "until": "结束时间",
+    "empty": "没有符合条件的记录。",
+    "partial": "以下模块暂时无法查询，结果不完整：{modules}",
+    "sources": {
+      "platform": "平台",
+      "catalog": "课程目录",
+      "reviews": "评价",
+      "moderation": "内容审核",
+      "resources": "资料",
+      "verification": "认证",
+      "billing": "账务",
+      "qq-binding": "QQ 绑定",
+      "open-platform": "开放平台",
+      "storage": "存储"
+    },
+    "results": {
+      "success": "成功",
+      "denied": "被拒绝",
+      "failed": "失败",
+      "unknown": "结果未知"
     }
   }
 }

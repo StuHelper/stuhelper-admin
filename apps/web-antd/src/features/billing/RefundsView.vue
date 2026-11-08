@@ -16,6 +16,7 @@ import MutationAlert from '#/shared/ui/MutationAlert.vue';
 
 import { refundStates, useBillingAdmin } from './api';
 import { useMoney } from './money';
+import PaymentReview from './PaymentReview.vue';
 
 /**
  * Refund queue. A submitted refund is approved or rejected; approval either
@@ -34,10 +35,10 @@ watch(filter, () => void refunds.reload());
 
 const selected = shallowRef<AdminOrder>();
 const reviewForm = reactive({ approve: true, manual: false, reason: '' });
-const manualForm = reactive({ succeeded: true, reference: '', reason: '' });
+const manualForm = reactive({ succeeded: true, channel: '', reference: '', reason: '' });
 const write = useMutation();
 const success = ref('');
-const dirty = computed(() => !!selected.value && (!!reviewForm.reason.trim() || !!manualForm.reference.trim() || !!manualForm.reason.trim()));
+const dirty = computed(() => !!selected.value && (!!reviewForm.reason.trim() || !!manualForm.channel.trim() || !!manualForm.reference.trim() || !!manualForm.reason.trim()));
 useLeaveGuard(() => (write.uncertain.value ? t('page.common.leaveUncertain') : (dirty.value || write.busy.value ? t('page.common.leaveUnsaved') : '')));
 const locked = computed(() => write.busy.value || write.uncertain.value);
 
@@ -46,14 +47,14 @@ function open(order: AdminOrder) {
   success.value = '';
   write.dismiss();
   Object.assign(reviewForm, { approve: true, manual: false, reason: '' });
-  Object.assign(manualForm, { succeeded: true, reference: '', reason: '' });
+  Object.assign(manualForm, { succeeded: true, channel: '', reference: '', reason: '' });
 }
 function close() {
   if (!locked.value) selected.value = undefined;
 }
 // Rejecting needs a reason the user can read; a failed payout needs the cause.
 const reviewReady = computed(() => reviewForm.approve || !!reviewForm.reason.trim());
-const manualReady = computed(() => (manualForm.succeeded ? !!manualForm.reference.trim() : !!manualForm.reason.trim()));
+const manualReady = computed(() => !!manualForm.channel.trim() && (manualForm.succeeded ? !!manualForm.reference.trim() : !!manualForm.reason.trim()));
 
 async function submitReview() {
   const order = selected.value;
@@ -65,7 +66,7 @@ async function submitReview() {
 async function submitManual() {
   const order = selected.value;
   if (!order || !manualReady.value) return;
-  const body: ManualInput = { target: order.target, succeeded: manualForm.succeeded, payment_reference: manualForm.succeeded ? manualForm.reference.trim() : '', reason: manualForm.reason.trim() };
+  const body: ManualInput = { target: order.target, succeeded: manualForm.succeeded, payment_channel: manualForm.channel.trim(), payment_reference: manualForm.succeeded ? manualForm.reference.trim() : '', reason: manualForm.reason.trim() };
   const result = await write.run(`manual:${order.id}`, body, (value, key) => api.manualResult(order.id, value, key));
   if (result) done(order, result, manualForm.succeeded ? 'paid' : 'payoutFailed');
 }
@@ -82,7 +83,7 @@ function done(order: AdminOrder, result: Order, message: string) {
   refunds.items.value = refunds.items.value.flatMap((item) => (item.id === order.id ? (updated.state === filter.value ? [updated] : []) : [item]));
 }
 
-const stateColor: Record<string, string> = { submitted: 'blue', processing: 'gold', awaiting_details: 'orange', awaiting_manual: 'orange', succeeded: 'green', failed: 'red', rejected: 'default' };
+const stateColor: Record<string, string> = { needs_review: 'red', review_query_pending: 'gold', submitted: 'blue', processing: 'gold', awaiting_details: 'orange', awaiting_manual: 'orange', succeeded: 'green', failed: 'red', rejected: 'default' };
 const columns = computed(() => [
   { key: 'created', title: t('page.common.createdAt') },
   { key: 'amount', title: t('page.billing.amount') },
@@ -153,6 +154,9 @@ const columns = computed(() => [
               <Radio :value="false">{{ t('page.billing.refunds.notPaid') }}</Radio>
             </RadioGroup>
           </FormItem>
+          <FormItem :label="t('page.billing.refunds.paymentChannel')" required :extra="t('page.billing.refunds.paymentChannelHint')" html-for="refund-payment-channel">
+            <Input id="refund-payment-channel" v-model:value="manualForm.channel" :maxlength="128" :disabled="locked" autocomplete="off" />
+          </FormItem>
           <FormItem v-if="manualForm.succeeded" :label="t('page.billing.refunds.paymentReference')" required html-for="refund-payment-reference">
             <Input id="refund-payment-reference" v-model:value="manualForm.reference" :maxlength="256" :disabled="locked" autocomplete="off" />
           </FormItem>
@@ -161,6 +165,8 @@ const columns = computed(() => [
           </FormItem>
           <Button type="primary" html-type="submit" :loading="write.busy.value" :disabled="!manualReady || write.uncertain.value">{{ t('page.billing.refunds.record') }}</Button>
         </Form>
+
+        <PaymentReview v-else-if="selected.state === 'needs_review' && !success" :order="selected" :target="selected.target" @done="(result, action) => done(selected!, result, `review.${action}`)" />
 
         <MutationAlert :busy="write.busy.value" :error="write.error.value" :uncertain="write.uncertain.value" :success="success" @retry="retry" />
       </div>

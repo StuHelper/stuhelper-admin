@@ -26,7 +26,10 @@
     "billingGroup": "Facturation",
     "billingRefunds": "Remboursements",
     "billingAccounts": "Facturation par compte",
-    "billingConfig": "Réglages de facturation"
+    "billingConfig": "Réglages de facturation",
+    "accessGroup": "Système",
+    "accessRoles": "Rôles et accès",
+    "accessAudit": "Journal des opérations"
   },
   "common": {
     "all": "Tous",
@@ -106,7 +109,9 @@
     "billing_closure_conflict": "Les données ont changé entre-temps, ou le compte est en cours de clôture. Actualisez puis réessayez.",
     "billing_insufficient_funds": "Le solde est insuffisant pour cette action.",
     "billing_assets_pending": "Des actifs du compte sont encore en traitement. Réessayez plus tard.",
-    "billing_operation_too_large": "Cette opération porte sur trop de données à la fois."
+    "billing_operation_too_large": "Cette opération porte sur trop de données à la fois.",
+    "billing_conflict": "Les données ont changé entre-temps. Actualisez puis réessayez.",
+    "invalid_request": "Le format de la requête n’est pas valide. Vérifiez-le puis réessayez."
   },
   "session": {
     "signIn": "Se connecter",
@@ -990,7 +995,9 @@
       "awaiting_manual": "En attente de versement manuel",
       "awaiting_payment": "En attente de paiement",
       "expired": "Expiré",
-      "cancelled": "Annulé"
+      "cancelled": "Annulé",
+      "needs_review": "À vérifier manuellement",
+      "review_query_pending": "Requête supplémentaire prévue"
     },
     "refunds": {
       "title": "Remboursements",
@@ -1018,8 +1025,15 @@
         "rejected": "Le remboursement a été refusé.",
         "paid": "Le versement a été enregistré comme effectué.",
         "payoutFailed": "Le versement a été enregistré comme échoué.",
-        "recorded": "Le résultat de l’action a été confirmé."
-      }
+        "recorded": "Le résultat de l’action a été confirmé.",
+        "review": {
+          "retry_query": "Une requête supplémentaire est prévue.",
+          "confirm_succeeded": "Le succès confirmé par le moyen de paiement a été enregistré.",
+          "confirm_failed": "L’échec confirmé par le moyen de paiement a été enregistré."
+        }
+      },
+      "paymentChannel": "Moyen de versement manuel",
+      "paymentChannelHint": "Indiquez le moyen et le compte payeur réellement utilisés, par exemple « Banque A, compte entreprise ». Un numéro de transaction ne peut être enregistré qu’une fois par moyen."
     },
     "accounts": {
       "title": "Facturation par compte",
@@ -1102,6 +1116,86 @@
         "offer": "Modifier l’offre de points",
         "rule": "Modifier la règle de récompense"
       }
+    },
+    "review": {
+      "intro": "Les requêtes automatiques sont épuisées et le résultat reste inconnu. Prévoyez une requête de plus, ou enregistrez le résultat après vérification auprès du moyen de paiement.",
+      "action": "Traitement",
+      "retry_query": "Interroger à nouveau",
+      "confirm_succeeded": "Succès confirmé",
+      "confirm_failed": "Échec confirmé",
+      "evidence": "Référence du justificatif",
+      "evidenceHint": "Indiquez une référence traçable, comme un numéro de ticket ou de relevé. Ne collez aucune donnée de paiement.",
+      "submit": "Envoyer",
+      "open": "Vérifier",
+      "title": "Vérifier le résultat du paiement"
+    }
+  },
+  "access": {
+    "title": "Rôles et accès",
+    "intro": "Attribuez aux administrateurs des rôles limités à un établissement, un groupe et un module. Les administrateurs de la plateforme détiennent toutes les capacités ; les autres n’ont que ce qui leur est attribué. Chaque attribution ou révocation demande un motif et est journalisée.",
+    "administrator": "Accès d’un administrateur",
+    "subject": "Identifiant de l’administrateur",
+    "subjectHint": "Saisissez l’identifiant utilisateur (subject) de l’administrateur dans le service d’identité.",
+    "platformAdmin": "Ce compte est administrateur de la plateforme et détient toutes les capacités partout ; aucun rôle n’est nécessaire.",
+    "noGrants": "Aucun rôle n’est attribué à cet administrateur.",
+    "role": "Rôle",
+    "roleId": "Identifiant du rôle",
+    "roleIdHint": "Saisissez l’identifiant du rôle à attribuer ; voir les modèles ou les rôles créés ci-dessous.",
+    "roleName": "Nom du rôle",
+    "scope": "Portée",
+    "school": "Établissement",
+    "group": "Groupe",
+    "module": "Module métier",
+    "scopeHint": "« * » couvre toute la dimension ; les trois dimensions doivent correspondre.",
+    "everywhere": "Partout",
+    "grantTitle": "Attribuer un rôle",
+    "grant": "Attribuer",
+    "granted": "Le rôle a été attribué.",
+    "revoke": "Révoquer",
+    "revokeTitle": "Révoquer le rôle",
+    "confirmRevoke": "Confirmer la révocation",
+    "revoked": "Le rôle a été révoqué.",
+    "templates": "Modèles de rôles",
+    "templatesHint": "Un modèle est un point de départ et n’accorde rien par lui-même. Un rôle créé ne change plus ; créez-en un nouveau pour ajuster les capacités.",
+    "useTemplate": "Partir de ce modèle",
+    "newRole": "Nouveau rôle",
+    "newRoleIdHint": "Lettres minuscules, chiffres, points, tirets bas et traits d’union, en commençant par une lettre. Non modifiable ensuite.",
+    "capabilities": "Capacités",
+    "capabilitiesHint": "Saisissez une capacité puis Entrée, par exemple billing.manage.",
+    "createRole": "Créer le rôle",
+    "created": "Le rôle a été créé."
+  },
+  "audit": {
+    "title": "Journal des opérations",
+    "intro": "Opérations d’administration de tous les modules que vous pouvez consulter, fusionnées par date. Si un module ne répond pas, la page indique les enregistrements manquants.",
+    "time": "Date",
+    "source": "Module",
+    "action": "Opération",
+    "actor": "Auteur",
+    "target": "Cible",
+    "result": "Résultat",
+    "allSources": "Tous les modules",
+    "from": "Depuis",
+    "until": "Jusqu’au",
+    "empty": "Aucun enregistrement correspondant.",
+    "partial": "Ces modules n’ont pas pu être consultés, les résultats sont incomplets : {modules}",
+    "sources": {
+      "platform": "Plateforme",
+      "catalog": "Catalogue des cours",
+      "reviews": "Avis",
+      "moderation": "Modération",
+      "resources": "Documents",
+      "verification": "Vérification",
+      "billing": "Facturation",
+      "qq-binding": "Liaison QQ",
+      "open-platform": "Plateforme ouverte",
+      "storage": "Stockage"
+    },
+    "results": {
+      "success": "Réussi",
+      "denied": "Refusé",
+      "failed": "Échoué",
+      "unknown": "Inconnu"
     }
   }
 }

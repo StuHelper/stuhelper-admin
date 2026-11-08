@@ -11,7 +11,7 @@ const rule = { id: 'review-published', version: 2, effective_at: '2026-10-01T00:
 
 // Billing server following the billing contract. Writes are recorded with their idempotency keys.
 async function server(page) {
-  const state = { refunds: [order({ id: 'r1', kind: 'refund', state: 'submitted', amount_minor: 3000, target }), order({ id: 'r2', kind: 'refund', state: 'awaiting_manual', amount_minor: 1000, receipt_reference: 'rcpt-9', target })], offers: [{ id: 'points-120', enabled: true, amount_minor: 1000, points: 120, valid_seconds: 30 * 86_400, version: 3 }], writes: [], reads: [] };
+  const state = { refunds: [order({ id: 'r1', kind: 'refund', state: 'submitted', amount_minor: 3000, target }), order({ id: 'r2', kind: 'refund', state: 'awaiting_manual', amount_minor: 1000, receipt_reference: 'rcpt-9', target }), order({ id: 'r3', kind: 'refund', state: 'needs_review', amount_minor: 500, target })], offers: [{ id: 'points-120', enabled: true, amount_minor: 1000, points: 120, valid_seconds: 30 * 86_400, version: 3 }], writes: [], reads: [] };
   await page.route('**/api/v1/billing/admin/**', async (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -28,6 +28,7 @@ async function server(page) {
     const body = request.postDataJSON();
     state.writes.push({ path, body, key: request.headers()['idempotency-key'] });
     if (path === '/refunds/r1/review') return route.fulfill({ json: order({ id: 'r1', kind: 'refund', state: 'processing', amount_minor: 3000 }) });
+    if (path === '/orders/r3/payment-review') return route.fulfill({ json: order({ id: 'r3', kind: 'refund', state: 'review_query_pending', amount_minor: 500 }) });
     if (path === '/refunds/r2/manual-result') return route.fulfill({ json: order({ id: 'r2', kind: 'refund', state: 'succeeded', amount_minor: 1000 }) });
     if (path === '/offers/points-120') {
       if (body.version !== state.offers[0].version) return route.fulfill({ status: 409, json: { code: 'billing_closure_conflict' } });
@@ -63,9 +64,11 @@ test('a submitted refund is approved for manual payout and the payout result is 
   const record = drawer.getByRole('button', { name: b.refunds.record, exact: true });
   await expect(record).toBeDisabled();
   await drawer.getByLabel(b.refunds.paymentReference).fill('bank-777');
+  await expect(record).toBeDisabled();
+  await drawer.getByLabel(b.refunds.paymentChannel).fill('bank-a-corporate');
   await record.click();
   await expect(drawer.getByText(b.refunds.done.paid, { exact: true })).toBeVisible();
-  expect(state.writes[1]).toEqual({ path: '/refunds/r2/manual-result', key: expect.any(String), body: { target, succeeded: true, payment_reference: 'bank-777', reason: '' } });
+  expect(state.writes[1]).toEqual({ path: '/refunds/r2/manual-result', key: expect.any(String), body: { target, succeeded: true, payment_channel: 'bank-a-corporate', payment_reference: 'bank-777', reason: '' } });
 });
 
 test('an offer is saved with the version that was read and disabled channels are listed', async ({ page }, info) => {
@@ -100,4 +103,19 @@ test('an account lookup shows the wallet and a reward is granted once per event'
   await grant.click();
   await expect(page.getByText(a.rewardState.granted, { exact: true })).toBeVisible();
   expect(state.writes).toEqual([{ path: '/rewards', key: expect.any(String), body: { target, event: { event_id: expect.stringMatching(/^[0-9a-f-]{36}$/), rule_id: 'review-published', object_id: 'review-42', occurred_at: expect.any(String) } } }]);
+});
+
+test('a refund whose automatic queries ran out gets one more query with cited evidence', async ({ page }, info) => {
+  const all = catalogue(info); const b = all.billing; const state = await server(page);
+  await page.goto(`${base}/billing/refunds?lang=${info.project.metadata.locale}`);
+  await page.getByText(b.orderState.needs_review, { exact: true }).click();
+  await page.getByRole('button', { name: b.refunds.handle, exact: true }).click();
+  const drawer = page.locator('.ant-drawer-content');
+  const submit = drawer.getByRole('button', { name: b.review.submit, exact: true });
+  await expect(submit).toBeDisabled();
+  await drawer.getByLabel(b.review.evidence).fill('ticket-55');
+  await drawer.getByLabel(all.common.reason).fill('Channel was down during the night.');
+  await submit.click();
+  await expect(drawer.getByText(b.refunds.done.review.retry_query, { exact: true })).toBeVisible();
+  expect(state.writes).toEqual([{ path: '/orders/r3/payment-review', key: expect.any(String), body: { target, action: 'retry_query', reason: 'Channel was down during the night.', evidence_reference: 'ticket-55' } }]);
 });

@@ -1,4 +1,4 @@
-import { MessagesSquare, Search, ShieldUser, ScrollText } from 'lucide-vue-next';
+import { MessagesSquare, Search } from 'lucide-vue-next';
 
 import { menus } from '#/menus';
 import { router } from '#/router';
@@ -10,9 +10,7 @@ import './demo.css';
 export function installDemo() {
   installDemoFetch();
   const pages = [
-    { name: 'DemoRoles', path: 'system/roles', title: '角色授权', icon: ShieldUser, load: () => import('./pages/Roles.vue') },
     { name: 'DemoLookup', path: 'system/lookup', title: '全站信息查询', icon: Search, load: () => import('./pages/Lookup.vue') },
-    { name: 'DemoAudit', path: 'system/audit', title: '操作记录', icon: ScrollText, load: () => import('./pages/AuditLog.vue') },
     { name: 'DemoQQ', path: 'qq', title: 'QQ 群管理', icon: MessagesSquare, load: () => import('./pages/QQ.vue') },
   ];
   for (const page of pages) {

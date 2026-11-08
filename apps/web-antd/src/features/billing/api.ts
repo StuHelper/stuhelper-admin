@@ -20,6 +20,7 @@ export type ManualInput = Schemas['ManualInput'];
 export type GrantInput = Schemas['GrantInput'];
 export type RevokeInput = Schemas['RevokeInput'];
 export type PurchaseRefundInput = Schemas['PurchaseRefundInput'];
+export type PaymentReviewInput = Schemas['PaymentReviewInput'];
 
 const schemas = contract.components.schemas;
 const parse = {
@@ -36,7 +37,7 @@ const parse = {
 };
 
 /** Refund states an administrator filters by; the server lists submitted refunds by default. */
-export const refundStates = ['submitted', 'awaiting_manual', 'awaiting_details', 'processing', 'succeeded', 'failed', 'rejected'] as const;
+export const refundStates = ['submitted', 'awaiting_manual', 'needs_review', 'review_query_pending', 'awaiting_details', 'processing', 'succeeded', 'failed', 'rejected'] as const;
 export const purchaseRefundReasons: PurchaseRefundInput['reason'][] = ['duplicate_charge', 'under_delivery'];
 export const pageSize = 50;
 
@@ -82,6 +83,14 @@ export class BillingAdmin {
 
   offers(signal?: AbortSignal) {
     return this.all('/api/v1/billing/admin/offers', parse.offers, signal);
+  }
+
+  /**
+   * Resolve an order whose automatic payment queries ran out: schedule one more query, or
+   * record the result an administrator verified with the channel, citing the evidence.
+   */
+  paymentReview(id: string, body: PaymentReviewInput, key: string) {
+    return this.http.json(`/api/v1/billing/admin/orders/${segment(id)}/payment-review`, parse.order, { method: 'POST', body, key });
   }
 
   purchaseRefund(body: PurchaseRefundInput, key: string) {

@@ -26,7 +26,10 @@
     "billingGroup": "Billing",
     "billingRefunds": "Refunds",
     "billingAccounts": "Account billing",
-    "billingConfig": "Billing settings"
+    "billingConfig": "Billing settings",
+    "accessGroup": "System",
+    "accessRoles": "Roles",
+    "accessAudit": "Operation log"
   },
   "common": {
     "all": "All",
@@ -106,7 +109,9 @@
     "billing_closure_conflict": "The data changed in the meantime, or the account is being closed. Refresh and try again.",
     "billing_insufficient_funds": "The balance is too low for this action.",
     "billing_assets_pending": "The account still has assets being processed. Try again later.",
-    "billing_operation_too_large": "This operation covers too much data at once."
+    "billing_operation_too_large": "This operation covers too much data at once.",
+    "billing_conflict": "The data changed in the meantime. Refresh and try again.",
+    "invalid_request": "The request format is not valid. Check it and try again."
   },
   "session": {
     "signIn": "Sign in",
@@ -990,7 +995,9 @@
       "awaiting_manual": "Waiting for manual payout",
       "awaiting_payment": "Waiting for payment",
       "expired": "Expired",
-      "cancelled": "Cancelled"
+      "cancelled": "Cancelled",
+      "needs_review": "Needs manual review",
+      "review_query_pending": "Extra query scheduled"
     },
     "refunds": {
       "title": "Refunds",
@@ -1018,8 +1025,15 @@
         "rejected": "The refund was rejected.",
         "paid": "The payout was recorded as paid.",
         "payoutFailed": "The payout was recorded as failed.",
-        "recorded": "The result of the action was confirmed."
-      }
+        "recorded": "The result of the action was confirmed.",
+        "review": {
+          "retry_query": "One more query was scheduled.",
+          "confirm_succeeded": "The channel-confirmed success was recorded.",
+          "confirm_failed": "The channel-confirmed failure was recorded."
+        }
+      },
+      "paymentChannel": "Manual payout channel",
+      "paymentChannelHint": "Enter the channel and paying account actually used, for example “Bank A corporate account”. A transaction number can be recorded only once per channel."
     },
     "accounts": {
       "title": "Account billing",
@@ -1102,6 +1116,86 @@
         "offer": "Edit points offer",
         "rule": "Edit reward rule"
       }
+    },
+    "review": {
+      "intro": "Automatic queries ran out and the channel result is still unknown. Schedule one more query, or record the result after checking with the channel.",
+      "action": "Action",
+      "retry_query": "Query once more",
+      "confirm_succeeded": "Channel confirmed success",
+      "confirm_failed": "Channel confirmed failure",
+      "evidence": "Evidence reference",
+      "evidenceHint": "Enter a traceable reference such as a channel ticket or statement number. Do not paste payment payloads.",
+      "submit": "Submit",
+      "open": "Review",
+      "title": "Review payment result"
+    }
+  },
+  "access": {
+    "title": "Roles",
+    "intro": "Grant administrators roles within a school, group and module scope. Platform administrators hold every capability automatically; other administrators hold only what is granted. Every grant and revocation needs a reason and is recorded.",
+    "administrator": "Administrator access",
+    "subject": "Administrator ID",
+    "subjectHint": "Enter the administrator’s user ID (subject) in the identity service.",
+    "platformAdmin": "This account is a platform administrator and holds every capability in every scope; no role is needed.",
+    "noGrants": "No roles are granted to this administrator.",
+    "role": "Role",
+    "roleId": "Role ID",
+    "roleIdHint": "Enter the ID of the role to grant; see the templates or roles created below.",
+    "roleName": "Role name",
+    "scope": "Scope",
+    "school": "School",
+    "group": "Group",
+    "module": "Module",
+    "scopeHint": "“*” covers the whole dimension; all three dimensions must match.",
+    "everywhere": "Everywhere",
+    "grantTitle": "Grant a role",
+    "grant": "Grant",
+    "granted": "The role was granted.",
+    "revoke": "Revoke",
+    "revokeTitle": "Revoke role",
+    "confirmRevoke": "Confirm revocation",
+    "revoked": "The role was revoked.",
+    "templates": "Role templates",
+    "templatesHint": "Templates are starting points and grant nothing by themselves. Roles cannot change after creation; create a new role to adjust capabilities.",
+    "useTemplate": "Start from this",
+    "newRole": "New role",
+    "newRoleIdHint": "Lowercase letters, digits, dots, underscores and hyphens, starting with a letter. It cannot change later.",
+    "capabilities": "Capabilities",
+    "capabilitiesHint": "Type a capability ID and press Enter, for example billing.manage.",
+    "createRole": "Create role",
+    "created": "The role was created."
+  },
+  "audit": {
+    "title": "Operation log",
+    "intro": "Administration records from every module you may read, merged by time. When a module cannot be queried, the page lists the missing records.",
+    "time": "Time",
+    "source": "Source",
+    "action": "Action",
+    "actor": "Actor",
+    "target": "Target",
+    "result": "Result",
+    "allSources": "All modules",
+    "from": "From",
+    "until": "Until",
+    "empty": "No matching records.",
+    "partial": "These modules could not be queried, so the results are incomplete: {modules}",
+    "sources": {
+      "platform": "Platform",
+      "catalog": "Course catalog",
+      "reviews": "Reviews",
+      "moderation": "Moderation",
+      "resources": "Resources",
+      "verification": "Verification",
+      "billing": "Billing",
+      "qq-binding": "QQ binding",
+      "open-platform": "Open platform",
+      "storage": "Storage"
+    },
+    "results": {
+      "success": "Succeeded",
+      "denied": "Denied",
+      "failed": "Failed",
+      "unknown": "Unknown"
     }
   }
 }

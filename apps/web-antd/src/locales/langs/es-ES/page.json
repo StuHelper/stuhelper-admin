@@ -26,7 +26,10 @@
     "billingGroup": "Facturación",
     "billingRefunds": "Reembolsos",
     "billingAccounts": "Facturación por cuenta",
-    "billingConfig": "Ajustes de facturación"
+    "billingConfig": "Ajustes de facturación",
+    "accessGroup": "Sistema",
+    "accessRoles": "Roles y accesos",
+    "accessAudit": "Registro de operaciones"
   },
   "common": {
     "all": "Todos",
@@ -106,7 +109,9 @@
     "billing_closure_conflict": "Los datos cambiaron mientras tanto o la cuenta se está cerrando. Actualiza e inténtalo de nuevo.",
     "billing_insufficient_funds": "El saldo no alcanza para esta acción.",
     "billing_assets_pending": "La cuenta aún tiene activos en proceso. Inténtalo más tarde.",
-    "billing_operation_too_large": "Esta operación abarca demasiados datos a la vez."
+    "billing_operation_too_large": "Esta operación abarca demasiados datos a la vez.",
+    "billing_conflict": "Los datos cambiaron mientras tanto. Actualiza e inténtalo de nuevo.",
+    "invalid_request": "El formato de la solicitud no es válido. Revísalo e inténtalo de nuevo."
   },
   "session": {
     "signIn": "Iniciar sesión",
@@ -990,7 +995,9 @@
       "awaiting_manual": "Esperando pago manual",
       "awaiting_payment": "Esperando el pago",
       "expired": "Caducado",
-      "cancelled": "Cancelado"
+      "cancelled": "Cancelado",
+      "needs_review": "Requiere revisión manual",
+      "review_query_pending": "Consulta adicional programada"
     },
     "refunds": {
       "title": "Reembolsos",
@@ -1018,8 +1025,15 @@
         "rejected": "Se rechazó el reembolso.",
         "paid": "Se registró el pago como realizado.",
         "payoutFailed": "Se registró el pago como fallido.",
-        "recorded": "Se confirmó el resultado de la acción."
-      }
+        "recorded": "Se confirmó el resultado de la acción.",
+        "review": {
+          "retry_query": "Se programó una consulta adicional.",
+          "confirm_succeeded": "Se registró el éxito confirmado por el medio de pago.",
+          "confirm_failed": "Se registró el fallo confirmado por el medio de pago."
+        }
+      },
+      "paymentChannel": "Medio de pago manual",
+      "paymentChannelHint": "Indica el medio y la cuenta de pago usados realmente, por ejemplo «Banco A, cuenta de empresa». Cada número de transacción solo se registra una vez por medio."
     },
     "accounts": {
       "title": "Facturación por cuenta",
@@ -1102,6 +1116,86 @@
         "offer": "Editar oferta de puntos",
         "rule": "Editar regla de recompensa"
       }
+    },
+    "review": {
+      "intro": "Se agotaron las consultas automáticas y el resultado sigue sin conocerse. Programa una consulta más o registra el resultado tras comprobarlo con el medio de pago.",
+      "action": "Acción",
+      "retry_query": "Consultar otra vez",
+      "confirm_succeeded": "Éxito confirmado",
+      "confirm_failed": "Fallo confirmado",
+      "evidence": "Referencia de comprobación",
+      "evidenceHint": "Indica una referencia rastreable, como un número de incidencia o de extracto. No pegues datos del pago.",
+      "submit": "Enviar",
+      "open": "Revisar",
+      "title": "Revisar resultado del pago"
+    }
+  },
+  "access": {
+    "title": "Roles y accesos",
+    "intro": "Concede a los administradores roles limitados a un centro, grupo y módulo. Los administradores de la plataforma tienen todas las capacidades; los demás solo las concedidas. Cada concesión o revocación necesita un motivo y queda registrada.",
+    "administrator": "Acceso de un administrador",
+    "subject": "ID del administrador",
+    "subjectHint": "Introduce el ID de usuario (subject) del administrador en el servicio de identidad.",
+    "platformAdmin": "Esta cuenta es administradora de la plataforma y tiene todas las capacidades en todo el ámbito; no necesita roles.",
+    "noGrants": "Este administrador no tiene roles concedidos.",
+    "role": "Rol",
+    "roleId": "ID del rol",
+    "roleIdHint": "Introduce el ID del rol que se concede; consulta las plantillas o los roles creados abajo.",
+    "roleName": "Nombre del rol",
+    "scope": "Ámbito",
+    "school": "Centro",
+    "group": "Grupo",
+    "module": "Módulo",
+    "scopeHint": "«*» abarca toda la dimensión; deben coincidir las tres dimensiones.",
+    "everywhere": "En todo el ámbito",
+    "grantTitle": "Conceder un rol",
+    "grant": "Conceder",
+    "granted": "Se concedió el rol.",
+    "revoke": "Revocar",
+    "revokeTitle": "Revocar rol",
+    "confirmRevoke": "Confirmar revocación",
+    "revoked": "Se revocó el rol.",
+    "templates": "Plantillas de roles",
+    "templatesHint": "Una plantilla es un punto de partida y no concede nada por sí misma. Un rol creado no cambia; crea uno nuevo para ajustar capacidades.",
+    "useTemplate": "Partir de esta",
+    "newRole": "Nuevo rol",
+    "newRoleIdHint": "Minúsculas, cifras, puntos, guiones bajos y guiones, empezando por una letra. No se puede cambiar después.",
+    "capabilities": "Capacidades",
+    "capabilitiesHint": "Escribe una capacidad y pulsa Intro, por ejemplo billing.manage.",
+    "createRole": "Crear rol",
+    "created": "Se creó el rol."
+  },
+  "audit": {
+    "title": "Registro de operaciones",
+    "intro": "Operaciones de administración de todos los módulos que puedes consultar, combinadas por fecha. Si un módulo no responde, la página indica los registros que faltan.",
+    "time": "Fecha",
+    "source": "Módulo",
+    "action": "Operación",
+    "actor": "Autor",
+    "target": "Objeto",
+    "result": "Resultado",
+    "allSources": "Todos los módulos",
+    "from": "Desde",
+    "until": "Hasta",
+    "empty": "No hay registros que coincidan.",
+    "partial": "No se pudo consultar estos módulos, así que los resultados están incompletos: {modules}",
+    "sources": {
+      "platform": "Plataforma",
+      "catalog": "Catálogo de cursos",
+      "reviews": "Reseñas",
+      "moderation": "Moderación",
+      "resources": "Recursos",
+      "verification": "Verificación",
+      "billing": "Facturación",
+      "qq-binding": "Vinculación con QQ",
+      "open-platform": "Plataforma abierta",
+      "storage": "Almacenamiento"
+    },
+    "results": {
+      "success": "Correcto",
+      "denied": "Denegado",
+      "failed": "Fallido",
+      "unknown": "Desconocido"
     }
   }
 }

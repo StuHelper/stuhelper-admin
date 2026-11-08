@@ -26,7 +26,10 @@
     "billingGroup": "会計",
     "billingRefunds": "返金処理",
     "billingAccounts": "アカウントの会計",
-    "billingConfig": "会計設定"
+    "billingConfig": "会計設定",
+    "accessGroup": "システム",
+    "accessRoles": "ロールと権限",
+    "accessAudit": "操作記録"
   },
   "common": {
     "all": "すべて",
@@ -106,7 +109,9 @@
     "billing_closure_conflict": "データが他の操作で更新されたか、アカウントが解約手続き中です。再読み込みしてから再試行してください。",
     "billing_insufficient_funds": "残高が不足しています。",
     "billing_assets_pending": "処理中の資産があります。しばらくしてから再試行してください。",
-    "billing_operation_too_large": "一度に処理するデータが多すぎます。"
+    "billing_operation_too_large": "一度に処理するデータが多すぎます。",
+    "billing_conflict": "データが他の操作で更新されました。再読み込みしてから再試行してください。",
+    "invalid_request": "リクエストの形式が正しくありません。確認して再試行してください。"
   },
   "session": {
     "signIn": "ログイン",
@@ -990,7 +995,9 @@
       "awaiting_manual": "手動送金待ち",
       "awaiting_payment": "支払い待ち",
       "expired": "期限切れ",
-      "cancelled": "キャンセル済み"
+      "cancelled": "キャンセル済み",
+      "needs_review": "手動確認が必要",
+      "review_query_pending": "追加照会待ち"
     },
     "refunds": {
       "title": "返金処理",
@@ -1018,8 +1025,15 @@
         "rejected": "返金を却下しました。",
         "paid": "送金済みとして記録しました。",
         "payoutFailed": "送金失敗として記録しました。",
-        "recorded": "操作結果を確認しました。"
-      }
+        "recorded": "操作結果を確認しました。",
+        "review": {
+          "retry_query": "追加の照会を 1 回予約しました。",
+          "confirm_succeeded": "支払い方法側で成功と確認された結果を記録しました。",
+          "confirm_failed": "支払い方法側で失敗と確認された結果を記録しました。"
+        }
+      },
+      "paymentChannel": "手動送金の方法",
+      "paymentChannelHint": "実際に使った送金方法と送金元口座の識別名を入力します（例：A 銀行 法人口座）。同じ方法で同じ取引番号は 1 回しか登録できません。"
     },
     "accounts": {
       "title": "アカウントの会計",
@@ -1102,6 +1116,86 @@
         "offer": "ポイントプランを編集",
         "rule": "報酬ルールを編集"
       }
+    },
+    "review": {
+      "intro": "自動照会の回数を使い切り、結果はまだ不明です。もう一度照会するか、支払い方法側に確認してから結果を記録してください。",
+      "action": "処理方法",
+      "retry_query": "もう一度照会",
+      "confirm_succeeded": "成功を確認済み",
+      "confirm_failed": "失敗を確認済み",
+      "evidence": "確認の根拠番号",
+      "evidenceHint": "問い合わせ番号や明細番号など追跡できる番号を入力します。決済データは貼り付けないでください。",
+      "submit": "送信",
+      "open": "確認処理",
+      "title": "支払い結果の確認"
+    }
+  },
+  "access": {
+    "title": "ロールと権限",
+    "intro": "管理者に学校・グループ・業務範囲付きのロールを付与します。プラットフォーム管理者はすべての権限を自動的に持ち、ほかの管理者は付与された権限だけを持ちます。付与と取り消しには理由が必要で、記録に残ります。",
+    "administrator": "管理者の権限",
+    "subject": "管理者 ID",
+    "subjectHint": "ID サービスでの管理者のユーザー ID（subject）を入力します。",
+    "platformAdmin": "このアカウントはプラットフォーム管理者で、すべての権限と範囲を持っています。ロールの付与は不要です。",
+    "noGrants": "この管理者に付与されたロールはありません。",
+    "role": "ロール",
+    "roleId": "ロール ID",
+    "roleIdHint": "付与するロールの ID を入力します。下のテンプレートまたは作成したロールで確認できます。",
+    "roleName": "ロール名",
+    "scope": "範囲",
+    "school": "学校",
+    "group": "グループ",
+    "module": "業務モジュール",
+    "scopeHint": "「*」はその項目の全範囲です。3 つの項目すべてが一致する必要があります。",
+    "everywhere": "全範囲",
+    "grantTitle": "ロールを付与",
+    "grant": "付与",
+    "granted": "ロールを付与しました。",
+    "revoke": "取り消し",
+    "revokeTitle": "ロールの取り消し",
+    "confirmRevoke": "取り消しを確定",
+    "revoked": "ロールを取り消しました。",
+    "templates": "ロールテンプレート",
+    "templatesHint": "テンプレートは出発点で、それ自体は権限を与えません。作成したロールは変更できないため、権限を変えるときは新しいロールを作成します。",
+    "useTemplate": "これを元に作成",
+    "newRole": "ロールを作成",
+    "newRoleIdHint": "英小文字、数字、ピリオド、下線、ハイフンのみ。英字で始め、作成後は変更できません。",
+    "capabilities": "権限",
+    "capabilitiesHint": "権限 ID を入力して Enter を押します（例：billing.manage）。",
+    "createRole": "ロールを作成する",
+    "created": "ロールを作成しました。"
+  },
+  "audit": {
+    "title": "操作記録",
+    "intro": "閲覧できる各モジュールの管理操作を時刻順にまとめて表示します。照会できないモジュールがある場合は、欠けている記録を示します。",
+    "time": "日時",
+    "source": "モジュール",
+    "action": "操作",
+    "actor": "操作者",
+    "target": "対象",
+    "result": "結果",
+    "allSources": "すべてのモジュール",
+    "from": "開始日時",
+    "until": "終了日時",
+    "empty": "条件に合う記録はありません。",
+    "partial": "次のモジュールを照会できなかったため、結果は不完全です：{modules}",
+    "sources": {
+      "platform": "プラットフォーム",
+      "catalog": "コースカタログ",
+      "reviews": "レビュー",
+      "moderation": "審査",
+      "resources": "資料",
+      "verification": "認証",
+      "billing": "会計",
+      "qq-binding": "QQ 連携",
+      "open-platform": "オープンプラットフォーム",
+      "storage": "ストレージ"
+    },
+    "results": {
+      "success": "成功",
+      "denied": "拒否",
+      "failed": "失敗",
+      "unknown": "不明"
     }
   }
 }

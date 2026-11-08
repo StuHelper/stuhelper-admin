@@ -248,7 +248,7 @@ const ruleColumns = computed(() => [
         <MutationAlert :busy="write.busy.value" :error="write.error.value" :uncertain="write.uncertain.value" :success="success" @retry="retry" />
         <div class="mt-4 flex gap-2">
           <Button type="primary" html-type="submit" :loading="write.busy.value" :disabled="!ready || !dirty || write.uncertain.value">{{ t('page.common.save') }}</Button>
-          <Button v-if="write.error.value === 'billing_closure_conflict'" :disabled="locked" @click="load(); editing = undefined">{{ t('page.common.reloadCompare') }}</Button>
+          <Button v-if="write.error.value === 'billing_conflict'" :disabled="locked" @click="load(); editing = undefined">{{ t('page.common.reloadCompare') }}</Button>
         </div>
       </Form>
     </Drawer>
