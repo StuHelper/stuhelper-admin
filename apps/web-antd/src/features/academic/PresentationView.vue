@@ -12,7 +12,6 @@ import {
   Form,
   FormItem,
   Input,
-  InputNumber,
   Select,
   Space,
 } from 'ant-design-vue';
@@ -35,7 +34,7 @@ import { dimensions, useAcademicAdmin } from './api';
 import { useCampusId } from './campus';
 import CampusPending from './CampusPending.vue';
 
-// Preview limits and five-level rating wording per language. Without a saved
+// Five-level rating wording per language. Without a saved
 // configuration the built-in wording of each language is the starting point.
 const { t, locale } = useI18n();
 const api = useAcademicAdmin();
@@ -153,60 +152,10 @@ async function saved() {
               type="warning"
               show-icon
               :message="t('page.common.compareNotice')"
-              :description="
-                t('page.moderation.savedLimits', {
-                  guest: current.guest_preview,
-                  member: current.member_preview,
-                  ratio: current.preview_ratio,
-                })
-              "
             />
-            <div class="grid gap-4 md:grid-cols-3">
-              <FormItem
-                :label="t('page.moderation.guestPreview')"
-                :extra="t('page.moderation.previewHint')"
-               html-for="presentationview-field-1"
->
-                <InputNumber
-id="presentationview-field-1"
-                  v-model:value="form.guest_preview"
-                  :min="0"
-                  :max="1000"
-                  :precision="0"
-                  :disabled="locked"
-                  class="w-full"
-                />
-              </FormItem>
-              <FormItem :label="t('page.moderation.memberPreview')" html-for="presentationview-field-2">
-                <InputNumber
-id="presentationview-field-2"
-                  v-model:value="form.member_preview"
-                  :min="0"
-                  :max="1000"
-                  :precision="0"
-                  :disabled="locked"
-                  class="w-full"
-                />
-              </FormItem>
-              <FormItem
-                :label="t('page.moderation.previewRatio')"
-                :extra="t('page.moderation.previewRatioHint')"
-               html-for="presentationview-field-3"
->
-                <InputNumber
-id="presentationview-field-3"
-                  v-model:value="form.preview_ratio"
-                  :min="0.001"
-                  :max="0.999"
-                  :step="0.05"
-                  :disabled="locked"
-                  class="w-full"
-                />
-              </FormItem>
-            </div>
-            <FormItem :label="t('page.moderation.ratingLanguage')" html-for="presentationview-field-4">
+            <FormItem :label="t('page.moderation.ratingLanguage')" html-for="presentationview-field-1">
               <Select
-id="presentationview-field-4"
+id="presentationview-field-1"
                 v-model:value="language"
                 class="w-48"
                 :options="
@@ -235,10 +184,10 @@ id="presentationview-field-4"
                       : t('page.moderation.levelLabel', { level })
                   "
                   class="mb-2"
-                 html-for="presentationview-field-5"
+                 html-for="presentationview-field-2"
 >
                   <Input
-id="presentationview-field-5"
+id="presentationview-field-2"
                     v-model:value="row[level]"
                     :maxlength="100"
                     :disabled="locked"

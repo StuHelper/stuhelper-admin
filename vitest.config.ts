@@ -19,6 +19,7 @@ export default defineConfig({
     exclude: [
       ...configDefaults.exclude,
       '**/e2e/**',
+      '.tools/**',
       '**/dist/**',
       '**/.{idea,git,cache,output,temp}/**',
       '**/node_modules/**',

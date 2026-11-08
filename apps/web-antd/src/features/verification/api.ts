@@ -19,17 +19,23 @@ export type Kind = Schemas['Kind']
 export type Job = Schemas['Job']
 export type Suggestion = Schemas['Suggestion']
 
-type Entity = 'Application' | 'CaptureSession' | 'Credential' | 'EmailChallenge' | 'Job' | 'ManualInput' | 'Material' | 'Operation' | 'RemovalRequest' | 'School' | 'StudentProfile' | 'Suggestion' | 'Summary'
+type Entity = 'Application' | 'CaptureSession' | 'Credential' | 'EmailChallenge' | 'IdentityInput' | 'IdentityMasked' | 'Job' | 'ManualInput' | 'Material' | 'Operation' | 'RemovalRequest' | 'School' | 'StudentProfile' | 'Suggestion' | 'Summary' | 'VerifyInput'
 
 export const methods = ['real_name_identity_check', 'school_sso', 'student_email_outbound_otp', 'student_email_inbound_challenge', 'manual_material_review'] as const
 export const stages = ['bachelor', 'master', 'doctor', 'other', 'unknown'] as const
 export const kinds = ['student', 'alumni', 'newcomer', 'unknown'] as const
+/** Application and credential kinds; teacher applications use the teacher form and review. */
+const recordKinds = [...kinds, 'teacher'] as const
 
 // The verification contract is YAML and private-provider owned, so its
 // response shapes are checked here field by field. The provider's shared cases
 // (contracts/verification-cases.json) run against these checks.
 const object = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v)
 const text = (v: unknown): v is string => typeof v === 'string'
+/** Lengths in Unicode code points, matching the provider's limits. */
+const points = (v: string) => [...v].length
+const sized = (v: unknown, min: number, max: number): v is string => text(v) && points(v) >= min && points(v) <= max
+const masked = (v: unknown) => object(v) && Object.keys(v).length === 2 && sized(v.name, 2, 100) && /^\*+[^*]$/u.test(v.name) && sized(v.document_number, 3, 32) && /^[^*]\*+[^*]$/u.test(v.document_number)
 const count = (v: unknown): v is number => typeof v === 'number' && Number.isSafeInteger(v) && v >= 0
 const instant = (v: unknown): v is string => {
   if (!text(v)) return false
@@ -47,9 +53,14 @@ const challenge = (v: unknown) => object(v) && text(v.id) && oneOf(v.state, ['pr
 const checks: Record<Entity, (v: Record<string, unknown>) => boolean> = {
   StudentProfile: (v) => text(v.school_id) && oneOf(v.data_status, ['complete', 'partial', 'reference_only', 'unavailable']) && text(v.schema) && count(v.revision) && optionalInstant(v.collected_at) && text(v.source_revision) && object(v.fields) && Object.keys(v.fields).length <= 64 && object(v.field_sources) && Object.values(v.field_sources).every(text) && (v.raw_data === undefined || text(v.raw_data)),
   School: (v) => text(v.id) && text(v.name) && typeof v.enabled === 'boolean' && Array.isArray(v.methods) && v.methods.every((m) => oneOf(m, methods)) && text(v.notice_version) && text(v.opening_date) && count(v.newcomer_days) && text(v.email_domain) && strings(v.material_types) && count(v.revision) && (v.profile_schema === undefined || text(v.profile_schema)),
-  Application: (v) => text(v.id) && text(v.school_id) && oneOf(v.method, methods) && oneOf(v.stage, stages) && oneOf(v.kind, kinds) && oneOf(v.state, ['in_progress', 'pending_review', 'supplement_required', 'approved', 'rejected', 'expired', 'deleted']) && count(v.revision) && instant(v.created_at) && instant(v.updated_at) && instant(v.expires_at) && text(v.credential_id) && text(v.result_code) && (v.review_note === undefined || text(v.review_note)) && (v.qualification_expires_at === undefined || optionalInstant(v.qualification_expires_at)) && (v.school_challenge === undefined || challenge(v.school_challenge)),
-  Credential: (v) => text(v.id) && text(v.school_id) && oneOf(v.method, methods) && oneOf(v.stage, stages) && oneOf(v.kind, kinds) && oneOf(v.state, ['active', 'revoked', 'expired', 'deleted']) && text(v.student_display) && count(v.revision) && instant(v.verified_at) && optionalInstant(v.expires_at),
-  Summary: (v) => typeof v.campus_eligibility === 'boolean' && typeof v.identity_verified === 'boolean' && instant(v.evaluated_at) && count(v.revision) && optionalInstant(v.next_evaluation_at),
+  Application: (v) => text(v.id) && text(v.school_id) && oneOf(v.method, methods) && oneOf(v.stage, stages) && oneOf(v.kind, recordKinds) && oneOf(v.state, ['in_progress', 'pending_review', 'supplement_required', 'approved', 'rejected', 'expired', 'deleted']) && count(v.revision) && instant(v.created_at) && instant(v.updated_at) && instant(v.expires_at) && text(v.credential_id) && text(v.result_code) && (v.review_note === undefined || text(v.review_note)) && (v.qualification_expires_at === undefined || optionalInstant(v.qualification_expires_at)) && (v.school_challenge === undefined || challenge(v.school_challenge)),
+  Credential: (v) => text(v.id) && text(v.school_id) && oneOf(v.method, methods) && oneOf(v.stage, stages) && oneOf(v.kind, recordKinds) && oneOf(v.state, ['active', 'revoked', 'expired', 'deleted']) && text(v.student_display) && count(v.revision) && instant(v.verified_at) && optionalInstant(v.expires_at),
+  IdentityMasked: masked,
+  IdentityInput: (v) => sized(v.student_id, 1, 64) && sized(v.name, 2, 100) && sized(v.document_number, 3, 32) && v.password === '' && sized(v.school_id, 0, 64) && sized(v.notice_version, 0, 64) && v.consent === true,
+  // Real-name matching sends name and document number; school SSO sends only a password.
+  VerifyInput: (v) => sized(v.student_id, 1, 64) && sized(v.name, 0, 100) && sized(v.document_number, 0, 32) && sized(v.password, 0, 256)
+    && ((points(v.name as string) >= 2 && points(v.document_number as string) >= 3 && v.password === '') || (v.name === '' && v.document_number === '' && points(v.password as string) >= 1)),
+  Summary: (v) => typeof v.campus_eligibility === 'boolean' && typeof v.teacher_verified === 'boolean' && typeof v.identity_verified === 'boolean' && (v.identity_masked === undefined ? true : v.identity_verified === true && masked(v.identity_masked)) && instant(v.evaluated_at) && count(v.revision) && optionalInstant(v.next_evaluation_at),
   RemovalRequest: (v) => text(v.id) && text(v.credential_id) && text(v.school_id) && oneOf(v.kind, ['revoke', 'delete']) && oneOf(v.state, ['pending', 'approved', 'rejected']) && text(v.reason) && text(v.note) && count(v.revision) && instant(v.created_at),
   Suggestion: (v) => text(v.id) && text(v.name) && text(v.website) && oneOf(v.state, ['pending', 'approved', 'rejected']) && text(v.note) && count(v.revision),
   EmailChallenge: (v) => text(v.id) && text(v.application_id) && instant(v.expires_at) && oneOf(v.state, ['queued', 'waiting', 'delivered', 'used', 'failed']) && text(v.masked_email) && text(v.target_address),

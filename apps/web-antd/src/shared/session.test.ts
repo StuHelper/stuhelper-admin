@@ -6,7 +6,7 @@ import { createSessionStore } from './session';
 afterEach(() => vi.unstubAllGlobals());
 const session = {
   authenticated: true,
-  profile: { nickname: 'A', revision: 1 },
+  profile: { id: '00000000-0000-4000-8000-000000000001', nickname: 'A', nickname_required: false, bio: '', visibility: { school: true, badge: true, department: true, grade: false, reviews: true, resources: true }, revision: 1 },
   csrf_token: 'a'.repeat(43),
   phone_bound: false,
   administrator: false,
@@ -46,7 +46,7 @@ describe('application session', () => {
     const responses = [
       Response.json({ code: 'unauthenticated' }, { status: 401 }),
       Response.json({}, { status: 503 }),
-      Response.json({ ...session, profile: { nickname: 'A', revision: '1' } }),
+      Response.json({ ...session, profile: { ...session.profile, revision: '1' } }),
       Response.json(session),
     ];
     const store = createSessionStore(
@@ -68,13 +68,14 @@ describe('application session', () => {
     const store = createSessionStore(async (_input, init) => {
       calls.push(init ?? {});
       return init?.method === 'PUT'
-        ? Response.json({ nickname: 'B', revision: 2 })
+        ? Response.json({ ...session.profile, nickname: 'B', revision: 2 })
         : Response.json(session);
     });
     await store.reload();
     await store.saveProfile({ nickname: 'B', revision: 1 }, 'key-1');
     expect(new Headers(calls[1]?.headers).get('Idempotency-Key')).toBe('key-1');
     expect(store.session.value?.profile).toEqual({
+      ...session.profile,
       nickname: 'B',
       revision: 2,
     });

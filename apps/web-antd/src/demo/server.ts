@@ -43,9 +43,9 @@ async function body(init?: RequestInit) {
 
 async function route(u: URL, method: string, init?: RequestInit): Promise<Response> {
   const p = u.pathname.replace('/api/v1', '');
-  if (p === '/auth/session') return json({ authenticated: true, profile: { nickname: '运营值班', revision: 1 }, csrf_token: 'a'.repeat(43), phone_bound: true, administrator: true, expires_at: '2030-01-01T00:00:00Z' });
+  if (p === '/auth/session') return json({ authenticated: true, profile: { id: '00000000-0000-4000-8000-000000000001', nickname: '运营值班', nickname_required: false, bio: '', visibility: { school: true, badge: true, department: true, grade: false, reviews: true, resources: true }, revision: 1 }, csrf_token: 'a'.repeat(43), phone_bound: true, administrator: true, expires_at: '2030-01-01T00:00:00Z' });
   if (p === '/auth/logout' || p === '/auth/logout-all') return new Response(null, { status: 204 });
-  if (p === '/profiles/me') return json({ nickname: '运营值班', revision: 1 });
+  if (p === '/profiles/me') return json({ id: '00000000-0000-4000-8000-000000000001', nickname: '运营值班', nickname_required: false, bio: '', visibility: { school: true, badge: true, department: true, grade: false, reviews: true, resources: true }, revision: 1 });
   if (p === '/system/capabilities') return json({ api_version: 1, capabilities: ['platform.status'] });
   if (p === '/admin/modules') return json([['session', 'ready', 'available'], ['catalog', 'ready', 'available'], ['reviews', 'ready', 'available'], ['resources', 'ready', 'available'], ['verification', 'ready', 'available'], ['storage', 'ready', 'available'], ['qqbot', 'disabled', 'disabled']].map(([id, state, health]) => ({ id, state, health })));
 
@@ -80,7 +80,7 @@ async function route(u: URL, method: string, init?: RequestInit): Promise<Respon
     if (p.endsWith('/attribution')) return json({ id: row.id, author_handle: row.author_handle, anonymous: row.anonymous });
     return json(row);
   }
-  if (p === '/reviews/admin/presentation' || p === '/reviews/presentation') return json({ effective: { school_id: d.SCHOOL, revision: 1, guest_preview: 80, member_preview: 400, preview_ratio: 0.3, rating_texts: {} }, configured: null, source: 'default' });
+  if (p === '/reviews/admin/presentation' || p === '/reviews/presentation') return json({ effective: { school_id: d.SCHOOL, revision: 1, rating_texts: {} }, configured: null, source: 'default' });
 
   if (p === '/resources/capabilities') return json(d.capabilities);
   if (p === '/resources/categories') return json({ items: d.resCategories, next_cursor: '' });
