@@ -18,7 +18,8 @@
     "storageGroup": "存储运营",
     "storage": "存储实例",
     "custody": "存储托管管理",
-    "contributions": "存储贡献管理"
+    "contributions": "存储贡献管理",
+    "openPlatform": "开放平台审核"
   },
   "common": {
     "all": "全部",
@@ -816,6 +817,67 @@
       "conflict": "账号已登记或记录发生变化，请刷新后核对。",
       "attempts_exhausted": "已达到重试上限，需要管理员处理。",
       "credentials_required": "未保存可恢复的凭据，请重新提交。"
+    }
+  },
+  "openPlatform": {
+    "title": "开放平台应用审核",
+    "intro": "审核开发者提交的第三方应用。批准时选择可用的信息范围和授权期限，用户仍需逐项同意。",
+    "empty": "没有符合条件的应用。",
+    "name": "应用",
+    "clientId": "客户端 ID",
+    "clientType": "客户端类型",
+    "clientTypes": {
+      "confidential": "服务端应用",
+      "public": "公共客户端"
+    },
+    "requested": "申请的信息范围",
+    "review": "审核",
+    "purpose": "用途说明",
+    "redirects": "回调地址",
+    "lastNote": "上次审核说明",
+    "decision": "审核结果",
+    "decisions": {
+      "approve": "批准",
+      "changes_requested": "要求修改",
+      "suspend": "停用"
+    },
+    "decisionHint": {
+      "approve": "应用可以按所选范围请求用户授权。重新批准停用的应用不会恢复原有用户授权。",
+      "changes_requested": "开发者会看到说明，修改后重新提交审核。",
+      "suspend": "立即停用应用并撤销全部用户授权，旧令牌失效。"
+    },
+    "approvedScopes": "批准的信息范围",
+    "grantDays": "用户授权期限（天）",
+    "tokenMinutes": "访问令牌有效期（分钟）",
+    "dailyQuota": "每日查询配额",
+    "noteRequired": "审核说明（必填，开发者可见）",
+    "noteOptional": "审核说明（可选，开发者可见）",
+    "submit": {
+      "approve": "批准应用",
+      "changes_requested": "要求修改",
+      "suspend": "停用应用"
+    },
+    "reviewed": {
+      "pending": "已提交审核。",
+      "changes_requested": "已要求开发者修改。",
+      "active": "应用已开通。",
+      "suspended": "应用已停用，用户授权已撤销。"
+    },
+    "state": {
+      "pending": "待审核",
+      "changes_requested": "需要修改",
+      "active": "已开通",
+      "suspended": "已停用"
+    },
+    "scopes": {
+      "student_status": "学生认证状态",
+      "schools": "所属学校",
+      "qq_binding_status": "QQ 绑定状态",
+      "qq_binding_details": "QQ 绑定状态和 QQ 号码",
+      "profile": "公开资料",
+      "schedule": "课表",
+      "catalog": "课程目录",
+      "public_reviews": "公开评价"
     }
   }
 }

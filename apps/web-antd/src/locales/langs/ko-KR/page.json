@@ -18,7 +18,8 @@
     "storageGroup": "저장소 운영",
     "storage": "저장소 인스턴스",
     "custody": "인증 정보 관리",
-    "contributions": "저장소 기여 관리"
+    "contributions": "저장소 기여 관리",
+    "openPlatform": "오픈 플랫폼 심사"
   },
   "common": {
     "all": "전체",
@@ -816,6 +817,67 @@
       "conflict": "이미 등록된 계정이거나 기록이 변경되었습니다. 새로 고침 후 확인하세요.",
       "attempts_exhausted": "재시도 한도에 도달했습니다. 관리자 조치가 필요합니다.",
       "credentials_required": "복구 가능한 인증 정보가 저장되지 않았습니다. 다시 제출하세요."
+    }
+  },
+  "openPlatform": {
+    "title": "오픈 플랫폼 앱 심사",
+    "intro": "개발자가 신청한 외부 앱을 심사합니다. 승인할 때 사용할 정보와 기간을 정하며, 사용자는 항목별로 동의합니다.",
+    "empty": "조건에 맞는 앱이 없습니다.",
+    "name": "앱",
+    "clientId": "클라이언트 ID",
+    "clientType": "클라이언트 유형",
+    "clientTypes": {
+      "confidential": "서버 앱",
+      "public": "공개 클라이언트"
+    },
+    "requested": "신청한 정보",
+    "review": "심사",
+    "purpose": "용도",
+    "redirects": "리디렉션 URI",
+    "lastNote": "이전 심사 의견",
+    "decision": "심사 결과",
+    "decisions": {
+      "approve": "승인",
+      "changes_requested": "수정 요청",
+      "suspend": "중지"
+    },
+    "decisionHint": {
+      "approve": "선택한 정보에 대해 사용자에게 권한을 요청할 수 있습니다. 중지된 앱을 다시 승인해도 기존 사용자 권한은 복구되지 않습니다.",
+      "changes_requested": "개발자가 의견을 보고 수정한 뒤 다시 제출합니다.",
+      "suspend": "앱을 즉시 중지하고 모든 사용자 권한을 철회합니다. 기존 토큰은 무효가 됩니다."
+    },
+    "approvedScopes": "승인할 정보",
+    "grantDays": "사용자 권한 기간(일)",
+    "tokenMinutes": "액세스 토큰 유효 시간(분)",
+    "dailyQuota": "하루 조회 한도",
+    "noteRequired": "심사 의견(필수, 개발자에게 표시)",
+    "noteOptional": "심사 의견(선택, 개발자에게 표시)",
+    "submit": {
+      "approve": "앱 승인",
+      "changes_requested": "수정 요청",
+      "suspend": "앱 중지"
+    },
+    "reviewed": {
+      "pending": "심사에 제출되었습니다.",
+      "changes_requested": "개발자에게 수정을 요청했습니다.",
+      "active": "앱이 사용 중입니다.",
+      "suspended": "앱을 중지하고 사용자 권한을 철회했습니다."
+    },
+    "state": {
+      "pending": "심사 대기",
+      "changes_requested": "수정 필요",
+      "active": "사용 중",
+      "suspended": "중지됨"
+    },
+    "scopes": {
+      "student_status": "학생 인증 상태",
+      "schools": "소속 학교",
+      "qq_binding_status": "QQ 연결 상태",
+      "qq_binding_details": "QQ 연결 상태와 QQ 번호",
+      "profile": "공개 프로필",
+      "schedule": "시간표",
+      "catalog": "과목 목록",
+      "public_reviews": "공개 평가"
     }
   }
 }

@@ -18,7 +18,8 @@
     "storageGroup": "Operación del almacenamiento",
     "storage": "Instancias de almacenamiento",
     "custody": "Custodia de credenciales",
-    "contributions": "Gestión de aportes de almacenamiento"
+    "contributions": "Gestión de aportes de almacenamiento",
+    "openPlatform": "Revisión de plataforma abierta"
   },
   "common": {
     "all": "Todos",
@@ -816,6 +817,67 @@
       "conflict": "La cuenta ya está registrada o cambió el registro. Actualiza y revisa.",
       "attempts_exhausted": "Se alcanzó el límite de intentos. Se requiere la intervención de un administrador.",
       "credentials_required": "No se guardaron credenciales recuperables. Vuelve a enviarlas."
+    }
+  },
+  "openPlatform": {
+    "title": "Revisión de aplicaciones de la plataforma abierta",
+    "intro": "Revisa las aplicaciones de terceros enviadas por los desarrolladores. La aprobación fija la información y los límites; cada usuario da su consentimiento después.",
+    "empty": "Ninguna aplicación coincide con este filtro.",
+    "name": "Aplicación",
+    "clientId": "ID de cliente",
+    "clientType": "Tipo de cliente",
+    "clientTypes": {
+      "confidential": "Aplicación de servidor",
+      "public": "Cliente público"
+    },
+    "requested": "Información solicitada",
+    "review": "Revisar",
+    "purpose": "Finalidad",
+    "redirects": "URI de redirección",
+    "lastNote": "Nota de la revisión anterior",
+    "decision": "Decisión",
+    "decisions": {
+      "approve": "Aprobar",
+      "changes_requested": "Pedir cambios",
+      "suspend": "Suspender"
+    },
+    "decisionHint": {
+      "approve": "La aplicación puede pedir a los usuarios la información seleccionada. Volver a aprobar una aplicación suspendida no restaura las autorizaciones anteriores.",
+      "changes_requested": "El desarrollador ve la nota y vuelve a enviar tras los cambios.",
+      "suspend": "Suspende la aplicación al instante y retira todas las autorizaciones; los tokens antiguos dejan de funcionar."
+    },
+    "approvedScopes": "Información aprobada",
+    "grantDays": "Duración de la autorización (días)",
+    "tokenMinutes": "Duración del token de acceso (minutos)",
+    "dailyQuota": "Cuota diaria de consultas",
+    "noteRequired": "Nota de revisión (obligatoria, visible para el desarrollador)",
+    "noteOptional": "Nota de revisión (opcional, visible para el desarrollador)",
+    "submit": {
+      "approve": "Aprobar aplicación",
+      "changes_requested": "Pedir cambios",
+      "suspend": "Suspender aplicación"
+    },
+    "reviewed": {
+      "pending": "Enviada a revisión.",
+      "changes_requested": "Se pidieron cambios al desarrollador.",
+      "active": "La aplicación está activa.",
+      "suspended": "La aplicación está suspendida y se retiraron las autorizaciones."
+    },
+    "state": {
+      "pending": "Pendiente de revisión",
+      "changes_requested": "Requiere cambios",
+      "active": "Activa",
+      "suspended": "Suspendida"
+    },
+    "scopes": {
+      "student_status": "Estado de estudiante",
+      "schools": "Centro",
+      "qq_binding_status": "Estado de vinculación con QQ",
+      "qq_binding_details": "Estado de vinculación y número de QQ",
+      "profile": "Perfil público",
+      "schedule": "Horario",
+      "catalog": "Catálogo",
+      "public_reviews": "Reseñas públicas"
     }
   }
 }

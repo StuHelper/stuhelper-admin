@@ -18,7 +18,8 @@
     "storageGroup": "ストレージ運用",
     "storage": "ストレージインスタンス",
     "custody": "認証情報の管理",
-    "contributions": "ストレージ提供の管理"
+    "contributions": "ストレージ提供の管理",
+    "openPlatform": "オープンプラットフォーム審査"
   },
   "common": {
     "all": "すべて",
@@ -816,6 +817,67 @@
       "conflict": "アカウントは登録済み、または記録が変更されています。再読み込みして確認してください。",
       "attempts_exhausted": "再試行回数の上限に達しました。管理者による対応が必要です。",
       "credentials_required": "復旧可能な認証情報が保存されていません。再度入力してください。"
+    }
+  },
+  "openPlatform": {
+    "title": "オープンプラットフォームのアプリ審査",
+    "intro": "開発者が申請した外部アプリを審査します。承認時に利用できる情報と期限を決め、ユーザーは項目ごとに同意します。",
+    "empty": "条件に合うアプリはありません。",
+    "name": "アプリ",
+    "clientId": "クライアント ID",
+    "clientType": "クライアントの種類",
+    "clientTypes": {
+      "confidential": "サーバーアプリ",
+      "public": "パブリッククライアント"
+    },
+    "requested": "申請された情報",
+    "review": "審査",
+    "purpose": "用途",
+    "redirects": "リダイレクト URI",
+    "lastNote": "前回の審査コメント",
+    "decision": "審査結果",
+    "decisions": {
+      "approve": "承認",
+      "changes_requested": "修正を依頼",
+      "suspend": "停止"
+    },
+    "decisionHint": {
+      "approve": "選択した情報についてユーザーに許可を求められます。停止中のアプリを再承認しても以前のユーザー許可は戻りません。",
+      "changes_requested": "開発者はコメントを確認し、修正後に再申請します。",
+      "suspend": "アプリをすぐに停止し、すべてのユーザー許可を取り消します。古いトークンは無効になります。"
+    },
+    "approvedScopes": "承認する情報",
+    "grantDays": "ユーザー許可の期間（日）",
+    "tokenMinutes": "アクセストークンの有効期間（分）",
+    "dailyQuota": "1 日の照会上限",
+    "noteRequired": "審査コメント（必須、開発者に表示）",
+    "noteOptional": "審査コメント（任意、開発者に表示）",
+    "submit": {
+      "approve": "アプリを承認",
+      "changes_requested": "修正を依頼",
+      "suspend": "アプリを停止"
+    },
+    "reviewed": {
+      "pending": "審査に提出されました。",
+      "changes_requested": "開発者に修正を依頼しました。",
+      "active": "アプリを利用可能にしました。",
+      "suspended": "アプリを停止し、ユーザー許可を取り消しました。"
+    },
+    "state": {
+      "pending": "審査待ち",
+      "changes_requested": "修正が必要",
+      "active": "利用中",
+      "suspended": "停止中"
+    },
+    "scopes": {
+      "student_status": "学生認証状態",
+      "schools": "所属学校",
+      "qq_binding_status": "QQ 連携状態",
+      "qq_binding_details": "QQ 連携状態と QQ 番号",
+      "profile": "公開プロフィール",
+      "schedule": "時間割",
+      "catalog": "科目カタログ",
+      "public_reviews": "公開レビュー"
     }
   }
 }

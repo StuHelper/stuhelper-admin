@@ -1,4 +1,4 @@
-import { Coins, KeyRound, MessagesSquare, Search, ShieldUser, ScrollText } from 'lucide-vue-next';
+import { Coins, MessagesSquare, Search, ShieldUser, ScrollText } from 'lucide-vue-next';
 
 import { menus } from '#/menus';
 import { router } from '#/router';
@@ -14,7 +14,6 @@ export function installDemo() {
     { name: 'DemoLookup', path: 'system/lookup', title: '全站信息查询', icon: Search, load: () => import('./pages/Lookup.vue') },
     { name: 'DemoAudit', path: 'system/audit', title: '操作记录', icon: ScrollText, load: () => import('./pages/AuditLog.vue') },
     { name: 'DemoQQ', path: 'qq', title: 'QQ 群管理', icon: MessagesSquare, load: () => import('./pages/QQ.vue') },
-    { name: 'DemoOpen', path: 'open-platform', title: '开放平台审批', icon: KeyRound, load: () => import('./pages/OpenApps.vue') },
     { name: 'DemoFinance', path: 'finance', title: '账务与退款', icon: Coins, load: () => import('./pages/Finance.vue') },
   ];
   for (const page of pages) {

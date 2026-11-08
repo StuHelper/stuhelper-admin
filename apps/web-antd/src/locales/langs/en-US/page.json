@@ -18,7 +18,8 @@
     "storageGroup": "Storage operations",
     "storage": "Storage instances",
     "custody": "Storage custody",
-    "contributions": "Storage contribution management"
+    "contributions": "Storage contribution management",
+    "openPlatform": "Open platform review"
   },
   "common": {
     "all": "All",
@@ -816,6 +817,67 @@
       "conflict": "The account is already registered or the record changed. Refresh and review.",
       "attempts_exhausted": "The retry limit was reached. Administrator action is required.",
       "credentials_required": "No recoverable credential was saved. Submit credentials again."
+    }
+  },
+  "openPlatform": {
+    "title": "Open platform app review",
+    "intro": "Review third-party apps submitted by developers. Approval sets the scopes and limits that apply; users still consent to each scope.",
+    "empty": "No apps match this filter.",
+    "name": "App",
+    "clientId": "Client ID",
+    "clientType": "Client type",
+    "clientTypes": {
+      "confidential": "Server app",
+      "public": "Public client"
+    },
+    "requested": "Requested scopes",
+    "review": "Review",
+    "purpose": "Purpose",
+    "redirects": "Redirect URIs",
+    "lastNote": "Previous review note",
+    "decision": "Decision",
+    "decisions": {
+      "approve": "Approve",
+      "changes_requested": "Request changes",
+      "suspend": "Suspend"
+    },
+    "decisionHint": {
+      "approve": "The app can ask users for the selected scopes. Approving a suspended app again does not restore earlier user grants.",
+      "changes_requested": "The developer sees the note and resubmits after changes.",
+      "suspend": "Suspends the app at once and revokes every user grant; old tokens stop working."
+    },
+    "approvedScopes": "Approved scopes",
+    "grantDays": "User grant length (days)",
+    "tokenMinutes": "Access token lifetime (minutes)",
+    "dailyQuota": "Daily query quota",
+    "noteRequired": "Review note (required, visible to the developer)",
+    "noteOptional": "Review note (optional, visible to the developer)",
+    "submit": {
+      "approve": "Approve app",
+      "changes_requested": "Request changes",
+      "suspend": "Suspend app"
+    },
+    "reviewed": {
+      "pending": "Submitted for review.",
+      "changes_requested": "Changes were requested from the developer.",
+      "active": "The app is active.",
+      "suspended": "The app is suspended and user grants were revoked."
+    },
+    "state": {
+      "pending": "Pending review",
+      "changes_requested": "Changes requested",
+      "active": "Active",
+      "suspended": "Suspended"
+    },
+    "scopes": {
+      "student_status": "Student status",
+      "schools": "School",
+      "qq_binding_status": "QQ binding status",
+      "qq_binding_details": "QQ binding status and QQ number",
+      "profile": "Public profile",
+      "schedule": "Timetable",
+      "catalog": "Course catalog",
+      "public_reviews": "Public reviews"
     }
   }
 }

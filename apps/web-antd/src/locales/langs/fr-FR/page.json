@@ -18,7 +18,8 @@
     "storageGroup": "Exploitation du stockage",
     "storage": "Instances de stockage",
     "custody": "Gestion des identifiants",
-    "contributions": "Gestion des contributions"
+    "contributions": "Gestion des contributions",
+    "openPlatform": "Examen plateforme ouverte"
   },
   "common": {
     "all": "Tous",
@@ -816,6 +817,67 @@
       "conflict": "Le compte est déjà enregistré ou les données ont changé. Actualisez et vérifiez.",
       "attempts_exhausted": "La limite de tentatives est atteinte. Un administrateur doit intervenir.",
       "credentials_required": "Aucun identifiant récupérable n’a été enregistré. Soumettez-les à nouveau."
+    }
+  },
+  "openPlatform": {
+    "title": "Examen des applications de la plateforme ouverte",
+    "intro": "Examinez les applications tierces soumises par les développeurs. L’approbation fixe les informations et les limites ; chaque utilisateur donne ensuite son accord.",
+    "empty": "Aucune application ne correspond à ce filtre.",
+    "name": "Application",
+    "clientId": "Identifiant client",
+    "clientType": "Type de client",
+    "clientTypes": {
+      "confidential": "Application serveur",
+      "public": "Client public"
+    },
+    "requested": "Informations demandées",
+    "review": "Examiner",
+    "purpose": "Usage",
+    "redirects": "URI de redirection",
+    "lastNote": "Note de l’examen précédent",
+    "decision": "Décision",
+    "decisions": {
+      "approve": "Approuver",
+      "changes_requested": "Demander des modifications",
+      "suspend": "Suspendre"
+    },
+    "decisionHint": {
+      "approve": "L’application peut demander aux utilisateurs les informations sélectionnées. Réapprouver une application suspendue ne rétablit pas les anciennes autorisations.",
+      "changes_requested": "Le développeur voit la note et soumet à nouveau après modification.",
+      "suspend": "Suspend immédiatement l’application et retire toutes les autorisations ; les anciens jetons cessent de fonctionner."
+    },
+    "approvedScopes": "Informations approuvées",
+    "grantDays": "Durée de l’autorisation (jours)",
+    "tokenMinutes": "Durée du jeton d’accès (minutes)",
+    "dailyQuota": "Quota quotidien de requêtes",
+    "noteRequired": "Note d’examen (obligatoire, visible par le développeur)",
+    "noteOptional": "Note d’examen (facultative, visible par le développeur)",
+    "submit": {
+      "approve": "Approuver l’application",
+      "changes_requested": "Demander des modifications",
+      "suspend": "Suspendre l’application"
+    },
+    "reviewed": {
+      "pending": "Soumise à l’examen.",
+      "changes_requested": "Des modifications ont été demandées au développeur.",
+      "active": "L’application est en service.",
+      "suspended": "L’application est suspendue et les autorisations ont été retirées."
+    },
+    "state": {
+      "pending": "En attente d’examen",
+      "changes_requested": "Modifications demandées",
+      "active": "En service",
+      "suspended": "Suspendue"
+    },
+    "scopes": {
+      "student_status": "Statut étudiant",
+      "schools": "Établissement",
+      "qq_binding_status": "Statut de liaison QQ",
+      "qq_binding_details": "Statut de liaison QQ et numéro QQ",
+      "profile": "Profil public",
+      "schedule": "Emploi du temps",
+      "catalog": "Catalogue",
+      "public_reviews": "Avis publics"
     }
   }
 }
