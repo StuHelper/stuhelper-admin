@@ -184,10 +184,10 @@ id="presentationview-field-1"
                       : t('page.moderation.levelLabel', { level })
                   "
                   class="mb-2"
-                 html-for="presentationview-field-2"
+                  :html-for="`presentation-${language}-${index}-${level}`"
 >
                   <Input
-id="presentationview-field-2"
+                    :id="`presentation-${language}-${index}-${level}`"
                     v-model:value="row[level]"
                     :maxlength="100"
                     :disabled="locked"

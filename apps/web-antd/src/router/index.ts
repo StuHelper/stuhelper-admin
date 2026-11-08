@@ -22,11 +22,6 @@ const children: RouteRecordRaw[] = [
   { name: 'Storage', path: 'storage', component: () => import('#/features/storage/StorageView.vue'), meta: { title: 'page.menu.storage' } },
   { name: 'StorageCustody', path: 'storage/custody', component: () => import('#/features/storage/CustodyView.vue'), meta: { title: 'page.menu.custody' } },
   { name: 'StorageContributions', path: 'storage/contributions', component: () => import('#/features/storage/ContributionsView.vue'), meta: { title: 'page.menu.contributions' } },
-  // Earlier entry points keep working after the reorganisation.
-  { path: 'academic/reviews', redirect: '/moderation/queue' },
-  { path: 'academic/catalog', redirect: '/catalog' },
-  { path: 'storage-accounts', redirect: '/storage/custody' },
-  { path: 'contributions', redirect: '/storage/contributions' },
 ];
 
 /**

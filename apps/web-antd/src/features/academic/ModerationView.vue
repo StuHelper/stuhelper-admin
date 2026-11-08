@@ -7,7 +7,7 @@ import type {
   Task,
 } from './api';
 
-import { computed, reactive, ref, shallowRef, watch } from 'vue';
+import { computed, nextTick, reactive, ref, shallowRef, watch } from 'vue';
 
 import { useI18n } from '@vben/locales';
 
@@ -221,10 +221,13 @@ async function retryBatch() {
   // The retried request is the original batch.
   if (result) batchApplied(result as BatchPreview);
 }
-function batchApplied(result: BatchPreview) {
+// Clearing the selection resets the preview through the watcher, so the
+// per-item delivery result is shown after that reset has run.
+async function batchApplied(result: BatchPreview) {
+  chosen.value = [];
+  await nextTick();
   preview.value = result;
   request.value = undefined;
-  chosen.value = [];
   void rows.reload();
 }
 
@@ -599,13 +602,14 @@ id="moderationview-field-6"
       destroy-on-close
       @close="close"
     >
-      <template #extra>
+      <!-- Navigation sits in the body so narrow screens keep the title and close button readable. -->
+      <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <Checkbox v-model:checked="autoNext">{{ t('page.moderation.autoNext') }}</Checkbox>
         <Space>
-          <Checkbox v-model:checked="autoNext">{{ t('page.moderation.autoNext') }}</Checkbox>
           <Button size="small" :disabled="panelBusy || !neighbour(-1)" @click="move(-1)">{{ t('page.moderation.previous') }}</Button>
           <Button size="small" :disabled="panelBusy || !neighbour(1)" @click="move(1)">{{ t('page.moderation.next') }}</Button>
         </Space>
-      </template>
+      </div>
       <DecisionPanel
         v-if="selected"
         @decided="decided"

@@ -145,8 +145,10 @@ const stateColor: Record<string, string> = {
           <FormItem
             :label="t('page.catalog.importFile')"
             :extra="t('page.catalog.importFileHint')"
+            html-for="import-file"
           >
             <input
+              id="import-file"
               ref="fileInput"
               type="file"
               accept="application/json,.json"
