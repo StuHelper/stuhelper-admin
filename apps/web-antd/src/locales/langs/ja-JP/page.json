@@ -29,7 +29,8 @@
     "billingConfig": "会計設定",
     "accessGroup": "システム",
     "accessRoles": "ロールと権限",
-    "accessAudit": "操作記録"
+    "accessAudit": "操作記録",
+    "lookup": "情報照会"
   },
   "common": {
     "all": "すべて",
@@ -1197,5 +1198,54 @@
       "failed": "失敗",
       "unknown": "不明"
     }
+  },
+  "lookup": {
+    "title": "情報照会",
+    "intro": "氏名、学籍番号、QQ 番号またはアカウント ID から、各業務モジュールで本人に関連する記録を検索します。サーバーは現在の権限で業務・範囲・機微項目を個別に確認し、すべての照会を記録してから結果を返します。",
+    "queryTab": "照会",
+    "auditTab": "照会記録",
+    "kind": "照会方法",
+    "kinds": {
+      "name": "氏名",
+      "student_number": "学籍番号",
+      "qq": "QQ 番号",
+      "subject": "アカウント ID"
+    },
+    "value": "照会内容",
+    "domains": "対象業務",
+    "domainNames": {
+      "profiles": "プロフィール",
+      "verification": "認証",
+      "catalog": "授業と教員",
+      "reviews": "評価",
+      "resources": "資料",
+      "billing": "会計",
+      "groups": "グループ"
+    },
+    "sensitive": "機微項目",
+    "sensitiveHint": "何も選ばない場合、マスクされた本人情報のみ返します。選んだ区分ごとに個別の権限が必要で、権限がなければ照会全体が拒否されます。",
+    "categories": {
+      "business": "業務",
+      "identity": "本人情報",
+      "document": "身分証明書",
+      "material": "認証資料",
+      "refund": "返金受取先"
+    },
+    "purpose": "照会目的",
+    "purposeHint": "チケットや申し立ての番号など、情報が必要な理由を記入してください。目的は照会記録に保存されます。",
+    "submit": "照会",
+    "incomplete": "次の業務はまだ照会に接続されていないため、結果は不完全です：{domains}",
+    "empty": "閲覧可能な該当記録はありません。",
+    "results": "照会結果",
+    "current": "現在",
+    "historical": "過去",
+    "changedAt": "{time} に変更",
+    "masked": "マスク済み",
+    "any": "すべて",
+    "auditPurposeHint": "照会記録を確認する理由を記入してください。確認操作も記録されます。",
+    "auditEmpty": "該当する照会記録はありません。",
+    "auditActor": "操作者",
+    "auditCount": "{count} 件を返却",
+    "auditChannel": "チャネル {channel}、グループ {group}"
   }
 }

@@ -1,4 +1,4 @@
-import { MessagesSquare, Search } from 'lucide-vue-next';
+import { MessagesSquare } from 'lucide-vue-next';
 
 import { menus } from '#/menus';
 import { router } from '#/router';
@@ -10,7 +10,6 @@ import './demo.css';
 export function installDemo() {
   installDemoFetch();
   const pages = [
-    { name: 'DemoLookup', path: 'system/lookup', title: '全站信息查询', icon: Search, load: () => import('./pages/Lookup.vue') },
     { name: 'DemoQQ', path: 'qq', title: 'QQ 群管理', icon: MessagesSquare, load: () => import('./pages/QQ.vue') },
   ];
   for (const page of pages) {

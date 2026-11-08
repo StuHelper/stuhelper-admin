@@ -29,7 +29,8 @@
     "billingConfig": "Ajustes de facturación",
     "accessGroup": "Sistema",
     "accessRoles": "Roles y accesos",
-    "accessAudit": "Registro de operaciones"
+    "accessAudit": "Registro de operaciones",
+    "lookup": "Consulta de información"
   },
   "common": {
     "all": "Todos",
@@ -1197,5 +1198,54 @@
       "failed": "Fallido",
       "unknown": "Desconocido"
     }
+  },
+  "lookup": {
+    "title": "Consulta de información",
+    "intro": "Busca los registros vinculados a una persona en los módulos de negocio por nombre, número de estudiante, número QQ o ID de cuenta. El servidor comprueba cada dominio, ámbito y campo sensible según tus permisos actuales y registra cada consulta antes de devolver resultados.",
+    "queryTab": "Consulta",
+    "auditTab": "Registro de consultas",
+    "kind": "Buscar por",
+    "kinds": {
+      "name": "Nombre",
+      "student_number": "Número de estudiante",
+      "qq": "Número QQ",
+      "subject": "ID de cuenta"
+    },
+    "value": "Valor buscado",
+    "domains": "Dominios de negocio",
+    "domainNames": {
+      "profiles": "Perfiles",
+      "verification": "Verificación",
+      "catalog": "Cursos y docentes",
+      "reviews": "Reseñas",
+      "resources": "Recursos",
+      "billing": "Facturación",
+      "groups": "Grupos"
+    },
+    "sensitive": "Campos sensibles",
+    "sensitiveHint": "Sin selección solo se devuelven campos de identidad enmascarados. Cada categoría marcada requiere su propio permiso; sin él se rechaza toda la consulta.",
+    "categories": {
+      "business": "Negocio",
+      "identity": "Identidad",
+      "document": "Documento de identidad",
+      "material": "Documentación de verificación",
+      "refund": "Beneficiario del reembolso"
+    },
+    "purpose": "Finalidad",
+    "purposeHint": "Explica por qué necesitas la información, por ejemplo el número de ticket o de reclamación. La finalidad se guarda con la consulta.",
+    "submit": "Consultar",
+    "incomplete": "Estos dominios aún no están conectados y los resultados están incompletos: {domains}",
+    "empty": "No hay registros visibles que coincidan.",
+    "results": "Resultados",
+    "current": "Actual",
+    "historical": "Anterior",
+    "changedAt": "Modificado el {time}",
+    "masked": "Enmascarado",
+    "any": "Todos",
+    "auditPurposeHint": "Explica por qué necesitas ver el registro. Verlo también queda registrado.",
+    "auditEmpty": "No hay consultas que coincidan.",
+    "auditActor": "Operador",
+    "auditCount": "{count} registros devueltos",
+    "auditChannel": "Canal {channel}, grupo {group}"
   }
 }

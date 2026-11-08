@@ -29,7 +29,8 @@
     "billingConfig": "账务配置",
     "accessGroup": "系统",
     "accessRoles": "角色授权",
-    "accessAudit": "操作记录"
+    "accessAudit": "操作记录",
+    "lookup": "信息查询"
   },
   "common": {
     "all": "全部",
@@ -1197,5 +1198,54 @@
       "failed": "失败",
       "unknown": "结果未知"
     }
+  },
+  "lookup": {
+    "title": "信息查询",
+    "intro": "按姓名、学号、QQ 或账号标识查找各业务模块中与某人关联的记录。服务端按当前授权逐项检查业务、范围和敏感字段，每次查询都会先记录再返回结果。",
+    "queryTab": "查询",
+    "auditTab": "查询记录",
+    "kind": "查询依据",
+    "kinds": {
+      "name": "姓名",
+      "student_number": "学号",
+      "qq": "QQ 号",
+      "subject": "账号标识"
+    },
+    "value": "查询内容",
+    "domains": "查询业务",
+    "domainNames": {
+      "profiles": "个人资料",
+      "verification": "认证",
+      "catalog": "课程与教师",
+      "reviews": "评价",
+      "resources": "资料",
+      "billing": "账务",
+      "groups": "群组"
+    },
+    "sensitive": "敏感字段",
+    "sensitiveHint": "不勾选时只返回脱敏后的身份字段。勾选的类别需要单独授权，未获授权时整次查询会被拒绝。",
+    "categories": {
+      "business": "业务",
+      "identity": "身份",
+      "document": "证件",
+      "material": "认证材料",
+      "refund": "退款收款"
+    },
+    "purpose": "查询目的",
+    "purposeHint": "说明为什么需要这些信息，例如对应的工单或申诉编号。目的会写入查询记录。",
+    "submit": "查询",
+    "incomplete": "以下业务暂未接入查询，结果不完整：{domains}",
+    "empty": "没有找到符合条件且有权查看的记录。",
+    "results": "查询结果",
+    "current": "当前",
+    "historical": "历史",
+    "changedAt": "变更于 {time}",
+    "masked": "已脱敏",
+    "any": "全部",
+    "auditPurposeHint": "说明为什么需要查看查询记录。查看本身也会被记录。",
+    "auditEmpty": "没有符合条件的查询记录。",
+    "auditActor": "操作者",
+    "auditCount": "返回 {count} 条",
+    "auditChannel": "渠道 {channel}，群 {group}"
   }
 }

@@ -29,7 +29,8 @@
     "billingConfig": "정산 설정",
     "accessGroup": "시스템",
     "accessRoles": "역할 권한",
-    "accessAudit": "작업 기록"
+    "accessAudit": "작업 기록",
+    "lookup": "정보 조회"
   },
   "common": {
     "all": "전체",
@@ -1197,5 +1198,54 @@
       "failed": "실패",
       "unknown": "알 수 없음"
     }
+  },
+  "lookup": {
+    "title": "정보 조회",
+    "intro": "이름, 학번, QQ 번호 또는 계정 ID로 각 업무 모듈에서 해당 사용자와 연결된 기록을 찾습니다. 서버는 현재 권한으로 업무, 범위, 민감 항목을 하나씩 확인하고 모든 조회를 먼저 기록한 뒤 결과를 반환합니다.",
+    "queryTab": "조회",
+    "auditTab": "조회 기록",
+    "kind": "조회 기준",
+    "kinds": {
+      "name": "이름",
+      "student_number": "학번",
+      "qq": "QQ 번호",
+      "subject": "계정 ID"
+    },
+    "value": "조회 내용",
+    "domains": "조회 업무",
+    "domainNames": {
+      "profiles": "프로필",
+      "verification": "인증",
+      "catalog": "강의와 교원",
+      "reviews": "평가",
+      "resources": "자료",
+      "billing": "회계",
+      "groups": "그룹"
+    },
+    "sensitive": "민감 항목",
+    "sensitiveHint": "선택하지 않으면 마스킹된 신원 항목만 반환합니다. 선택한 분류마다 별도 권한이 필요하며, 권한이 없으면 조회 전체가 거부됩니다.",
+    "categories": {
+      "business": "업무",
+      "identity": "신원",
+      "document": "신분증",
+      "material": "인증 자료",
+      "refund": "환불 수취 정보"
+    },
+    "purpose": "조회 목적",
+    "purposeHint": "티켓이나 이의 신청 번호 등 정보가 필요한 이유를 적어 주세요. 목적은 조회 기록에 저장됩니다.",
+    "submit": "조회",
+    "incomplete": "다음 업무는 아직 조회에 연결되지 않아 결과가 불완전합니다: {domains}",
+    "empty": "볼 수 있는 일치 기록이 없습니다.",
+    "results": "조회 결과",
+    "current": "현재",
+    "historical": "과거",
+    "changedAt": "{time}에 변경",
+    "masked": "마스킹됨",
+    "any": "전체",
+    "auditPurposeHint": "조회 기록을 확인하는 이유를 적어 주세요. 확인 자체도 기록됩니다.",
+    "auditEmpty": "일치하는 조회 기록이 없습니다.",
+    "auditActor": "작업자",
+    "auditCount": "{count}건 반환",
+    "auditChannel": "채널 {channel}, 그룹 {group}"
   }
 }

@@ -24,6 +24,7 @@ const children: RouteRecordRaw[] = [
   { name: 'BillingAccounts', path: 'billing/accounts', component: () => import('#/features/billing/AccountView.vue'), meta: { title: 'page.menu.billingAccounts' } },
   { name: 'BillingConfig', path: 'billing/config', component: () => import('#/features/billing/ConfigView.vue'), meta: { title: 'page.menu.billingConfig' } },
   { name: 'AccessRoles', path: 'system/roles', component: () => import('#/features/access/RolesView.vue'), meta: { title: 'page.menu.accessRoles' } },
+  { name: 'InformationLookup', path: 'system/lookup', component: () => import('#/features/information-query/LookupView.vue'), meta: { title: 'page.menu.lookup' } },
   { name: 'AccessAudit', path: 'system/audit', component: () => import('#/features/access/AuditView.vue'), meta: { title: 'page.menu.accessAudit' } },
   { name: 'QqBinding', path: 'qq-binding', component: () => import('#/features/qq-binding/BindingView.vue'), meta: { title: 'page.menu.qqBinding' } },
   { name: 'OpenPlatform', path: 'open-platform', component: () => import('#/features/open-platform/AppsView.vue'), meta: { title: 'page.menu.openPlatform' } },

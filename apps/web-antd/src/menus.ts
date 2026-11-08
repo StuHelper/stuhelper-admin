@@ -74,6 +74,7 @@ export const menus: MenuRecordRaw[] = [
     icon: ShieldUser,
     children: [
       { name: 'page.menu.accessRoles', path: '/system/roles' },
+      { name: 'page.menu.lookup', path: '/system/lookup' },
       { name: 'page.menu.accessAudit', path: '/system/audit' },
     ],
   },

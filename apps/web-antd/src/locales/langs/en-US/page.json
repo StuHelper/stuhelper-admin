@@ -29,7 +29,8 @@
     "billingConfig": "Billing settings",
     "accessGroup": "System",
     "accessRoles": "Roles",
-    "accessAudit": "Operation log"
+    "accessAudit": "Operation log",
+    "lookup": "Information lookup"
   },
   "common": {
     "all": "All",
@@ -1197,5 +1198,54 @@
       "failed": "Failed",
       "unknown": "Unknown"
     }
+  },
+  "lookup": {
+    "title": "Information lookup",
+    "intro": "Find records linked to a person across business modules by name, student number, QQ number or account ID. The server checks each domain, scope and sensitive field against your current grants and records every query before returning results.",
+    "queryTab": "Query",
+    "auditTab": "Query log",
+    "kind": "Search by",
+    "kinds": {
+      "name": "Name",
+      "student_number": "Student number",
+      "qq": "QQ number",
+      "subject": "Account ID"
+    },
+    "value": "Search value",
+    "domains": "Business domains",
+    "domainNames": {
+      "profiles": "Profiles",
+      "verification": "Verification",
+      "catalog": "Courses and teachers",
+      "reviews": "Reviews",
+      "resources": "Resources",
+      "billing": "Billing",
+      "groups": "Groups"
+    },
+    "sensitive": "Sensitive fields",
+    "sensitiveHint": "Leave all unchecked to receive masked identity fields only. Each checked category needs its own grant; without it the whole query is refused.",
+    "categories": {
+      "business": "Business",
+      "identity": "Identity",
+      "document": "ID document",
+      "material": "Verification material",
+      "refund": "Refund payee"
+    },
+    "purpose": "Purpose",
+    "purposeHint": "Explain why the information is needed, such as the ticket or appeal number. The purpose is recorded with the query.",
+    "submit": "Look up",
+    "incomplete": "These domains are not connected yet, so the results are incomplete: {domains}",
+    "empty": "No records match that you are allowed to see.",
+    "results": "Results",
+    "current": "Current",
+    "historical": "Past",
+    "changedAt": "Changed {time}",
+    "masked": "Masked",
+    "any": "All",
+    "auditPurposeHint": "Explain why you need to view the query log. Viewing it is also recorded.",
+    "auditEmpty": "No queries match.",
+    "auditActor": "Operator",
+    "auditCount": "{count} records returned",
+    "auditChannel": "Channel {channel}, group {group}"
   }
 }

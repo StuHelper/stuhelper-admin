@@ -29,7 +29,8 @@
     "billingConfig": "Réglages de facturation",
     "accessGroup": "Système",
     "accessRoles": "Rôles et accès",
-    "accessAudit": "Journal des opérations"
+    "accessAudit": "Journal des opérations",
+    "lookup": "Recherche d’informations"
   },
   "common": {
     "all": "Tous",
@@ -1197,5 +1198,54 @@
       "failed": "Échoué",
       "unknown": "Inconnu"
     }
+  },
+  "lookup": {
+    "title": "Recherche d’informations",
+    "intro": "Retrouvez les enregistrements liés à une personne dans les modules métier par nom, numéro d’étudiant, numéro QQ ou identifiant de compte. Le serveur vérifie chaque domaine, périmètre et champ sensible selon vos droits actuels, et enregistre chaque requête avant de renvoyer les résultats.",
+    "queryTab": "Recherche",
+    "auditTab": "Journal des recherches",
+    "kind": "Rechercher par",
+    "kinds": {
+      "name": "Nom",
+      "student_number": "Numéro d’étudiant",
+      "qq": "Numéro QQ",
+      "subject": "Identifiant de compte"
+    },
+    "value": "Valeur recherchée",
+    "domains": "Domaines métier",
+    "domainNames": {
+      "profiles": "Profils",
+      "verification": "Vérification",
+      "catalog": "Cours et enseignants",
+      "reviews": "Avis",
+      "resources": "Ressources",
+      "billing": "Facturation",
+      "groups": "Groupes"
+    },
+    "sensitive": "Champs sensibles",
+    "sensitiveHint": "Sans sélection, seuls les champs d’identité masqués sont renvoyés. Chaque catégorie cochée exige son propre droit ; sinon toute la requête est refusée.",
+    "categories": {
+      "business": "Métier",
+      "identity": "Identité",
+      "document": "Pièce d’identité",
+      "material": "Justificatifs",
+      "refund": "Bénéficiaire du remboursement"
+    },
+    "purpose": "Motif",
+    "purposeHint": "Expliquez pourquoi ces informations sont nécessaires, par exemple le numéro du ticket ou du recours. Le motif est enregistré avec la requête.",
+    "submit": "Rechercher",
+    "incomplete": "Ces domaines ne sont pas encore connectés ; les résultats sont incomplets : {domains}",
+    "empty": "Aucun enregistrement visible ne correspond.",
+    "results": "Résultats",
+    "current": "Actuel",
+    "historical": "Ancien",
+    "changedAt": "Modifié le {time}",
+    "masked": "Masqué",
+    "any": "Tous",
+    "auditPurposeHint": "Expliquez pourquoi vous consultez le journal. Cette consultation est aussi enregistrée.",
+    "auditEmpty": "Aucune recherche ne correspond.",
+    "auditActor": "Opérateur",
+    "auditCount": "{count} enregistrements renvoyés",
+    "auditChannel": "Canal {channel}, groupe {group}"
   }
 }
