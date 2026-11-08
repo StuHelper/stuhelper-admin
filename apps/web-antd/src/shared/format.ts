@@ -36,6 +36,5 @@ export function useFormat() {
   return computed(() => ({
     ...createFormatters(locale.value, preferences.app.timezone),
     bytes: (value: number) => formatBytes(locale.value, value),
-    list: (values: string[]) => new Intl.ListFormat(locale.value, { style: 'long', type: 'conjunction' }).format(values),
   }));
 }

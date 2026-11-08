@@ -1,6 +1,6 @@
 import type { MenuRecordRaw } from '@vben/types';
 
-import { BadgeCheck, BookOpen, Database, Files, KeyRound, LayoutDashboard, Link2, MessageSquare } from 'lucide-vue-next';
+import { BadgeCheck, BookOpen, Coins, Database, Files, KeyRound, LayoutDashboard, Link2, MessageSquare } from 'lucide-vue-next';
 
 // Sidebar grouped by business area. Menus only guide navigation; the server
 // decides on every request whether the administrator may see the data.
@@ -44,6 +44,16 @@ export const menus: MenuRecordRaw[] = [
     children: [
       { name: 'page.menu.verification', path: '/verification' },
       { name: 'page.menu.teacherVerification', path: '/verification/teachers' },
+    ],
+  },
+  {
+    name: 'page.menu.billingGroup',
+    path: '/billing-group',
+    icon: Coins,
+    children: [
+      { name: 'page.menu.billingRefunds', path: '/billing/refunds' },
+      { name: 'page.menu.billingAccounts', path: '/billing/accounts' },
+      { name: 'page.menu.billingConfig', path: '/billing/config' },
     ],
   },
   { name: 'page.menu.qqBinding', path: '/qq-binding', icon: Link2 },

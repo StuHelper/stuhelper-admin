@@ -95,12 +95,18 @@ async function route(u: URL, method: string, init?: RequestInit): Promise<Respon
 
   if (p === '/verification/schools') return json([d.verification.school]);
   if (p === '/admin/verification/access') return json({ allowed: true });
+  // Teacher review in the demo starts with an empty queue; qualifications are looked up by ID.
+  if (p.endsWith('/teacher-applications')) return json([]);
+  if (p.startsWith('/admin/verification/teacher-credentials/')) return nope('not_found', 404);
   if (p.startsWith('/admin/verification/schools/') && p.endsWith('/applications')) return json(applications);
   if (p.startsWith('/admin/verification/schools/') && p.endsWith('/requests')) return json([{ id: 'rv1', credential_id: 'cred', school_id: d.SCHOOL, kind: 'revoke', state: 'pending', reason: '同学申请注销认证', note: '', revision: 1, created_at: d.ago(2) }]);
   if (p.startsWith('/admin/verification/schools/')) return json(d.verification.school);
   if (p.startsWith('/admin/verification/jobs')) return json([{ id: 'job1', school_id: d.SCHOOL, kind: 'mail', state: 'manual', attempts: 3, code: 'mail_rejected' }]);
   if (p === '/admin/verification/suggestions') return json([]);
   if (p.startsWith('/admin/verification/credentials/')) return json(d.verification.credential('active'));
+
+  const billing = billingRoute(p, method, u);
+  if (billing) return billing;
 
   if (p.startsWith('/storage/operations')) return json(operations);
   if (p.startsWith('/storage-contributions')) {
@@ -116,6 +122,30 @@ async function route(u: URL, method: string, init?: RequestInit): Promise<Respon
     return json(d.custody.items[0], 202);
   }
   return nope('not_found', 404);
+}
+
+// Billing administration over a small fixed data set; writes echo a plausible result.
+const billingTarget = { issuer: 'https://id.example.invalid', subject: 'demo-user' };
+const billingOrder = (id: string, kind: string, state: string, amount: number) => ({ id, kind, state, amount_minor: amount, points: kind === 'purchase' ? 120 : 0, reference: 'demo', channel: 'demo-pay', reason: '', created_at: d.ago(1), allocations: [], original_points: 0, original_amount_minor: 0, receipt_reference: state === 'awaiting_manual' ? 'demo-receipt' : '', failure_code: '' });
+function billingRoute(p: string, method: string, u: URL) {
+  if (!p.startsWith('/billing/admin/')) return undefined;
+  const path = p.slice('/billing/admin'.length);
+  if (method === 'GET') {
+    if (path === '/refunds') {
+      const state = u.searchParams.get('state') ?? 'submitted';
+      return json({ items: ['submitted', 'awaiting_manual'].includes(state) ? [{ ...billingOrder(`refund-${state}`, 'refund', state, 3000), target: billingTarget }] : [], next: '' });
+    }
+    if (path === '/channels') return json({ items: [{ id: 'demo-pay', enabled: true, amounts_minor: [1000, 3000, 5000], original_refunds: true }], next: '' });
+    if (path === '/offers') return json({ items: [{ id: 'points-120', enabled: true, amount_minor: 1000, points: 120, valid_seconds: 365 * 86_400, version: 1 }], next: '' });
+    if (path === '/rules') return json({ items: [{ id: 'review-published', version: 1, effective_at: d.ago(30), enabled: true, points: 5, valid_seconds: 0, period_seconds: 86_400, limit: 3, object_scoped: true }], next: '' });
+    if (path === '/accounts') return json({ target: billingTarget, wallet: { points: 133, ivory_minor: 2000, frozen_ivory_minor: 0, debt_points: 0, frozen: false }, orders: { items: [billingOrder('purchase-1', 'purchase', 'succeeded', 1000)], next: '' }, ledger: { items: [{ id: 'entry-1', asset: 'points', kind: 'reward', amount: 5, reference: 'review-published', created_at: d.ago(2) }], next: '' } });
+    return nope('billing_not_found', 404);
+  }
+  if (path.endsWith('/review')) return json(billingOrder(path.split('/')[2] ?? '', 'refund', 'processing', 3000));
+  if (path.endsWith('/manual-result')) return json(billingOrder(path.split('/')[2] ?? '', 'refund', 'succeeded', 3000));
+  if (path === '/purchase-refunds') return json(billingOrder('purchase-refund-1', 'purchase_refund', 'succeeded', 1000));
+  if (path === '/rewards' || path === '/revocations') return json({ event_id: 'demo-event', rule_id: 'review-published', version: 1, points: 5, state: 'granted', occurred_at: d.ago(0), lot_id: 'lot-1', revoked: path === '/revocations' });
+  return nope('billing_not_found', 404);
 }
 
 export function installDemoFetch() {
