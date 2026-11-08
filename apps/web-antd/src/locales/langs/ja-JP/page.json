@@ -20,7 +20,9 @@
     "custody": "認証情報の管理",
     "contributions": "ストレージ提供の管理",
     "openPlatform": "オープンプラットフォーム審査",
-    "qqBinding": "QQ 連携の管理"
+    "qqBinding": "QQ 連携の管理",
+    "verificationGroup": "認証管理",
+    "teacherVerification": "教員認証"
   },
   "common": {
     "all": "すべて",
@@ -911,6 +913,39 @@
       "onebot": "OneBot ボット",
       "connect": "QQ ログイン連携",
       "official": "QQ 公式ボット"
+    }
+  },
+  "teacherVerification": {
+    "title": "教員認証",
+    "intro": "学校ごとに教員の在職証明を審査し、コースカタログの教員プロフィールと関連付けます。教員資格の照会と取り消しもできます。教員認証は学生認証とは別に扱われます。",
+    "empty": "審査待ちの教員申請はありません。",
+    "credentialId": "教員資格 ID",
+    "profiles": "関連する教員プロフィール",
+    "public": "公開情報",
+    "revokeHint": "取り消すと教員資格はすぐに無効になり、教員プロフィールとの関連も解除されます。記録は残ります。",
+    "reviewTitle": "教員申請の審査",
+    "organization": "所属機関",
+    "gender": "性別",
+    "profilesHint": "この学校の教員プロフィールのみ選べます。承認するには 1 件以上選んでください。",
+    "noTeachers": "一致する教員はありません。",
+    "expiryHint": "空欄の場合、取り消されるまで有効です。",
+    "noteHint": "資料の追加依頼や却下の際は必須です。申請者に表示されます。",
+    "nothingPublic": "公開している情報はありません",
+    "revoked": "教員資格を取り消しました。",
+    "tabs": {
+      "reviews": "審査待ちの申請",
+      "credentials": "教員資格"
+    },
+    "done": {
+      "approve": "申請を承認しました。",
+      "supplement": "申請者に資料の追加を依頼しました。",
+      "reject": "申請を却下しました。"
+    },
+    "disclosure": {
+      "real_name": "氏名",
+      "teacher": "教員であること",
+      "gender": "性別",
+      "organization": "所属機関"
     }
   }
 }

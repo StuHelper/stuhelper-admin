@@ -37,7 +37,15 @@ export const menus: MenuRecordRaw[] = [
       { name: 'page.menu.resourceDirectories', path: '/resources/directories' },
     ],
   },
-  { name: 'page.menu.verification', path: '/verification', icon: BadgeCheck },
+  {
+    name: 'page.menu.verificationGroup',
+    path: '/verification-group',
+    icon: BadgeCheck,
+    children: [
+      { name: 'page.menu.verification', path: '/verification' },
+      { name: 'page.menu.teacherVerification', path: '/verification/teachers' },
+    ],
+  },
   { name: 'page.menu.qqBinding', path: '/qq-binding', icon: Link2 },
   { name: 'page.menu.openPlatform', path: '/open-platform', icon: KeyRound },
   {

@@ -5,7 +5,7 @@ import { computed, onBeforeUnmount, onMounted, reactive, ref, shallowRef, watch 
 
 import { useI18n } from '@vben/locales';
 
-import { Alert, Button, Card, Checkbox, CheckboxGroup, DatePicker, Descriptions, DescriptionsItem, Drawer, Form, FormItem, Image, Input, InputNumber, Result, Space, Switch, Table, TabPane, Tabs, Tag, Textarea } from 'ant-design-vue';
+import { Alert, Button, Card, Checkbox, CheckboxGroup, DatePicker, Descriptions, DescriptionsItem, Drawer, Form, FormItem, Image, Input, InputNumber, Result, Select, Space, Switch, Table, TabPane, Tabs, Tag, Textarea } from 'ant-design-vue';
 
 import { errorCode } from '#/shared/api/errors';
 import { useFormat } from '#/shared/format';
@@ -278,7 +278,11 @@ const jobColumns = computed(() => [
     <Result v-else-if="access !== 'allowed'" :status="access === 'denied' ? '403' : 'warning'" :title="t(access === 'denied' ? 'page.verification.noAccess' : 'page.errors.unavailable')" :sub-title="errorText(accessError)" />
     <div v-else class="flex flex-col gap-4">
       <Card :bordered="false">
-        <Form layout="inline" />
+        <Form layout="inline">
+          <FormItem :label="t('page.common.school')" html-for="verification-school">
+            <Select id="verification-school" v-model:value="schoolId" class="w-64 max-w-full" :options="schools.map((item) => ({ value: item.id, label: item.name }))" :disabled="busy" />
+          </FormItem>
+        </Form>
       </Card>
       <Alert v-if="error" type="error" show-icon role="alert" :message="errorText(error)" />
       <Alert v-if="notice" type="success" show-icon role="status" :message="notice" />

@@ -20,7 +20,9 @@
     "custody": "存储托管管理",
     "contributions": "存储贡献管理",
     "openPlatform": "开放平台审核",
-    "qqBinding": "QQ 绑定处理"
+    "qqBinding": "QQ 绑定处理",
+    "verificationGroup": "认证管理",
+    "teacherVerification": "教师认证"
   },
   "common": {
     "all": "全部",
@@ -911,6 +913,39 @@
       "onebot": "OneBot 机器人",
       "connect": "QQ 互联",
       "official": "QQ 官方机器人"
+    }
+  },
+  "teacherVerification": {
+    "title": "教师认证",
+    "intro": "按学校审核教师提交的任教证明，并关联课程目录中的教师档案；也可以查询并撤销教师资格。教师认证与学生认证相互独立。",
+    "empty": "当前没有待审核的教师申请。",
+    "credentialId": "教师资格编号",
+    "profiles": "关联的教师档案",
+    "public": "公开信息",
+    "revokeHint": "撤销后该教师资格立即失效，并解除与教师档案的关联。记录会保留。",
+    "reviewTitle": "审核教师申请",
+    "organization": "任职单位",
+    "gender": "性别",
+    "profilesHint": "只能选择本校的教师档案，批准时至少选择一项。",
+    "noTeachers": "没有找到匹配的教师。",
+    "expiryHint": "留空表示长期有效，直到被撤销。",
+    "noteHint": "要求补充或拒绝时必须填写，申请人会看到这段说明。",
+    "nothingPublic": "不公开任何信息",
+    "revoked": "教师资格已撤销。",
+    "tabs": {
+      "reviews": "待审核申请",
+      "credentials": "教师资格"
+    },
+    "done": {
+      "approve": "已批准申请。",
+      "supplement": "已退回申请人补充材料。",
+      "reject": "已拒绝申请。"
+    },
+    "disclosure": {
+      "real_name": "真实姓名",
+      "teacher": "教师身份",
+      "gender": "性别",
+      "organization": "任职单位"
     }
   }
 }

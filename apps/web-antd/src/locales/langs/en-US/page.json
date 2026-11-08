@@ -20,7 +20,9 @@
     "custody": "Storage custody",
     "contributions": "Storage contribution management",
     "openPlatform": "Open platform review",
-    "qqBinding": "QQ binding"
+    "qqBinding": "QQ binding",
+    "verificationGroup": "Verification",
+    "teacherVerification": "Teacher verification"
   },
   "common": {
     "all": "All",
@@ -911,6 +913,39 @@
       "onebot": "OneBot bot",
       "connect": "QQ Connect",
       "official": "Official QQ bot"
+    }
+  },
+  "teacherVerification": {
+    "title": "Teacher verification",
+    "intro": "Review proof of teaching per school and link the applicant to teacher profiles in the course catalog, or look up and revoke a teacher qualification. Teacher verification is separate from student verification.",
+    "empty": "No teacher applications are waiting for review.",
+    "credentialId": "Qualification ID",
+    "profiles": "Linked teacher profiles",
+    "public": "Shown publicly",
+    "revokeHint": "Revoking ends the qualification at once and unlinks the teacher profiles. The record is kept.",
+    "reviewTitle": "Review teacher application",
+    "organization": "Employer",
+    "gender": "Gender",
+    "profilesHint": "Only teacher profiles of this school can be chosen. Choose at least one to approve.",
+    "noTeachers": "No matching teachers.",
+    "expiryHint": "Leave empty to keep it valid until revoked.",
+    "noteHint": "Required to ask for more materials or to reject. The applicant sees this note.",
+    "nothingPublic": "Nothing is shown publicly",
+    "revoked": "The teacher qualification was revoked.",
+    "tabs": {
+      "reviews": "Pending applications",
+      "credentials": "Teacher qualifications"
+    },
+    "done": {
+      "approve": "The application was approved.",
+      "supplement": "The application was returned for more materials.",
+      "reject": "The application was rejected."
+    },
+    "disclosure": {
+      "real_name": "Real name",
+      "teacher": "Teacher status",
+      "gender": "Gender",
+      "organization": "Employer"
     }
   }
 }

@@ -20,7 +20,9 @@
     "custody": "Custodia de credenciales",
     "contributions": "Gestión de aportes de almacenamiento",
     "openPlatform": "Revisión de plataforma abierta",
-    "qqBinding": "Vinculación con QQ"
+    "qqBinding": "Vinculación con QQ",
+    "verificationGroup": "Verificaciones",
+    "teacherVerification": "Verificación docente"
   },
   "common": {
     "all": "Todos",
@@ -911,6 +913,39 @@
       "onebot": "Bot OneBot",
       "connect": "Conexión QQ",
       "official": "Bot oficial de QQ"
+    }
+  },
+  "teacherVerification": {
+    "title": "Verificación docente",
+    "intro": "Revisa por centro las pruebas docentes y vincula al solicitante con perfiles docentes del catálogo, o consulta y revoca una acreditación. La verificación docente es independiente de la de estudiantes.",
+    "empty": "No hay solicitudes docentes pendientes de revisión.",
+    "credentialId": "ID de acreditación",
+    "profiles": "Perfiles docentes vinculados",
+    "public": "Se muestra públicamente",
+    "revokeHint": "Al revocarla, la acreditación deja de valer al instante y se desvinculan los perfiles docentes. El registro se conserva.",
+    "reviewTitle": "Revisar solicitud docente",
+    "organization": "Centro de trabajo",
+    "gender": "Género",
+    "profilesHint": "Solo se pueden elegir perfiles docentes de este centro. Elige al menos uno para aprobar.",
+    "noTeachers": "No hay docentes que coincidan.",
+    "expiryHint": "Déjalo vacío para que valga hasta su revocación.",
+    "noteHint": "Obligatorio para pedir más documentos o rechazar. El solicitante verá esta nota.",
+    "nothingPublic": "No se muestra nada públicamente",
+    "revoked": "Se revocó la acreditación docente.",
+    "tabs": {
+      "reviews": "Solicitudes pendientes",
+      "credentials": "Acreditaciones docentes"
+    },
+    "done": {
+      "approve": "Se aprobó la solicitud.",
+      "supplement": "Se devolvió la solicitud para completar documentos.",
+      "reject": "Se rechazó la solicitud."
+    },
+    "disclosure": {
+      "real_name": "Nombre real",
+      "teacher": "Condición docente",
+      "gender": "Género",
+      "organization": "Centro de trabajo"
     }
   }
 }

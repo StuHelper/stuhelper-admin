@@ -20,7 +20,9 @@
     "custody": "Gestion des identifiants",
     "contributions": "Gestion des contributions",
     "openPlatform": "Examen plateforme ouverte",
-    "qqBinding": "Liaison QQ"
+    "qqBinding": "Liaison QQ",
+    "verificationGroup": "Vérifications",
+    "teacherVerification": "Vérification enseignant"
   },
   "common": {
     "all": "Tous",
@@ -911,6 +913,39 @@
       "onebot": "Bot OneBot",
       "connect": "Connexion QQ",
       "official": "Bot QQ officiel"
+    }
+  },
+  "teacherVerification": {
+    "title": "Vérification enseignant",
+    "intro": "Examinez par établissement les preuves d’enseignement et reliez le demandeur aux fiches enseignant du catalogue, ou consultez et révoquez une qualification. Cette vérification est distincte de celle des étudiants.",
+    "empty": "Aucune demande d’enseignant n’attend d’examen.",
+    "credentialId": "Identifiant de qualification",
+    "profiles": "Fiches enseignant liées",
+    "public": "Rendu public",
+    "revokeHint": "La révocation met fin à la qualification immédiatement et délie les fiches enseignant. L’historique est conservé.",
+    "reviewTitle": "Examiner la demande d’enseignant",
+    "organization": "Établissement employeur",
+    "gender": "Genre",
+    "profilesHint": "Seules les fiches enseignant de cet établissement sont proposées. Choisissez-en au moins une pour approuver.",
+    "noTeachers": "Aucun enseignant correspondant.",
+    "expiryHint": "Laissez vide pour une validité jusqu’à révocation.",
+    "noteHint": "Obligatoire pour demander des pièces ou refuser. Le demandeur voit cette note.",
+    "nothingPublic": "Aucune information publique",
+    "revoked": "La qualification d’enseignant a été révoquée.",
+    "tabs": {
+      "reviews": "Demandes en attente",
+      "credentials": "Qualifications d’enseignant"
+    },
+    "done": {
+      "approve": "La demande a été approuvée.",
+      "supplement": "La demande a été renvoyée pour compléments.",
+      "reject": "La demande a été refusée."
+    },
+    "disclosure": {
+      "real_name": "Nom réel",
+      "teacher": "Qualité d’enseignant",
+      "gender": "Genre",
+      "organization": "Établissement employeur"
     }
   }
 }

@@ -20,7 +20,9 @@
     "custody": "인증 정보 관리",
     "contributions": "저장소 기여 관리",
     "openPlatform": "오픈 플랫폼 심사",
-    "qqBinding": "QQ 연결 관리"
+    "qqBinding": "QQ 연결 관리",
+    "verificationGroup": "인증 관리",
+    "teacherVerification": "교원 인증"
   },
   "common": {
     "all": "전체",
@@ -911,6 +913,39 @@
       "onebot": "OneBot 봇",
       "connect": "QQ 로그인 연동",
       "official": "QQ 공식 봇"
+    }
+  },
+  "teacherVerification": {
+    "title": "교원 인증",
+    "intro": "학교별로 교원의 재직 증빙을 검토하고 강의 카탈로그의 교원 프로필과 연결합니다. 교원 자격을 조회하고 취소할 수도 있습니다. 교원 인증은 학생 인증과 별개입니다.",
+    "empty": "검토할 교원 신청이 없습니다.",
+    "credentialId": "교원 자격 ID",
+    "profiles": "연결된 교원 프로필",
+    "public": "공개 정보",
+    "revokeHint": "취소하면 교원 자격이 즉시 무효가 되고 교원 프로필 연결도 해제됩니다. 기록은 보존됩니다.",
+    "reviewTitle": "교원 신청 검토",
+    "organization": "소속 기관",
+    "gender": "성별",
+    "profilesHint": "이 학교의 교원 프로필만 선택할 수 있습니다. 승인하려면 하나 이상 선택하세요.",
+    "noTeachers": "일치하는 교원이 없습니다.",
+    "expiryHint": "비워 두면 취소될 때까지 유효합니다.",
+    "noteHint": "자료 보완 요청이나 거절 시 필수이며 신청자에게 표시됩니다.",
+    "nothingPublic": "공개 중인 정보가 없습니다",
+    "revoked": "교원 자격을 취소했습니다.",
+    "tabs": {
+      "reviews": "검토 대기 신청",
+      "credentials": "교원 자격"
+    },
+    "done": {
+      "approve": "신청을 승인했습니다.",
+      "supplement": "신청자에게 자료 보완을 요청했습니다.",
+      "reject": "신청을 거절했습니다."
+    },
+    "disclosure": {
+      "real_name": "실명",
+      "teacher": "교원 신분",
+      "gender": "성별",
+      "organization": "소속 기관"
     }
   }
 }
