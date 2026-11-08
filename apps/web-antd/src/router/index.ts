@@ -19,6 +19,7 @@ const children: RouteRecordRaw[] = [
   { name: 'ResourceCategories', path: 'resources/categories', component: () => import('#/features/resources/CategoriesView.vue'), meta: { title: 'page.menu.resourceCategories' } },
   { name: 'ResourceDirectories', path: 'resources/directories', component: () => import('#/features/resources/DirectoriesView.vue'), meta: { title: 'page.menu.resourceDirectories' } },
   { name: 'Verification', path: 'verification', component: () => import('#/features/verification/VerificationView.vue'), meta: { title: 'page.menu.verification' } },
+  { name: 'QqBinding', path: 'qq-binding', component: () => import('#/features/qq-binding/BindingView.vue'), meta: { title: 'page.menu.qqBinding' } },
   { name: 'OpenPlatform', path: 'open-platform', component: () => import('#/features/open-platform/AppsView.vue'), meta: { title: 'page.menu.openPlatform' } },
   { name: 'Storage', path: 'storage', component: () => import('#/features/storage/StorageView.vue'), meta: { title: 'page.menu.storage' } },
   { name: 'StorageCustody', path: 'storage/custody', component: () => import('#/features/storage/CustodyView.vue'), meta: { title: 'page.menu.custody' } },

@@ -19,7 +19,8 @@
     "storage": "저장소 인스턴스",
     "custody": "인증 정보 관리",
     "contributions": "저장소 기여 관리",
-    "openPlatform": "오픈 플랫폼 심사"
+    "openPlatform": "오픈 플랫폼 심사",
+    "qqBinding": "QQ 연결 관리"
   },
   "common": {
     "all": "전체",
@@ -82,7 +83,15 @@
     "information_mismatch": "정보가 일치하지 않습니다. 확인하거나 다른 가능한 방법을 선택하세요.",
     "method_unavailable": "이 인증 방법을 사용할 수 없습니다. 다른 가능한 방법을 선택하세요.",
     "processing": "요청이 처리 중입니다. 잠시 후 새로고침하거나 다시 시도하세요.",
-    "school_mismatch": "파일의 학교가 선택한 학교와 다릅니다."
+    "school_mismatch": "파일의 학교가 선택한 학교와 다릅니다.",
+    "qq_binding_forbidden": "이 계정은 QQ 연결을 관리할 수 없습니다.",
+    "qq_binding_not_found": "이 계정의 QQ 연결을 찾을 수 없습니다.",
+    "qq_binding_invalid_input": "입력 내용이 올바르지 않습니다.",
+    "qq_binding_revision_conflict": "연결 상태가 변경되었습니다. 다시 조회한 뒤 처리하세요.",
+    "qq_binding_rate_limited": "요청이 너무 많습니다. 잠시 후 다시 시도하세요.",
+    "qq_binding_unavailable": "QQ 연결 서비스를 사용할 수 없습니다.",
+    "qq_binding_account_closed": "탈퇴한 계정입니다.",
+    "qq_binding_unauthenticated": "먼저 로그인하세요."
   },
   "session": {
     "signIn": "로그인",
@@ -878,6 +887,30 @@
       "schedule": "시간표",
       "catalog": "과목 목록",
       "public_reviews": "공개 평가"
+    }
+  },
+  "qqBinding": {
+    "title": "QQ 연결 관리",
+    "intro": "계정별로 세 가지 QQ 연결 상태를 조회하고 필요하면 한 항목을 해제합니다. 조회는 감사 기록에 남습니다.",
+    "owner": "계정 키",
+    "ownerHint": "서버 계정 키(발급자와 사용자 ID를 인코딩한 값)를 입력하세요.",
+    "lookup": "조회",
+    "result": "연결 상태",
+    "complete": "세 항목이 모두 연결되었습니다.",
+    "incomplete": "QQ 연결이 완료되지 않았습니다.",
+    "number": "연결된 QQ 번호(가림): {number}",
+    "bound": "연결됨",
+    "unbound": "연결 안 됨",
+    "release": "해제",
+    "releaseTitle": "{part} 해제",
+    "releaseHint": "해제하면 이 계정의 QQ 연결은 즉시 미완료가 되며 나머지 두 항목은 유지됩니다. 사용자는 다시 연결할 수 있습니다.",
+    "reason": "해제 사유",
+    "confirmRelease": "해제 확인",
+    "released": "{part}을(를) 해제했습니다.",
+    "parts": {
+      "onebot": "OneBot 봇",
+      "connect": "QQ 로그인 연동",
+      "official": "QQ 공식 봇"
     }
   }
 }

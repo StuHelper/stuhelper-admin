@@ -19,7 +19,8 @@
     "storage": "ストレージインスタンス",
     "custody": "認証情報の管理",
     "contributions": "ストレージ提供の管理",
-    "openPlatform": "オープンプラットフォーム審査"
+    "openPlatform": "オープンプラットフォーム審査",
+    "qqBinding": "QQ 連携の管理"
   },
   "common": {
     "all": "すべて",
@@ -82,7 +83,15 @@
     "information_mismatch": "情報が一致しません。内容を確認するか、別の利用可能な方法を選んでください。",
     "method_unavailable": "この認証方法は利用できません。別の利用可能な方法を選んでください。",
     "processing": "リクエストを処理中です。少し待って更新または再試行してください。",
-    "school_mismatch": "ファイルの学校が選択中の学校と一致しません。"
+    "school_mismatch": "ファイルの学校が選択中の学校と一致しません。",
+    "qq_binding_forbidden": "このアカウントには QQ 連携を管理する権限がありません。",
+    "qq_binding_not_found": "このアカウントの QQ 連携は見つかりません。",
+    "qq_binding_invalid_input": "入力内容が正しくありません。",
+    "qq_binding_revision_conflict": "連携状態が更新されました。再度照会してから操作してください。",
+    "qq_binding_rate_limited": "リクエストが多すぎます。しばらくしてから再試行してください。",
+    "qq_binding_unavailable": "QQ 連携サービスを利用できません。",
+    "qq_binding_account_closed": "このアカウントは解約済みです。",
+    "qq_binding_unauthenticated": "先にログインしてください。"
   },
   "session": {
     "signIn": "ログイン",
@@ -878,6 +887,30 @@
       "schedule": "時間割",
       "catalog": "科目カタログ",
       "public_reviews": "公開レビュー"
+    }
+  },
+  "qqBinding": {
+    "title": "QQ 連携の管理",
+    "intro": "アカウントごとに 3 項目の QQ 連携状態を確認し、必要に応じて 1 項目を解除します。照会は監査記録に残ります。",
+    "owner": "アカウントキー",
+    "ownerHint": "サーバーのアカウントキー（発行者とユーザー ID を符号化したもの）を入力します。",
+    "lookup": "照会",
+    "result": "連携状態",
+    "complete": "3 項目すべて連携済みです。",
+    "incomplete": "QQ 連携は未完了です。",
+    "number": "連携済み QQ 番号（マスク）：{number}",
+    "bound": "連携済み",
+    "unbound": "未連携",
+    "release": "解除",
+    "releaseTitle": "{part}を解除",
+    "releaseHint": "解除するとこのアカウントの QQ 連携はすぐに未完了になり、他の 2 項目は残ります。ユーザーは再度連携できます。",
+    "reason": "解除の理由",
+    "confirmRelease": "解除を確定",
+    "released": "{part}を解除しました。",
+    "parts": {
+      "onebot": "OneBot ボット",
+      "connect": "QQ ログイン連携",
+      "official": "QQ 公式ボット"
     }
   }
 }

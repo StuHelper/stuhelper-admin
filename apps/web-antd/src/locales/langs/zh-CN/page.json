@@ -19,7 +19,8 @@
     "storage": "存储实例",
     "custody": "存储托管管理",
     "contributions": "存储贡献管理",
-    "openPlatform": "开放平台审核"
+    "openPlatform": "开放平台审核",
+    "qqBinding": "QQ 绑定处理"
   },
   "common": {
     "all": "全部",
@@ -82,7 +83,15 @@
     "information_mismatch": "信息未匹配，请核对后重试或选择其他已开放方式。",
     "method_unavailable": "该认证方式当前不可用，请选择其他已开放方式。",
     "processing": "请求仍在处理中，请稍后刷新或重试。",
-    "school_mismatch": "文件中的学校与当前选择的学校不一致。"
+    "school_mismatch": "文件中的学校与当前选择的学校不一致。",
+    "qq_binding_forbidden": "当前账号无权处理 QQ 绑定。",
+    "qq_binding_not_found": "没有找到该账号的 QQ 绑定记录。",
+    "qq_binding_invalid_input": "填写的内容不符合要求。",
+    "qq_binding_revision_conflict": "绑定状态已被其他操作更新，请重新查询后再处理。",
+    "qq_binding_rate_limited": "操作过于频繁，请稍后重试。",
+    "qq_binding_unavailable": "QQ 绑定服务暂时不可用。",
+    "qq_binding_account_closed": "该账号已注销。",
+    "qq_binding_unauthenticated": "请先登录。"
   },
   "session": {
     "signIn": "登录",
@@ -878,6 +887,30 @@
       "schedule": "课表",
       "catalog": "课程目录",
       "public_reviews": "公开评价"
+    }
+  },
+  "qqBinding": {
+    "title": "QQ 绑定处理",
+    "intro": "按账号查询三项 QQ 绑定状态，必要时释放其中一项。查询会记录审计。",
+    "owner": "账号键",
+    "ownerHint": "填写服务端账号键（签发方与用户标识的编码），可从账号相关记录中复制。",
+    "lookup": "查询",
+    "result": "绑定状态",
+    "complete": "三项绑定均已完成。",
+    "incomplete": "QQ 绑定未完成。",
+    "number": "已绑定 QQ 号码（脱敏）：{number}",
+    "bound": "已绑定",
+    "unbound": "未绑定",
+    "release": "释放",
+    "releaseTitle": "释放{part}",
+    "releaseHint": "释放后该账号的 QQ 绑定立即变为未完成，另外两项保留。用户可以重新绑定。",
+    "reason": "释放原因",
+    "confirmRelease": "确认释放",
+    "released": "已释放{part}。",
+    "parts": {
+      "onebot": "OneBot 机器人",
+      "connect": "QQ 互联",
+      "official": "QQ 官方机器人"
     }
   }
 }

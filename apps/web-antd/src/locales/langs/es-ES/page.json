@@ -19,7 +19,8 @@
     "storage": "Instancias de almacenamiento",
     "custody": "Custodia de credenciales",
     "contributions": "Gestión de aportes de almacenamiento",
-    "openPlatform": "Revisión de plataforma abierta"
+    "openPlatform": "Revisión de plataforma abierta",
+    "qqBinding": "Vinculación con QQ"
   },
   "common": {
     "all": "Todos",
@@ -82,7 +83,15 @@
     "information_mismatch": "Los datos no coinciden. Revísalos o elige otro método disponible.",
     "method_unavailable": "Este método no está disponible. Elige otro.",
     "processing": "La solicitud sigue en proceso. Actualiza o reintenta en breve.",
-    "school_mismatch": "La universidad del archivo no coincide con la seleccionada."
+    "school_mismatch": "La universidad del archivo no coincide con la seleccionada.",
+    "qq_binding_forbidden": "Esta cuenta no puede gestionar vinculaciones con QQ.",
+    "qq_binding_not_found": "No se encontró ninguna vinculación con QQ para esta cuenta.",
+    "qq_binding_invalid_input": "Los datos no son válidos.",
+    "qq_binding_revision_conflict": "La vinculación cambió mientras tanto. Consúltala de nuevo antes de actuar.",
+    "qq_binding_rate_limited": "Demasiadas solicitudes. Inténtalo más tarde.",
+    "qq_binding_unavailable": "El servicio de vinculación con QQ no está disponible.",
+    "qq_binding_account_closed": "Esta cuenta está cerrada.",
+    "qq_binding_unauthenticated": "Inicia sesión primero."
   },
   "session": {
     "signIn": "Iniciar sesión",
@@ -878,6 +887,30 @@
       "schedule": "Horario",
       "catalog": "Catálogo",
       "public_reviews": "Reseñas públicas"
+    }
+  },
+  "qqBinding": {
+    "title": "Vinculación con QQ",
+    "intro": "Consulta las tres partes de la vinculación con QQ de una cuenta y libera una si hace falta. Cada consulta queda auditada.",
+    "owner": "Clave de cuenta",
+    "ownerHint": "Introduce la clave de cuenta del servidor (emisor e ID de usuario codificados), copiada de los registros de la cuenta.",
+    "lookup": "Consultar",
+    "result": "Estado de la vinculación",
+    "complete": "Las tres partes están vinculadas.",
+    "incomplete": "La vinculación con QQ está incompleta.",
+    "number": "Número de QQ vinculado (oculto): {number}",
+    "bound": "Vinculado",
+    "unbound": "No vinculado",
+    "release": "Liberar",
+    "releaseTitle": "Liberar {part}",
+    "releaseHint": "La vinculación con QQ de la cuenta queda incompleta al instante; las otras dos partes se mantienen. El usuario puede volver a vincular.",
+    "reason": "Motivo",
+    "confirmRelease": "Confirmar liberación",
+    "released": "Se liberó {part}.",
+    "parts": {
+      "onebot": "Bot OneBot",
+      "connect": "Conexión QQ",
+      "official": "Bot oficial de QQ"
     }
   }
 }

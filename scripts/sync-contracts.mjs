@@ -20,6 +20,7 @@ const modules = {
   profiles: { repo: 'profiles', files: { 'contracts/profiles.openapi.json': 'contracts/profiles.openapi.json', 'sdk/profiles.gen.ts': 'apps/web-antd/src/api/profiles.gen.ts' } },
   'open-platform': { repo: 'open-platform', files: { 'contracts/open-platform.openapi.json': 'contracts/open-platform.openapi.json', 'sdk/open-platform.gen.ts': 'apps/web-antd/src/api/open-platform.gen.ts' } },
   billing: { repo: 'billing', files: { 'contracts/billing.openapi.json': 'contracts/billing.openapi.json', 'sdk/billing.gen.ts': 'apps/web-antd/src/api/billing.gen.ts' } },
+  'qq-binding': { repo: 'qq-binding', files: { 'contracts/qq-binding.openapi.json': 'contracts/qq-binding.openapi.json', 'sdk/qq-binding.gen.ts': 'apps/web-antd/src/api/qq-binding.gen.ts' } },
   session: { repo: 'backend', single: true, files: { 'contracts/session.openapi.json': 'contracts/session.openapi.json' }, extra: { generator: 'openapi-typescript@7.13.0' } },
   verification: { repo: 'verification', single: true, files: { 'contracts/verification.openapi.yaml': 'contracts/verification.openapi.yaml', 'sdk/verification.gen.ts': 'apps/web-antd/src/api/verification.gen.ts', 'contracts/verification-cases.json': 'contracts/verification-cases.json' } },
   platform: { repo: 'platform', single: true, files: { 'contracts/platform.openapi.yaml': 'contracts/platform.openapi.yaml', 'sdk/platform.gen.ts': 'apps/web-antd/src/api/platform.gen.ts', 'contracts/client-cases.json': 'contracts/client-cases.json' } },

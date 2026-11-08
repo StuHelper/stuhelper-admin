@@ -19,7 +19,8 @@
     "storage": "Instances de stockage",
     "custody": "Gestion des identifiants",
     "contributions": "Gestion des contributions",
-    "openPlatform": "Examen plateforme ouverte"
+    "openPlatform": "Examen plateforme ouverte",
+    "qqBinding": "Liaison QQ"
   },
   "common": {
     "all": "Tous",
@@ -82,7 +83,15 @@
     "information_mismatch": "Les informations ne correspondent pas. Vérifiez-les ou choisissez une autre méthode.",
     "method_unavailable": "Cette méthode est indisponible. Choisissez une autre méthode proposée.",
     "processing": "La demande est en cours. Actualisez ou réessayez bientôt.",
-    "school_mismatch": "L’établissement du fichier diffère de celui sélectionné."
+    "school_mismatch": "L’établissement du fichier diffère de celui sélectionné.",
+    "qq_binding_forbidden": "Ce compte ne peut pas gérer les liaisons QQ.",
+    "qq_binding_not_found": "Aucune liaison QQ trouvée pour ce compte.",
+    "qq_binding_invalid_input": "La saisie n’est pas valide.",
+    "qq_binding_revision_conflict": "La liaison a changé entre-temps. Consultez-la de nouveau avant d’agir.",
+    "qq_binding_rate_limited": "Trop de requêtes. Réessayez plus tard.",
+    "qq_binding_unavailable": "Le service de liaison QQ est indisponible.",
+    "qq_binding_account_closed": "Ce compte a été clôturé.",
+    "qq_binding_unauthenticated": "Connectez-vous d’abord."
   },
   "session": {
     "signIn": "Se connecter",
@@ -878,6 +887,30 @@
       "schedule": "Emploi du temps",
       "catalog": "Catalogue",
       "public_reviews": "Avis publics"
+    }
+  },
+  "qqBinding": {
+    "title": "Liaison QQ",
+    "intro": "Consultez les trois éléments de liaison QQ d’un compte et libérez-en un si nécessaire. Chaque consultation est journalisée.",
+    "owner": "Clé de compte",
+    "ownerHint": "Saisissez la clé de compte du serveur (émetteur et identifiant encodés), copiée depuis les enregistrements du compte.",
+    "lookup": "Consulter",
+    "result": "État de la liaison",
+    "complete": "Les trois éléments sont liés.",
+    "incomplete": "La liaison QQ est incomplète.",
+    "number": "Numéro QQ lié (masqué) : {number}",
+    "bound": "Lié",
+    "unbound": "Non lié",
+    "release": "Libérer",
+    "releaseTitle": "Libérer {part}",
+    "releaseHint": "La liaison QQ du compte devient aussitôt incomplète ; les deux autres éléments sont conservés. L’utilisateur peut lier à nouveau.",
+    "reason": "Motif",
+    "confirmRelease": "Confirmer la libération",
+    "released": "{part} a été libéré.",
+    "parts": {
+      "onebot": "Bot OneBot",
+      "connect": "Connexion QQ",
+      "official": "Bot QQ officiel"
     }
   }
 }

@@ -19,7 +19,8 @@
     "storage": "Storage instances",
     "custody": "Storage custody",
     "contributions": "Storage contribution management",
-    "openPlatform": "Open platform review"
+    "openPlatform": "Open platform review",
+    "qqBinding": "QQ binding"
   },
   "common": {
     "all": "All",
@@ -82,7 +83,15 @@
     "information_mismatch": "The information did not match. Check it or choose another available method.",
     "method_unavailable": "This method is unavailable. Choose another available method.",
     "processing": "The request is still processing. Refresh or retry shortly.",
-    "school_mismatch": "The school in the file differs from the selected school."
+    "school_mismatch": "The school in the file differs from the selected school.",
+    "qq_binding_forbidden": "This account cannot manage QQ bindings.",
+    "qq_binding_not_found": "No QQ binding was found for this account.",
+    "qq_binding_invalid_input": "The input is not valid.",
+    "qq_binding_revision_conflict": "The binding changed in the meantime. Look it up again before acting.",
+    "qq_binding_rate_limited": "Too many requests. Try again later.",
+    "qq_binding_unavailable": "The QQ binding service is unavailable.",
+    "qq_binding_account_closed": "This account has been closed.",
+    "qq_binding_unauthenticated": "Sign in first."
   },
   "session": {
     "signIn": "Sign in",
@@ -878,6 +887,30 @@
       "schedule": "Timetable",
       "catalog": "Course catalog",
       "public_reviews": "Public reviews"
+    }
+  },
+  "qqBinding": {
+    "title": "QQ binding",
+    "intro": "Look up the three QQ binding parts of an account and release one when needed. Each lookup is audited.",
+    "owner": "Account key",
+    "ownerHint": "Enter the server account key (encoded issuer and user ID); copy it from the account’s records.",
+    "lookup": "Look up",
+    "result": "Binding status",
+    "complete": "All three parts are bound.",
+    "incomplete": "QQ binding is incomplete.",
+    "number": "Bound QQ number (masked): {number}",
+    "bound": "Bound",
+    "unbound": "Not bound",
+    "release": "Release",
+    "releaseTitle": "Release {part}",
+    "releaseHint": "The account’s QQ binding becomes incomplete at once; the other two parts are kept. The user can bind again.",
+    "reason": "Reason",
+    "confirmRelease": "Confirm release",
+    "released": "{part} was released.",
+    "parts": {
+      "onebot": "OneBot bot",
+      "connect": "QQ Connect",
+      "official": "Official QQ bot"
     }
   }
 }
