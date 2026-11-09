@@ -32,10 +32,13 @@ async function server(page, options = {}) {
   return state;
 }
 
-test('a lookup states its purpose, shows masked fields and loads the next page', async ({ page }, info) => {
+const candidate = (account, extra = {}) => ({ account, source: 'verification', current: true, changed_at: '2026-10-01T00:00:00Z', scope: { school: 'school-1', group: '*', module: '*' }, label: [{ name: 'name', category: 'identity', value: '张*', masked: true }], ...extra });
+
+test('a lookup states its purpose, groups records by candidate and continues a candidate on the next page', async ({ page }, info) => {
   const all = catalogue(info); const l = all.lookup;
-  const first = { items: [record('p1', 'profiles', [{ name: 'phone', category: 'identity', value: '138****2046', masked: true }])], next_cursor: 'profiles:p1', unavailable_domains: ['groups'] };
-  const second = { items: [record('r1', 'reviews', [{ name: 'count', category: 'business', value: '12', masked: false }], false)], next_cursor: '', unavailable_domains: ['groups'] };
+  const person = candidate('https://id.example|user-7');
+  const first = { groups: [{ candidate: person, items: [record('p1', 'profiles', [{ name: 'phone', category: 'identity', value: '138****2046', masked: true }])] }], next_cursor: 'c1', unavailable_domains: ['groups'] };
+  const second = { groups: [{ candidate: person, items: [record('r1', 'reviews', [{ name: 'count', category: 'business', value: '12', masked: false }], false)] }], next_cursor: '', unavailable_domains: ['groups'] };
   const state = await server(page, { pages: [first, second] });
   await page.goto(`${base}/system/lookup?lang=${info.project.metadata.locale}`);
   const submit = page.getByRole('button', { name: l.submit, exact: true });
@@ -46,14 +49,36 @@ test('a lookup states its purpose, shows masked fields and loads the next page',
   await page.getByRole('checkbox', { name: l.categories.identity, exact: true }).check();
   await submit.click();
   await expect(page.getByText('138****2046')).toBeVisible();
-  await expect(page.getByText(l.masked, { exact: true })).toBeVisible();
+  await expect(page.getByText(fill(l.linkedBy, { source: l.sources.verification }), { exact: false })).toBeVisible();
   await expect(page.getByText(fill(l.incomplete, { domains: l.domainNames.groups }), { exact: true })).toBeVisible();
   expect(state.queries[0]).toEqual({ kind: 'name', value: '张三', scope: any, domains: ['profiles', 'verification', 'catalog', 'reviews', 'resources', 'groups'], fields: ['identity'], purpose: 'Ticket 2041', limit: 50 });
 
   await page.getByRole('button', { name: all.common.loadMore, exact: true }).click();
   await expect(page.getByText(l.historical, { exact: true })).toBeVisible();
-  expect(state.queries[1]).toEqual({ ...state.queries[0], after: 'profiles:p1' });
+  // The second page continues the same person, so one candidate holds both records.
+  await expect(page.getByText(l.candidate, { exact: true })).toHaveCount(1);
+  expect(state.queries[1]).toEqual({ ...state.queries[0], after: 'c1' });
   await expect(page.getByRole('button', { name: all.common.loadMore, exact: true })).toHaveCount(0);
+});
+
+test('people with the same name stay separate and a past QQ binding is marked historical', async ({ page }, info) => {
+  const l = catalogue(info).lookup;
+  const pages = [{ groups: [
+    { candidate: candidate('https://id.example|user-7', { source: 'onebot', label: [] }), items: [] },
+    { candidate: candidate('https://id.example|user-9', { source: 'onebot', current: false, label: [] }), items: [] },
+  ], next_cursor: '', unavailable_domains: [] }];
+  const state = await server(page, { pages });
+  await page.goto(`${base}/system/lookup?lang=${info.project.metadata.locale}`);
+  await page.locator('.ant-form-item').filter({ hasText: l.kind }).locator('.ant-select-selector').click();
+  await page.locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden)').getByTitle(l.kinds.qq, { exact: true }).click();
+  await page.getByLabel(l.value, { exact: true }).fill('12345678');
+  await page.getByLabel(l.purpose, { exact: true }).fill('Report 88');
+  await page.getByRole('button', { name: l.submit, exact: true }).click();
+  const results = page.getByRole('list', { name: l.results });
+  await expect(results.getByText(l.candidate, { exact: true })).toHaveCount(2);
+  await expect(results.getByText(l.historical, { exact: true })).toHaveCount(1);
+  await expect(results.getByText(l.noRecords, { exact: true })).toHaveCount(2);
+  expect(state.queries[0].kind).toBe('qq');
 });
 
 test('a refused lookup shows the reason and keeps nothing on screen', async ({ page }, info) => {

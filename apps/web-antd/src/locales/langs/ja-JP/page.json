@@ -1212,9 +1212,9 @@
     "kind": "照会方法",
     "kinds": {
       "name": "氏名",
-      "student_number": "学籍番号",
+      "student_id": "学籍番号",
       "qq": "QQ 番号",
-      "subject": "アカウント ID"
+      "account": "アカウント ID"
     },
     "value": "照会内容",
     "domains": "対象業務",
@@ -1234,7 +1234,7 @@
       "identity": "本人情報",
       "document": "身分証明書",
       "material": "認証資料",
-      "refund": "返金受取先"
+      "refund_payee": "返金受取人"
     },
     "purpose": "照会目的",
     "purposeHint": "チケットや申し立ての番号など、情報が必要な理由を記入してください。目的は照会記録に保存されます。",
@@ -1251,7 +1251,17 @@
     "auditEmpty": "該当する照会記録はありません。",
     "auditActor": "操作者",
     "auditCount": "{count} 件を返却",
-    "auditChannel": "チャネル {channel}、グループ {group}"
+    "auditChannel": "チャネル {channel}、グループ {group}",
+    "candidate": "候補",
+    "linkedBy": "関連付けの根拠：{source}",
+    "noRecords": "選択した業務に、この人物について閲覧できる記録はありません。",
+    "sources": {
+      "verification": "学生認証",
+      "onebot": "QQ ボット連携",
+      "official": "公式ボット連携",
+      "connect": "QQ 連携ログイン",
+      "account": "アカウント ID"
+    }
   },
   "timetable": {
     "title": "時限設定",

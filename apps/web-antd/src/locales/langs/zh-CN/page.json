@@ -1212,9 +1212,9 @@
     "kind": "查询依据",
     "kinds": {
       "name": "姓名",
-      "student_number": "学号",
+      "student_id": "学号",
       "qq": "QQ 号",
-      "subject": "账号标识"
+      "account": "账号标识"
     },
     "value": "查询内容",
     "domains": "查询业务",
@@ -1234,7 +1234,7 @@
       "identity": "身份",
       "document": "证件",
       "material": "认证材料",
-      "refund": "退款收款"
+      "refund_payee": "退款收款"
     },
     "purpose": "查询目的",
     "purposeHint": "说明为什么需要这些信息，例如对应的工单或申诉编号。目的会写入查询记录。",
@@ -1251,7 +1251,17 @@
     "auditEmpty": "没有符合条件的查询记录。",
     "auditActor": "操作者",
     "auditCount": "返回 {count} 条",
-    "auditChannel": "渠道 {channel}，群 {group}"
+    "auditChannel": "渠道 {channel}，群 {group}",
+    "candidate": "候选对象",
+    "linkedBy": "关联来源：{source}",
+    "noRecords": "该对象在所选业务中没有有权查看的记录。",
+    "sources": {
+      "verification": "学生认证",
+      "onebot": "QQ 机器人绑定",
+      "official": "官方机器人绑定",
+      "connect": "QQ 互联",
+      "account": "账号标识"
+    }
   },
   "timetable": {
     "title": "学校作息",

@@ -1212,9 +1212,9 @@
     "kind": "Rechercher par",
     "kinds": {
       "name": "Nom",
-      "student_number": "Numéro d’étudiant",
+      "student_id": "Numéro d’étudiant",
       "qq": "Numéro QQ",
-      "subject": "Identifiant de compte"
+      "account": "Identifiant de compte"
     },
     "value": "Valeur recherchée",
     "domains": "Domaines métier",
@@ -1234,7 +1234,7 @@
       "identity": "Identité",
       "document": "Pièce d’identité",
       "material": "Justificatifs",
-      "refund": "Bénéficiaire du remboursement"
+      "refund_payee": "Bénéficiaire du remboursement"
     },
     "purpose": "Motif",
     "purposeHint": "Expliquez pourquoi ces informations sont nécessaires, par exemple le numéro du ticket ou du recours. Le motif est enregistré avec la requête.",
@@ -1251,7 +1251,17 @@
     "auditEmpty": "Aucune recherche ne correspond.",
     "auditActor": "Opérateur",
     "auditCount": "{count} enregistrements renvoyés",
-    "auditChannel": "Canal {channel}, groupe {group}"
+    "auditChannel": "Canal {channel}, groupe {group}",
+    "candidate": "Personne candidate",
+    "linkedBy": "Lien établi par : {source}",
+    "noRecords": "Aucun enregistrement consultable pour cette personne dans les domaines choisis.",
+    "sources": {
+      "verification": "Vérification étudiante",
+      "onebot": "Liaison au robot QQ",
+      "official": "Liaison au robot officiel",
+      "connect": "Connexion avec QQ",
+      "account": "Identifiant de compte"
+    }
   },
   "timetable": {
     "title": "Horaires des créneaux",

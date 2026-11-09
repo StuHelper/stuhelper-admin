@@ -1212,9 +1212,9 @@
     "kind": "Buscar por",
     "kinds": {
       "name": "Nombre",
-      "student_number": "Número de estudiante",
-      "qq": "Número QQ",
-      "subject": "ID de cuenta"
+      "student_id": "Número de estudiante",
+      "qq": "Número de QQ",
+      "account": "ID de cuenta"
     },
     "value": "Valor buscado",
     "domains": "Dominios de negocio",
@@ -1234,7 +1234,7 @@
       "identity": "Identidad",
       "document": "Documento de identidad",
       "material": "Documentación de verificación",
-      "refund": "Beneficiario del reembolso"
+      "refund_payee": "Beneficiario del reembolso"
     },
     "purpose": "Finalidad",
     "purposeHint": "Explica por qué necesitas la información, por ejemplo el número de ticket o de reclamación. La finalidad se guarda con la consulta.",
@@ -1251,7 +1251,17 @@
     "auditEmpty": "No hay consultas que coincidan.",
     "auditActor": "Operador",
     "auditCount": "{count} registros devueltos",
-    "auditChannel": "Canal {channel}, grupo {group}"
+    "auditChannel": "Canal {channel}, grupo {group}",
+    "candidate": "Persona candidata",
+    "linkedBy": "Vinculado mediante: {source}",
+    "noRecords": "No hay registros que puedas ver de esta persona en las áreas elegidas.",
+    "sources": {
+      "verification": "Verificación de estudiante",
+      "onebot": "Vinculación con el bot de QQ",
+      "official": "Vinculación con el bot oficial",
+      "connect": "Inicio de sesión con QQ",
+      "account": "ID de cuenta"
+    }
   },
   "timetable": {
     "title": "Horario de franjas",

@@ -1212,9 +1212,9 @@
     "kind": "Search by",
     "kinds": {
       "name": "Name",
-      "student_number": "Student number",
+      "student_id": "Student ID",
       "qq": "QQ number",
-      "subject": "Account ID"
+      "account": "Account ID"
     },
     "value": "Search value",
     "domains": "Business domains",
@@ -1234,7 +1234,7 @@
       "identity": "Identity",
       "document": "ID document",
       "material": "Verification material",
-      "refund": "Refund payee"
+      "refund_payee": "Refund payee"
     },
     "purpose": "Purpose",
     "purposeHint": "Explain why the information is needed, such as the ticket or appeal number. The purpose is recorded with the query.",
@@ -1251,7 +1251,17 @@
     "auditEmpty": "No queries match.",
     "auditActor": "Operator",
     "auditCount": "{count} records returned",
-    "auditChannel": "Channel {channel}, group {group}"
+    "auditChannel": "Channel {channel}, group {group}",
+    "candidate": "Candidate",
+    "linkedBy": "Linked by: {source}",
+    "noRecords": "No records you may view in the selected areas for this person.",
+    "sources": {
+      "verification": "Student verification",
+      "onebot": "QQ bot binding",
+      "official": "Official bot binding",
+      "connect": "QQ Connect",
+      "account": "Account ID"
+    }
   },
   "timetable": {
     "title": "Class periods",

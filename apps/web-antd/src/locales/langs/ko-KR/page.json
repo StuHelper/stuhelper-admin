@@ -1212,9 +1212,9 @@
     "kind": "조회 기준",
     "kinds": {
       "name": "이름",
-      "student_number": "학번",
+      "student_id": "학번",
       "qq": "QQ 번호",
-      "subject": "계정 ID"
+      "account": "계정 ID"
     },
     "value": "조회 내용",
     "domains": "조회 업무",
@@ -1234,7 +1234,7 @@
       "identity": "신원",
       "document": "신분증",
       "material": "인증 자료",
-      "refund": "환불 수취 정보"
+      "refund_payee": "환불 수취인"
     },
     "purpose": "조회 목적",
     "purposeHint": "티켓이나 이의 신청 번호 등 정보가 필요한 이유를 적어 주세요. 목적은 조회 기록에 저장됩니다.",
@@ -1251,7 +1251,17 @@
     "auditEmpty": "일치하는 조회 기록이 없습니다.",
     "auditActor": "작업자",
     "auditCount": "{count}건 반환",
-    "auditChannel": "채널 {channel}, 그룹 {group}"
+    "auditChannel": "채널 {channel}, 그룹 {group}",
+    "candidate": "후보",
+    "linkedBy": "연결 근거: {source}",
+    "noRecords": "선택한 업무에서 이 사람에 대해 볼 수 있는 기록이 없습니다.",
+    "sources": {
+      "verification": "학생 인증",
+      "onebot": "QQ 봇 연결",
+      "official": "공식 봇 연결",
+      "connect": "QQ 로그인 연동",
+      "account": "계정 ID"
+    }
   },
   "timetable": {
     "title": "교시 시간",

@@ -1,13 +1,13 @@
 {
   "repository": "StuHelper/stuhelper-information-query",
-  "revision": "87d6f0ebb8ba33ba45c7f3b803388b9e3f584a21",
-  "version": "0.1.0",
+  "revision": "50d61e24e1fe9996b779d3d911089058136f1f67",
+  "version": "0.2.0",
   "files": {
     "contracts/information-query.openapi.json": "contracts/information-query.openapi.json",
     "sdk/information-query.gen.ts": "apps/web-antd/src/api/information-query.gen.ts"
   },
   "sha256": {
-    "contracts/information-query.openapi.json": "9dab23d6e100446dd42e6e46f98adaa6025e8f1e82e570fec381506d4f3acc5d",
-    "apps/web-antd/src/api/information-query.gen.ts": "bf9f638543139b76fe5f3f5ad4943166a5c124228311d8a723b1ee360dad3f84"
+    "contracts/information-query.openapi.json": "8224a4f1ef6b468c91d724c20109d9988504003fe6da6ee378716877a59bdc6f",
+    "apps/web-antd/src/api/information-query.gen.ts": "f709969d8d74f5b44f60fd9d9c58d24d4bf0317690799a3023a54a70fe9cd230"
   }
 }

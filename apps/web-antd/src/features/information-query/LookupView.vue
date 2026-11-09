@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Audit, Domain, Query, Record, Scope, Sensitive } from './api';
+import type { Audit, CandidateGroup, Domain, Query, Scope, Sensitive } from './api';
 
 import { computed, onBeforeUnmount, reactive, ref, shallowRef } from 'vue';
 
@@ -13,7 +13,7 @@ import AdminPage from '#/shared/ui/AdminPage.vue';
 import LoadState from '#/shared/ui/LoadState.vue';
 import { useErrorText } from '#/shared/ui/messages';
 
-import { domains, kinds, pageSize, sensitive, useInformationQuery } from './api';
+import { candidateKey, domains, kinds, mergeGroups, pageSize, sensitive, useInformationQuery } from './api';
 
 /**
  * Look up the records linked to one person across business modules. Every query
@@ -32,7 +32,7 @@ const form = reactive({ kind: 'name' as Query['kind'], value: '', school: '*', g
 const scope = (): Scope => ({ school: form.school.trim() || '*', group: form.group.trim() || '*', module: form.module.trim() || '*' });
 const ready = computed(() => !!form.value.trim() && !!form.purpose.trim() && form.domains.length > 0);
 
-const items = shallowRef<Record[]>([]);
+const groups = shallowRef<CandidateGroup[]>([]);
 const unavailable = shallowRef<string[]>([]);
 const next = ref('');
 const status = ref<'error' | 'idle' | 'loading' | 'ready'>('idle');
@@ -42,7 +42,7 @@ let applied: Query | undefined;
 let controller: AbortController | undefined;
 
 function clear() {
-  items.value = [];
+  groups.value = [];
   unavailable.value = [];
   next.value = '';
 }
@@ -58,7 +58,7 @@ async function run(after: string) {
   const result = await api.query({ ...applied, ...(after ? { after } : {}) }, controller.signal);
   unavailable.value = result.unavailable_domains;
   next.value = result.next_cursor;
-  return result.items;
+  return result.groups;
 }
 async function search() {
   if (!ready.value) return;
@@ -67,7 +67,7 @@ async function search() {
   status.value = 'loading';
   loadError.value = '';
   try {
-    items.value = (await run('')) ?? [];
+    groups.value = (await run('')) ?? [];
     status.value = 'ready';
   } catch (error) {
     fail(error);
@@ -79,7 +79,7 @@ async function more() {
   appending.value = true;
   loadError.value = '';
   try {
-    items.value = [...items.value, ...((await run(next.value)) ?? [])];
+    groups.value = mergeGroups(groups.value, (await run(next.value)) ?? []);
   } catch (error) {
     fail(error);
   } finally {
@@ -159,26 +159,42 @@ const scopeText = (value: Scope) => [value.school, value.group, value.module].ma
           </Card>
           <Alert v-if="unavailable.length > 0" type="warning" show-icon role="alert" :message="t('page.lookup.incomplete', { domains: format.list(unavailable.map((value) => label(`page.lookup.domainNames.${value}`, value))) })" />
           <Card v-if="status !== 'idle'" :bordered="false">
-            <LoadState v-if="status !== 'ready' || items.length === 0" :status="status" :error="loadError" :empty="true" :empty-text="t('page.lookup.empty')" @retry="search" />
+            <LoadState v-if="status !== 'ready' || groups.length === 0" :status="status" :error="loadError" :empty="true" :empty-text="t('page.lookup.empty')" @retry="search" />
             <template v-else>
-              <ul class="flex flex-col gap-3" :aria-label="t('page.lookup.results')">
-                <li v-for="record in items" :key="`${record.source}:${record.id}`" class="border-border rounded-md border p-3">
+              <ul class="flex flex-col gap-4" :aria-label="t('page.lookup.results')">
+                <li v-for="group in groups" :key="candidateKey(group.candidate)" class="border-border rounded-md border p-3">
                   <div class="flex flex-wrap items-center gap-2">
-                    <Tag color="blue">{{ label(`page.lookup.domainNames.${record.source}`, record.source) }}</Tag>
-                    <Tag :color="record.current ? 'green' : 'default'">{{ record.current ? t('page.lookup.current') : t('page.lookup.historical') }}</Tag>
-                    <code class="break-all text-xs">{{ record.subject }}</code>
-                    <span class="text-muted-foreground text-xs">{{ scopeText(record.scope) }} · {{ t('page.lookup.changedAt', { time: format.dateTime(record.changed_at) }) }}</span>
+                    <span class="font-medium">{{ t('page.lookup.candidate') }}</span>
+                    <code class="break-all text-xs">{{ group.candidate.account }}</code>
+                    <Tag :color="group.candidate.current ? 'green' : 'default'">{{ group.candidate.current ? t('page.lookup.current') : t('page.lookup.historical') }}</Tag>
+                    <span class="text-muted-foreground text-xs">{{ t('page.lookup.linkedBy', { source: label(`page.lookup.sources.${group.candidate.source}`, group.candidate.source) }) }} · {{ scopeText(group.candidate.scope) }} · {{ t('page.lookup.changedAt', { time: format.dateTime(group.candidate.changed_at) }) }}</span>
                   </div>
-                  <dl class="mt-2 grid gap-x-4 gap-y-1 text-sm md:grid-cols-[max-content_1fr]">
-                    <template v-for="field in record.fields" :key="field.name">
+                  <dl v-if="group.candidate.label.length > 0" class="mt-2 grid gap-x-4 gap-y-1 text-sm md:grid-cols-[max-content_1fr]">
+                    <template v-for="field in group.candidate.label" :key="field.name">
                       <dt class="text-muted-foreground">{{ label(`page.lookup.fieldNames.${field.name}`, field.name) }}</dt>
-                      <dd class="m-0 break-all">
-                        {{ field.value }}
-                        <Tag v-if="field.masked" class="ms-1">{{ t('page.lookup.masked') }}</Tag>
-                        <Tag v-if="field.category !== 'business'" class="ms-1" color="orange">{{ t(`page.lookup.categories.${field.category}`) }}</Tag>
-                      </dd>
+                      <dd class="m-0 break-all">{{ field.value }}<Tag v-if="field.masked" class="ms-1">{{ t('page.lookup.masked') }}</Tag></dd>
                     </template>
                   </dl>
+                  <p v-if="group.items.length === 0" class="text-muted-foreground mt-2 text-sm">{{ t('page.lookup.noRecords') }}</p>
+                  <ul v-else class="mt-3 flex flex-col gap-3">
+                    <li v-for="record in group.items" :key="`${record.source}:${record.id}`" class="bg-muted/40 rounded-md p-3">
+                      <div class="flex flex-wrap items-center gap-2">
+                        <Tag color="blue">{{ label(`page.lookup.domainNames.${record.source}`, record.source) }}</Tag>
+                        <Tag :color="record.current ? 'green' : 'default'">{{ record.current ? t('page.lookup.current') : t('page.lookup.historical') }}</Tag>
+                        <span class="text-muted-foreground text-xs">{{ scopeText(record.scope) }} · {{ t('page.lookup.changedAt', { time: format.dateTime(record.changed_at) }) }}</span>
+                      </div>
+                      <dl class="mt-2 grid gap-x-4 gap-y-1 text-sm md:grid-cols-[max-content_1fr]">
+                        <template v-for="field in record.fields" :key="field.name">
+                          <dt class="text-muted-foreground">{{ label(`page.lookup.fieldNames.${field.name}`, field.name) }}</dt>
+                          <dd class="m-0 break-all">
+                            {{ field.value }}
+                            <Tag v-if="field.masked" class="ms-1">{{ t('page.lookup.masked') }}</Tag>
+                            <Tag v-if="field.category !== 'business'" class="ms-1" color="orange">{{ t(`page.lookup.categories.${field.category}`) }}</Tag>
+                          </dd>
+                        </template>
+                      </dl>
+                    </li>
+                  </ul>
                 </li>
               </ul>
               <Alert v-if="loadError" class="mt-3" type="error" show-icon :message="errorText(loadError)" />

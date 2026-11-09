@@ -10,6 +10,8 @@ type Schemas = components['schemas'];
 export type Query = Schemas['Query'];
 export type Scope = Schemas['Scope'];
 export type Record = Schemas['Record'];
+export type Candidate = Schemas['Candidate'];
+export type CandidateGroup = Schemas['CandidateGroup'];
 export type Field = Schemas['Field'];
 export type Result = Schemas['Result'];
 export type Audit = Schemas['Audit'];
@@ -24,12 +26,31 @@ const parse = {
 };
 
 export const domains: Domain[] = ['profiles', 'verification', 'catalog', 'reviews', 'resources', 'billing', 'groups'];
-export const sensitive: Sensitive[] = ['identity', 'document', 'material', 'refund'];
-export const kinds: Query['kind'][] = ['name', 'student_number', 'qq', 'subject'];
+export const sensitive: Sensitive[] = ['identity', 'document', 'material', 'refund_payee'];
+export const kinds: Query['kind'][] = ['name', 'student_id', 'qq', 'account'];
 export const pageSize = 50;
 
+/** One person per candidate: the same account across pages stays one group. */
+export const candidateKey = (candidate: Candidate) => `${candidate.source}:${candidate.account}:${candidate.changed_at}`;
+
 /**
- * Cross-module information lookup. The server checks every domain, scope and
+ * Append a page of candidate groups. The server continues a candidate's records on the
+ * next page under the same candidate, so its records join the group already shown.
+ */
+export function mergeGroups(shown: CandidateGroup[], page: CandidateGroup[]) {
+  const merged = shown.map((group) => ({ ...group, items: [...group.items] }));
+  for (const group of page) {
+    const existing = merged.find((item) => candidateKey(item.candidate) === candidateKey(group.candidate));
+    if (existing) existing.items.push(...group.items);
+    else merged.push({ ...group, items: [...group.items] });
+  }
+  return merged;
+}
+
+/**
+ * Cross-module information lookup. Names, student IDs and QQ numbers resolve to
+ * candidate accounts first; same-named people stay separate candidates and a past QQ
+ * binding is marked historical, never shown as the current owner. The server checks every domain, scope and
  * sensitive category against the viewer's current grants and records each query,
  * including refusals, before releasing any result. Both calls are POST reads: a
  * repeated query is safe and is recorded again.
