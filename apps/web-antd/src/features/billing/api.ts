@@ -21,6 +21,10 @@ export type GrantInput = Schemas['GrantInput'];
 export type RevokeInput = Schemas['RevokeInput'];
 export type PurchaseRefundInput = Schemas['PurchaseRefundInput'];
 export type PaymentReviewInput = Schemas['PaymentReviewInput'];
+export type MembershipPlan = Schemas['MembershipPlan'];
+export type ResourcePrice = Schemas['ResourcePrice'];
+export type Payee = Schemas['Payee'];
+export type Principal = Schemas['Principal'];
 
 const schemas = contract.components.schemas;
 const parse = {
@@ -34,6 +38,10 @@ const parse = {
   reward: schemaOf<Reward>(schemas, 'Reward'),
   rule: schemaOf<Rule>(schemas, 'Rule'),
   rules: schemaOf<Schemas['AdminRulePage']>(schemas, 'AdminRulePage'),
+  plan: schemaOf<MembershipPlan>(schemas, 'MembershipPlan'),
+  plans: schemaOf<MembershipPlan[]>(schemas, 'MembershipPlan', true),
+  price: schemaOf<ResourcePrice>(schemas, 'ResourcePrice'),
+  payee: schemaOf<Payee>(schemas, 'Payee'),
 };
 
 /** Refund states an administrator filters by; the server lists submitted refunds by default. */
@@ -73,8 +81,23 @@ export class BillingAdmin {
     return this.all('/api/v1/billing/admin/channels', parse.channels, signal);
   }
 
+  /** Refund a resource unlock or membership order to the account it was paid from. */
+  commerceRefund(body: { amount: number; order_id: string; reason: string; target: Principal }, key: string) {
+    return this.http.json('/api/v1/billing/admin/commerce-refunds', parse.order, { method: 'POST', body, key });
+  }
+
+  /** Stop selling a plan; memberships already granted keep their period. */
+  deletePlan(id: string, key: string) {
+    return this.http.json(`/api/v1/billing/admin/membership-plans/${segment(id)}`, parse.plan, { method: 'DELETE', key });
+  }
+
   grant(body: GrantInput, key: string) {
     return this.http.json('/api/v1/billing/admin/rewards', parse.reward, { method: 'POST', body, key });
+  }
+
+  /** Give a membership without payment; the reason is recorded with the order. */
+  grantMembership(body: { plan_id: string; reason: string; target: Principal }, key: string) {
+    return this.http.json('/api/v1/billing/admin/memberships/grants', parse.order, { method: 'POST', body, key });
   }
 
   manualResult(id: string, body: ManualInput, key: string) {
@@ -85,6 +108,11 @@ export class BillingAdmin {
     return this.all('/api/v1/billing/admin/offers', parse.offers, signal);
   }
 
+  /** Refund payee details. Reading them needs a separate permission and is audited before they are returned. */
+  payee(refundID: string, target: Principal, signal?: AbortSignal) {
+    return this.http.json(`/api/v1/billing/admin/refunds/${segment(refundID)}/payee`, parse.payee, { query: { issuer: target.issuer, subject: target.subject }, signal });
+  }
+
   /**
    * Resolve an order whose automatic payment queries ran out: schedule one more query, or
    * record the result an administrator verified with the channel, citing the evidence.
@@ -93,12 +121,21 @@ export class BillingAdmin {
     return this.http.json(`/api/v1/billing/admin/orders/${segment(id)}/payment-review`, parse.order, { method: 'POST', body, key });
   }
 
+  /** Membership plans, including disabled ones; at most 100 are configured. */
+  plans(signal?: AbortSignal) {
+    return this.http.json('/api/v1/billing/admin/membership-plans', parse.plans, { query: { limit: 100 }, signal });
+  }
+
   purchaseRefund(body: PurchaseRefundInput, key: string) {
     return this.http.json('/api/v1/billing/admin/purchase-refunds', parse.order, { method: 'POST', body, key });
   }
 
   async refunds(state: string, after: string, signal?: AbortSignal) {
     return this.http.json('/api/v1/billing/admin/refunds', parse.refunds, { query: { state, after, limit: pageSize }, signal });
+  }
+
+  resourcePrice(id: string, signal?: AbortSignal) {
+    return this.http.json(`/api/v1/billing/resource-prices/${segment(id)}`, parse.price, { signal });
   }
 
   review(id: string, body: ReviewInput, key: string) {
@@ -119,6 +156,15 @@ export class BillingAdmin {
 
   saveOffer(body: Offer, key: string) {
     return this.http.json(`/api/v1/billing/admin/offers/${segment(body.id)}`, parse.offer, { method: 'POST', body, key });
+  }
+
+  /** Create or change a plan; the version read is sent back and a concurrent change is rejected. */
+  savePlan(body: MembershipPlan, key: string) {
+    return this.http.json(`/api/v1/billing/admin/membership-plans/${segment(body.id)}`, parse.plan, { method: 'PUT', body, key });
+  }
+
+  saveResourcePrice(body: ResourcePrice, key: string) {
+    return this.http.json(`/api/v1/billing/admin/resource-prices/${segment(body.resource_id)}`, parse.price, { method: 'PUT', body, key });
   }
 
   saveRule(body: Rule, key: string) {

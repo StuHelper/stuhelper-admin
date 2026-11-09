@@ -27,6 +27,8 @@ export type DirectoryWrite = Schema['DirectoryWrite'];
 export type Grant = Schema['Grant'];
 export type GrantWrite = Schema['GrantWrite'];
 export type StateChange = Schema['StateChange'];
+export type Coverage = Schema['Coverage'];
+export type CoverageRule = Schema['CoverageRule'];
 
 const resources = resourcesContract.components.schemas;
 const media = mediaContract.components.schemas;
@@ -40,6 +42,7 @@ const parse = {
   receipt: schemaOf<Receipt>(resources, 'RequestReceipt'),
   receipts: schemaOf<Schema['RequestPage']>(resources, 'RequestPage'),
   category: schemaOf<Category>(resources, 'Category'),
+  coverage: schemaOf<Coverage>(resources, 'Coverage'),
   directory: schemaOf<Directory>(resources, 'Directory'),
   grant: schemaOf<Grant>(resources, 'Grant'),
   grants: schemaOf<Schema['GrantPage']>(resources, 'GrantPage'),
@@ -149,6 +152,15 @@ export class ResourcesApi {
       `/api/v1/resources/items/${segment(id)}/state`,
       parse.resource,
       { method: 'POST', body, key },
+    );
+  }
+
+  /** Coverage of a billing membership plan; 404 means the plan covers nothing yet. */
+  coverage(planID: string, signal?: AbortSignal) {
+    return this.http.json(
+      `/api/v1/resources/coverage/${segment(planID)}`,
+      parse.coverage,
+      { signal },
     );
   }
 
@@ -329,6 +341,15 @@ export class ResourcesApi {
       `/api/v1/resources/review/${segment(version)}`,
       parse.resource,
       { signal },
+    );
+  }
+
+  /** Replace a plan's coverage; the revision read is sent back and a concurrent change is rejected. */
+  saveCoverage(body: Coverage, key: string) {
+    return this.http.json(
+      `/api/v1/resources/coverage/${segment(body.plan_id)}`,
+      parse.coverage,
+      { method: 'PUT', body, key },
     );
   }
 

@@ -25,6 +25,7 @@ const modules = {
   verification: { repo: 'verification', single: true, files: { 'contracts/verification.openapi.yaml': 'contracts/verification.openapi.yaml', 'sdk/verification.gen.ts': 'apps/web-antd/src/api/verification.gen.ts', 'contracts/verification-cases.json': 'contracts/verification-cases.json' } },
   groups: { repo: 'groups', files: { 'contracts/groups.openapi.json': 'contracts/groups.openapi.json', 'sdk/groups.gen.ts': 'apps/web-antd/src/api/groups.gen.ts' } },
   'information-query': { repo: 'information-query', files: { 'contracts/information-query.openapi.json': 'contracts/information-query.openapi.json', 'sdk/information-query.gen.ts': 'apps/web-antd/src/api/information-query.gen.ts' } },
+  'platform-eligibility': { repo: 'platform', files: { 'contracts/eligibility.openapi.json': 'contracts/platform-eligibility.openapi.json', 'sdk/eligibility.gen.ts': 'apps/web-antd/src/api/platform-eligibility.gen.ts' } },
   'platform-admin': { repo: 'platform', files: { 'contracts/admin.openapi.json': 'contracts/platform-admin.openapi.json', 'sdk/admin.gen.ts': 'apps/web-antd/src/api/platform-admin.gen.ts' } },
   platform: { repo: 'platform', single: true, files: { 'contracts/platform.openapi.yaml': 'contracts/platform.openapi.yaml', 'sdk/platform.gen.ts': 'apps/web-antd/src/api/platform.gen.ts', 'contracts/client-cases.json': 'contracts/client-cases.json' } },
 };

@@ -26,9 +26,11 @@
     "billingGroup": "Billing",
     "billingRefunds": "Refunds",
     "billingAccounts": "Account billing",
+    "billingMemberships": "Membership plans",
     "billingConfig": "Billing settings",
     "accessGroup": "System",
     "accessRoles": "Roles",
+    "eligibility": "Action eligibility",
     "accessAudit": "Operation log",
     "lookup": "Information lookup",
     "catalogTimetable": "Class periods",
@@ -117,7 +119,9 @@
     "invalid_request": "The request format is not valid. Check it and try again.",
     "unprocessable": "The request does not match the selected operation. Check it and try again.",
     "disabled": "This feature is not enabled.",
-    "cooldown": "Too many attempts. Try again shortly."
+    "cooldown": "Too many attempts. Try again shortly.",
+    "billing_already_accessible": "This user can already access the resource; no purchase is needed.",
+    "invalid_rule": "This combination of conditions is not valid. Adjust it and save again."
   },
   "session": {
     "signIn": "Sign in",
@@ -541,7 +545,15 @@
     "parentFolder": "Parent folder",
     "newFolder": "New folder",
     "editFolder": "Edit folder",
-    "noFolders": "No folders here."
+    "noFolders": "No folders here.",
+    "price": {
+      "title": "Price",
+      "hint": "Users can buy lasting access to this resource with either points or Ivory.",
+      "unpriced": "This resource has no price yet, so users cannot buy it. Set at least one of points and Ivory.",
+      "points": "Points price",
+      "ivory": "Ivory price",
+      "save": "Save price"
+    }
   },
   "verification": {
     "title": "Verification administration",
@@ -989,7 +1001,9 @@
       "topup": "Top-up",
       "purchase": "Points purchase",
       "refund": "Top-up refund",
-      "purchase_refund": "Purchase refund"
+      "purchase_refund": "Purchase refund",
+      "resource_unlock": "Resource unlock",
+      "membership": "Membership"
     },
     "orderState": {
       "submitted": "Awaiting review",
@@ -1003,7 +1017,10 @@
       "expired": "Expired",
       "cancelled": "Cancelled",
       "needs_review": "Needs manual review",
-      "review_query_pending": "Extra query scheduled"
+      "review_query_pending": "Extra query scheduled",
+      "paid": "Paid, awaiting delivery",
+      "fulfilled": "Delivered",
+      "refunded": "Refunded"
     },
     "refunds": {
       "title": "Refunds",
@@ -1039,11 +1056,18 @@
         }
       },
       "paymentChannel": "Manual payout channel",
-      "paymentChannelHint": "Enter the channel and paying account actually used, for example “Bank A corporate account”. A transaction number can be recorded only once per channel."
+      "paymentChannelHint": "Enter the channel and paying account actually used, for example “Bank A corporate account”. A transaction number can be recorded only once per channel.",
+      "showPayee": "Show payee details",
+      "payeeHint": "Payee details need a separate permission. Each view is audited, and the details disappear when you close this panel.",
+      "noPayee": "The user has not submitted payee details.",
+      "payee": "Payee details",
+      "payeeMethod": "Method",
+      "payeeName": "Account name",
+      "payeeAccount": "Account number"
     },
     "accounts": {
       "title": "Account billing",
-      "intro": "Look up an account’s balance, orders and ledger; refund points purchases, grant rewards and revoke them. Every lookup is audited.",
+      "intro": "Look up an account's balance, orders and ledger; refund points purchases, resource unlocks and memberships; grant and revoke rewards; and grant memberships. Every lookup is audited.",
       "subjectHint": "Copy the issuer and user ID from the account’s records.",
       "wallet": "Balance",
       "frozen": "This account’s assets are frozen. The user cannot spend or withdraw for now.",
@@ -1079,7 +1103,19 @@
         "disabled": "The rule is disabled, so no points were granted.",
         "limit_reached": "The rule’s limit was reached, so no points were granted.",
         "expired": "The event is outside the rule’s validity, so no points were granted."
-      }
+      },
+      "refundCommerce": "Refund",
+      "commerceRefunded": "Refund completed. The access or membership period from this order has been withdrawn.",
+      "unlockRefundSummary": "A resource unlock is refunded in full: {amount}. The user loses the access gained by this purchase.",
+      "membershipRefundSummary": "Original price {amount}. The refund ends the remaining membership period of this order and moves later periods forward.",
+      "refundPoints": "Points to refund",
+      "refundIvory": "Ivory to refund",
+      "membership": "Grant membership",
+      "membershipHint": "Grant a membership to this account without payment. The reason is recorded in the order and the audit log.",
+      "plan": "Membership plan",
+      "membershipReasonHint": "State why, for example an event reward or compensation.",
+      "membershipSubmit": "Grant membership",
+      "membershipGranted": "Membership granted."
     },
     "config": {
       "title": "Billing settings",
@@ -1134,6 +1170,38 @@
       "submit": "Submit",
       "open": "Review",
       "title": "Review payment result"
+    },
+    "memberships": {
+      "title": "Membership plans",
+      "intro": "Manage each plan's name, period, prices and the resources it covers. A plan without coverage cannot be bought; stopping sales keeps the period of memberships already bought.",
+      "new": "New plan",
+      "edit": "Edit plan",
+      "idHint": "Cannot be changed after saving. Use letters, digits, dots, underscores and hyphens.",
+      "name": "Plan name",
+      "nameHint": "Shown to users when buying. Renaming does not change the name stored with past purchases.",
+      "days": "Valid days",
+      "pointsPrice": "Points price",
+      "ivoryPrice": "Ivory price",
+      "priceHint": "Set at least one of points and Ivory. Users pay the whole price from one account.",
+      "ivoryInvalid": "Enter an amount above 0 with at most two decimals.",
+      "onSale": "On sale",
+      "coverage": "Coverage",
+      "coverageUnavailable": "Coverage could not be read",
+      "noCoverage": "No coverage configured",
+      "ruleCount": "Rules: {count}",
+      "editCoverage": "Edit coverage",
+      "stop": "Stop sales",
+      "stopConfirm": "Users can no longer buy or renew this plan; memberships already bought keep their period. Stop sales?",
+      "coverageTitle": "Coverage of \"{name}\"",
+      "coverageIntro": "Each rule covers resources of this school: optionally one folder (that folder only, not its subfolders) and one category. Leave both empty to cover all resources. Rules are combined.",
+      "noRules": "There are no rules. After saving, the plan covers nothing and cannot be bought.",
+      "rule": "Rule {index}",
+      "directory": "Folder",
+      "anyDirectory": "All folders",
+      "category": "Category",
+      "anyCategory": "All categories",
+      "removeRule": "Remove rule",
+      "addRule": "Add rule"
     }
   },
   "access": {
@@ -1468,5 +1536,45 @@
       }
     },
     "backToGroup": "Back to group"
+  },
+  "eligibility": {
+    "title": "Action eligibility",
+    "intro": "Set the conditions each action requires. The platform default applies to every school; the school column shows the rule in effect, and saving there affects only this school.",
+    "action": "Action",
+    "site": "Platform default",
+    "school": "In effect for this school",
+    "signedIn": "Sign-in only",
+    "required": "Required conditions",
+    "onlySignIn": "With no condition selected, users only need to be signed in.",
+    "siteHint": "Changing the platform default affects every school without its own rule. Other instances apply the change within 5 seconds.",
+    "schoolHint": "After saving, this school uses its own rule instead of the platform default. Other instances apply the change within 5 seconds.",
+    "edit": {
+      "site": "Edit platform default: {action}",
+      "school": "Edit school rule: {action}"
+    },
+    "actions": {
+      "content_enter": "Enter content area",
+      "read_full": "View full content",
+      "vote": "Vote",
+      "bookmark": "Bookmark",
+      "report": "Report",
+      "resources_discover": "Browse resources",
+      "resources_download_public": "Download public resources",
+      "resources_download_restricted": "Download restricted resources",
+      "resources_purchase": "Buy resources",
+      "membership_purchase": "Buy membership",
+      "publish_course": "Post course reviews",
+      "publish_mentor": "Post mentor reviews",
+      "reply": "Reply",
+      "resources_upload": "Upload resources",
+      "reply_teacher": "Reply to teacher reviews"
+    },
+    "conditions": {
+      "content_access": "Content admission",
+      "campus_eligibility": "Valid campus eligibility",
+      "phone_bound": "Phone linked",
+      "identity_verified": "Identity verified",
+      "course_enrollment": "Enrolled in the course"
+    }
   }
 }

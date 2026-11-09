@@ -26,9 +26,11 @@
     "billingGroup": "Facturation",
     "billingRefunds": "Remboursements",
     "billingAccounts": "Facturation par compte",
+    "billingMemberships": "Formules d'abonnement",
     "billingConfig": "Réglages de facturation",
     "accessGroup": "Système",
     "accessRoles": "Rôles et accès",
+    "eligibility": "Conditions d'accès aux actions",
     "accessAudit": "Journal des opérations",
     "lookup": "Recherche d’informations",
     "catalogTimetable": "Horaires des créneaux",
@@ -117,7 +119,9 @@
     "invalid_request": "Le format de la requête n’est pas valide. Vérifiez-le puis réessayez.",
     "unprocessable": "La requête ne correspond pas à l’opération choisie. Vérifiez puis réessayez.",
     "disabled": "Cette fonctionnalité n’est pas activée.",
-    "cooldown": "Trop de tentatives. Réessayez dans un instant."
+    "cooldown": "Trop de tentatives. Réessayez dans un instant.",
+    "billing_already_accessible": "Cet utilisateur a déjà accès à la ressource ; aucun achat n'est nécessaire.",
+    "invalid_rule": "Cette combinaison de conditions n'est pas valide. Modifiez-la puis enregistrez."
   },
   "session": {
     "signIn": "Se connecter",
@@ -541,7 +545,15 @@
     "parentFolder": "Dossier parent",
     "newFolder": "Nouveau dossier",
     "editFolder": "Modifier le dossier",
-    "noFolders": "Aucun dossier ici."
+    "noFolders": "Aucun dossier ici.",
+    "price": {
+      "title": "Prix",
+      "hint": "Les utilisateurs peuvent acheter un accès durable à cette ressource en points ou en Ivory.",
+      "unpriced": "Cette ressource n'a pas encore de prix et ne peut pas être achetée. Indiquez au moins un prix en points ou en Ivory.",
+      "points": "Prix en points",
+      "ivory": "Prix en Ivory",
+      "save": "Enregistrer le prix"
+    }
   },
   "verification": {
     "title": "Gestion des vérifications",
@@ -989,7 +1001,9 @@
       "topup": "Rechargement",
       "purchase": "Achat de points",
       "refund": "Remboursement de rechargement",
-      "purchase_refund": "Remboursement d’achat"
+      "purchase_refund": "Remboursement d’achat",
+      "resource_unlock": "Déblocage de ressource",
+      "membership": "Abonnement"
     },
     "orderState": {
       "submitted": "En attente d’examen",
@@ -1003,7 +1017,10 @@
       "expired": "Expiré",
       "cancelled": "Annulé",
       "needs_review": "À vérifier manuellement",
-      "review_query_pending": "Requête supplémentaire prévue"
+      "review_query_pending": "Requête supplémentaire prévue",
+      "paid": "Payé, en attente de livraison",
+      "fulfilled": "Livré",
+      "refunded": "Remboursé"
     },
     "refunds": {
       "title": "Remboursements",
@@ -1039,11 +1056,18 @@
         }
       },
       "paymentChannel": "Moyen de versement manuel",
-      "paymentChannelHint": "Indiquez le moyen et le compte payeur réellement utilisés, par exemple « Banque A, compte entreprise ». Un numéro de transaction ne peut être enregistré qu’une fois par moyen."
+      "paymentChannelHint": "Indiquez le moyen et le compte payeur réellement utilisés, par exemple « Banque A, compte entreprise ». Un numéro de transaction ne peut être enregistré qu’une fois par moyen.",
+      "showPayee": "Afficher les coordonnées de paiement",
+      "payeeHint": "Ces coordonnées exigent une autorisation distincte. Chaque consultation est auditée et elles disparaissent à la fermeture du panneau.",
+      "noPayee": "L'utilisateur n'a pas encore fourni de coordonnées de paiement.",
+      "payee": "Coordonnées de paiement",
+      "payeeMethod": "Mode",
+      "payeeName": "Titulaire",
+      "payeeAccount": "Numéro de compte"
     },
     "accounts": {
       "title": "Facturation par compte",
-      "intro": "Consultez le solde, les commandes et les écritures d’un compte ; remboursez des achats de points, attribuez et révoquez des récompenses. Chaque consultation est journalisée.",
+      "intro": "Consultez le solde, les commandes et l'historique d'un compte ; remboursez les achats de points, les déblocages et les abonnements ; attribuez et retirez des récompenses ; attribuez des abonnements. Chaque consultation est auditée.",
       "subjectHint": "Copiez l’émetteur et l’identifiant utilisateur depuis les enregistrements du compte.",
       "wallet": "Solde",
       "frozen": "Les actifs de ce compte sont gelés : l’utilisateur ne peut ni dépenser ni retirer pour le moment.",
@@ -1079,7 +1103,19 @@
         "disabled": "La règle est désactivée : aucun point attribué.",
         "limit_reached": "La limite de la règle est atteinte : aucun point attribué.",
         "expired": "L’événement sort de la validité de la règle : aucun point attribué."
-      }
+      },
+      "refundCommerce": "Rembourser",
+      "commerceRefunded": "Remboursement effectué. L'accès ou la période d'abonnement obtenu par cette commande a été retiré.",
+      "unlockRefundSummary": "Un déblocage de ressource est remboursé en totalité : {amount}. L'utilisateur perd l'accès obtenu par cet achat.",
+      "membershipRefundSummary": "Prix d'origine {amount}. Le remboursement met fin à la période restante de cette commande et avance les périodes suivantes.",
+      "refundPoints": "Points à rembourser",
+      "refundIvory": "Ivory à rembourser",
+      "membership": "Attribuer un abonnement",
+      "membershipHint": "Attribuer un abonnement à ce compte sans paiement. Le motif est enregistré dans la commande et le journal d'audit.",
+      "plan": "Formule d'abonnement",
+      "membershipReasonHint": "Indiquez le motif, par exemple une récompense ou une compensation.",
+      "membershipSubmit": "Attribuer l'abonnement",
+      "membershipGranted": "Abonnement attribué."
     },
     "config": {
       "title": "Réglages de facturation",
@@ -1134,6 +1170,38 @@
       "submit": "Envoyer",
       "open": "Vérifier",
       "title": "Vérifier le résultat du paiement"
+    },
+    "memberships": {
+      "title": "Formules d'abonnement",
+      "intro": "Gérez le nom, la durée, les prix et les ressources couvertes par chaque formule. Une formule sans couverture ne peut pas être achetée ; l'arrêt des ventes conserve la période des abonnements déjà achetés.",
+      "new": "Nouvelle formule",
+      "edit": "Modifier la formule",
+      "idHint": "Non modifiable après l'enregistrement. Lettres, chiffres, points, tirets bas et tirets.",
+      "name": "Nom de la formule",
+      "nameHint": "Affiché aux utilisateurs lors de l'achat. Le renommer ne change pas le nom conservé avec les achats passés.",
+      "days": "Jours de validité",
+      "pointsPrice": "Prix en points",
+      "ivoryPrice": "Prix en Ivory",
+      "priceHint": "Indiquez au moins un prix en points ou en Ivory. L'utilisateur paie la totalité depuis un seul compte.",
+      "ivoryInvalid": "Saisissez un montant supérieur à 0 avec au plus deux décimales.",
+      "onSale": "En vente",
+      "coverage": "Couverture",
+      "coverageUnavailable": "Impossible de lire la couverture",
+      "noCoverage": "Aucune couverture configurée",
+      "ruleCount": "Règles : {count}",
+      "editCoverage": "Modifier la couverture",
+      "stop": "Arrêter la vente",
+      "stopConfirm": "Les utilisateurs ne pourront plus acheter ni renouveler cette formule ; les abonnements achetés gardent leur période. Arrêter la vente ?",
+      "coverageTitle": "Couverture de « {name} »",
+      "coverageIntro": "Chaque règle couvre des ressources de cet établissement : un dossier (ce dossier seul, sans ses sous-dossiers) et une catégorie, tous deux facultatifs. Laissez les deux vides pour tout couvrir. Les règles s'additionnent.",
+      "noRules": "Aucune règle. Après l'enregistrement, la formule ne couvre rien et ne peut pas être achetée.",
+      "rule": "Règle {index}",
+      "directory": "Dossier",
+      "anyDirectory": "Tous les dossiers",
+      "category": "Catégorie",
+      "anyCategory": "Toutes les catégories",
+      "removeRule": "Supprimer la règle",
+      "addRule": "Ajouter une règle"
     }
   },
   "access": {
@@ -1468,5 +1536,45 @@
       }
     },
     "backToGroup": "Retour au groupe"
+  },
+  "eligibility": {
+    "title": "Conditions d'accès aux actions",
+    "intro": "Définissez les conditions requises pour chaque action. La règle par défaut s'applique à tous les établissements ; la colonne de l'établissement montre la règle en vigueur, et un enregistrement à cet endroit ne concerne que lui.",
+    "action": "Opération",
+    "site": "Règle par défaut",
+    "school": "En vigueur dans l'établissement",
+    "signedIn": "Connexion seule",
+    "required": "Conditions requises",
+    "onlySignIn": "Sans condition cochée, il suffit d'être connecté.",
+    "siteHint": "Modifier la règle par défaut concerne tous les établissements sans règle propre. Les autres instances l'appliquent en 5 secondes au plus.",
+    "schoolHint": "Après l'enregistrement, cet établissement suit sa propre règle et non plus la règle par défaut. Les autres instances l'appliquent en 5 secondes au plus.",
+    "edit": {
+      "site": "Modifier la règle par défaut : {action}",
+      "school": "Modifier la règle de l'établissement : {action}"
+    },
+    "actions": {
+      "content_enter": "Entrer dans l'espace de contenu",
+      "read_full": "Voir le contenu complet",
+      "vote": "Voter",
+      "bookmark": "Ajouter aux favoris",
+      "report": "Signaler",
+      "resources_discover": "Parcourir les ressources",
+      "resources_download_public": "Télécharger les ressources publiques",
+      "resources_download_restricted": "Télécharger les ressources restreintes",
+      "resources_purchase": "Acheter des ressources",
+      "membership_purchase": "Acheter un abonnement",
+      "publish_course": "Publier un avis de cours",
+      "publish_mentor": "Publier un avis d'encadrant",
+      "reply": "Répondre",
+      "resources_upload": "Déposer des ressources",
+      "reply_teacher": "Répondre aux avis d'enseignant"
+    },
+    "conditions": {
+      "content_access": "Accès au contenu",
+      "campus_eligibility": "Statut étudiant valide",
+      "phone_bound": "Téléphone associé",
+      "identity_verified": "Identité vérifiée",
+      "course_enrollment": "Inscrit au cours"
+    }
   }
 }

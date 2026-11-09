@@ -26,9 +26,11 @@
     "billingGroup": "账务",
     "billingRefunds": "退款处理",
     "billingAccounts": "账号账务",
+    "billingMemberships": "会员套餐",
     "billingConfig": "账务配置",
     "accessGroup": "系统",
     "accessRoles": "角色授权",
+    "eligibility": "动作资格",
     "accessAudit": "操作记录",
     "lookup": "信息查询",
     "catalogTimetable": "学校作息",
@@ -117,7 +119,9 @@
     "invalid_request": "请求格式不正确，请检查后重试。",
     "unprocessable": "请求内容与所选操作不符，请检查后重试。",
     "disabled": "该功能尚未启用。",
-    "cooldown": "操作过于频繁，请稍后再试。"
+    "cooldown": "操作过于频繁，请稍后再试。",
+    "billing_already_accessible": "该用户已经可以访问这份资料，无需购买。",
+    "invalid_rule": "资格条件组合无效，请调整后再保存。"
   },
   "session": {
     "signIn": "登录",
@@ -541,7 +545,15 @@
     "parentFolder": "上级目录",
     "newFolder": "新增目录",
     "editFolder": "编辑目录",
-    "noFolders": "当前位置没有目录。"
+    "noFolders": "当前位置没有目录。",
+    "price": {
+      "title": "售价",
+      "hint": "用户可以用积分或 Ivory 中的一种购买该资料的长期访问权。",
+      "unpriced": "该资料还没有定价，用户不能购买。积分与 Ivory 至少填写一种。",
+      "points": "积分价格",
+      "ivory": "Ivory 价格",
+      "save": "保存价格"
+    }
   },
   "verification": {
     "title": "学生认证管理",
@@ -989,7 +1001,9 @@
       "topup": "充值",
       "purchase": "购买积分",
       "refund": "充值退款",
-      "purchase_refund": "积分购买退款"
+      "purchase_refund": "积分购买退款",
+      "resource_unlock": "资料解锁",
+      "membership": "会员"
     },
     "orderState": {
       "submitted": "待审核",
@@ -1003,7 +1017,10 @@
       "expired": "已过期",
       "cancelled": "已取消",
       "needs_review": "需要人工核实",
-      "review_query_pending": "等待补充查询"
+      "review_query_pending": "等待补充查询",
+      "paid": "已付款，等待交付",
+      "fulfilled": "已交付",
+      "refunded": "已退款"
     },
     "refunds": {
       "title": "退款处理",
@@ -1039,11 +1056,18 @@
         }
       },
       "paymentChannel": "人工付款渠道",
-      "paymentChannelHint": "填写实际付款使用的渠道和付款账户标识，例如“招商银行-对公账户”。同一渠道的流水号不能重复登记。"
+      "paymentChannelHint": "填写实际付款使用的渠道和付款账户标识，例如“招商银行-对公账户”。同一渠道的流水号不能重复登记。",
+      "showPayee": "查看收款资料",
+      "payeeHint": "收款资料需要单独权限，每次查看都会记录审计，关闭详情后不再显示。",
+      "noPayee": "用户还没有提交收款资料。",
+      "payee": "收款资料",
+      "payeeMethod": "收款方式",
+      "payeeName": "户名",
+      "payeeAccount": "账号"
     },
     "accounts": {
       "title": "账号账务",
-      "intro": "按账号查询余额、订单和明细，并处理积分购买退款、奖励发放与撤销。每次查询都会记录审计。",
+      "intro": "按账号查询余额、订单和明细，并处理积分购买退款、资料与会员退款、奖励发放与撤销以及会员授予。每次查询都会记录审计。",
       "subjectHint": "签发方和用户标识可从账号相关记录中复制。",
       "wallet": "余额",
       "frozen": "该账号的资产已冻结，用户暂时不能消费或提现。",
@@ -1079,7 +1103,19 @@
         "disabled": "该规则已停用，没有发放积分。",
         "limit_reached": "已达到该规则的发放上限，没有发放积分。",
         "expired": "事件已超出规则有效期，没有发放积分。"
-      }
+      },
+      "refundCommerce": "退款",
+      "commerceRefunded": "退款已完成，对应的访问权限或会员期间已撤销。",
+      "unlockRefundSummary": "资料解锁需要整单退款：{amount}。退款后用户失去这次购买获得的访问权。",
+      "membershipRefundSummary": "原价 {amount}。退款会结束该订单剩余的会员期间，之后的会员期间顺延提前。",
+      "refundPoints": "退回积分",
+      "refundIvory": "退回 Ivory 金额",
+      "membership": "授予会员",
+      "membershipHint": "直接为该账号授予会员，不收取费用。原因会记录在订单和审计中。",
+      "plan": "会员套餐",
+      "membershipReasonHint": "请说明授予原因，例如活动奖励或补偿。",
+      "membershipSubmit": "授予会员",
+      "membershipGranted": "会员已授予。"
     },
     "config": {
       "title": "账务配置",
@@ -1134,6 +1170,38 @@
       "submit": "提交",
       "open": "核实处理",
       "title": "核实支付结果"
+    },
+    "memberships": {
+      "title": "会员套餐",
+      "intro": "管理会员套餐的名称、期限、价格和覆盖的资料范围。没有配置覆盖范围的套餐不能购买；停售后已购会员保留原有期限。",
+      "new": "新建套餐",
+      "edit": "编辑套餐",
+      "idHint": "保存后不能修改，只能使用字母、数字、点、下划线和连字符。",
+      "name": "套餐名称",
+      "nameHint": "用户购买时看到的名称。改名不会影响已购记录中的名称。",
+      "days": "有效天数",
+      "pointsPrice": "积分价格",
+      "ivoryPrice": "Ivory 价格",
+      "priceHint": "积分与 Ivory 至少填写一种，用户购买时从其中一个账户付全款。",
+      "ivoryInvalid": "请输入大于 0 的金额，最多两位小数。",
+      "onSale": "在售",
+      "coverage": "覆盖范围",
+      "coverageUnavailable": "覆盖范围读取失败",
+      "noCoverage": "未配置覆盖范围",
+      "ruleCount": "规则数：{count}",
+      "editCoverage": "编辑覆盖范围",
+      "stop": "停售",
+      "stopConfirm": "停售后用户不能再购买或续费该套餐，已购会员保留原有期限。确定停售吗？",
+      "coverageTitle": "“{name}”的覆盖范围",
+      "coverageIntro": "每条规则覆盖本校的一类资料：可限定到某个目录（只含该目录本身，不含子目录）和某个分类，两者都留空表示本校全部资料。多条规则之间取并集。",
+      "noRules": "当前没有规则，保存后该套餐不覆盖任何资料，用户不能购买。",
+      "rule": "规则 {index}",
+      "directory": "目录",
+      "anyDirectory": "全部目录",
+      "category": "分类",
+      "anyCategory": "全部分类",
+      "removeRule": "删除规则",
+      "addRule": "添加规则"
     }
   },
   "access": {
@@ -1468,5 +1536,45 @@
       }
     },
     "backToGroup": "返回群详情"
+  },
+  "eligibility": {
+    "title": "动作资格",
+    "intro": "设置每个动作需要满足的条件。全站默认适用于所有学校；本校列显示当前生效的规则，在本校保存后只影响本校。",
+    "action": "动作",
+    "site": "全站默认",
+    "school": "本校生效",
+    "signedIn": "仅需登录",
+    "required": "需要满足的条件",
+    "onlySignIn": "不勾选任何条件时，只要求用户已登录。",
+    "siteHint": "修改全站默认会影响所有没有单独规则的学校。修改后其他实例最迟 5 秒生效。",
+    "schoolHint": "保存后本校使用单独规则，不再跟随全站默认。修改后其他实例最迟 5 秒生效。",
+    "edit": {
+      "site": "编辑全站默认：{action}",
+      "school": "编辑本校规则：{action}"
+    },
+    "actions": {
+      "content_enter": "进入内容区",
+      "read_full": "查看完整内容",
+      "vote": "投票",
+      "bookmark": "收藏",
+      "report": "举报",
+      "resources_discover": "浏览资料",
+      "resources_download_public": "下载公开资料",
+      "resources_download_restricted": "下载受限资料",
+      "resources_purchase": "购买资料",
+      "membership_purchase": "购买会员",
+      "publish_course": "发布课程评价",
+      "publish_mentor": "发布导师评价",
+      "reply": "回复",
+      "resources_upload": "上传资料",
+      "reply_teacher": "回复教师评价"
+    },
+    "conditions": {
+      "content_access": "内容准入",
+      "campus_eligibility": "有效校园资格",
+      "phone_bound": "已绑定手机",
+      "identity_verified": "已实名认证",
+      "course_enrollment": "已选该课程"
+    }
   }
 }

@@ -26,9 +26,11 @@
     "billingGroup": "Facturación",
     "billingRefunds": "Reembolsos",
     "billingAccounts": "Facturación por cuenta",
+    "billingMemberships": "Planes de membresía",
     "billingConfig": "Ajustes de facturación",
     "accessGroup": "Sistema",
     "accessRoles": "Roles y accesos",
+    "eligibility": "Requisitos de las acciones",
     "accessAudit": "Registro de operaciones",
     "lookup": "Consulta de información",
     "catalogTimetable": "Horario de franjas",
@@ -117,7 +119,9 @@
     "invalid_request": "El formato de la solicitud no es válido. Revísalo e inténtalo de nuevo.",
     "unprocessable": "La solicitud no coincide con la operación elegida. Revísala e inténtalo de nuevo.",
     "disabled": "Esta función no está activada.",
-    "cooldown": "Demasiados intentos. Vuelve a intentarlo en un momento."
+    "cooldown": "Demasiados intentos. Vuelve a intentarlo en un momento.",
+    "billing_already_accessible": "Este usuario ya puede acceder al recurso; no necesita comprarlo.",
+    "invalid_rule": "Esta combinación de condiciones no es válida. Ajústala y vuelve a guardar."
   },
   "session": {
     "signIn": "Iniciar sesión",
@@ -541,7 +545,15 @@
     "parentFolder": "Carpeta superior",
     "newFolder": "Nueva carpeta",
     "editFolder": "Editar carpeta",
-    "noFolders": "No hay carpetas aquí."
+    "noFolders": "No hay carpetas aquí.",
+    "price": {
+      "title": "Precio",
+      "hint": "Los usuarios pueden comprar acceso permanente a este recurso con puntos o con Ivory.",
+      "unpriced": "Este recurso aún no tiene precio y no se puede comprar. Indica al menos un precio en puntos o en Ivory.",
+      "points": "Precio en puntos",
+      "ivory": "Precio en Ivory",
+      "save": "Guardar precio"
+    }
   },
   "verification": {
     "title": "Gestión de verificaciones",
@@ -989,7 +1001,9 @@
       "topup": "Recarga",
       "purchase": "Compra de puntos",
       "refund": "Reembolso de recarga",
-      "purchase_refund": "Reembolso de compra"
+      "purchase_refund": "Reembolso de compra",
+      "resource_unlock": "Desbloqueo de recurso",
+      "membership": "Membresía"
     },
     "orderState": {
       "submitted": "Pendiente de revisión",
@@ -1003,7 +1017,10 @@
       "expired": "Caducado",
       "cancelled": "Cancelado",
       "needs_review": "Requiere revisión manual",
-      "review_query_pending": "Consulta adicional programada"
+      "review_query_pending": "Consulta adicional programada",
+      "paid": "Pagado, pendiente de entrega",
+      "fulfilled": "Entregado",
+      "refunded": "Reembolsado"
     },
     "refunds": {
       "title": "Reembolsos",
@@ -1039,11 +1056,18 @@
         }
       },
       "paymentChannel": "Medio de pago manual",
-      "paymentChannelHint": "Indica el medio y la cuenta de pago usados realmente, por ejemplo «Banco A, cuenta de empresa». Cada número de transacción solo se registra una vez por medio."
+      "paymentChannelHint": "Indica el medio y la cuenta de pago usados realmente, por ejemplo «Banco A, cuenta de empresa». Cada número de transacción solo se registra una vez por medio.",
+      "showPayee": "Ver datos de cobro",
+      "payeeHint": "Los datos de cobro requieren un permiso aparte. Cada consulta se audita y los datos desaparecen al cerrar el panel.",
+      "noPayee": "El usuario aún no ha enviado datos de cobro.",
+      "payee": "Datos de cobro",
+      "payeeMethod": "Método",
+      "payeeName": "Titular",
+      "payeeAccount": "Número de cuenta"
     },
     "accounts": {
       "title": "Facturación por cuenta",
-      "intro": "Consulta el saldo, los pedidos y los movimientos de una cuenta; reembolsa compras de puntos y concede o revoca recompensas. Cada consulta queda auditada.",
+      "intro": "Consulta el saldo, los pedidos y los movimientos de una cuenta; reembolsa compras de puntos, desbloqueos y membresías; otorga y revoca recompensas; y otorga membresías. Cada consulta se audita.",
       "subjectHint": "Copia el emisor y el ID de usuario de los registros de la cuenta.",
       "wallet": "Saldo",
       "frozen": "Los activos de esta cuenta están congelados. El usuario no puede gastar ni retirar por ahora.",
@@ -1079,7 +1103,19 @@
         "disabled": "La regla está desactivada y no se concedieron puntos.",
         "limit_reached": "Se alcanzó el límite de la regla y no se concedieron puntos.",
         "expired": "El evento está fuera de la vigencia de la regla y no se concedieron puntos."
-      }
+      },
+      "refundCommerce": "Reembolsar",
+      "commerceRefunded": "Reembolso completado. Se retiró el acceso o el periodo de membresía obtenido con este pedido.",
+      "unlockRefundSummary": "Un desbloqueo de recurso se reembolsa por completo: {amount}. El usuario pierde el acceso obtenido con esta compra.",
+      "membershipRefundSummary": "Precio original {amount}. El reembolso termina el periodo restante de este pedido y adelanta los periodos posteriores.",
+      "refundPoints": "Puntos a reembolsar",
+      "refundIvory": "Ivory a reembolsar",
+      "membership": "Otorgar membresía",
+      "membershipHint": "Otorga una membresía a esta cuenta sin pago. El motivo queda registrado en el pedido y en la auditoría.",
+      "plan": "Plan de membresía",
+      "membershipReasonHint": "Indica el motivo, por ejemplo una recompensa o una compensación.",
+      "membershipSubmit": "Otorgar membresía",
+      "membershipGranted": "Membresía otorgada."
     },
     "config": {
       "title": "Ajustes de facturación",
@@ -1134,6 +1170,38 @@
       "submit": "Enviar",
       "open": "Revisar",
       "title": "Revisar resultado del pago"
+    },
+    "memberships": {
+      "title": "Planes de membresía",
+      "intro": "Gestiona el nombre, la duración, los precios y los recursos que cubre cada plan. Un plan sin cobertura no se puede comprar; al detener la venta, las membresías ya compradas conservan su periodo.",
+      "new": "Nuevo plan",
+      "edit": "Editar plan",
+      "idHint": "No se puede cambiar después de guardar. Usa letras, dígitos, puntos, guiones bajos y guiones.",
+      "name": "Nombre del plan",
+      "nameHint": "Se muestra al comprar. Cambiarlo no altera el nombre guardado en compras anteriores.",
+      "days": "Días de validez",
+      "pointsPrice": "Precio en puntos",
+      "ivoryPrice": "Precio en Ivory",
+      "priceHint": "Indica al menos un precio en puntos o en Ivory. El usuario paga el importe completo desde una sola cuenta.",
+      "ivoryInvalid": "Introduce un importe mayor que 0 con dos decimales como máximo.",
+      "onSale": "En venta",
+      "coverage": "Cobertura",
+      "coverageUnavailable": "No se pudo leer la cobertura",
+      "noCoverage": "Sin cobertura configurada",
+      "ruleCount": "Reglas: {count}",
+      "editCoverage": "Editar cobertura",
+      "stop": "Detener venta",
+      "stopConfirm": "Los usuarios ya no podrán comprar ni renovar este plan; las membresías compradas conservan su periodo. ¿Detener la venta?",
+      "coverageTitle": "Cobertura de «{name}»",
+      "coverageIntro": "Cada regla cubre recursos de este centro: opcionalmente una carpeta (solo esa carpeta, sin subcarpetas) y una categoría. Deja ambas vacías para cubrir todo. Las reglas se suman.",
+      "noRules": "No hay reglas. Al guardar, el plan no cubrirá nada y no se podrá comprar.",
+      "rule": "Regla {index}",
+      "directory": "Carpeta",
+      "anyDirectory": "Todas las carpetas",
+      "category": "Categoría",
+      "anyCategory": "Todas las categorías",
+      "removeRule": "Quitar regla",
+      "addRule": "Añadir regla"
     }
   },
   "access": {
@@ -1468,5 +1536,45 @@
       }
     },
     "backToGroup": "Volver al grupo"
+  },
+  "eligibility": {
+    "title": "Requisitos de las acciones",
+    "intro": "Define las condiciones que exige cada acción. La regla general se aplica a todos los centros; la columna del centro muestra la regla vigente, y guardar ahí solo afecta a este centro.",
+    "action": "Acción",
+    "site": "Regla general",
+    "school": "Vigente en este centro",
+    "signedIn": "Solo iniciar sesión",
+    "required": "Condiciones necesarias",
+    "onlySignIn": "Si no marcas ninguna condición, solo se exige haber iniciado sesión.",
+    "siteHint": "Cambiar la regla general afecta a todos los centros sin regla propia. Las demás instancias la aplican en 5 segundos como máximo.",
+    "schoolHint": "Tras guardar, este centro usa su propia regla en lugar de la general. Las demás instancias la aplican en 5 segundos como máximo.",
+    "edit": {
+      "site": "Editar regla general: {action}",
+      "school": "Editar regla del centro: {action}"
+    },
+    "actions": {
+      "content_enter": "Entrar en el área de contenido",
+      "read_full": "Ver el contenido completo",
+      "vote": "Votar",
+      "bookmark": "Guardar en favoritos",
+      "report": "Denunciar",
+      "resources_discover": "Explorar recursos",
+      "resources_download_public": "Descargar recursos públicos",
+      "resources_download_restricted": "Descargar recursos restringidos",
+      "resources_purchase": "Comprar recursos",
+      "membership_purchase": "Comprar membresía",
+      "publish_course": "Publicar reseñas de asignaturas",
+      "publish_mentor": "Publicar reseñas de tutores",
+      "reply": "Responder",
+      "resources_upload": "Subir recursos",
+      "reply_teacher": "Responder a reseñas de profesores"
+    },
+    "conditions": {
+      "content_access": "Acceso al contenido",
+      "campus_eligibility": "Condición de estudiante válida",
+      "phone_bound": "Teléfono vinculado",
+      "identity_verified": "Identidad verificada",
+      "course_enrollment": "Matriculado en la asignatura"
+    }
   }
 }

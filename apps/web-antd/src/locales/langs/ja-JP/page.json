@@ -26,9 +26,11 @@
     "billingGroup": "会計",
     "billingRefunds": "返金処理",
     "billingAccounts": "アカウントの会計",
+    "billingMemberships": "会員プラン",
     "billingConfig": "会計設定",
     "accessGroup": "システム",
     "accessRoles": "ロールと権限",
+    "eligibility": "操作の利用条件",
     "accessAudit": "操作記録",
     "lookup": "情報照会",
     "catalogTimetable": "時限設定",
@@ -117,7 +119,9 @@
     "invalid_request": "リクエストの形式が正しくありません。確認して再試行してください。",
     "unprocessable": "リクエスト内容が選択した操作と一致しません。確認して再試行してください。",
     "disabled": "この機能はまだ有効になっていません。",
-    "cooldown": "操作が多すぎます。しばらくしてから再試行してください。"
+    "cooldown": "操作が多すぎます。しばらくしてから再試行してください。",
+    "billing_already_accessible": "この利用者はすでに資料にアクセスできるため、購入は不要です。",
+    "invalid_rule": "条件の組み合わせが無効です。調整してから保存してください。"
   },
   "session": {
     "signIn": "ログイン",
@@ -541,7 +545,15 @@
     "parentFolder": "親フォルダ",
     "newFolder": "フォルダーを追加",
     "editFolder": "フォルダを編集",
-    "noFolders": "ここにフォルダはありません。"
+    "noFolders": "ここにフォルダはありません。",
+    "price": {
+      "title": "価格",
+      "hint": "利用者はポイントまたは Ivory のいずれかでこの資料の永続的なアクセス権を購入できます。",
+      "unpriced": "この資料はまだ価格が設定されていないため購入できません。ポイントと Ivory の少なくとも一方を設定してください。",
+      "points": "ポイント価格",
+      "ivory": "Ivory 価格",
+      "save": "価格を保存"
+    }
   },
   "verification": {
     "title": "学生認証の管理",
@@ -989,7 +1001,9 @@
       "topup": "チャージ",
       "purchase": "ポイント購入",
       "refund": "チャージの返金",
-      "purchase_refund": "ポイント購入の返金"
+      "purchase_refund": "ポイント購入の返金",
+      "resource_unlock": "資料のロック解除",
+      "membership": "会員"
     },
     "orderState": {
       "submitted": "審査待ち",
@@ -1003,7 +1017,10 @@
       "expired": "期限切れ",
       "cancelled": "キャンセル済み",
       "needs_review": "手動確認が必要",
-      "review_query_pending": "追加照会待ち"
+      "review_query_pending": "追加照会待ち",
+      "paid": "支払い済み・提供待ち",
+      "fulfilled": "提供済み",
+      "refunded": "返金済み"
     },
     "refunds": {
       "title": "返金処理",
@@ -1039,11 +1056,18 @@
         }
       },
       "paymentChannel": "手動送金の方法",
-      "paymentChannelHint": "実際に使った送金方法と送金元口座の識別名を入力します（例：A 銀行 法人口座）。同じ方法で同じ取引番号は 1 回しか登録できません。"
+      "paymentChannelHint": "実際に使った送金方法と送金元口座の識別名を入力します（例：A 銀行 法人口座）。同じ方法で同じ取引番号は 1 回しか登録できません。",
+      "showPayee": "受取情報を表示",
+      "payeeHint": "受取情報の表示には別の権限が必要です。表示のたびに監査記録され、詳細を閉じると表示されなくなります。",
+      "noPayee": "利用者はまだ受取情報を提出していません。",
+      "payee": "受取情報",
+      "payeeMethod": "受取方法",
+      "payeeName": "口座名義",
+      "payeeAccount": "口座番号"
     },
     "accounts": {
       "title": "アカウントの会計",
-      "intro": "アカウントの残高、注文、明細を照会し、ポイント購入の返金や報酬の付与・取り消しを行います。照会はすべて監査記録に残ります。",
+      "intro": "アカウントの残高、注文、明細を照会し、ポイント購入・資料・会員の返金、特典の付与と取り消し、会員の付与を行います。照会はすべて監査記録されます。",
       "subjectHint": "発行者とユーザー ID はアカウントの記録からコピーしてください。",
       "wallet": "残高",
       "frozen": "このアカウントの資産は凍結されています。ユーザーは現在、利用も出金もできません。",
@@ -1079,7 +1103,19 @@
         "disabled": "ルールが無効のため、ポイントは付与されませんでした。",
         "limit_reached": "ルールの上限に達したため、ポイントは付与されませんでした。",
         "expired": "イベントがルールの有効期間外のため、ポイントは付与されませんでした。"
-      }
+      },
+      "refundCommerce": "返金",
+      "commerceRefunded": "返金が完了しました。この注文で得たアクセス権または会員期間は取り消されました。",
+      "unlockRefundSummary": "資料のロック解除は全額返金します：{amount}。返金後、利用者はこの購入で得たアクセス権を失います。",
+      "membershipRefundSummary": "元の価格 {amount}。返金するとこの注文の残りの会員期間が終了し、以降の期間が前倒しされます。",
+      "refundPoints": "返金するポイント",
+      "refundIvory": "返金する Ivory",
+      "membership": "会員を付与",
+      "membershipHint": "このアカウントに無料で会員を付与します。理由は注文と監査ログに記録されます。",
+      "plan": "会員プラン",
+      "membershipReasonHint": "付与の理由を入力してください（例：イベント特典、補償）。",
+      "membershipSubmit": "会員を付与",
+      "membershipGranted": "会員を付与しました。"
     },
     "config": {
       "title": "会計設定",
@@ -1134,6 +1170,38 @@
       "submit": "送信",
       "open": "確認処理",
       "title": "支払い結果の確認"
+    },
+    "memberships": {
+      "title": "会員プラン",
+      "intro": "会員プランの名前、期間、価格、対象資料を管理します。対象範囲が未設定のプランは購入できません。販売停止後も購入済みの会員期間は維持されます。",
+      "new": "プランを作成",
+      "edit": "プランを編集",
+      "idHint": "保存後は変更できません。英数字、ドット、アンダースコア、ハイフンを使用できます。",
+      "name": "プラン名",
+      "nameHint": "購入時に表示される名前です。名前を変えても購入履歴の名前は変わりません。",
+      "days": "有効日数",
+      "pointsPrice": "ポイント価格",
+      "ivoryPrice": "Ivory 価格",
+      "priceHint": "ポイントと Ivory の少なくとも一方を設定してください。利用者はいずれか一方の口座から全額を支払います。",
+      "ivoryInvalid": "0 より大きい金額を小数点以下 2 桁まで入力してください。",
+      "onSale": "販売中",
+      "coverage": "対象範囲",
+      "coverageUnavailable": "対象範囲を読み込めません",
+      "noCoverage": "対象範囲が未設定",
+      "ruleCount": "ルール数：{count}",
+      "editCoverage": "対象範囲を編集",
+      "stop": "販売停止",
+      "stopConfirm": "販売を停止すると、このプランの購入と更新ができなくなります。購入済みの会員期間は維持されます。停止しますか？",
+      "coverageTitle": "「{name}」の対象範囲",
+      "coverageIntro": "各ルールは本校の資料を対象にします。フォルダー（そのフォルダーのみ、サブフォルダーは含まない）と分類で絞り込めます。両方空欄なら本校の全資料が対象です。複数のルールは合算されます。",
+      "noRules": "ルールがありません。保存するとこのプランは何も対象にせず、購入できなくなります。",
+      "rule": "ルール {index}",
+      "directory": "フォルダー",
+      "anyDirectory": "すべてのフォルダー",
+      "category": "分類",
+      "anyCategory": "すべての分類",
+      "removeRule": "ルールを削除",
+      "addRule": "ルールを追加"
     }
   },
   "access": {
@@ -1468,5 +1536,45 @@
       }
     },
     "backToGroup": "グループ詳細へ戻る"
+  },
+  "eligibility": {
+    "title": "操作の利用条件",
+    "intro": "各操作に必要な条件を設定します。全体の既定値はすべての学校に適用されます。本校の列は現在有効なルールを示し、ここで保存すると本校だけに適用されます。",
+    "action": "操作",
+    "site": "全体の既定値",
+    "school": "本校で有効",
+    "signedIn": "ログインのみ",
+    "required": "必要な条件",
+    "onlySignIn": "条件を選ばない場合、ログインだけが必要です。",
+    "siteHint": "全体の既定値を変更すると、個別ルールのないすべての学校に影響します。他のインスタンスには 5 秒以内に反映されます。",
+    "schoolHint": "保存後、本校は全体の既定値ではなく個別ルールを使用します。他のインスタンスには 5 秒以内に反映されます。",
+    "edit": {
+      "site": "全体の既定値を編集：{action}",
+      "school": "本校のルールを編集：{action}"
+    },
+    "actions": {
+      "content_enter": "コンテンツエリアに入る",
+      "read_full": "全文を表示",
+      "vote": "投票",
+      "bookmark": "お気に入り",
+      "report": "通報",
+      "resources_discover": "資料を閲覧",
+      "resources_download_public": "公開資料をダウンロード",
+      "resources_download_restricted": "限定資料をダウンロード",
+      "resources_purchase": "資料を購入",
+      "membership_purchase": "会員を購入",
+      "publish_course": "授業レビューを投稿",
+      "publish_mentor": "指導教員レビューを投稿",
+      "reply": "返信",
+      "resources_upload": "資料をアップロード",
+      "reply_teacher": "教員レビューに返信"
+    },
+    "conditions": {
+      "content_access": "コンテンツ利用許可",
+      "campus_eligibility": "有効な在学資格",
+      "phone_bound": "電話番号登録済み",
+      "identity_verified": "本人確認済み",
+      "course_enrollment": "その授業を履修"
+    }
   }
 }

@@ -54,6 +54,7 @@ export const menus: MenuRecordRaw[] = [
     children: [
       { name: 'page.menu.billingRefunds', path: '/billing/refunds' },
       { name: 'page.menu.billingAccounts', path: '/billing/accounts' },
+      { name: 'page.menu.billingMemberships', path: '/billing/memberships' },
       { name: 'page.menu.billingConfig', path: '/billing/config' },
     ],
   },
@@ -76,6 +77,7 @@ export const menus: MenuRecordRaw[] = [
     icon: ShieldUser,
     children: [
       { name: 'page.menu.accessRoles', path: '/system/roles' },
+      { name: 'page.menu.eligibility', path: '/system/eligibility' },
       { name: 'page.menu.lookup', path: '/system/lookup' },
       { name: 'page.menu.accessAudit', path: '/system/audit' },
     ],

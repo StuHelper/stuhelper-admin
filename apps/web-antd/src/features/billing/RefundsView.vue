@@ -1,17 +1,19 @@
 <script setup lang="ts">
-import type { AdminOrder, ManualInput, Order, ReviewInput } from './api';
+import type { AdminOrder, ManualInput, Order, Payee, ReviewInput } from './api';
 
 import { computed, onMounted, reactive, ref, shallowRef, watch } from 'vue';
 
 import { useI18n } from '@vben/locales';
 
-import { Button, Card, Checkbox, Descriptions, DescriptionsItem, Drawer, Form, FormItem, Input, Radio, RadioGroup, Segmented, Table, Tag, Textarea } from 'ant-design-vue';
+import { Alert, Button, Card, Checkbox, Descriptions, DescriptionsItem, Drawer, Form, FormItem, Input, Radio, RadioGroup, Segmented, Table, Tag, Textarea } from 'ant-design-vue';
 
+import { errorCode } from '#/shared/api/errors';
 import { useMutation, usePaged } from '#/shared/composables/async';
 import { useLeaveGuard } from '#/shared/composables/leave';
 import { useFormat } from '#/shared/format';
 import AdminPage from '#/shared/ui/AdminPage.vue';
 import LoadState from '#/shared/ui/LoadState.vue';
+import { useErrorText } from '#/shared/ui/messages';
 import MutationAlert from '#/shared/ui/MutationAlert.vue';
 
 import { refundStates, useBillingAdmin } from './api';
@@ -28,6 +30,7 @@ const { t } = useI18n();
 const format = useFormat();
 const money = useMoney();
 const api = useBillingAdmin();
+const errorText = useErrorText();
 const filter = ref<State>('submitted');
 const refunds = usePaged<AdminOrder>((after, signal) => api.refunds(filter.value, after, signal));
 onMounted(refunds.reload);
@@ -44,13 +47,42 @@ const locked = computed(() => write.busy.value || write.uncertain.value);
 
 function open(order: AdminOrder) {
   selected.value = order;
+  hidePayee();
   success.value = '';
   write.dismiss();
   Object.assign(reviewForm, { approve: true, manual: false, reason: '' });
   Object.assign(manualForm, { succeeded: true, channel: '', reference: '', reason: '' });
 }
 function close() {
-  if (!locked.value) selected.value = undefined;
+  if (locked.value) return;
+  selected.value = undefined;
+  hidePayee();
+}
+
+// Payee details are decrypted only on request. The server needs a separate
+// permission and returns them only after the read is audited; closing the
+// drawer drops them from the page.
+const payee = shallowRef<Payee>();
+const payeeState = ref<'' | 'loading' | 'missing'>('');
+const payeeError = ref('');
+function hidePayee() {
+  payee.value = undefined;
+  payeeState.value = '';
+  payeeError.value = '';
+}
+async function showPayee() {
+  const order = selected.value;
+  if (!order || payeeState.value === 'loading') return;
+  hidePayee();
+  payeeState.value = 'loading';
+  try {
+    payee.value = await api.payee(order.id, order.target);
+    payeeState.value = '';
+  } catch (error) {
+    const code = errorCode(error);
+    payeeState.value = code === 'billing_not_found' || code === 'not_found' ? 'missing' : '';
+    if (!payeeState.value) payeeError.value = code;
+  }
 }
 // Rejecting needs a reason the user can read; a failed payout needs the cause.
 const reviewReady = computed(() => reviewForm.approve || !!reviewForm.reason.trim());
@@ -129,6 +161,18 @@ const columns = computed(() => [
           <DescriptionsItem v-if="selected.failure_code" :label="t('page.billing.failureCode')"><code>{{ selected.failure_code }}</code></DescriptionsItem>
           <DescriptionsItem :label="t('page.common.createdAt')">{{ format.dateTime(selected.created_at) }}</DescriptionsItem>
         </Descriptions>
+
+        <div class="flex flex-col gap-2">
+          <div><Button :loading="payeeState === 'loading'" @click="showPayee">{{ t('page.billing.refunds.showPayee') }}</Button></div>
+          <p class="text-muted-foreground text-sm">{{ t('page.billing.refunds.payeeHint') }}</p>
+          <Alert v-if="payeeState === 'missing'" type="info" show-icon :message="t('page.billing.refunds.noPayee')" />
+          <Alert v-if="payeeError" type="error" show-icon role="alert" :message="errorText(payeeError)" />
+          <Descriptions v-if="payee" :column="1" size="small" bordered :title="t('page.billing.refunds.payee')">
+            <DescriptionsItem :label="t('page.billing.refunds.payeeMethod')">{{ payee.method }}</DescriptionsItem>
+            <DescriptionsItem :label="t('page.billing.refunds.payeeName')">{{ payee.name }}</DescriptionsItem>
+            <DescriptionsItem :label="t('page.billing.refunds.payeeAccount')"><code class="break-all">{{ payee.account }}</code></DescriptionsItem>
+          </Descriptions>
+        </div>
 
         <Form v-if="selected.state === 'submitted' && !success" layout="vertical" @submit.prevent="submitReview">
           <FormItem :label="t('page.billing.refunds.decision')">

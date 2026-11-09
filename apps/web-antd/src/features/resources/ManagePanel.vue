@@ -7,6 +7,7 @@ import { useI18n } from '@vben/locales';
 
 import { Alert, Button, DatePicker, Descriptions, DescriptionsItem, Divider, Form, FormItem, Input, List, ListItem, Popconfirm, Select, Space, Tag, Textarea } from 'ant-design-vue';
 
+import PricePanel from '#/features/billing/PricePanel.vue';
 import { useAsync, useMutation, usePaged } from '#/shared/composables/async';
 import { useFormat } from '#/shared/format';
 import LoadState from '#/shared/ui/LoadState.vue';
@@ -54,7 +55,8 @@ watch(
   },
   { immediate: true },
 );
-watch([changing.busy, changing.uncertain, granting.busy, granting.uncertain, reason, subject], () => emit('pending', changing.busy.value || changing.uncertain.value || granting.busy.value || granting.uncertain.value || !!reason.value || !!subject.value));
+const pricing = ref(false);
+watch([changing.busy, changing.uncertain, granting.busy, granting.uncertain, reason, subject, pricing], () => emit('pending', changing.busy.value || changing.uncertain.value || granting.busy.value || granting.uncertain.value || !!reason.value || !!subject.value || pricing.value));
 
 async function change() {
   const current = resource.value;
@@ -116,6 +118,9 @@ function granted() {
         <MutationAlert :busy="changing.busy.value" :error="changing.error.value" :uncertain="changing.uncertain.value" :success="success" @retry="retryChange" />
         <Button class="mt-3" type="primary" html-type="submit" :loading="changing.busy.value" :disabled="changing.uncertain.value || !reason.trim()">{{ t('page.resources.applyState') }}</Button>
       </Form>
+
+      <Divider orientation="left">{{ t('page.resources.price.title') }}</Divider>
+      <PricePanel :resource-id="resource.id" @pending="pricing = $event" />
 
       <Divider orientation="left">{{ t('page.resources.grants') }}</Divider>
       <LoadState v-if="grants.items.value.length === 0" :status="grants.status.value" :error="grants.error.value" :empty="true" :empty-text="t('page.resources.noGrants')" @retry="grants.reload" />

@@ -6,10 +6,10 @@ import os from 'node:os';
 import path from 'node:path';
 const temp=fs.mkdtempSync(path.join(os.tmpdir(),'stuhelper-admin-academic-'));
 try{
-  for(const module of ['catalog','reviews','moderation','resources','media','favorites','profiles','open-platform','billing','qq-binding','platform-admin','information-query','groups']){
+  for(const module of ['catalog','reviews','moderation','resources','media','favorites','profiles','open-platform','billing','qq-binding','platform-admin','platform-eligibility','information-query','groups']){
     const source=JSON.parse(fs.readFileSync(`contracts/${module}.source.json`,'utf8'));
-    // platform-admin is the administration contract published by the platform repository.
-    assert.equal(source.repository,`StuHelper/stuhelper-${module==='platform-admin'?'platform':module}`);
+    // platform-admin and platform-eligibility are published by the platform repository.
+    assert.equal(source.repository,`StuHelper/stuhelper-${module.startsWith('platform-')?'platform':module}`);
     assert.match(source.revision,/^[0-9a-f]{40}$/);
     const contract=`contracts/${module}.openapi.json`; const generated=`apps/web-antd/src/api/${module}.gen.ts`;
     assert.equal(source.version,JSON.parse(fs.readFileSync(contract,'utf8')).info.version);
