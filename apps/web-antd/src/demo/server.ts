@@ -43,9 +43,9 @@ async function body(init?: RequestInit) {
 
 async function route(u: URL, method: string, init?: RequestInit): Promise<Response> {
   const p = u.pathname.replace('/api/v1', '');
-  if (p === '/auth/session') return json({ authenticated: true, profile: { id: '00000000-0000-4000-8000-000000000001', nickname: '运营值班', nickname_required: false, bio: '', visibility: { school: true, badge: true, department: true, grade: false, reviews: true, resources: true }, revision: 1 }, csrf_token: 'a'.repeat(43), phone_bound: true, administrator: true, expires_at: '2030-01-01T00:00:00Z' });
+  if (p === '/auth/session') return json({ authenticated: true, profile: { id: '00000000-0000-4000-8000-000000000001', nickname: '运营值班', nickname_required: false, bio: '', visibility: { school: true, badge: true, department: true, grade: false, reviews: true, resources: true }, group_card_consent: { school: false, grade: false, department: false, name: false, student_id: false, gender: false, nickname: false }, revision: 1 }, csrf_token: 'a'.repeat(43), phone_bound: true, administrator: true, expires_at: '2030-01-01T00:00:00Z' });
   if (p === '/auth/logout' || p === '/auth/logout-all') return new Response(null, { status: 204 });
-  if (p === '/profiles/me') return json({ id: '00000000-0000-4000-8000-000000000001', nickname: '运营值班', nickname_required: false, bio: '', visibility: { school: true, badge: true, department: true, grade: false, reviews: true, resources: true }, revision: 1 });
+  if (p === '/profiles/me') return json({ id: '00000000-0000-4000-8000-000000000001', nickname: '运营值班', nickname_required: false, bio: '', visibility: { school: true, badge: true, department: true, grade: false, reviews: true, resources: true }, group_card_consent: { school: false, grade: false, department: false, name: false, student_id: false, gender: false, nickname: false }, revision: 1 });
   if (p === '/system/capabilities') return json({ api_version: 1, capabilities: ['platform.status'] });
   if (p === '/admin/modules') return json([['session', 'ready', 'available'], ['catalog', 'ready', 'available'], ['reviews', 'ready', 'available'], ['resources', 'ready', 'available'], ['verification', 'ready', 'available'], ['storage', 'ready', 'available'], ['qqbot', 'disabled', 'disabled']].map(([id, state, health]) => ({ id, state, health })));
 
