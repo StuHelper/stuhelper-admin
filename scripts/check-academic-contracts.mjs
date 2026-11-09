@@ -6,7 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 const temp=fs.mkdtempSync(path.join(os.tmpdir(),'stuhelper-admin-academic-'));
 try{
-  for(const module of ['catalog','reviews','moderation','resources','media','favorites','profiles','open-platform','billing','qq-binding','platform-admin','information-query']){
+  for(const module of ['catalog','reviews','moderation','resources','media','favorites','profiles','open-platform','billing','qq-binding','platform-admin','information-query','groups']){
     const source=JSON.parse(fs.readFileSync(`contracts/${module}.source.json`,'utf8'));
     // platform-admin is the administration contract published by the platform repository.
     assert.equal(source.repository,`StuHelper/stuhelper-${module==='platform-admin'?'platform':module}`);

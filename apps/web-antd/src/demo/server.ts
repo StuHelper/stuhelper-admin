@@ -107,6 +107,8 @@ async function route(u: URL, method: string, init?: RequestInit): Promise<Respon
 
   const billing = billingRoute(p, method, u);
   if (billing) return billing;
+  const groups = groupsRoute(p, method);
+  if (groups) return groups;
 
   if (p.startsWith('/storage/operations')) return json(operations);
   if (p.startsWith('/storage-contributions')) {
@@ -122,6 +124,26 @@ async function route(u: URL, method: string, init?: RequestInit): Promise<Respon
     return json(d.custody.items[0], 202);
   }
   return nope('not_found', 404);
+}
+
+// QQ groups: two groups with a few members; commands report a pending bot action.
+const zero = '0001-01-01T00:00:00Z';
+const groupConfig = (id: string, name: string, number: string) => ({ id, school: d.SCHOOL, name, number, bot_enabled: true, revision: 3, password_set: false, mode: 'before', require_student: true, accept_alumni: false, accept_temporary: true, grace_seconds: 72 * 3600, reminder_seconds: 24 * 3600, retention_seconds: 7 * 86_400, card_template: '{name}-{grade}', auto_card: false, dice_sides: 6, mute_probability: 10, mute_seconds: 60, cooldown_seconds: 300, pity: 10, keywords: ['代写'], repeat_threshold: 5, auto_actions: ['warn'], welcome: '欢迎加入，请先完成学生认证。', rules_template: '请文明交流。', check_card: true, remind_card: true, block_links: false, frequency_seconds: 10, frequency_limit: 8, warning_limit: 3 });
+const groupList = [groupConfig('g1', '2026 秋 数据结构答疑群', '****4821'), groupConfig('g2', 'StuHelper 反馈群', '****7109')];
+const member = (owner: string, state: string, hours: number) => ({ owner, state, deadline: hours ? new Date(Date.now() + hours * 3_600_000).toISOString() : zero, reminder: zero, password: false, exempt: state === 'exempt', extended: false, failures: 0, last_play: zero, muted_until: zero, id: owner, joined: state !== 'removed' });
+function groupsRoute(p: string, method: string) {
+  if (!p.startsWith('/groups')) return undefined;
+  if (p === '/groups') return json({ items: groupList.map((g, i) => ({ id: g.id, school: g.school, name: g.name, number: g.number, member_count: i ? 1280 : 412, bot_enabled: g.bot_enabled, require_student: g.require_student, pending_count: i ? 0 : 2, revision: g.revision })), next_cursor: '' });
+  const [, , id, collection] = p.split('/');
+  const group = groupList.find((g) => g.id === id);
+  if (!group) return nope('groups_not_found', 404);
+  if (!collection) return method === 'GET' ? json(group) : json({ ...group, revision: group.revision + 1 });
+  if (collection === 'commands') return json({ id: 'act-demo', state: 'pending', action: 'queued', value: 0, detail: '' });
+  if (collection === 'members') return json({ items: [member('user-1024', 'grace', 30), member('user-2048', 'joined', 0), member('user-4096', 'exempt', 0)], next_cursor: '' });
+  if (collection === 'actions') return json({ items: [{ id: 'a1', group: id, actor: billingTarget, capability: 'groups.manage', command: { kind: 'warn', target: 'user-2048' }, state: 'unknown', result: '', created: d.ago(1) }], next_cursor: '' });
+  if (collection === 'reports') return json({ items: [{ id: 'r1', reporter: 'user-1024', message: 'm1', reason: '广告', state: 'suggested', analysis: '疑似广告链接', suggestions: ['recall', 'warn'] }], next_cursor: '' });
+  if (collection === 'hits') return json({ items: [{ id: 'h1', owner: 'user-2048', message: 'm2', rules: ['keyword'], state: 'noncompliant' }], next_cursor: '' });
+  return json({ items: [], next_cursor: '' });
 }
 
 // Billing administration over a small fixed data set; writes echo a plausible result.
