@@ -19,6 +19,7 @@ export type MergeInput = Catalog['schemas']['MergeInput'];
 export type MergePreview = Catalog['schemas']['MergePreview'];
 export type ObjectState = Catalog['schemas']['ObjectState'];
 export type CatalogImport = Catalog['schemas']['Import'];
+export type Timetable = Catalog['schemas']['Timetable'];
 export type ImportPreview = Catalog['schemas']['ImportPreview'];
 export type ImportResult = Catalog['schemas']['ImportResult'];
 export type AdminEntry = Reviews['schemas']['AdminEntry'];
@@ -44,6 +45,7 @@ const parse = {
   mergePreview: schemaOf<MergePreview>(catalog, 'MergePreview'),
   importPreview: schemaOf<ImportPreview>(catalog, 'ImportPreview'),
   importResult: schemaOf<ImportResult>(catalog, 'ImportResult'),
+  timetable: schemaOf<Timetable>(catalog, 'Timetable'),
   entry: schemaOf<AdminEntry>(reviews, 'AdminEntry'),
   entries: schemaOf<AdminEntry[]>(reviews, 'AdminEntry', true),
   entryPage: schemaOf<Reviews['schemas']['AdminPage']>(reviews, 'AdminPage'),
@@ -273,6 +275,11 @@ export class AcademicAdminApi {
     );
   }
 
+  /** Revision 0 creates; later writes send the current revision and fail with conflict when it moved. */
+  saveTimetable(body: Timetable, key: string) {
+    return this.http.json(`/api/v1/catalog/admin/schools/${segment(body.school_id)}/terms/${segment(body.term_id)}/timetable`, parse.timetable, { method: 'PUT', body, key });
+  }
+
   setState(id: string, body: ObjectState, key: string) {
     return this.http.json(
       `/api/v1/catalog/objects/${segment(id)}/state`,
@@ -310,6 +317,16 @@ export class AcademicAdminApi {
       query: { admin: true, ...query },
       signal,
     });
+  }
+
+  /** Period times of one school term. Resolves undefined when none is configured yet. */
+  async timetable(school: string, term: string, signal?: AbortSignal) {
+    try {
+      return await this.http.json(`/api/v1/catalog/admin/schools/${segment(school)}/terms/${segment(term)}/timetable`, parse.timetable, { signal });
+    } catch (error) {
+      if (error instanceof ApiError && error.code === 'not_found') return undefined;
+      throw error;
+    }
   }
 }
 

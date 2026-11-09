@@ -30,7 +30,8 @@
     "accessGroup": "システム",
     "accessRoles": "ロールと権限",
     "accessAudit": "操作記録",
-    "lookup": "情報照会"
+    "lookup": "情報照会",
+    "catalogTimetable": "時限設定"
   },
   "common": {
     "all": "すべて",
@@ -1247,5 +1248,31 @@
     "auditActor": "操作者",
     "auditCount": "{count} 件を返却",
     "auditChannel": "チャネル {channel}、グループ {group}"
+  },
+  "timetable": {
+    "title": "時限設定",
+    "intro": "学期ごとに第 1 週の月曜日、学校のタイムゾーン、各時限の開始・終了時刻を設定します。学生の時間割とカレンダー書き出しはこの設定で時限を時刻に変換します。未設定の学期はカレンダーを書き出せません。",
+    "term": "学期",
+    "missing": "この学期の時限はまだ設定されていません。保存すると学生がカレンダーを書き出せます。",
+    "weekOne": "第 1 週の月曜日",
+    "weekOneHint": "最初の授業週の月曜日を選んでください。",
+    "timezone": "タイムゾーン",
+    "timezoneHint": "IANA のタイムゾーン名（例：Asia/Shanghai）。",
+    "period": "時限",
+    "start": "開始",
+    "end": "終了",
+    "startOf": "{number} 限の開始時刻",
+    "endOf": "{number} 限の終了時刻",
+    "removeOf": "{number} 限を削除",
+    "remove": "削除",
+    "add": "時限を追加",
+    "saved": "時限設定を保存しました。",
+    "problems": {
+      "notMonday": "第 1 週は月曜日から始まる必要があります。",
+      "timezone": "タイムゾーン名を認識できません。",
+      "noPeriods": "時限を 1 つ以上追加してください。",
+      "periodTime": "各時限の終了は開始より後で、日付をまたげません。",
+      "periodOrder": "時限は順番に並び、重なってはいけません。"
+    }
   }
 }

@@ -13,6 +13,7 @@ const children: RouteRecordRaw[] = [
   { name: 'ModerationPolicies', path: 'moderation/policies', component: () => import('#/features/academic/PolicyView.vue'), meta: { title: 'page.menu.moderationPolicies' } },
   { name: 'ModerationPresentation', path: 'moderation/presentation', component: () => import('#/features/academic/PresentationView.vue'), meta: { title: 'page.menu.moderationPresentation' } },
   { name: 'Catalog', path: 'catalog', component: () => import('#/features/academic/CatalogView.vue'), meta: { title: 'page.menu.catalog' } },
+  { name: 'CatalogTimetable', path: 'catalog/timetable', component: () => import('#/features/academic/TimetableView.vue'), meta: { title: 'page.menu.catalogTimetable' } },
   { name: 'CatalogImports', path: 'catalog/imports', component: () => import('#/features/academic/ImportView.vue'), meta: { title: 'page.menu.catalogImports' } },
   { name: 'Resources', path: 'resources', component: () => import('#/features/resources/ResourcesView.vue'), meta: { title: 'page.menu.resources' } },
   { name: 'ResourceReviews', path: 'resources/reviews', component: () => import('#/features/resources/ReviewView.vue'), meta: { title: 'page.menu.resourceReviews' } },

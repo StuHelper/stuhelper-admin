@@ -30,7 +30,8 @@
     "accessGroup": "系统",
     "accessRoles": "角色授权",
     "accessAudit": "操作记录",
-    "lookup": "信息查询"
+    "lookup": "信息查询",
+    "catalogTimetable": "学校作息"
   },
   "common": {
     "all": "全部",
@@ -1247,5 +1248,31 @@
     "auditActor": "操作者",
     "auditCount": "返回 {count} 条",
     "auditChannel": "渠道 {channel}，群 {group}"
+  },
+  "timetable": {
+    "title": "学校作息",
+    "intro": "设置每个学期第一周的日期、学校时区和每节课的起止时间。学生课表和日历导出按这里把节次换算成具体时间；没有作息的学期无法导出日历。",
+    "term": "学期",
+    "missing": "这个学期还没有设置作息。保存后学生即可导出日历。",
+    "weekOne": "第一周周一",
+    "weekOneHint": "选择第一教学周的周一。",
+    "timezone": "时区",
+    "timezoneHint": "填写 IANA 时区名称，例如 Asia/Shanghai。",
+    "period": "节次",
+    "start": "开始",
+    "end": "结束",
+    "startOf": "第 {number} 节开始时间",
+    "endOf": "第 {number} 节结束时间",
+    "removeOf": "删除第 {number} 节",
+    "remove": "删除",
+    "add": "添加一节",
+    "saved": "作息已保存。",
+    "problems": {
+      "notMonday": "第一周日期必须是周一。",
+      "timezone": "时区名称无法识别。",
+      "noPeriods": "至少需要一节课。",
+      "periodTime": "每节课的结束时间必须晚于开始时间，且不能跨过午夜。",
+      "periodOrder": "节次时间需要按顺序排列且不能重叠。"
+    }
   }
 }

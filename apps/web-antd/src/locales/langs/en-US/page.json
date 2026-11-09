@@ -30,7 +30,8 @@
     "accessGroup": "System",
     "accessRoles": "Roles",
     "accessAudit": "Operation log",
-    "lookup": "Information lookup"
+    "lookup": "Information lookup",
+    "catalogTimetable": "Class periods"
   },
   "common": {
     "all": "All",
@@ -1247,5 +1248,31 @@
     "auditActor": "Operator",
     "auditCount": "{count} records returned",
     "auditChannel": "Channel {channel}, group {group}"
+  },
+  "timetable": {
+    "title": "Class periods",
+    "intro": "Set the Monday of week one, the school time zone and the start and end of each period for a term. Student timetables and calendar exports use these to turn period numbers into times; a term without them cannot be exported.",
+    "term": "Term",
+    "missing": "No periods are set for this term yet. Students can export calendars once they are saved.",
+    "weekOne": "Monday of week one",
+    "weekOneHint": "Choose the Monday of the first teaching week.",
+    "timezone": "Time zone",
+    "timezoneHint": "An IANA time zone name, such as Asia/Shanghai.",
+    "period": "Period",
+    "start": "Starts",
+    "end": "Ends",
+    "startOf": "Period {number} start",
+    "endOf": "Period {number} end",
+    "removeOf": "Remove period {number}",
+    "remove": "Remove",
+    "add": "Add a period",
+    "saved": "Class periods saved.",
+    "problems": {
+      "notMonday": "Week one must start on a Monday.",
+      "timezone": "The time zone name is not recognized.",
+      "noPeriods": "Add at least one period.",
+      "periodTime": "Each period must end after it starts, within the same day.",
+      "periodOrder": "Periods must be in order and must not overlap."
+    }
   }
 }

@@ -30,7 +30,8 @@
     "accessGroup": "Système",
     "accessRoles": "Rôles et accès",
     "accessAudit": "Journal des opérations",
-    "lookup": "Recherche d’informations"
+    "lookup": "Recherche d’informations",
+    "catalogTimetable": "Horaires des créneaux"
   },
   "common": {
     "all": "Tous",
@@ -1247,5 +1248,31 @@
     "auditActor": "Opérateur",
     "auditCount": "{count} enregistrements renvoyés",
     "auditChannel": "Canal {channel}, groupe {group}"
+  },
+  "timetable": {
+    "title": "Horaires des créneaux",
+    "intro": "Définissez pour chaque semestre le lundi de la première semaine, le fuseau horaire de l’établissement et les horaires de chaque créneau. Les emplois du temps et les exports d’agenda s’en servent pour convertir les créneaux en heures ; sans eux, l’agenda ne peut pas être exporté.",
+    "term": "Semestre",
+    "missing": "Aucun horaire n’est encore défini pour ce semestre. Les étudiants pourront exporter leur agenda après l’enregistrement.",
+    "weekOne": "Lundi de la première semaine",
+    "weekOneHint": "Choisissez le lundi de la première semaine de cours.",
+    "timezone": "Fuseau horaire",
+    "timezoneHint": "Nom de fuseau IANA, par exemple Asia/Shanghai.",
+    "period": "Créneau",
+    "start": "Début",
+    "end": "Fin",
+    "startOf": "Début du créneau {number}",
+    "endOf": "Fin du créneau {number}",
+    "removeOf": "Supprimer le créneau {number}",
+    "remove": "Supprimer",
+    "add": "Ajouter un créneau",
+    "saved": "Horaires enregistrés.",
+    "problems": {
+      "notMonday": "La première semaine doit commencer un lundi.",
+      "timezone": "Le fuseau horaire n’est pas reconnu.",
+      "noPeriods": "Ajoutez au moins un créneau.",
+      "periodTime": "Chaque créneau doit finir après son début, le même jour.",
+      "periodOrder": "Les créneaux doivent se suivre sans se chevaucher."
+    }
   }
 }

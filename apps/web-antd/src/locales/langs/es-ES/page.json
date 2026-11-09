@@ -30,7 +30,8 @@
     "accessGroup": "Sistema",
     "accessRoles": "Roles y accesos",
     "accessAudit": "Registro de operaciones",
-    "lookup": "Consulta de información"
+    "lookup": "Consulta de información",
+    "catalogTimetable": "Horario de franjas"
   },
   "common": {
     "all": "Todos",
@@ -1247,5 +1248,31 @@
     "auditActor": "Operador",
     "auditCount": "{count} registros devueltos",
     "auditChannel": "Canal {channel}, grupo {group}"
+  },
+  "timetable": {
+    "title": "Horario de franjas",
+    "intro": "Define para cada periodo el lunes de la primera semana, la zona horaria del centro y el inicio y fin de cada franja. Los horarios de los estudiantes y la exportación al calendario lo usan para convertir franjas en horas; sin él no se puede exportar el calendario.",
+    "term": "Periodo",
+    "missing": "Este periodo aún no tiene horario. Los estudiantes podrán exportar el calendario cuando lo guardes.",
+    "weekOne": "Lunes de la primera semana",
+    "weekOneHint": "Elige el lunes de la primera semana lectiva.",
+    "timezone": "Zona horaria",
+    "timezoneHint": "Nombre de zona IANA, por ejemplo Asia/Shanghai.",
+    "period": "Franja",
+    "start": "Inicio",
+    "end": "Fin",
+    "startOf": "Inicio de la franja {number}",
+    "endOf": "Fin de la franja {number}",
+    "removeOf": "Quitar la franja {number}",
+    "remove": "Quitar",
+    "add": "Añadir franja",
+    "saved": "Horario guardado.",
+    "problems": {
+      "notMonday": "La primera semana debe empezar en lunes.",
+      "timezone": "No se reconoce la zona horaria.",
+      "noPeriods": "Añade al menos una franja.",
+      "periodTime": "Cada franja debe terminar después de empezar y en el mismo día.",
+      "periodOrder": "Las franjas deben ir en orden y sin solaparse."
+    }
   }
 }
