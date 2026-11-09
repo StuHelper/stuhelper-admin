@@ -71,7 +71,12 @@ test('bot actions awaiting confirmation are labelled and explained', async ({ pa
   const g = catalogue(info).groups;
   await server(page);
   await page.goto(`${base}/qq/groups/g1?lang=${info.project.metadata.locale}`);
-  await page.getByRole('tab', { name: g.tabs.actions, exact: true }).click();
+  // Narrow tab bars measure their overflow after the first render; click again until the tab is selected.
+  const tab = page.getByRole('tab', { name: g.tabs.actions, exact: true });
+  await expect(async () => {
+    await tab.click();
+    await expect(tab).toHaveAttribute('aria-selected', 'true', { timeout: 1000 });
+  }).toPass();
   await expect(page.getByText(g.unknownHint, { exact: true })).toBeVisible();
   await expect(page.getByRole('cell', { name: g.states.unknown, exact: true })).toBeVisible();
 });
