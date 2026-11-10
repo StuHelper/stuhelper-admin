@@ -1,6 +1,6 @@
 {
   "repository": "StuHelper/stuhelper-information-query",
-  "revision": "50d61e24e1fe9996b779d3d911089058136f1f67",
+  "revision": "97f0030fdc2132b72e099113a0057766e0d18348",
   "version": "0.2.0",
   "files": {
     "contracts/information-query.openapi.json": "contracts/information-query.openapi.json",
