@@ -1,128 +1,76 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 
 import { useI18n } from '@vben/locales';
 
-import {
-  getSession,
-  saveProfile,
-  type Session,
-  signIn,
-  signOut,
-} from '../api/session';
+import { Alert, Button, Dropdown, Form, FormItem, Input, Menu, MenuItem, Modal } from 'ant-design-vue';
+
+import { errorCode } from '#/shared/api/errors';
+import { useMutation } from '#/shared/composables/async';
+import { useSession } from '#/shared/session';
+import { useErrorText } from '#/shared/ui/messages';
+
+// Header account controls. Sign-out ends this application's session only; the
+// shared SSO account and other applications keep their own sessions.
 const { t } = useI18n();
-const busy = ref(false);
-const current = ref<null | Session>(null);
-const error = ref(false);
+const errorText = useErrorText();
+const session = useSession();
+const save = useMutation();
+const editing = ref(false);
 const nickname = ref('');
-let pending: null | { key: string; nickname: string; revision: number } = null;
-async function reload() {
+const signOutError = ref('');
+
+function edit() {
+  nickname.value = session.session.value?.profile.nickname ?? '';
+  editing.value = true;
+}
+async function submit() {
+  const profile = session.session.value?.profile;
+  if (!profile) return;
+  if (await save.run('profile', { nickname: nickname.value.trim(), revision: profile.revision }, (body, key) => session.saveProfile(body, key))) editing.value = false;
+}
+async function signOut(all: boolean) {
+  signOutError.value = '';
   try {
-    current.value = await getSession();
-    nickname.value = current.value?.profile.nickname ?? '';
-    error.value = false;
-  } catch {
-    error.value = true;
+    await session.signOut(all);
+  } catch (error) {
+    signOutError.value = errorCode(error);
   }
 }
-async function logout(all: boolean) {
-  busy.value = true;
-  try {
-    await signOut(all);
-  } catch {
-    error.value = true;
-  } finally {
-    busy.value = false;
-  }
+function choose({ key }: { key: number | string }) {
+  if (key === 'profile') edit();
+  else void signOut(key === 'all');
 }
-async function save() {
-  if (!current.value) return;
-  if (
-    !pending ||
-    pending.nickname !== nickname.value ||
-    pending.revision !== current.value.profile.revision
-  )
-    pending = {
-      nickname: nickname.value,
-      revision: current.value.profile.revision,
-      key: crypto.randomUUID(),
-    };
-  busy.value = true;
-  try {
-    current.value.profile = await saveProfile(
-      { nickname: pending.nickname, revision: pending.revision },
-      pending.key,
-    );
-    pending = null;
-    error.value = false;
-  } catch {
-    error.value = true;
-  } finally {
-    busy.value = false;
-  }
-}
-onMounted(reload);
 </script>
+
 <template>
-  <div class="session-controls">
-    <template v-if="current">
-      <span>{{ current.profile.nickname }}</span>
-      <details>
-        <summary>{{ t('page.auth.profile') }}</summary>
-        <form @submit.prevent="save">
-          <label>{{ t('page.auth.nickname')
-            }}<input v-model="nickname" maxlength="64" required /></label>
-          <button :disabled="busy" type="submit">
-            {{ t('page.auth.save') }}
-          </button>
-        </form>
-      </details>
-      <button :disabled="busy" type="button" @click="logout(false)">
-        {{ t('page.auth.signOut') }}
-      </button>
-      <button :disabled="busy" type="button" @click="logout(true)">
-        {{ t('page.auth.signOutAll') }}
-      </button>
+  <div class="me-2 flex items-center gap-2">
+    <template v-if="session.state.value === 'member' && session.session.value">
+      <Dropdown :trigger="['click']">
+        <Button type="text">{{ session.session.value.profile.nickname }}</Button>
+        <template #overlay>
+          <Menu @click="choose">
+            <MenuItem key="profile">{{ t('page.session.editNickname') }}</MenuItem>
+            <MenuItem key="device">{{ t('page.session.signOut') }}</MenuItem>
+            <MenuItem key="all">{{ t('page.session.signOutAll') }}</MenuItem>
+          </Menu>
+        </template>
+      </Dropdown>
+      <span v-if="signOutError" class="text-destructive text-xs">{{ errorText(signOutError) }}</span>
     </template>
-    <button v-else type="button" @click="signIn">
-      {{ t('page.auth.signIn') }}
-    </button>
-    <span v-if="error" role="status">{{ t('page.auth.unavailable') }}
-      <button type="button" @click="reload">
-        {{ t('page.auth.retry') }}
-      </button></span>
+    <Button v-else-if="session.state.value === 'guest'" type="primary" size="small" @click="session.signIn">{{ t('page.session.signIn') }}</Button>
+    <span v-else-if="session.state.value === 'error'" class="text-muted-foreground text-xs">
+      {{ t('page.session.unavailable') }}
+      <Button type="link" size="small" @click="session.reload">{{ t('page.common.retry') }}</Button>
+    </span>
+    <Modal :open="editing" :title="t('page.session.editNickname')" :confirm-loading="save.busy.value" :ok-text="t(save.uncertain.value ? 'page.common.retryOriginal' : 'page.common.save')" :cancel-text="t('page.common.cancel')" :cancel-button-props="{ disabled: save.busy.value || save.uncertain.value }" @ok="save.uncertain.value ? save.retry() : submit()" @cancel="editing = false">
+      <Form layout="vertical" @submit.prevent="submit">
+        <FormItem :label="t('page.session.nickname')">
+          <Input v-model:value="nickname" :maxlength="64" :disabled="save.busy.value || save.uncertain.value" />
+        </FormItem>
+      </Form>
+      <Alert v-if="save.uncertain.value" type="warning" show-icon :message="t('page.common.uncertain')" />
+      <Alert v-else-if="save.error.value" type="error" show-icon :message="errorText(save.error.value)" />
+    </Modal>
   </div>
 </template>
-<style scoped>
-.session-controls {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  max-width: 100%;
-  font-size: 0.85rem;
-}
-.session-controls button,
-.session-controls input {
-  font: inherit;
-  min-height: 36px;
-  padding: 0.3rem 0.6rem;
-  border: 1px solid currentColor;
-  border-radius: 4px;
-  background: transparent;
-  color: inherit;
-  max-width: 100%;
-}
-.session-controls form {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-}
-.session-controls label {
-  display: grid;
-  gap: 0.25rem;
-}
-.session-controls summary {
-  cursor: pointer;
-}
-</style>

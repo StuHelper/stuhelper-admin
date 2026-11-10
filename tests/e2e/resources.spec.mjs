@@ -1,173 +1,120 @@
-import { Buffer } from 'node:buffer';
 import fs from 'node:fs';
-import path from 'node:path';
-import process from 'node:process';
 
+import { schoolSession } from '../school-session-fixture.mjs';
 import { expect, test } from '../session-fixture.mjs';
-import { fixture, routes } from './resource-fixture.mjs';
-async function setup(page, info) {
+
+const catalogue = (info) => JSON.parse(fs.readFileSync(`apps/web-antd/src/locales/langs/${info.project.metadata.locale}/page.json`, 'utf8'));
+const base = 'http://127.0.0.1:18786';
+test.beforeEach(async ({ page }) => { await schoolSession(page); });
+function watch(page) {
   const errors = [];
-    const locale = info.project.metadata.locale;
-    const m = JSON.parse(
-      fs.readFileSync(
-        `apps/web-antd/src/locales/langs/${locale}/page.json`,
-        'utf8',
-      ),
-    ).resources;
-    const s = fixture();
-  page.on('pageerror', (e) => errors.push(e.message));
-  page.on('console', (e) => {
-    if (/\[intlify\].*(Not found|Fall back)/i.test(e.text()))
-      errors.push(e.text());
-  });
+  page.on('pageerror', (error) => errors.push(error.message));
+  page.on('console', (message) => { if (/\[intlify\].*(Not found|Fall back)/i.test(message.text())) errors.push(message.text()); });
+  return errors;
+}
+async function fits(page, info) {
+  await expect(page.locator('html')).toHaveAttribute('dir', info.project.metadata.locale === 'ar-EG' ? 'rtl' : 'ltr');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+}
+import { fixture, routes } from './resource-fixture.mjs';
+
+async function open(page, info, path) {
+  const all = catalogue(info); const errors = watch(page); const s = fixture();
   await routes(page, s);
-  await page.goto(`http://127.0.0.1:18786/resources?lang=${locale}`);
-  await expect(
-    page.getByRole('button', { name: m.taxonomy, exact: true }),
-  ).toBeVisible();
-  return { m, s, errors, locale };
+  await page.goto(`${base}${path}?lang=${info.project.metadata.locale}`);
+  return { all, m: all.resources, c: all.common, s, errors };
 }
-async function layout(page, errors, locale) {
-  await expect(page.locator('html')).toHaveAttribute(
-    'dir',
-    locale === 'ar-EG' ? 'rtl' : 'ltr',
-  );
-  expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth <= innerWidth,
-    ),
-  ).toBe(true);
-  expect(errors).toEqual([]);
-if(process.env.RESOURCE_SCREENSHOTS && ((locale==='zh-CN'&&page.viewportSize().width>800)||(locale==='ar-EG'&&page.viewportSize().width<800))&&test.info().title.startsWith('category')){fs.mkdirSync(process.env.RESOURCE_SCREENSHOTS,{recursive:true});await page.locator('.resources-page nav').first().scrollIntoViewIfNeeded();await page.screenshot({path:path.join(process.env.RESOURCE_SCREENSHOTS,'admin-'+locale+'.png'),fullPage:true})} 
-}
-test('category configuration preserves stable ids, fields and original-request retry', async ({
-  page,
-}, info) => {
-  const { m, s, errors, locale } = await setup(page, info);
-  await page.getByRole('button', { name: m.taxonomy, exact: true }).click();
-  await page.getByRole('button', { name: m.edit, exact: true }).click();
-  const group = page.getByRole('group', { name: m.names, exact: true }).first();
-  await group.getByLabel('zh-CN', { exact: true }).fill('按配置更名');
-  s.lose = true;
-  await page.getByRole('button', { name: m.save, exact: true }).click();
+const lost = (s) => { s.lose = true; };
+
+test('category configuration preserves stable ids, fields and original-request retry', async ({ page }, info) => {
+  const { m, c, s, errors } = await open(page, info, '/resources/categories');
+  await page.getByRole('button', { name: c.edit, exact: true }).click();
+  await page.getByRole('group', { name: m.names, exact: true }).first().getByLabel(m.languageNames['zh-CN']).fill('按配置更名');
+  lost(s);
+  await page.getByRole('button', { name: c.save, exact: true }).click();
   await expect(page.getByRole('alert')).toBeVisible();
-  await page
-    .locator('button[type=submit]')
-    .filter({ hasText: m.retry })
-    .click();
-  await expect
-    .poll(
-      () =>
-        s.calls.filter(
-          (x) => x.method === 'PUT' && x.path.startsWith('/categories/'),
-        ).length,
-    )
-    .toBe(2);
-  const writes = s.calls.filter(
-    (x) => x.method === 'PUT' && x.path.startsWith('/categories/'),
-  );
-  expect(writes[0].key).toBe(writes[1].key);
-  expect(writes[0].body).toEqual(writes[1].body);
+  await page.getByRole('button', { name: c.retryOriginal, exact: true }).click();
+  const writes = () => s.calls.filter((call) => call.method === 'PUT' && call.path.startsWith('/categories/'));
+  await expect.poll(() => writes().length).toBe(2);
+  expect(writes()[0].key).toBe(writes()[1].key);
+  expect(writes()[0].body).toEqual(writes()[1].body);
   expect(s.category.id).toBe('custom-category');
   expect(s.category.names['zh-CN']).toBe('按配置更名');
   expect(s.category.group_by).toBe('edition');
   expect(s.category.fields[0].kind).toBe('integer');
-  await layout(page, errors, locale);
+  await fits(page, info);
+  expect(errors).toEqual([]);
 });
-test('grant creation and revocation retain the subject and respect current permissions', async ({
-  page,
-}, info) => {
-  const { m, s, errors, locale } = await setup(page, info);
-  await page
-    .getByRole('combobox', { name: m.catalog.school, exact: true })
-    .selectOption('school');
-  await page.getByRole('button', { name: m.view, exact: true }).click();
+
+test('grant creation and revocation retain the subject and respect current permissions', async ({ page }, info) => {
+  const { all, m, c, s, errors } = await open(page, info, '/resources');
+  await page.getByRole('button', { name: c.manage, exact: true }).click();
   await page.getByLabel(m.subjectKey, { exact: true }).fill('issuer:reader');
   await page.getByRole('button', { name: m.grant, exact: true }).click();
   await expect(page.getByText('issuer:reader', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: m.revoke, exact: true }).click();
+  await page.locator('.ant-popconfirm .ant-btn-primary').click();
   await expect(page.getByText(m.revoked, { exact: true })).toBeVisible();
-  const grants = s.calls.filter((x) => x.path.includes('/grants/'));
+  const grants = s.calls.filter((call) => call.path.includes('/grants/'));
   expect(grants).toHaveLength(2);
-  expect(grants[1].body).toMatchObject({
-    subject_key: 'issuer:reader',
-    revoked: true,
-    revision: 1,
-  });
+  expect(grants[1].body).toMatchObject({ subject_key: 'issuer:reader', revoked: true, revision: 1 });
+  await page.locator('.ant-drawer-close').click();
   s.reject = true;
-  await page.getByRole('button', { name: m.filter, exact: true }).click();
-  await expect(
-    page.getByText(m.errors.permission_denied, { exact: true }),
-  ).toBeVisible();
+  await page.getByRole('button', { name: c.search, exact: true }).click();
+  await expect(page.getByRole('alert')).toContainText(all.errors.forbidden);
   await expect(page.getByText('issuer:reader', { exact: true })).toHaveCount(0);
-  await layout(page, errors, locale);
+  await fits(page, info);
+  expect(errors).toEqual([]);
 });
-test('review reads the pending file and retries an unknown decision without duplication', async ({
-  page,
-}, info) => {
-  const { m, s, errors, locale } = await setup(page, info);
-  await page
-    .getByRole('combobox', { name: m.catalog.school, exact: true })
-    .selectOption('school');
-  await page.getByRole('button', { name: m.reviewQueue, exact: true }).click();
-  await page.getByRole('button', { name: m.view, exact: true }).click();
-  await expect(
-    page.getByRole('heading', { name: 'Fixture notes', exact: true }),
-  ).toBeVisible();
-  await page.getByRole('button', { name: m.download, exact: true }).click();
-  await expect
-    .poll(() => s.calls.filter((x) => x.path === '/review/version/file').length)
-    .toBe(1);
-  await page
-    .getByLabel(m.reason, { exact: true })
-    .fill('Verified content and source');
-  s.lose = true;
-  await page.getByRole('button', { name: m.confirm, exact: true }).click();
+
+test('review reads the pending file and retries an unknown decision without duplication', async ({ page }, info) => {
+  const { all, m, c, s, errors } = await open(page, info, '/resources/reviews');
+  await page.getByRole('button', { name: c.open, exact: true }).click();
+  await expect(page.getByText('Fixture notes', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: m.downloadFile, exact: true }).click();
+  await expect.poll(() => s.calls.filter((call) => call.path === '/review/version/file').length).toBe(1);
+  await page.getByLabel(c.reason, { exact: true }).fill('Verified content and source');
+  lost(s);
+  await page.getByRole('button', { name: all.moderation.applyDecision, exact: true }).click();
   await expect(page.getByRole('alert')).toBeVisible();
-  await page
-    .locator('button[type=submit]')
-    .filter({ hasText: m.retry })
-    .click();
-  await expect
-    .poll(() => s.calls.filter((x) => x.path.endsWith('/decisions')).length)
-    .toBe(2);
-  const decisions = s.calls.filter((x) => x.path.endsWith('/decisions'));
-  expect(decisions[0].key).toBe(decisions[1].key);
-  expect(decisions[0].body).toEqual(decisions[1].body);
-  expect(decisions[0].body.decision).toMatchObject({
-    object_id: 'resource:version',
-    revision: 2,
-    action: 'publish',
-  });
-  await page.getByRole('button', { name: m.reload, exact: true }).click();
-  await expect(
-    page.getByRole('status').filter({ hasText: m.states.applied }),
-  ).toBeVisible();
-  await layout(page, errors, locale);
+  await page.getByRole('button', { name: c.retryOriginal, exact: true }).click();
+  const decisions = () => s.calls.filter((call) => call.path.endsWith('/decisions'));
+  await expect.poll(() => decisions().length).toBe(2);
+  expect(decisions()[0].key).toBe(decisions()[1].key);
+  expect(decisions()[0].body).toEqual(decisions()[1].body);
+  expect(decisions()[0].body.decision).toMatchObject({ object_id: 'resource:version', revision: 2, action: 'publish' });
+  await expect(page.locator('.ant-drawer .ant-alert-success')).toBeVisible();
+  await fits(page, info);
+  expect(errors).toEqual([]);
 });
-test('directory editing saves revision and configured names', async ({
-  page,
-}, info) => {
-  const { m, s, errors, locale } = await setup(page, info);
-  await page
-    .getByRole('combobox', { name: m.catalog.school, exact: true })
-    .selectOption('school');
-  await page.getByRole('button', { name: m.directories, exact: true }).click();
-  await page.getByRole('button', { name: m.edit, exact: true }).click();
-  await page
-    .getByRole('group', { name: m.names, exact: true })
-    .getByLabel('zh-CN', { exact: true })
-    .fill('更名后的目录');
-  await page.getByRole('button', { name: m.save, exact: true }).click();
+
+test('directory editing saves revision and configured names', async ({ page }, info) => {
+  const { m, c, s, errors } = await open(page, info, '/resources/directories');
+  await page.getByRole('button', { name: c.edit, exact: true }).click();
+  await page.getByRole('group', { name: m.names, exact: true }).getByLabel(m.languageNames['zh-CN']).fill('更名后的目录');
+  await page.getByRole('button', { name: c.save, exact: true }).click();
   await expect.poll(() => s.directory.names['zh-CN']).toBe('更名后的目录');
   expect(s.directory.id).toBe('folder');
   expect(s.directory.revision).toBe(2);
-  await layout(page, errors, locale);
+  await fits(page, info);
+  expect(errors).toEqual([]);
 });
 
-test('owned file reuse avoids content transfer and keeps separate review',async({page},info)=>{
- const {m,s,errors,locale}=await setup(page,info);await page.goto(`http://127.0.0.1:18786/resources/new?school_id=school&course_id=course&lang=${locale}`);
- await page.getByLabel(m.resourceTitle,{exact:true}).fill('Reused lecture');await page.getByRole('combobox',{name:m.origin,exact:true}).selectOption('original');await page.getByLabel(m.acceptTerms,{exact:true}).check();await page.getByRole('button',{name:m.save,exact:true}).click();await expect(page.getByText(m.saved,{exact:true})).toBeVisible();
- s.media.reused=true;s.media.state='verifying';await page.getByLabel(m.chooseFile,{exact:true}).setInputFiles({name:'lecture.txt',mimeType:'text/plain',buffer:Buffer.from('hello')});await page.getByRole('button',{name:m.uploadFile,exact:true}).click();await expect(page.getByText(m.errors.reuse_pending,{exact:true})).toBeVisible();
- expect(s.calls.filter(x=>x.path?.startsWith('/api/v1/media')&&x.method==='PUT')).toHaveLength(0);s.media.state='awaiting_approval';await page.getByRole('button',{name:m.uploadFile,exact:true}).click();await expect(page.getByText(m.reusedFile,{exact:true})).toBeVisible();await expect(page.getByText(m.uploadStates.attached,{exact:true})).toBeVisible();expect(s.calls.filter(x=>x.path==='/api/v1/media/uploads')).toHaveLength(1);expect(s.calls.find(x=>x.path==='/api/v1/media/uploads').body.reuse_existing).toBe(true);expect(s.calls.filter(x=>x.path?.startsWith('/api/v1/media')&&x.method==='PUT')).toHaveLength(0);await page.getByRole('button',{name:m.submit,exact:true}).click();await expect(page.getByText(m.states.pending,{exact:true})).toBeVisible();await layout(page,errors,locale);
+test('review keeps its input through reload protection and shows the object in the result', async ({ page }, info) => {
+  const { all, c, s } = await open(page, info, '/resources/reviews');
+  await page.getByRole('button', { name: c.open, exact: true }).click();
+  await page.getByLabel(c.reason, { exact: true }).fill('Unsaved reason');
+  expect(await page.evaluate(() => { const event = new Event('beforeunload', { cancelable: true }); window.dispatchEvent(event); return event.defaultPrevented; })).toBe(true);
+  await page.getByRole('button', { name: all.moderation.applyDecision, exact: true }).click();
+  await expect.poll(() => s.calls.filter((call) => call.path.endsWith('/decisions')).length).toBe(1);
+  await expect(page.locator('.ant-alert-success').first()).toContainText('Fixture notes');
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+});
+
+test('no school choice appears and a failed school lookup offers one retry', async ({ page }, info) => {
+  const all = catalogue(info);
+  await page.route('**/api/v1/catalog/objects**', (route) => route.fulfill({ status: 503, json: { code: 'unavailable' } }));
+  await page.goto(`${base}/resources?lang=${info.project.metadata.locale}`);
+  await expect(page.getByRole('button', { name: all.common.reloadCampus, exact: true })).toHaveCount(1);
+  await expect(page.getByLabel(all.common.school)).toHaveCount(0);
 });

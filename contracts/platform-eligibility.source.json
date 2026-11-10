@@ -1,0 +1,13 @@
+{
+  "repository": "StuHelper/stuhelper-platform",
+  "revision": "1b232d46d0e186916af435dbebfcc63854317097",
+  "version": "0.2.0",
+  "files": {
+    "contracts/eligibility.openapi.json": "contracts/platform-eligibility.openapi.json",
+    "sdk/eligibility.gen.ts": "apps/web-antd/src/api/platform-eligibility.gen.ts"
+  },
+  "sha256": {
+    "contracts/platform-eligibility.openapi.json": "16f1e63118186fd4ca2d5a6f2f525c35ebd850da21438c8f72851d3c079c121f",
+    "apps/web-antd/src/api/platform-eligibility.gen.ts": "4fb0ccd4e6f787cc1246af3056fc5a4db8fb316db818604cbc13b0f39073f6d5"
+  }
+}
