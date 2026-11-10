@@ -1,9 +1,11 @@
 import fs from 'node:fs';
 
+import { schoolSession } from '../school-session-fixture.mjs';
 import { expect, test } from '../session-fixture.mjs';
 
 const catalogue = (info) => JSON.parse(fs.readFileSync(`apps/web-antd/src/locales/langs/${info.project.metadata.locale}/page.json`, 'utf8'));
 const base = 'http://127.0.0.1:18786';
+test.beforeEach(async ({ page }) => { await schoolSession(page); });
 function watch(page) {
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));

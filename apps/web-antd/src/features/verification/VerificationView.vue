@@ -5,7 +5,7 @@ import { computed, onBeforeUnmount, onMounted, reactive, ref, shallowRef, watch 
 
 import { useI18n } from '@vben/locales';
 
-import { Alert, Button, Card, Checkbox, CheckboxGroup, DatePicker, Descriptions, DescriptionsItem, Drawer, Form, FormItem, Image, Input, InputNumber, Result, Select, Space, Switch, Table, TabPane, Tabs, Tag, Textarea } from 'ant-design-vue';
+import { Alert, Button, Card, Checkbox, CheckboxGroup, DatePicker, Descriptions, DescriptionsItem, Drawer, Form, FormItem, Image, Input, InputNumber, Result, Space, Switch, Table, TabPane, Tabs, Tag, Textarea } from 'ant-design-vue';
 
 import { errorCode } from '#/shared/api/errors';
 import { useFormat } from '#/shared/format';
@@ -13,6 +13,7 @@ import AdminPage from '#/shared/ui/AdminPage.vue';
 import { useErrorText } from '#/shared/ui/messages';
 
 import { methods, useVerification } from './api';
+import SchoolSelect from './SchoolSelect.vue';
 
 /**
  * Student verification administration per school: manual material review,
@@ -270,6 +271,10 @@ const jobColumns = computed(() => [
   { key: 'action', title: t('page.common.operation') },
 ]);
 // Ant Design Vue types table rows as Record<string, any>; each row comes from this page's typed data source.
+function chooseSchool(school: School) {
+  schools.value = [...new Map([...schools.value, school].map((item) => [item.id, item])).values()];
+  schoolId.value = school.id;
+}
 </script>
 
 <template>
@@ -280,7 +285,7 @@ const jobColumns = computed(() => [
       <Card :bordered="false">
         <Form layout="inline">
           <FormItem :label="t('page.common.school')" html-for="verification-school">
-            <Select id="verification-school" v-model:value="schoolId" class="w-64 max-w-full" :options="schools.map((item) => ({ value: item.id, label: item.name }))" :disabled="busy" />
+            <SchoolSelect input-id="verification-school" :model-value="schoolId" :schools="schools" class="w-64 max-w-full" :disabled="busy" @select="chooseSchool" />
           </FormItem>
         </Form>
       </Card>

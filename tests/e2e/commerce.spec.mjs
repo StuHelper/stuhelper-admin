@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 
+import { schoolSession } from '../school-session-fixture.mjs';
 import { expect, test } from '../session-fixture.mjs';
 import { fixture, routes } from './resource-fixture.mjs';
 
@@ -10,6 +11,7 @@ function fill(text, values) {
   return out;
 }
 const base = 'http://127.0.0.1:18786';
+test.beforeEach(async ({ page }) => { await schoolSession(page); });
 const target = { issuer: 'https://id.example.invalid', subject: 'user-1' };
 const order = (values) => ({ amount_minor: 0, points: 0, reference: '', channel: '', reason: '', created_at: '2026-11-01T00:00:00Z', allocations: [], original_points: 0, original_amount_minor: 0, receipt_reference: '', failure_code: '', ...values });
 function watch(page) {

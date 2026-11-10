@@ -105,3 +105,23 @@ test('a teacher qualification is looked up and revoked with a reason', async ({ 
   await expect(page.getByText(all.verification.states.revoked, { exact: true })).toBeVisible();
   expect(state.writes).toEqual([{ path: '/api/v1/admin/verification/teacher-credentials/tc/revoke', key: expect.any(String), body: { approve: true, note: 'Left the school.', revision: 2 } }]);
 });
+
+test('school selection delegates codes names and aliases to the server', async ({ page }, info) => {
+  const all = catalogue(info);
+  await server(page);
+  const queries = [];
+  await page.route('**/api/v1/verification/schools?**', route => {
+    const q = new URL(route.request().url()).searchParams.get('q');
+    if (q) queries.push(q);
+    return route.fulfill({ json: q === '99999' ? [] : [school] });
+  });
+  await page.goto(`${base}/verification/teachers?lang=${info.project.metadata.locale}`);
+  const input = page.getByRole('combobox', { name: all.common.school });
+  for (const q of ['4111010006', '10006', '北京航空航天大学', '北航', '99999']) {
+    await input.fill(q);
+    await expect.poll(() => queries.at(-1)).toBe(q);
+    const option = page.locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden) .ant-select-item-option');
+    await expect(option).toHaveCount(q === '99999' ? 0 : 1);
+    if (q !== '99999') await expect(option).toHaveText(school.name);
+  }
+});

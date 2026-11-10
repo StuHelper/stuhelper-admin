@@ -4,16 +4,13 @@ import { onMounted, ref } from 'vue';
 
 import { errorCode } from '#/shared/api/errors';
 import { ApiError } from '#/shared/api/errors';
+import { useSession } from '#/shared/session';
 
 import { useAcademicAdmin } from './api';
 
-/**
- * The platform serves one university, so pages never ask for a school. Its id
- * comes from the catalog; a deployment holding several school records names the
- * served one with VITE_STUHELPER_SCHOOL_ID instead of guessing.
- */
+/** The backend session supplies the single community school configuration. */
 export function chooseCampus(schools: CatalogObject[], configured: string | undefined) {
-  const chosen = configured ? schools.find((row) => row.id === configured) : (schools.length === 1 ? schools[0] : undefined);
+  const chosen = schools.find((row) => row.id === configured);
   if (!chosen) throw new ApiError('incompatible');
   return chosen;
 }
@@ -25,12 +22,14 @@ let pending: Promise<void> | undefined;
 
 export function useCampus() {
   const api = useAcademicAdmin();
+  const session = useSession();
   function load() {
     pending ??= (async () => {
       status.value = 'loading';
       failure.value = '';
       try {
-        campusId.value = chooseCampus(await api.options({ kind: 'school' }), import.meta.env.VITE_STUHELPER_SCHOOL_ID).id;
+        await session.reload();
+        campusId.value = chooseCampus(await api.options({ kind: 'school' }), session.session.value?.content_school_id).id;
         status.value = 'ready';
       } catch (error) {
         failure.value = errorCode(error);

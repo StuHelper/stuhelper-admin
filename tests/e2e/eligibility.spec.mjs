@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 
+import { schoolSession } from '../school-session-fixture.mjs';
 import { expect, test } from '../session-fixture.mjs';
 import { fixture, routes } from './resource-fixture.mjs';
 
@@ -10,6 +11,7 @@ function fill(text, values) {
   return out;
 }
 const base = 'http://127.0.0.1:18786';
+test.beforeEach(async ({ page }) => { await schoolSession(page); });
 function watch(page) {
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));

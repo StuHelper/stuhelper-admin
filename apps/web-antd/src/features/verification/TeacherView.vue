@@ -17,6 +17,7 @@ import AdminPage from '#/shared/ui/AdminPage.vue';
 import { useErrorText } from '#/shared/ui/messages';
 
 import { useVerification } from './api';
+import SchoolSelect from './SchoolSelect.vue';
 
 /**
  * Teacher verification per school: review photographed teaching evidence and
@@ -197,6 +198,10 @@ const columns = computed(() => [
   { key: 'action', title: t('page.common.operation') },
 ]);
 const disclosureText = (items: readonly string[]) => (items.length > 0 ? format.value.list(items.map((item) => t(`page.teacherVerification.disclosure.${item}`))) : t('page.teacherVerification.nothingPublic'));
+function chooseSchool(school: School) {
+  schools.value = [...new Map([...schools.value, school].map((item) => [item.id, item])).values()];
+  schoolId.value = school.id;
+}
 </script>
 
 <template>
@@ -211,7 +216,7 @@ const disclosureText = (items: readonly string[]) => (items.length > 0 ? format.
           <TabPane key="reviews" :tab="t('page.teacherVerification.tabs.reviews')">
             <Form layout="inline" class="mb-4">
               <FormItem :label="t('page.common.school')" html-for="teacher-school">
-                <Select id="teacher-school" v-model:value="schoolId" class="w-64 max-w-full" :options="schools.map((item) => ({ value: item.id, label: item.name }))" :disabled="busy" />
+                <SchoolSelect input-id="teacher-school" :model-value="schoolId" :schools="schools" class="w-64 max-w-full" :disabled="busy" @select="chooseSchool" />
               </FormItem>
               <FormItem><Button :disabled="busy || !schoolId" @click="load()">{{ t('page.common.refresh') }}</Button></FormItem>
             </Form>

@@ -1,9 +1,11 @@
 import fs from 'node:fs';
 
+import { schoolSession } from '../school-session-fixture.mjs';
 import { expect, test } from '../session-fixture.mjs';
 
 const catalogue = (info) => JSON.parse(fs.readFileSync(`apps/web-antd/src/locales/langs/${info.project.metadata.locale}/page.json`, 'utf8'));
 const base = 'http://127.0.0.1:18786';
+test.beforeEach(async ({ page }) => { await schoolSession(page); });
 const object = (id, kind, name) => ({ id, kind, name, school_id: 'school', credits: null, aliases: [], revision: 1, updated_at: '2026-10-27T00:00:00Z' });
 const stored = { school_id: 'school', term_id: 'fall', revision: 3, week_one_start: '2026-09-07', timezone: 'Asia/Shanghai', periods: [{ number: 1, start: '08:00', end: '08:45' }] };
 
