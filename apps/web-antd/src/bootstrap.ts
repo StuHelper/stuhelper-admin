@@ -14,9 +14,10 @@ import { $t, setupI18n } from '#/locales';
 import { initComponentAdapter } from './adapter/component';
 import { initSetupVbenForm } from './adapter/form';
 import App from './app.vue';
-import { menus } from './menus';
+import { availableMenus } from './menus';
 import { router } from './router';
 import { hostFetchKey, sessionFetch } from './shared/api/transport';
+import { capabilitiesKey, createCapabilities } from './shared/capabilities';
 import { createSessionStore, sessionKey } from './shared/session';
 
 import './styles/theme.css';
@@ -38,6 +39,9 @@ async function bootstrap(namespace: string, fetcher: typeof fetch = sessionFetch
   // });
 
   const app = createApp(App);
+  const capabilities = createCapabilities(fetcher);
+  app.provide(capabilitiesKey, capabilities);
+  void capabilities.load();
   const session = createSessionStore(fetcher);
   app.provide(hostFetchKey, fetcher).provide(sessionKey, session);
   void session.reload();
@@ -53,7 +57,8 @@ async function bootstrap(namespace: string, fetcher: typeof fetch = sessionFetch
 
   // 配置 pinia-tore
   await initStores(app, { namespace });
-  useAccessStore().setAccessMenus(menus);
+  const accessStore = useAccessStore();
+  watchEffect(() => accessStore.setAccessMenus(availableMenus(capabilities.has)));
 
   // 安装权限指令
   registerAccessDirective(app);

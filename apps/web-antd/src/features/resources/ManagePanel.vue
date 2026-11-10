@@ -8,6 +8,7 @@ import { useI18n } from '@vben/locales';
 import { Alert, Button, DatePicker, Descriptions, DescriptionsItem, Divider, Form, FormItem, Input, List, ListItem, Popconfirm, Select, Space, Tag, Textarea } from 'ant-design-vue';
 
 import PricePanel from '#/features/billing/PricePanel.vue';
+import { useCapabilities } from '#/shared/capabilities';
 import { useAsync, useMutation, usePaged } from '#/shared/composables/async';
 import { useFormat } from '#/shared/format';
 import LoadState from '#/shared/ui/LoadState.vue';
@@ -23,6 +24,7 @@ import { localName, useResourcesApi } from './api';
 const props = defineProps<{ id: string }>();
 const emit = defineEmits<{ changed: []; pending: [busy: boolean] }>();
 const { t, locale } = useI18n();
+const capabilities = useCapabilities();
 const format = useFormat();
 const api = useResourcesApi();
 const changing = useMutation();
@@ -119,8 +121,8 @@ function granted() {
         <Button class="mt-3" type="primary" html-type="submit" :loading="changing.busy.value" :disabled="changing.uncertain.value || !reason.trim()">{{ t('page.resources.applyState') }}</Button>
       </Form>
 
-      <Divider orientation="left">{{ t('page.resources.price.title') }}</Divider>
-      <PricePanel :resource-id="resource.id" @pending="pricing = $event" />
+      <Divider v-if="capabilities.has('billing.manage')" orientation="left">{{ t('page.resources.price.title') }}</Divider>
+      <PricePanel v-if="capabilities.has('billing.manage')" :resource-id="resource.id" @pending="pricing = $event" />
 
       <Divider orientation="left">{{ t('page.resources.grants') }}</Divider>
       <LoadState v-if="grants.items.value.length === 0" :status="grants.status.value" :error="grants.error.value" :empty="true" :empty-text="t('page.resources.noGrants')" @retry="grants.reload" />

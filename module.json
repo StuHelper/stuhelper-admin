@@ -66,6 +66,10 @@
     ],
     "AE-ADMIN-03": [
       "tests/e2e/eligibility.spec.mjs#a column the administrator may not read shows the refusal and keeps the other column usable"
+    ],
+    "CAP-01": [
+      "tests/e2e/capabilities.spec.mjs#disabled module direct routes never mount business pages",
+      "tests/e2e/capabilities.spec.mjs#menus follow deployment capabilities and discovery failure keeps entries"
     ]
   }
 }

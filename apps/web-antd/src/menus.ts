@@ -2,6 +2,8 @@ import type { MenuRecordRaw } from '@vben/types';
 
 import { BadgeCheck, BookOpen, Coins, Database, Files, KeyRound, LayoutDashboard, Link2, MessageSquare, MessagesSquare, ShieldUser } from 'lucide-vue-next';
 
+import { routeCapability } from './shared/capabilities';
+
 // Sidebar grouped by business area. Menus only guide navigation; the server
 // decides on every request whether the administrator may see the data.
 export const menus: MenuRecordRaw[] = [
@@ -83,3 +85,14 @@ export const menus: MenuRecordRaw[] = [
     ],
   },
 ];
+
+/** Empty groups disappear along with their unavailable children. */
+export function availableMenus(has: (capability: string) => boolean, items = menus): MenuRecordRaw[] {
+  return items.flatMap((item) => {
+    const capability = routeCapability(item.path);
+    if (capability && !has(capability)) return [];
+    if (!item.children) return [item];
+    const children = availableMenus(has, item.children);
+    return children.length > 0 ? [{ ...item, children }] : [];
+  });
+}
