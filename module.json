@@ -1,0 +1,75 @@
+{
+  "id": "admin",
+  "implementation": "application",
+  "required": [
+    "platform"
+  ],
+  "optional": [
+    "catalog",
+    "reviews",
+    "moderation",
+    "storage",
+    "media",
+    "storage-contribution",
+    "resources"
+  ],
+  "specifications": [
+    "README.md"
+  ],
+  "scenario_tests": {
+    "RES-CLIENT-01": [
+      "apps/web-antd/src/features/resources/api.test.ts#retries unknown writes with the frozen nested payload and original key",
+      "apps/web-antd/src/features/resources/api.test.ts#resolves a lost upload response by querying state without sending bytes again"
+    ],
+    "RES-CLIENT-02": [
+      "apps/web-antd/src/features/resources/api.test.ts#passes current host credentials and cancellation on every request",
+      "apps/web-antd/src/features/resources/api.test.ts#releases a known rejected mutation and clears private state even for non-JSON denial"
+    ],
+    "RES-ADMIN-01": [
+      "tests/e2e/resources.spec.mjs#category configuration preserves stable ids, fields and original-request retry"
+    ],
+    "RES-ADMIN-02": [
+      "tests/e2e/resources.spec.mjs#review reads the pending file and retries an unknown decision without duplication"
+    ],
+    "RES-ADMIN-03": [
+      "tests/e2e/resources.spec.mjs#grant creation and revocation retain the subject and respect current permissions"
+    ],
+    "RES-ADMIN-04": [
+      "tests/e2e/resources.spec.mjs#directory editing saves revision and configured names"
+    ],
+    "RES-CLIENT-07": [
+      "apps/web-antd/src/features/resources/api.test.ts#requests safe reuse and never sends bytes for reused or still pending content"
+    ],
+    "RES-ADMIN-05": [
+      "tests/e2e/commerce.spec.mjs#an unpriced resource is priced from the manage panel"
+    ],
+    "WP-ADMIN-01": [
+      "tests/e2e/commerce.spec.mjs#a plan is saved with the version that was read, and a plan without coverage is marked",
+      "tests/e2e/commerce.spec.mjs#stopping sales asks for confirmation and keeps the plan listed as not on sale"
+    ],
+    "WP-ADMIN-02": [
+      "tests/e2e/commerce.spec.mjs#coverage rules are saved with the revision that was read"
+    ],
+    "WP-ADMIN-03": [
+      "tests/e2e/commerce.spec.mjs#an administrator grants a membership and refunds a resource unlock in full",
+      "tests/e2e/commerce.spec.mjs#a membership refund may be partial but not above the price paid"
+    ],
+    "WP-ADMIN-04": [
+      "tests/e2e/commerce.spec.mjs#payee details are read only on request and a missing record is stated",
+      "tests/e2e/commerce.spec.mjs#a refund without payee details says so"
+    ],
+    "AE-ADMIN-01": [
+      "tests/e2e/eligibility.spec.mjs#a school rule for buying resources is saved with the version read and leaves downloads unchanged"
+    ],
+    "AE-ADMIN-02": [
+      "tests/e2e/eligibility.spec.mjs#an empty rule requires only sign-in and a stale version is rejected"
+    ],
+    "AE-ADMIN-03": [
+      "tests/e2e/eligibility.spec.mjs#a column the administrator may not read shows the refusal and keeps the other column usable"
+    ],
+    "CAP-01": [
+      "tests/e2e/capabilities.spec.mjs#disabled module direct routes never mount business pages",
+      "tests/e2e/capabilities.spec.mjs#menus follow deployment capabilities and discovery failure keeps entries"
+    ]
+  }
+}

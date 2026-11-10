@@ -14,9 +14,15 @@ import { $t, setupI18n } from '#/locales';
 import { initComponentAdapter } from './adapter/component';
 import { initSetupVbenForm } from './adapter/form';
 import App from './app.vue';
+import { availableMenus } from './menus';
 import { router } from './router';
+import { hostFetchKey, sessionFetch } from './shared/api/transport';
+import { capabilitiesKey, createCapabilities } from './shared/capabilities';
+import { createSessionStore, sessionKey } from './shared/session';
 
-async function bootstrap(namespace: string) {
+import './styles/theme.css';
+
+async function bootstrap(namespace: string, fetcher: typeof fetch = sessionFetch) {
   // 初始化组件适配器
   await initComponentAdapter();
 
@@ -33,6 +39,12 @@ async function bootstrap(namespace: string) {
   // });
 
   const app = createApp(App);
+  const capabilities = createCapabilities(fetcher);
+  app.provide(capabilitiesKey, capabilities);
+  void capabilities.load();
+  const session = createSessionStore(fetcher);
+  app.provide(hostFetchKey, fetcher).provide(sessionKey, session);
+  void session.reload();
 
   // 注册v-loading指令
   registerLoadingDirective(app, {
@@ -45,7 +57,8 @@ async function bootstrap(namespace: string) {
 
   // 配置 pinia-tore
   await initStores(app, { namespace });
-  useAccessStore().setAccessMenus([{ name: 'page.framework.title', path: '/', icon: 'lucide:layout-dashboard' }]);
+  const accessStore = useAccessStore();
+  watchEffect(() => accessStore.setAccessMenus(availableMenus(capabilities.has)));
 
   // 安装权限指令
   registerAccessDirective(app);
