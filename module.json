@@ -70,6 +70,13 @@
     "CAP-01": [
       "tests/e2e/capabilities.spec.mjs#disabled module direct routes never mount business pages",
       "tests/e2e/capabilities.spec.mjs#menus follow deployment capabilities and discovery failure keeps entries"
+    ],
+    "SESSION-AVAILABILITY-01": [
+      "apps/web-antd/src/shared/session.test.ts#coalesces 25 failures, waits with bounded backoff and preserves the signed-in snapshot"
+    ],
+    "SESSION-AVAILABILITY-02": [
+      "apps/web-antd/src/shared/session.test.ts#the retry component backs off and leaves an in-progress form mounted",
+      "apps/web-antd/src/shared/session.test.ts#clears the snapshot after an explicit rejection even after an outage"
     ]
   }
 }
