@@ -7,6 +7,7 @@ const academic = {
 };
 
 const children: RouteRecordRaw[] = [
+ {name:'SessionSettings',path:'system/sessions',component:()=>import('#/features/sessions/SessionSettingsView.vue'),meta:{title:'page.sessionPolicy.title'}},
   { name: 'Overview', path: '', component: () => import('#/features/overview/OverviewView.vue'), meta: { title: 'page.menu.overview', affixTab: true } },
   { name: 'ModerationQueue', path: 'moderation/queue', component: academic.moderation, props: { mode: 'queue' }, meta: { title: 'page.menu.moderationQueue' } },
   { name: 'ModerationContent', path: 'moderation/content', component: academic.moderation, props: { mode: 'content' }, meta: { title: 'page.menu.moderationContent' } },

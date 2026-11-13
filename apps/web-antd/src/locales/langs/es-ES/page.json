@@ -1576,5 +1576,21 @@
       "identity_verified": "Identidad verificada",
       "course_enrollment": "Matriculado en la asignatura"
     }
+  },
+  "sessionPolicy": {
+    "title": "Gestión de sesiones",
+    "description": "Ajusta la frecuencia de revisión de cuentas o revoca todas las sesiones de un usuario en esta aplicación. Solo para administradores de la plataforma.",
+    "loading": "Procesando…",
+    "interval": "Intervalo de revisión (minutos, 5–240)",
+    "grace": "Periodo de gracia por fallo (minutos, 0–240)",
+    "save": "Guardar ajustes",
+    "saved": "Ajustes guardados. Se aplicarán en la próxima revisión.",
+    "conflict": "Otro administrador ha cambiado estos ajustes. Vuelve a cargarlos antes de guardar.",
+    "reload": "Recargar ajustes",
+    "forceTitle": "Forzar cierre de sesión",
+    "subject": "Subject del usuario (identificador permanente)",
+    "confirm": "He comprobado la cuenta y revocaré todas las sesiones locales de este usuario.",
+    "force": "Cerrar las sesiones del usuario",
+    "revoked": "Se han revocado todas las sesiones locales de este usuario."
   }
 }
