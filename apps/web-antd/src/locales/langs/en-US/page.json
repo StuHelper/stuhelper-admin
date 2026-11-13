@@ -1576,5 +1576,21 @@
       "identity_verified": "Identity verified",
       "course_enrollment": "Enrolled in the course"
     }
+  },
+  "sessionPolicy": {
+    "title": "Session management",
+    "description": "Set the account review frequency or revoke all of a user’s sessions in this application. Platform administrators only.",
+    "loading": "Working…",
+    "interval": "Review interval (minutes, 5–240)",
+    "grace": "Outage grace period (minutes, 0–240)",
+    "save": "Save settings",
+    "saved": "Settings saved. The next review uses the new configuration.",
+    "conflict": "Another administrator changed these settings. Reload before saving.",
+    "reload": "Reload settings",
+    "forceTitle": "Force sign-out",
+    "subject": "User subject (stable account ID)",
+    "confirm": "I have checked the account and will revoke all of this user’s local sessions.",
+    "force": "Sign this user out",
+    "revoked": "All local sessions for this user have been revoked."
   }
 }

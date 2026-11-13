@@ -26,7 +26,7 @@ export interface HttpOptions {
   /** Share a single account check after a service outage. Writes are never replayed. */
   onUnavailable?: () => void;
   /** Called when the server rejects the current account (401/403). */
-  onDenied?: () => void;
+  onDenied?: (status: number) => void;
 }
 
 const jsonLimit = 4 * 1024 * 1024;
@@ -187,7 +187,7 @@ export class Http {
         : undefined;
     if (response.status === 503) this.options.onUnavailable?.();
     if (response.status === 401 || response.status === 403)
-      this.options.onDenied?.();
+      this.options.onDenied?.(response.status);
     // A gateway or server failure without a recorded operation leaves a write's outcome unknown.
     throw new ApiError(
       serverCode(problem, response.status),

@@ -29,14 +29,17 @@ export function createSessionStore(fetcher: typeof fetch) {
   let pending: Promise<void> | undefined;
   let retryAt = 0;
   let failures = 0;
+ let generation=0;
 
   async function load() {
+ const current=generation;
     const wait = retryAt - Date.now();
     if (wait > 0) await new Promise<void>((resolve) => setTimeout(resolve, wait));
     try {
       const value = await http.json('/api/v1/auth/session', parseSession, {
         timeout: 10_000,
       });
+      if(current!==generation)return;
       if (!value.authenticated) throw new ApiError('incompatible');
       session.value = value;
       state.value = 'member';
@@ -44,6 +47,7 @@ export function createSessionStore(fetcher: typeof fetch) {
       failures = 0;
       retryAt = 0;
     } catch (error) {
+ if(current!==generation)return;
       if (error instanceof ApiError && error.denied) {
         session.value = null;
         state.value = 'guest';
@@ -75,6 +79,7 @@ export function createSessionStore(fetcher: typeof fetch) {
     if (state.value === 'member' && (!serviceUnavailable || !unavailable.value)) void reload();
   }
 
+  function invalidate(){generation++;session.value=null;state.value='guest';unavailable.value=false;failures=0;retryAt=0;}
   function signIn() {
     const target = window.location.href.split('#')[0] ?? window.location.origin;
     window.location.assign(
@@ -114,6 +119,7 @@ export function createSessionStore(fetcher: typeof fetch) {
     session: readonly(session),
     reload,
     revalidate,
+    invalidate,
     signIn,
     signOut,
     currentProfile,
@@ -134,5 +140,5 @@ export function useSession(): SessionStore {
 export function useHttp() {
   const fetcher = useHostFetch();
   const session = inject(sessionKey, undefined);
-  return new Http(fetcher, { onDenied: () => session?.revalidate(), onUnavailable: () => session?.revalidate(true) });
+  return new Http(fetcher, { onDenied: (status) => status===401 ? session?.invalidate() : session?.revalidate(), onUnavailable: () => session?.revalidate(true) });
 }

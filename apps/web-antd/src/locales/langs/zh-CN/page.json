@@ -1576,5 +1576,21 @@
       "identity_verified": "已实名认证",
       "course_enrollment": "已选该课程"
     }
+  },
+  "sessionPolicy": {
+    "title": "会话管理",
+    "description": "调整账号状态复核频率，或撤销用户在本应用的全部会话。仅平台管理员可操作。",
+    "loading": "正在处理…",
+    "interval": "复核间隔（分钟，5–240）",
+    "grace": "故障宽限期（分钟，0–240）",
+    "save": "保存设置",
+    "saved": "设置已保存，下次复核使用新配置。",
+    "conflict": "设置已被其他管理员修改。重新读取后再保存。",
+    "reload": "重新读取",
+    "forceTitle": "强制下线",
+    "subject": "用户 subject（稳定账号标识）",
+    "confirm": "我已核对账号，将撤销该用户的全部本地会话。",
+    "force": "强制下线该用户",
+    "revoked": "该用户的全部本地会话已撤销。"
   }
 }
