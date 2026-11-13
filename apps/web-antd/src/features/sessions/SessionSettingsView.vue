@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { components } from '#/api/session.gen';
 
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 
 import { useI18n } from '@vben/locales';
 
@@ -22,6 +22,8 @@ const grace = ref(30);
 const version = ref(0);
 const subject = ref('');
 const confirmed = ref(false);
+// Confirmation belongs to the exact account the administrator checked.
+watch(subject, () => { confirmed.value = false; }, { flush: 'sync' });
 const busy = ref(false);
 const error = ref('');
 const message = ref('');

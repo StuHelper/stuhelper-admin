@@ -41,9 +41,13 @@ test('session settings preserve edits on conflict and revoke only the confirmed 
   const revoke = page.locator('form').last().locator('button[type="submit"]');
   await expect(revoke).toBeDisabled();
   await page.getByRole('checkbox').check();
+  await page.locator('#session-subject').fill('synthetic-other-subject');
+  await expect(page.getByRole('checkbox')).not.toBeChecked();
+  await expect(revoke).toBeDisabled();
+  await page.getByRole('checkbox').check();
   await revoke.click();
   await expect(page.getByRole('checkbox')).not.toBeChecked();
-  expect(revocations).toEqual([{ subject: 'synthetic-subject' }]);
+  expect(revocations).toEqual([{ subject: 'synthetic-other-subject' }]);
   if(info.project.metadata.locale==='ar-EG')await expect(page.locator('html')).toHaveAttribute('dir','rtl');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
