@@ -23,11 +23,16 @@ export const parseProfile = schemaOf<Profile>(schemas, 'Profile');
  */
 export function createSessionStore(fetcher: typeof fetch) {
   const state = ref<SessionState>('loading');
+  const unavailable = ref(false);
   const session = shallowRef<null | Session>(null);
   const http = new Http(fetcher);
   let pending: Promise<void> | undefined;
+  let retryAt = 0;
+  let failures = 0;
 
   async function load() {
+    const wait = retryAt - Date.now();
+    if (wait > 0) await new Promise<void>((resolve) => setTimeout(resolve, wait));
     try {
       const value = await http.json('/api/v1/auth/session', parseSession, {
         timeout: 10_000,
@@ -35,11 +40,26 @@ export function createSessionStore(fetcher: typeof fetch) {
       if (!value.authenticated) throw new ApiError('incompatible');
       session.value = value;
       state.value = 'member';
+      unavailable.value = false;
+      failures = 0;
+      retryAt = 0;
     } catch (error) {
-      session.value = null;
-      // An expired or missing session is a normal guest state, not a failure.
-      state.value =
-        error instanceof ApiError && error.denied ? 'guest' : 'error';
+      if (error instanceof ApiError && error.denied) {
+        session.value = null;
+        state.value = 'guest';
+        unavailable.value = false;
+        failures = 0;
+        retryAt = 0;
+      } else {
+        // Keep mounted forms and their valid input during a temporary outage.
+        // Every business action is still authorized independently by the server.
+        unavailable.value = true;
+        state.value = session.value ? 'member' : 'error';
+        if (error instanceof ApiError && (error.status === 503 || error.code === 'network' || error.code === 'timeout')) {
+          failures = Math.min(failures + 1, 4);
+          retryAt = Date.now() + Math.min(1000 * 2 ** (failures - 1), 8000);
+        }
+      }
     }
   }
 
@@ -51,8 +71,8 @@ export function createSessionStore(fetcher: typeof fetch) {
   }
 
   /** A business API rejected the account; confirm whether the session ended. */
-  function revalidate() {
-    if (state.value === 'member') void reload();
+  function revalidate(serviceUnavailable = false) {
+    if (state.value === 'member' && (!serviceUnavailable || !unavailable.value)) void reload();
   }
 
   function signIn() {
@@ -89,6 +109,7 @@ export function createSessionStore(fetcher: typeof fetch) {
   }
 
   return {
+    unavailable: readonly(unavailable),
     state: readonly(state),
     session: readonly(session),
     reload,
@@ -113,5 +134,5 @@ export function useSession(): SessionStore {
 export function useHttp() {
   const fetcher = useHostFetch();
   const session = inject(sessionKey, undefined);
-  return new Http(fetcher, { onDenied: () => session?.revalidate() });
+  return new Http(fetcher, { onDenied: () => session?.revalidate(), onUnavailable: () => session?.revalidate(true) });
 }

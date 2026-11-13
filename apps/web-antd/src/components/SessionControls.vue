@@ -10,6 +10,8 @@ import { useMutation } from '#/shared/composables/async';
 import { useSession } from '#/shared/session';
 import { useErrorText } from '#/shared/ui/messages';
 
+import SessionNotice from './SessionNotice.vue';
+
 // Header account controls. Sign-out ends this application's session only; the
 // shared SSO account and other applications keep their own sessions.
 const { t } = useI18n();
@@ -63,6 +65,7 @@ function choose({ key }: { key: number | string }) {
       {{ t('page.session.unavailable') }}
       <Button type="link" size="small" @click="session.reload">{{ t('page.common.retry') }}</Button>
     </span>
+    <SessionNotice />
     <Modal :open="editing" :title="t('page.session.editNickname')" :confirm-loading="save.busy.value" :ok-text="t(save.uncertain.value ? 'page.common.retryOriginal' : 'page.common.save')" :cancel-text="t('page.common.cancel')" :cancel-button-props="{ disabled: save.busy.value || save.uncertain.value }" @ok="save.uncertain.value ? save.retry() : submit()" @cancel="editing = false">
       <Form layout="vertical" @submit.prevent="submit">
         <FormItem :label="t('page.session.nickname')">
