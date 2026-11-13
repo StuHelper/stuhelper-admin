@@ -1576,5 +1576,21 @@
       "identity_verified": "Identité vérifiée",
       "course_enrollment": "Inscrit au cours"
     }
+  },
+  "sessionPolicy": {
+    "title": "Gestion des sessions",
+    "description": "Réglez la fréquence de vérification des comptes ou révoquez toutes les sessions d’un utilisateur dans cette application. Réservé aux administrateurs de la plateforme.",
+    "loading": "Traitement…",
+    "interval": "Intervalle de vérification (minutes, 5–240)",
+    "grace": "Délai de grâce en cas de panne (minutes, 0–240)",
+    "save": "Enregistrer",
+    "saved": "Paramètres enregistrés. Ils s’appliqueront à la prochaine vérification.",
+    "conflict": "Un autre administrateur a modifié ces paramètres. Rechargez-les avant d’enregistrer.",
+    "reload": "Recharger les paramètres",
+    "forceTitle": "Déconnexion forcée",
+    "subject": "Subject utilisateur (identifiant permanent)",
+    "confirm": "J’ai vérifié le compte et je vais révoquer toutes ses sessions locales.",
+    "force": "Déconnecter cet utilisateur",
+    "revoked": "Toutes les sessions locales de cet utilisateur ont été révoquées."
   }
 }

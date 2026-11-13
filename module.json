@@ -76,7 +76,12 @@
     ],
     "SESSION-AVAILABILITY-02": [
       "apps/web-antd/src/shared/session.test.ts#the retry component backs off and leaves an in-progress form mounted",
-      "apps/web-antd/src/shared/session.test.ts#clears the snapshot after an explicit rejection even after an outage"
+      "apps/web-antd/src/shared/session.test.ts#clears the snapshot after an explicit rejection even after an outage",
+      "apps/web-antd/src/shared/session.test.ts#does not restore a session when an in-flight check completes after a 401"
+    ],
+    "SESSION-MANAGEMENT-01": [
+      "tests/e2e/session-policy.spec.mjs#session settings preserve edits on conflict and revoke only the confirmed subject",
+      "tests/e2e/session-policy.spec.mjs#session settings show a retryable outage without losing input"
     ]
   }
 }
