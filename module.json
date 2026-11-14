@@ -85,7 +85,8 @@
     ],
     "CM-19": [
       "tests/e2e/feedback.spec.mjs#feedback reply refresh cannot overwrite another operators note with a newer revision",
-      "tests/e2e/feedback.spec.mjs#feedback clears private mail after permission revocation"
+      "tests/e2e/feedback.spec.mjs#feedback clears private mail after permission revocation",
+      "tests/e2e/feedback.spec.mjs#feedback opens and updates a detail whose escaped replies exceed the default JSON limit"
     ],
     "CM-20": [
       "tests/e2e/feedback.spec.mjs#feedback preserves pending writes and reply identity across retry",

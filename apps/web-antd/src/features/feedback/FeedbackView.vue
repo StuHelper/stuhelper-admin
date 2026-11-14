@@ -19,6 +19,9 @@ type Feedback = components['schemas']['Feedback'];
 const { t } = useI18n();
 const http = useHttp();
 const contactAddress = 'feedback@stuhelper.com';
+// The detail contains at most 100 replies of 20,000 UTF-8 bytes each. Go's JSON
+// escaping can expand those bytes sixfold; keep a fixed budget for that contract.
+const detailOptions = { maxJsonBytes: 16 * 1024 * 1024 };
 const format = useFormat();
 const errorText = useErrorText();
 const parsePage = schemaOf<components['schemas']['FeedbackPage']>(contract.components.schemas, 'FeedbackPage');
@@ -67,7 +70,7 @@ async function open(id: string) {
   if (dirty.value && !window.confirm(t('page.common.leaveUnsaved'))) return;
   busy.value = true; error.value = ''; success.value = '';
   try {
-    const message = await http.json(`/api/v1/moderation/feedback/${encodeURIComponent(id)}`, parseMessage);
+    const message = await http.json(`/api/v1/moderation/feedback/${encodeURIComponent(id)}`, parseMessage, detailOptions);
     adopt(message); body.value = '';
   } catch (error_) { failed(error_); }
   finally { busy.value = false; }
@@ -78,7 +81,7 @@ async function save() {
   const request = pendingUpdate.value;
   busy.value = true; error.value = ''; success.value = '';
   try {
-    adopt(await http.json(`/api/v1/moderation/feedback/${encodeURIComponent(request.id)}`, parseMessage, { method: 'PATCH', key: request.key, body: request.body }));
+    adopt(await http.json(`/api/v1/moderation/feedback/${encodeURIComponent(request.id)}`, parseMessage, { ...detailOptions, method: 'PATCH', key: request.key, body: request.body }));
     pendingUpdate.value = undefined; success.value = 'saved';
     items.value = items.value.map((item) => item.id === selected.value?.id ? selected.value : item);
   } catch (error_) {
@@ -94,7 +97,7 @@ async function send() {
   try {
     const reply = await http.json(`/api/v1/moderation/feedback/${encodeURIComponent(request.id)}/replies`, parseReply, { method: 'POST', key: request.key, body: { body: request.body }, timeout: 40_000 });
     pendingReply.value = undefined; body.value = ''; success.value = reply.state;
-    const fresh = await http.json(`/api/v1/moderation/feedback/${encodeURIComponent(request.id)}`, parseMessage);
+    const fresh = await http.json(`/api/v1/moderation/feedback/${encodeURIComponent(request.id)}`, parseMessage, detailOptions);
     if (editDirty.value) selected.value = fresh;
     else adopt(fresh);
   } catch (error_) { failed(error_); if (!isUncertain(error_)) pendingReply.value = undefined; }

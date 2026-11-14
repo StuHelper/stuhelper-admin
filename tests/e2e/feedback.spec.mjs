@@ -101,3 +101,25 @@ test('feedback known rejections preserve editable drafts and issue new request k
   }
   expect(new Set(keys).size).toBe(6);
 });
+
+test('feedback opens and updates a detail whose escaped replies exceed the default JSON limit', async ({ page }, info) => {
+  const text = JSON.parse(fs.readFileSync(`apps/web-antd/src/locales/langs/${info.project.metadata.locale}/page.json`, 'utf8')).feedback;
+  const replyBody = '<'.repeat(20_000);
+  let message = { ...fixture(), replies: Array.from({ length: 40 }, (_, index) => ({ id: `reply-${index}`, body: replyBody, actor: 'operator', state: 'sent', created_at: '2026-11-15T01:00:00Z' })) };
+  await page.route('**/api/v1/moderation/feedback**', async route => {
+    const request = route.request();
+    if (request.method() === 'PATCH') message = { ...message, ...request.postDataJSON(), revision: message.revision + 1 };
+    const detail = new URL(request.url()).pathname.endsWith('/case-one');
+    const value = detail ? message : { items: [{ ...message, body: '', replies: [], attachments: [] }], next_cursor: '' };
+    const body = JSON.stringify(value).replaceAll('<', String.raw`\u003c`);
+    if (detail) expect(body.length).toBeGreaterThan(4 * 1024 * 1024);
+    await route.fulfill({ contentType: 'application/json', body });
+  });
+  await page.goto(`${base}/moderation/feedback?lang=${info.project.metadata.locale}`);
+  await page.getByRole('button').filter({ hasText: 'Synthetic feedback' }).click();
+  await expect(page.getByText(replyBody, { exact: true })).toHaveCount(40);
+  await page.getByLabel(text.note, { exact: true }).fill('Updated without losing reply history');
+  await page.getByRole('button', { name: text.save, exact: true }).click();
+  await expect(page.getByRole('status').filter({ hasText: text.saved })).toBeVisible();
+  await expect(page.getByText(replyBody, { exact: true })).toHaveCount(40);
+});

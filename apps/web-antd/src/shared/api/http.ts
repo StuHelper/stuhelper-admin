@@ -18,6 +18,8 @@ export interface RequestOptions {
   signal?: AbortSignal;
   /** Milliseconds before the request is abandoned. */
   timeout?: number;
+  /** Explicit JSON response budget for bounded detail contracts, at most 16 MiB. */
+  maxJsonBytes?: number;
   /** JSON endpoints never redirect; downloads may follow a signed delivery URL. */
   redirect?: RequestRedirect;
 }
@@ -113,11 +115,14 @@ export class Http {
     validate: Validator<T>,
     options: RequestOptions = {},
   ): Promise<T> {
+    const limit = options.maxJsonBytes ?? jsonLimit;
+    if (!Number.isSafeInteger(limit) || limit < 1 || limit > 16 * 1024 * 1024)
+      throw new ApiError('invalid_input');
     const write = !readMethods.has((options.method ?? 'GET').toUpperCase());
     const response = await this.send(path, options);
     let value: unknown;
     try {
-      value = parseJson(await readLimited(response, jsonLimit));
+      value = parseJson(await readLimited(response, limit));
     } catch {
       throw new ApiError('incompatible', write, response.status);
     }
