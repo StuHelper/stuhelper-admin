@@ -11,6 +11,23 @@ const json = (body: unknown, status = 200) =>
 const anything = (value: unknown) => value;
 
 describe('HTTP boundary', () => {
+  it('allows an explicitly bounded large detail while preserving the default JSON limit', async () => {
+    const body = JSON.stringify({ replies: Array.from({ length: 40 }, () => '<'.repeat(20_000)) }).replaceAll('<', String.raw`\u003c`);
+    const client = new Http(async () => new Response(body));
+    await expect(client.json('/api/v1/test', anything)).rejects.toMatchObject({ code: 'incompatible' });
+    await expect(client.json('/api/v1/test', anything, { maxJsonBytes: 16 * 1024 * 1024 })).resolves.toHaveProperty('replies.length', 40);
+    await expect(client.json('/api/v1/test', anything, { maxJsonBytes: 4 * 1024 * 1024 })).rejects.toMatchObject({ code: 'incompatible' });
+  });
+
+  it('rejects invalid JSON budgets before sending a request', async () => {
+    const fetcher = vi.fn<typeof fetch>();
+    const client = new Http(fetcher);
+    for (const maxJsonBytes of [0, -1, 1.5, Number.NaN, Number.POSITIVE_INFINITY, 16 * 1024 * 1024 + 1]) {
+      await expect(client.json('/api/v1/test', anything, { maxJsonBytes })).rejects.toMatchObject({ code: 'invalid_input', uncertain: false });
+    }
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
   it('calls the transport as a plain function with same-origin credentials and no redirects', async () => {
     const fetcher: typeof fetch = function (this: unknown, _input, init) {
       expect(this).toBeUndefined();

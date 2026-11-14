@@ -14,6 +14,7 @@ export const menus: MenuRecordRaw[] = [
     icon: MessageSquare,
     children: [
       { name: 'page.menu.moderationQueue', path: '/moderation/queue' },
+      { name: 'page.feedback.title', path: '/moderation/feedback' },
       { name: 'page.menu.moderationContent', path: '/moderation/content' },
       { name: 'page.menu.moderationPolicies', path: '/moderation/policies' },
       { name: 'page.menu.moderationPresentation', path: '/moderation/presentation' },

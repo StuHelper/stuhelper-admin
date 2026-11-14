@@ -65,6 +65,7 @@ function choose({ key }: { key: number | string }) {
       {{ t('page.session.unavailable') }}
       <Button type="link" size="small" @click="session.reload">{{ t('page.common.retry') }}</Button>
     </span>
+    <a href="mailto:feedback@stuhelper.com" class="text-xs underline">{{ t('page.feedback.title') }}</a>
     <SessionNotice />
     <Modal :open="editing" :title="t('page.session.editNickname')" :confirm-loading="save.busy.value" :ok-text="t(save.uncertain.value ? 'page.common.retryOriginal' : 'page.common.save')" :cancel-text="t('page.common.cancel')" :cancel-button-props="{ disabled: save.busy.value || save.uncertain.value }" @ok="save.uncertain.value ? save.retry() : submit()" @cancel="editing = false">
       <Form layout="vertical" @submit.prevent="submit">
