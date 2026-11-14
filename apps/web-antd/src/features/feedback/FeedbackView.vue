@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import type { components } from '#/api/moderation.gen';
 
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
 import { useI18n } from '@vben/locales';
 
-import { errorCode } from '#/shared/api/errors';
+import { errorCode, isUncertain } from '#/shared/api/errors';
 import { schemaOf } from '#/shared/api/schema';
+import { useLeaveGuard } from '#/shared/composables/leave';
 import { useFormat } from '#/shared/format';
 import { useHttp } from '#/shared/session';
 import AdminPage from '#/shared/ui/AdminPage.vue';
@@ -36,9 +37,21 @@ const success = ref('');
 const pendingReply = ref<{ body: string; id: string; key: string }>();
 const pendingUpdate = ref<{ body: components['schemas']['FeedbackUpdate']; id: string; key: string }>();
 const states: Feedback['state'][] = ['new', 'processing', 'resolved', 'spam'];
+// A details refresh must not silently upgrade the revision of an existing draft.
+const editBase = ref({ revision: 0, state: 'new', note: '' });
+const editDirty = computed(() => !!selected.value && (state.value !== editBase.value.state || note.value !== editBase.value.note));
+const dirty = computed(() => editDirty.value || !!body.value);
+useLeaveGuard(() => pendingReply.value || pendingUpdate.value ? t('page.common.leaveUncertain') : (dirty.value ? t('page.common.leaveUnsaved') : ''));
+function adopt(message: Feedback) {
+  selected.value = message;
+  state.value = message.state;
+  note.value = message.note;
+  editBase.value = { revision: message.revision, state: message.state, note: message.note };
+}
+
 function failed(cause: unknown) {
   error.value = errorCode(cause);
-  if (['forbidden', 'unauthenticated'].includes(error.value)) { selected.value = undefined; items.value = []; note.value = ''; body.value = ''; pendingReply.value = undefined; pendingUpdate.value = undefined; }
+  if (['forbidden', 'unauthenticated'].includes(error.value)) { selected.value = undefined; items.value = []; note.value = ''; body.value = ''; editBase.value = { revision: 0, state: 'new', note: '' }; pendingReply.value = undefined; pendingUpdate.value = undefined; }
 }
 async function load(after = '') {
   if (busy.value) return;
@@ -51,37 +64,40 @@ async function load(after = '') {
 }
 async function open(id: string) {
   if (busy.value || pendingReply.value || pendingUpdate.value) return;
+  if (dirty.value && !window.confirm(t('page.common.leaveUnsaved'))) return;
   busy.value = true; error.value = ''; success.value = '';
   try {
     const message = await http.json(`/api/v1/moderation/feedback/${encodeURIComponent(id)}`, parseMessage);
-    selected.value = message; state.value = message.state; note.value = message.note; body.value = '';
+    adopt(message); body.value = '';
   } catch (error_) { failed(error_); }
   finally { busy.value = false; }
 }
 async function save() {
-  if (busy.value || !selected.value) return;
-  pendingUpdate.value ??= { id: selected.value.id, key: crypto.randomUUID(), body: { revision: selected.value.revision, state: state.value, note: note.value } };
+  if (busy.value || !selected.value || pendingReply.value) return;
+  pendingUpdate.value ??= { id: selected.value.id, key: crypto.randomUUID(), body: { revision: editBase.value.revision, state: state.value, note: note.value } };
   const request = pendingUpdate.value;
   busy.value = true; error.value = ''; success.value = '';
   try {
-    selected.value = await http.json(`/api/v1/moderation/feedback/${encodeURIComponent(request.id)}`, parseMessage, { method: 'PATCH', key: request.key, body: request.body });
+    adopt(await http.json(`/api/v1/moderation/feedback/${encodeURIComponent(request.id)}`, parseMessage, { method: 'PATCH', key: request.key, body: request.body }));
     pendingUpdate.value = undefined; success.value = 'saved';
     items.value = items.value.map((item) => item.id === selected.value?.id ? selected.value : item);
   } catch (error_) {
     failed(error_);
-    if (['conflict', 'invalid_request', 'not_found'].includes(error.value)) pendingUpdate.value = undefined;
+    if (!isUncertain(error_)) pendingUpdate.value = undefined;
   } finally { busy.value = false; }
 }
 async function send() {
-  if (busy.value || !selected.value || !body.value.trim()) return;
+  if (busy.value || !selected.value || pendingUpdate.value || !body.value.trim()) return;
   pendingReply.value ??= { id: selected.value.id, key: crypto.randomUUID(), body: body.value };
   const request = pendingReply.value;
   busy.value = true; error.value = ''; success.value = '';
   try {
     const reply = await http.json(`/api/v1/moderation/feedback/${encodeURIComponent(request.id)}/replies`, parseReply, { method: 'POST', key: request.key, body: { body: request.body }, timeout: 40_000 });
     pendingReply.value = undefined; body.value = ''; success.value = reply.state;
-    selected.value = await http.json(`/api/v1/moderation/feedback/${encodeURIComponent(request.id)}`, parseMessage);
-  } catch (error_) { failed(error_); }
+    const fresh = await http.json(`/api/v1/moderation/feedback/${encodeURIComponent(request.id)}`, parseMessage);
+    if (editDirty.value) selected.value = fresh;
+    else adopt(fresh);
+  } catch (error_) { failed(error_); if (!isUncertain(error_)) pendingReply.value = undefined; }
   finally { busy.value = false; }
 }
 async function download(attachment: components['schemas']['FeedbackAttachment']) {
@@ -144,20 +160,20 @@ onMounted(() => load());
           <p class="break-all">{{ t('page.feedback.assignee') }}: {{ selected.assignee || t('page.feedback.unassigned') }}</p>
           <form class="flex flex-col gap-3" @submit.prevent="save">
             <label class="flex flex-col gap-1">{{ t('page.feedback.state') }}
-              <select :aria-label="t('page.feedback.state')" v-model="state" class="bg-background rounded border p-2" :disabled="busy || !!pendingUpdate"><option v-for="value in states" :key="value" :value="value">{{ t(`page.feedback.${value}`) }}</option></select>
+              <select :aria-label="t('page.feedback.state')" v-model="state" class="bg-background rounded border p-2" :disabled="busy || !!pendingUpdate || !!pendingReply"><option v-for="value in states" :key="value" :value="value">{{ t(`page.feedback.${value}`) }}</option></select>
             </label>
-            <label class="flex flex-col gap-1">{{ t('page.feedback.note') }}<textarea v-model="note" rows="3" maxlength="2500" class="bg-background rounded border p-2" :disabled="busy || !!pendingUpdate"></textarea></label>
+            <label class="flex flex-col gap-1">{{ t('page.feedback.note') }}<textarea v-model="note" rows="3" maxlength="2500" class="bg-background rounded border p-2" :disabled="busy || !!pendingUpdate || !!pendingReply"></textarea></label>
             <p v-if="pendingUpdate" role="status">{{ t('page.feedback.retryPending') }}</p>
-            <button class="bg-primary text-primary-foreground rounded px-4 py-2" :disabled="busy" type="submit">{{ t(pendingUpdate ? 'page.feedback.retry' : 'page.feedback.save') }}</button>
+            <button class="bg-primary text-primary-foreground rounded px-4 py-2" :disabled="busy || !!pendingReply" type="submit">{{ t(pendingUpdate ? 'page.feedback.retry' : 'page.feedback.save') }}</button>
           </form>
           <h3 class="font-semibold">{{ t('page.feedback.replies') }}</h3>
           <article v-for="reply in selected.replies" :key="reply.id" class="rounded border p-3">
             <p>{{ t(`page.feedback.${reply.state}`) }} · {{ reply.actor }}</p><p class="whitespace-pre-wrap break-words">{{ reply.body }}</p>
           </article>
           <form class="flex flex-col gap-3" @submit.prevent="send">
-            <label class="flex flex-col gap-1">{{ t('page.feedback.reply') }}<textarea v-model="body" rows="5" maxlength="5000" required class="bg-background rounded border p-2" :disabled="busy || !!pendingReply"></textarea></label>
+            <label class="flex flex-col gap-1">{{ t('page.feedback.reply') }}<textarea v-model="body" rows="5" maxlength="5000" required class="bg-background rounded border p-2" :disabled="busy || !!pendingReply || !!pendingUpdate"></textarea></label>
             <p>{{ t('page.feedback.replyHelp', { address: contactAddress }) }}</p><p v-if="pendingReply" role="status">{{ t('page.feedback.retryPending') }}</p>
-            <button class="bg-primary text-primary-foreground rounded px-4 py-2" :disabled="busy || !body.trim()" type="submit">{{ t(pendingReply ? 'page.feedback.retry' : 'page.feedback.send') }}</button>
+            <button class="bg-primary text-primary-foreground rounded px-4 py-2" :disabled="busy || !!pendingUpdate || !body.trim()" type="submit">{{ t(pendingReply ? 'page.feedback.retry' : 'page.feedback.send') }}</button>
           </form>
         </section>
       </div>

@@ -47,3 +47,57 @@ test('feedback clears private mail after permission revocation',async({page},inf
  await expect(page.getByText('sender@example.test',{exact:false}).last()).toBeVisible();denied=true;await page.getByRole('button',{name:text.refresh,exact:true}).click();
  await expect(page.getByText('sender@example.test',{exact:false})).toHaveCount(0);await expect(page.getByRole('alert')).toBeVisible();
 });
+
+test('feedback reply refresh cannot overwrite another operators note with a newer revision', async ({ page }, info) => {
+  const text = JSON.parse(fs.readFileSync('apps/web-antd/src/locales/langs/' + info.project.metadata.locale + '/page.json', 'utf8')).feedback;
+  let message = fixture(); const writes = [];
+  await page.route('**/api/v1/moderation/feedback**', async route => {
+    const request = route.request(); const path = new URL(request.url()).pathname;
+    if (request.method() === 'POST') {
+      const reply = { id: 'reply', actor: 'operator', body: request.postDataJSON().body, state: 'sent', created_at: message.received_at };
+      message = { ...message, revision: 3, note: 'Other operator note', state: 'processing', replies: [reply] };
+      return route.fulfill({ json: reply });
+    }
+    if (request.method() === 'PATCH') { writes.push(request.postDataJSON()); return route.fulfill({ status: 409, json: { code: 'conflict' } }); }
+    return route.fulfill({ json: path.endsWith('/case-one') ? message : { items: [message], next_cursor: '' } });
+  });
+  await page.goto(base + '/moderation/feedback?lang=' + info.project.metadata.locale);
+  await page.getByRole('button').filter({ hasText: 'Synthetic feedback' }).click();
+  await page.getByLabel(text.note, { exact: true }).fill('My unsaved note');
+  await page.getByLabel(text.reply, { exact: true }).fill('Reply');
+  await page.getByRole('button', { name: text.send, exact: true }).click();
+  await expect(page.getByRole('status').filter({ hasText: text.sent })).toBeVisible();
+  await expect(page.getByLabel(text.note, { exact: true })).toHaveValue('My unsaved note');
+  await page.getByRole('button', { name: text.save, exact: true }).click();
+  await expect(page.getByRole('alert')).toBeVisible();
+  expect(writes).toEqual([{ revision: 1, state: 'new', note: 'My unsaved note' }]);
+  expect(message.note).toBe('Other operator note');
+});
+
+test('feedback known rejections preserve editable drafts and issue new request keys', async ({ page }, info) => {
+  const text = JSON.parse(fs.readFileSync('apps/web-antd/src/locales/langs/' + info.project.metadata.locale + '/page.json', 'utf8')).feedback;
+  const keys = []; let replyStatus = 400; let updateStatus = 400;
+  await page.route('**/api/v1/moderation/feedback**', route => {
+    const request = route.request();
+    if (request.method() === 'POST') { keys.push(request.headers()['idempotency-key']); return route.fulfill({ status: replyStatus, json: {} }); }
+    if (request.method() === 'PATCH') { keys.push(request.headers()['idempotency-key']); return route.fulfill({ status: updateStatus, json: {} }); }
+    return route.fulfill({ json: new URL(request.url()).pathname.endsWith('/case-one') ? fixture() : { items: [fixture()], next_cursor: '' } });
+  });
+  await page.goto(base + '/moderation/feedback?lang=' + info.project.metadata.locale);
+  await page.getByRole('button').filter({ hasText: 'Synthetic feedback' }).click();
+  for (const status of [400, 404, 409]) {
+    replyStatus = status;
+    await page.getByLabel(text.reply, { exact: true }).fill('Reply draft ' + status);
+    await page.getByRole('button', { name: text.send, exact: true }).click();
+    await expect(page.getByLabel(text.reply, { exact: true })).toBeEnabled();
+    await expect(page.getByLabel(text.reply, { exact: true })).toHaveValue('Reply draft ' + status);
+  }
+  for (const status of [400, 404, 409]) {
+    updateStatus = status;
+    await page.getByLabel(text.note, { exact: true }).fill('Note draft ' + status);
+    await page.getByRole('button', { name: text.save, exact: true }).click();
+    await expect(page.getByLabel(text.note, { exact: true })).toBeEnabled();
+    await expect(page.getByLabel(text.note, { exact: true })).toHaveValue('Note draft ' + status);
+  }
+  expect(new Set(keys).size).toBe(6);
+});
