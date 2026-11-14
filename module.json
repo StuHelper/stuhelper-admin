@@ -82,6 +82,15 @@
     "SESSION-MANAGEMENT-01": [
       "tests/e2e/session-policy.spec.mjs#session settings preserve edits on conflict and revoke only the confirmed subject",
       "tests/e2e/session-policy.spec.mjs#session settings show a retryable outage without losing input"
+    ],
+    "CM-19": [
+      "tests/e2e/feedback.spec.mjs#feedback reply refresh cannot overwrite another operators note with a newer revision",
+      "tests/e2e/feedback.spec.mjs#feedback clears private mail after permission revocation"
+    ],
+    "CM-20": [
+      "tests/e2e/feedback.spec.mjs#feedback preserves pending writes and reply identity across retry",
+      "tests/e2e/feedback.spec.mjs#feedback known rejections preserve editable drafts and issue new request keys",
+      "apps/web-antd/src/features/feedback/FeedbackView.test.ts#protects route changes and refresh while drafts or unknown replies exist"
     ]
   }
 }
