@@ -60,6 +60,9 @@ export function validates(
 ): boolean {
   if (!record(schema) || depth > maxDepth) return false;
   if (typeof schema.$ref === 'string') {
+    // OpenAPI 3.0 writes a nullable reference as { $ref, nullable: true }; the
+    // nullable flag sits next to the reference, not inside the target.
+    if (value === null && schema.nullable === true) return true;
     const target = schemas[schema.$ref.split('/').at(-1) ?? ''];
     return validates(value, target, schemas, depth + 1);
   }

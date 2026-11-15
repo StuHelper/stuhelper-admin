@@ -20,7 +20,7 @@ import {
   Tag,
 } from 'ant-design-vue';
 
-import { errorCode } from '#/shared/api/errors';
+import { ApiError, errorCode } from '#/shared/api/errors';
 import { useAsync, useMutation } from '#/shared/composables/async';
 import { useFormat } from '#/shared/format';
 import AdminPage from '#/shared/ui/AdminPage.vue';
@@ -50,7 +50,22 @@ const status = useAsync((signal) =>
     ? api.teacherRefresh(school.value, signal)
     : Promise.resolve(undefined),
 );
-const latest = computed(() => status.data.value?.latest ?? undefined);
+// reload() clears data while a request is in flight; keep the last answer so the
+// page does not flicker and a loading gap is not mistaken for a finished run.
+const known = shallowRef<typeof status.data.value>();
+watch(
+  () => status.data.value,
+  (value) => {
+    if (value) known.value = value;
+  },
+);
+watch(
+  () => status.status.value,
+  (value) => {
+    if (value === 'error') known.value = undefined;
+  },
+);
+const latest = computed(() => known.value?.latest ?? undefined);
 const active = computed(
   () => latest.value?.status === 'queued' || latest.value?.status === 'running',
 );
@@ -58,7 +73,7 @@ const active = computed(
 // While a run is queued or running, check again every five seconds.
 let timer: ReturnType<typeof setTimeout> | undefined;
 watch(
-  () => [active.value, status.data.value] as const,
+  () => [active.value, known.value] as const,
   () => {
     clearTimeout(timer);
     if (active.value) timer = setTimeout(() => void status.reload(), 5000);
@@ -108,7 +123,16 @@ async function load(more = false) {
     observedAt.value = page.observed_at;
     if (!reason.value) reasonCounts.value = page.reason_counts as Record<string, number>;
   } catch (error_) {
-    if (current === generation) listError.value = errorCode(error_);
+    if (current !== generation) return;
+    listError.value = errorCode(error_);
+    // Without read permission the names and units already shown must go too.
+    if (error_ instanceof ApiError && error_.denied) {
+      rows.value = [];
+      next.value = '';
+      total.value = 0;
+      observedAt.value = null;
+      reasonCounts.value = {};
+    }
   } finally {
     if (current === generation) loading.value = false;
   }
@@ -122,13 +146,16 @@ watch(
   { immediate: true },
 );
 watch(reason, () => void load());
-// A finished run may change the unmatched list, so read it again.
-watch(
-  () => latest.value?.status,
-  (value, previous) => {
-    if (previous && value !== previous && !active.value) void load();
-  },
-);
+// When a run reaches a final state, the unmatched list may have changed, so read
+// it again. Only received answers count; the loading gap between polls does not.
+let seen: string | undefined;
+watch(latest, (run) => {
+  if (!run) return;
+  const before = seen;
+  seen = `${run.id}:${run.status}`;
+  const finished = run.status !== 'queued' && run.status !== 'running';
+  if (before && before !== seen && finished) void load();
+});
 
 const reasons = [
   'unit_mismatch',
@@ -177,19 +204,19 @@ const dash = '—';
         <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
           <Statistic
             :title="t('page.teacherSites.eligible')"
-            :value="status.data.value?.counts.eligible ?? dash"
+            :value="known?.counts.eligible ?? dash"
           />
           <Statistic
             :title="t('page.teacherSites.teaching')"
-            :value="status.data.value?.counts.teaching ?? dash"
+            :value="known?.counts.teaching ?? dash"
           />
           <Statistic
             :title="t('page.teacherSites.official')"
-            :value="status.data.value?.counts.official ?? dash"
+            :value="known?.counts.official ?? dash"
           />
           <Statistic
             :title="t('page.teacherSites.both')"
-            :value="status.data.value?.counts.both ?? dash"
+            :value="known?.counts.both ?? dash"
           />
         </div>
       </Card>

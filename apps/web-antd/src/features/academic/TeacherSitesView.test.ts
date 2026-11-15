@@ -62,3 +62,50 @@ it('disables both refresh buttons while a run is queued or running', async () =>
   expect(button(root, 'page.teacherSites.runIncremental')!.disabled).toBe(true);
   expect(button(root, 'page.teacherSites.runFull')!.disabled).toBe(true);
 });
+
+it('accepts the contract answers for a school with no refresh yet', async () => {
+  const { validates } = await import('#/shared/api/schema');
+  const module = await import('../../../../../contracts/catalog.openapi.json');
+  const contract = module.default;
+  const schemas = contract.components.schemas;
+  expect(validates({ latest: null, counts }, { $ref: '#/components/schemas/TeacherRefreshStatus' }, schemas)).toBe(true);
+  expect(validates({ ...run('queued'), counts: null, requests: null, site_count: null }, { $ref: '#/components/schemas/TeacherRefreshRun' }, schemas)).toBe(true);
+});
+
+it('reads the unmatched list again only when a polled run reaches a final state', async () => {
+  vi.useFakeTimers({ shouldAdvanceTime: true });
+  cleanups.push(() => vi.useRealTimers());
+  let state = 'running';
+  let unmatchedReads = 0;
+  mock.json.mockImplementation(async (path: string) => {
+    if (path.endsWith('/refresh')) return { latest: run(state), counts };
+    unmatchedReads++;
+    return page('');
+  });
+  await mount();
+  expect(unmatchedReads).toBe(1);
+  await vi.advanceTimersByTimeAsync(5000); await settle();
+  expect(unmatchedReads).toBe(1);
+  state = 'succeeded';
+  await vi.advanceTimersByTimeAsync(5000); await settle();
+  expect(unmatchedReads).toBe(2);
+});
+
+it('clears names already shown when reading the list is denied', async () => {
+  let deny = false;
+  mock.json.mockImplementation(async (path: string) => {
+    if (path.endsWith('/refresh')) return { latest: run('succeeded'), counts };
+    if (deny) throw new ApiError('forbidden', false, 403);
+    return page('');
+  });
+  const root = await mount();
+  expect(root.textContent).toContain('Synthetic Teacher');
+  deny = true;
+  // Changing the reason filter reads the list again; the select is driven through its option.
+  const select = root.querySelector('.ant-select-selector');
+  select?.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })); await settle();
+  const option = [...document.querySelectorAll('.ant-select-item-option')].find((item) => item.textContent?.includes('ambiguous_catalog'));
+  option?.dispatchEvent(new MouseEvent('click', { bubbles: true })); await settle();
+  expect(root.textContent).not.toContain('Synthetic Teacher');
+  expect(root.textContent).toContain('error:forbidden');
+});
