@@ -34,7 +34,8 @@
     "accessAudit": "Operation log",
     "lookup": "Information lookup",
     "catalogTimetable": "Class periods",
-    "qqGroups": "QQ groups"
+    "qqGroups": "QQ groups",
+    "catalogTeacherSites": "Teacher homepages"
   },
   "common": {
     "all": "All",
@@ -1631,5 +1632,69 @@
     "sent": "Mail server accepted the reply",
     "failed": "Sending failed",
     "unknown": "Delivery unknown; check the mailbox"
+  },
+  "teacherSites": {
+    "title": "Teacher homepage refresh",
+    "intro": "Reads the teacher list from the BUAA faculty homepage site. Together with teaching records it decides which teachers the teacher list shows. An incremental refresh runs monthly; a full refresh can only be started here.",
+    "marks": "Teacher marks",
+    "eligible": "Teachers shown",
+    "teaching": "With teaching records",
+    "official": "Matched to a homepage",
+    "both": "Both",
+    "latestRun": "Latest refresh",
+    "runIncremental": "Incremental refresh",
+    "runFull": "Full refresh",
+    "fullConfirm": "A full refresh fetches every teacher homepage again and takes longer. Start it?",
+    "alreadyRunning": "A refresh is already running. Wait for it to finish.",
+    "schedule": "Scheduled: one incremental refresh a month. It reads the full list and fetches only changed homepages.",
+    "mode": "Type",
+    "requestedAt": "Started",
+    "finishedAt": "Finished",
+    "duration": "Duration",
+    "seconds": "{value} sec",
+    "requests": "Requests",
+    "sites": "Homepages",
+    "failure": "Failure reason",
+    "noRun": "No refresh has run yet.",
+    "unmatched": "Unmatched homepages",
+    "name": "Name on homepage",
+    "unit": "Unit on homepage",
+    "reason": "Reason",
+    "candidates": "Candidates",
+    "allReasons": "All reasons ({count})",
+    "reasonCount": "{reason}: {count}",
+    "observedAt": "List read at {time}, {count} in total",
+    "status": {
+      "queued": "Queued",
+      "running": "Running",
+      "succeeded": "Succeeded",
+      "failed": "Failed",
+      "timed_out": "Timed out"
+    },
+    "modes": {
+      "incremental": "Incremental update",
+      "full": "Full update"
+    },
+    "triggers": {
+      "manual": "Started manually",
+      "scheduled": "Scheduled"
+    },
+    "failures": {
+      "crawl_failed": "Fetching failed",
+      "request_failed": "Homepage site request failed",
+      "invalid_snapshot": "Incomplete fetch result",
+      "import_conflict": "Import conflict",
+      "dependency_unavailable": "A required service is unavailable",
+      "worker_interrupted": "The task was interrupted",
+      "timeout": "Timed out"
+    },
+    "reasons": {
+      "unit_mismatch": "Unit written differently",
+      "ambiguous_catalog": "Same name in the same unit",
+      "catalog_unit_missing": "No unit in the catalog",
+      "site_unit_missing": "No unit on the homepage",
+      "catalog_name_absent": "No such name in the catalog",
+      "ambiguous_site": "Duplicate homepages"
+    }
   }
 }

@@ -17,6 +17,7 @@ const children: RouteRecordRaw[] = [
   { name: 'Catalog', path: 'catalog', component: () => import('#/features/academic/CatalogView.vue'), meta: { title: 'page.menu.catalog' } },
   { name: 'CatalogTimetable', path: 'catalog/timetable', component: () => import('#/features/academic/TimetableView.vue'), meta: { title: 'page.menu.catalogTimetable' } },
   { name: 'CatalogImports', path: 'catalog/imports', component: () => import('#/features/academic/ImportView.vue'), meta: { title: 'page.menu.catalogImports' } },
+  { name: 'CatalogTeacherSites', path: 'catalog/teacher-sites', component: () => import('#/features/academic/TeacherSitesView.vue'), meta: { title: 'page.menu.catalogTeacherSites' } },
   { name: 'Resources', path: 'resources', component: () => import('#/features/resources/ResourcesView.vue'), meta: { title: 'page.menu.resources' } },
   { name: 'ResourceReviews', path: 'resources/reviews', component: () => import('#/features/resources/ReviewView.vue'), meta: { title: 'page.menu.resourceReviews' } },
   { name: 'ResourceCategories', path: 'resources/categories', component: () => import('#/features/resources/CategoriesView.vue'), meta: { title: 'page.menu.resourceCategories' } },

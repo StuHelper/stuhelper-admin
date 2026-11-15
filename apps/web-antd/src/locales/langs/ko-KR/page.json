@@ -34,7 +34,8 @@
     "accessAudit": "작업 기록",
     "lookup": "정보 조회",
     "catalogTimetable": "교시 시간",
-    "qqGroups": "QQ 그룹 관리"
+    "qqGroups": "QQ 그룹 관리",
+    "catalogTeacherSites": "교원 홈페이지"
   },
   "common": {
     "all": "전체",
@@ -1631,5 +1632,69 @@
     "sent": "메일 서버가 답장을 수락했습니다",
     "failed": "발송 실패",
     "unknown": "발송 결과 불명확, 메일함을 확인하세요"
+  },
+  "teacherSites": {
+    "title": "교원 홈페이지 새로 고침",
+    "intro": "베이항 교원 홈페이지 사이트에서 교원 명단을 읽고, 강의 기록과 함께 교원 목록에 표시할 교원을 정합니다. 증분 새로 고침은 매달 자동으로 실행되며, 전체 새로 고침은 여기서만 시작할 수 있습니다.",
+    "marks": "교원 표시",
+    "eligible": "표시되는 교원",
+    "teaching": "강의 기록 있음",
+    "official": "홈페이지와 일치",
+    "both": "둘 다",
+    "latestRun": "최근 새로 고침",
+    "runIncremental": "증분 새로 고침",
+    "runFull": "전체 새로 고침",
+    "fullConfirm": "전체 새로 고침은 모든 홈페이지를 다시 가져와 시간이 더 걸립니다. 시작할까요?",
+    "alreadyRunning": "새로 고침이 이미 진행 중입니다. 끝날 때까지 기다리세요.",
+    "schedule": "예약: 매달 한 번 증분 새로 고침. 전체 명단을 읽고 바뀐 홈페이지만 다시 가져옵니다.",
+    "mode": "유형",
+    "requestedAt": "시작",
+    "finishedAt": "종료",
+    "duration": "소요 시간",
+    "seconds": "{value}초",
+    "requests": "요청 수",
+    "sites": "홈페이지 수",
+    "failure": "실패 원인",
+    "noRun": "아직 새로 고침 기록이 없습니다.",
+    "unmatched": "일치하지 않은 홈페이지",
+    "name": "홈페이지의 이름",
+    "unit": "홈페이지의 소속",
+    "reason": "원인",
+    "candidates": "후보 수",
+    "allReasons": "모든 원인 ({count})",
+    "reasonCount": "{reason} ({count})",
+    "observedAt": "명단 확인 시각 {time}, 총 {count}개",
+    "status": {
+      "queued": "대기 중",
+      "running": "진행 중",
+      "succeeded": "성공",
+      "failed": "실패",
+      "timed_out": "시간 초과"
+    },
+    "modes": {
+      "incremental": "증분",
+      "full": "전체"
+    },
+    "triggers": {
+      "manual": "수동",
+      "scheduled": "예약"
+    },
+    "failures": {
+      "crawl_failed": "가져오기 실패",
+      "request_failed": "사이트 요청 실패",
+      "invalid_snapshot": "결과가 불완전함",
+      "import_conflict": "가져오기 충돌",
+      "dependency_unavailable": "필요한 서비스를 사용할 수 없음",
+      "worker_interrupted": "작업이 중단됨",
+      "timeout": "시간 초과"
+    },
+    "reasons": {
+      "unit_mismatch": "소속 표기가 다름",
+      "ambiguous_catalog": "같은 소속에 동명이인",
+      "catalog_unit_missing": "데이터에 소속 없음",
+      "site_unit_missing": "홈페이지에 소속 없음",
+      "catalog_name_absent": "데이터에 같은 이름 없음",
+      "ambiguous_site": "중복 홈페이지"
+    }
   }
 }
