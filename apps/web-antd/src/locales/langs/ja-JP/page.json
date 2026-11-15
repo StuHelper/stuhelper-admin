@@ -34,7 +34,8 @@
     "accessAudit": "操作記録",
     "lookup": "情報照会",
     "catalogTimetable": "時限設定",
-    "qqGroups": "QQ グループ管理"
+    "qqGroups": "QQ グループ管理",
+    "catalogTeacherSites": "教員ページ更新"
   },
   "common": {
     "all": "すべて",
@@ -1631,5 +1632,69 @@
     "sent": "メールサーバーが返信を受け付けました",
     "failed": "送信失敗",
     "unknown": "送信結果不明・メールボックスを確認してください"
+  },
+  "teacherSites": {
+    "title": "教員ページの更新",
+    "intro": "北航の教員個人ページから教員名簿を読み取り、授業記録とあわせて教員一覧に表示する教員を決めます。増分更新は毎月自動で行われ、全件更新はここからのみ開始できます。",
+    "marks": "教員マーク",
+    "eligible": "表示する教員",
+    "teaching": "授業記録あり",
+    "official": "個人ページと一致",
+    "both": "両方",
+    "latestRun": "最新の更新",
+    "runIncremental": "増分更新",
+    "runFull": "全件更新",
+    "fullConfirm": "全件更新はすべての個人ページを取り直すため時間がかかります。開始しますか？",
+    "alreadyRunning": "更新が実行中です。終了までお待ちください。",
+    "schedule": "自動更新：毎月 1 回の増分更新。名簿全体を読み、変更されたページだけを取り直します。",
+    "mode": "種類",
+    "requestedAt": "開始",
+    "finishedAt": "終了",
+    "duration": "所要時間",
+    "seconds": "{value} 秒",
+    "requests": "リクエスト数",
+    "sites": "個人ページ数",
+    "failure": "失敗の理由",
+    "noRun": "まだ更新は実行されていません。",
+    "unmatched": "一致しなかった個人ページ",
+    "name": "ページ上の氏名",
+    "unit": "ページ上の所属",
+    "reason": "理由",
+    "candidates": "候補数",
+    "allReasons": "すべての理由（{count}）",
+    "reasonCount": "{reason}（{count}）",
+    "observedAt": "名簿の取得：{time}、合計 {count}",
+    "status": {
+      "queued": "待機中",
+      "running": "実行中",
+      "succeeded": "成功",
+      "failed": "失敗",
+      "timed_out": "タイムアウト"
+    },
+    "modes": {
+      "incremental": "増分",
+      "full": "全件"
+    },
+    "triggers": {
+      "manual": "手動",
+      "scheduled": "自動"
+    },
+    "failures": {
+      "crawl_failed": "取得に失敗",
+      "request_failed": "サイトへの要求に失敗",
+      "invalid_snapshot": "取得結果が不完全",
+      "import_conflict": "取り込みの競合",
+      "dependency_unavailable": "必要なサービスが利用不可",
+      "worker_interrupted": "処理が中断",
+      "timeout": "タイムアウト"
+    },
+    "reasons": {
+      "unit_mismatch": "所属の表記が異なる",
+      "ambiguous_catalog": "同じ所属に同名がいる",
+      "catalog_unit_missing": "データに所属がない",
+      "site_unit_missing": "ページに所属がない",
+      "catalog_name_absent": "データに同名がいない",
+      "ambiguous_site": "重複したページ"
+    }
   }
 }

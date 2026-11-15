@@ -34,7 +34,8 @@
     "accessAudit": "Registro de operaciones",
     "lookup": "Consulta de información",
     "catalogTimetable": "Horario de franjas",
-    "qqGroups": "Grupos de QQ"
+    "qqGroups": "Grupos de QQ",
+    "catalogTeacherSites": "Páginas del profesorado"
   },
   "common": {
     "all": "Todos",
@@ -1631,5 +1632,69 @@
     "sent": "El servidor aceptó la respuesta",
     "failed": "Error de envío",
     "unknown": "Envío incierto; revisa el buzón"
+  },
+  "teacherSites": {
+    "title": "Actualización de páginas del profesorado",
+    "intro": "Lee la lista de profesores del sitio de páginas personales de BUAA. Junto con los registros de docencia decide qué profesores se muestran. Cada mes se ejecuta una actualización incremental; la completa solo se inicia aquí.",
+    "marks": "Marcas de profesores",
+    "eligible": "Profesores mostrados",
+    "teaching": "Con docencia registrada",
+    "official": "Con página coincidente",
+    "both": "Ambos",
+    "latestRun": "Última actualización",
+    "runIncremental": "Actualización incremental",
+    "runFull": "Actualización completa",
+    "fullConfirm": "La actualización completa vuelve a descargar todas las páginas y tarda más. ¿Iniciarla?",
+    "alreadyRunning": "Ya hay una actualización en curso. Espera a que termine.",
+    "schedule": "Programada: una actualización incremental al mes. Lee la lista completa y solo descarga las páginas que cambiaron.",
+    "mode": "Tipo",
+    "requestedAt": "Inicio",
+    "finishedAt": "Fin",
+    "duration": "Duración",
+    "seconds": "{value} s",
+    "requests": "Solicitudes",
+    "sites": "Páginas",
+    "failure": "Motivo del fallo",
+    "noRun": "Aún no se ha ejecutado ninguna actualización.",
+    "unmatched": "Páginas sin coincidencia",
+    "name": "Nombre en la página",
+    "unit": "Unidad en la página",
+    "reason": "Motivo",
+    "candidates": "Candidatos",
+    "allReasons": "Todos los motivos ({count})",
+    "reasonCount": "{reason} ({count})",
+    "observedAt": "Lista leída el {time}; {count} en total",
+    "status": {
+      "queued": "En cola",
+      "running": "En curso",
+      "succeeded": "Correcta",
+      "failed": "Fallida",
+      "timed_out": "Tiempo agotado"
+    },
+    "modes": {
+      "incremental": "Incremental",
+      "full": "Completa"
+    },
+    "triggers": {
+      "manual": "Manual",
+      "scheduled": "Programada"
+    },
+    "failures": {
+      "crawl_failed": "Error al descargar",
+      "request_failed": "Error al consultar el sitio",
+      "invalid_snapshot": "Resultado incompleto",
+      "import_conflict": "Conflicto de importación",
+      "dependency_unavailable": "Servicio necesario no disponible",
+      "worker_interrupted": "Tarea interrumpida",
+      "timeout": "Tiempo agotado"
+    },
+    "reasons": {
+      "unit_mismatch": "Unidad escrita de otra forma",
+      "ambiguous_catalog": "Mismo nombre en la misma unidad",
+      "catalog_unit_missing": "Sin unidad en el catálogo",
+      "site_unit_missing": "Sin unidad en la página",
+      "catalog_name_absent": "Nombre ausente en el catálogo",
+      "ambiguous_site": "Páginas duplicadas"
+    }
   }
 }

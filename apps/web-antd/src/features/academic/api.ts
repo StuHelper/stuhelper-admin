@@ -22,6 +22,10 @@ export type CatalogImport = Catalog['schemas']['Import'];
 export type Timetable = Catalog['schemas']['Timetable'];
 export type ImportPreview = Catalog['schemas']['ImportPreview'];
 export type ImportResult = Catalog['schemas']['ImportResult'];
+export type TeacherRefreshStatus = Catalog['schemas']['TeacherRefreshStatus'];
+export type TeacherRefreshRun = Catalog['schemas']['TeacherRefreshRun'];
+export type UnmatchedTeacherSite = Catalog['schemas']['UnmatchedTeacherSite'];
+export type UnmatchedTeacherSitePage = Catalog['schemas']['UnmatchedTeacherSitePage'];
 export type AdminEntry = Reviews['schemas']['AdminEntry'];
 export type Presentation = Reviews['schemas']['Presentation'];
 export type PresentationView = Reviews['schemas']['PresentationView'];
@@ -46,6 +50,9 @@ const parse = {
   importPreview: schemaOf<ImportPreview>(catalog, 'ImportPreview'),
   importResult: schemaOf<ImportResult>(catalog, 'ImportResult'),
   timetable: schemaOf<Timetable>(catalog, 'Timetable'),
+  refreshStatus: schemaOf<TeacherRefreshStatus>(catalog, 'TeacherRefreshStatus'),
+  refreshRun: schemaOf<TeacherRefreshRun>(catalog, 'TeacherRefreshRun'),
+  unmatched: schemaOf<UnmatchedTeacherSitePage>(catalog, 'UnmatchedTeacherSitePage'),
   entry: schemaOf<AdminEntry>(reviews, 'AdminEntry'),
   entries: schemaOf<AdminEntry[]>(reviews, 'AdminEntry', true),
   entryPage: schemaOf<Reviews['schemas']['AdminPage']>(reviews, 'AdminPage'),
@@ -288,6 +295,19 @@ export class AcademicAdminApi {
     );
   }
 
+  /** Start one refresh. The server runs at most one at a time and answers 409 while one runs. */
+  startTeacherRefresh(
+    school: string,
+    body: { mode: 'full' | 'incremental' },
+    key: string,
+  ) {
+    return this.http.json(
+      `/api/v1/catalog/admin/schools/${segment(school)}/teacher-sites/refresh`,
+      parse.refreshRun,
+      { method: 'POST', body, key },
+    );
+  }
+
   submitTask(body: Submission, key: string) {
     return this.http.json('/api/v1/moderation/tasks', parse.task, {
       method: 'POST',
@@ -319,6 +339,15 @@ export class AcademicAdminApi {
     });
   }
 
+  /** Latest teacher homepage refresh and the current teacher mark counts. */
+  teacherRefresh(school: string, signal?: AbortSignal) {
+    return this.http.json(
+      `/api/v1/catalog/admin/schools/${segment(school)}/teacher-sites/refresh`,
+      parse.refreshStatus,
+      { signal },
+    );
+  }
+
   /** Period times of one school term. Resolves undefined when none is configured yet. */
   async timetable(school: string, term: string, signal?: AbortSignal) {
     try {
@@ -327,6 +356,15 @@ export class AcademicAdminApi {
       if (error instanceof ApiError && error.code === 'not_found') return undefined;
       throw error;
     }
+  }
+
+  /** Homepages that matched no single catalog teacher, with the reason; no staff numbers. */
+  unmatchedTeacherSites(school: string, query: Query, signal?: AbortSignal) {
+    return this.http.json(
+      `/api/v1/catalog/admin/schools/${segment(school)}/teacher-sites/unmatched`,
+      parse.unmatched,
+      { query, signal },
+    );
   }
 }
 

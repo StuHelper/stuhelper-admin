@@ -34,7 +34,8 @@
     "accessAudit": "Journal des opérations",
     "lookup": "Recherche d’informations",
     "catalogTimetable": "Horaires des créneaux",
-    "qqGroups": "Groupes QQ"
+    "qqGroups": "Groupes QQ",
+    "catalogTeacherSites": "Pages des enseignants"
   },
   "common": {
     "all": "Tous",
@@ -1631,5 +1632,69 @@
     "sent": "Réponse acceptée par le serveur de messagerie",
     "failed": "Échec de l’envoi",
     "unknown": "Envoi incertain ; vérifiez la boîte"
+  },
+  "teacherSites": {
+    "title": "Actualisation des pages des enseignants",
+    "intro": "Lit la liste des enseignants sur le site des pages personnelles de BUAA. Avec les enseignements enregistrés, elle détermine les enseignants affichés. Une actualisation incrémentielle a lieu chaque mois ; une actualisation complète se lance uniquement ici.",
+    "marks": "Marques des enseignants",
+    "eligible": "Enseignants affichés",
+    "teaching": "Avec enseignements",
+    "official": "Page correspondante",
+    "both": "Les deux",
+    "latestRun": "Dernière actualisation",
+    "runIncremental": "Actualisation incrémentielle",
+    "runFull": "Actualisation complète",
+    "fullConfirm": "Une actualisation complète récupère à nouveau toutes les pages et prend plus de temps. La lancer ?",
+    "alreadyRunning": "Une actualisation est déjà en cours. Attendez sa fin.",
+    "schedule": "Planifiée : une actualisation incrémentielle par mois. Elle lit la liste complète et ne récupère que les pages modifiées.",
+    "mode": "Genre",
+    "requestedAt": "Début",
+    "finishedAt": "Fin",
+    "duration": "Durée",
+    "seconds": "{value} s",
+    "requests": "Requêtes",
+    "sites": "Pages",
+    "failure": "Cause de l’échec",
+    "noRun": "Aucune actualisation pour l’instant.",
+    "unmatched": "Pages sans correspondance",
+    "name": "Nom sur la page",
+    "unit": "Unité sur la page",
+    "reason": "Cause",
+    "candidates": "Candidats",
+    "allReasons": "Toutes les causes ({count})",
+    "reasonCount": "{reason} ({count})",
+    "observedAt": "Liste lue le {time}, {count} au total",
+    "status": {
+      "queued": "En attente",
+      "running": "En cours",
+      "succeeded": "Réussie",
+      "failed": "Échouée",
+      "timed_out": "Délai dépassé"
+    },
+    "modes": {
+      "incremental": "Incrémentielle",
+      "full": "Complète"
+    },
+    "triggers": {
+      "manual": "Manuelle",
+      "scheduled": "Planifiée"
+    },
+    "failures": {
+      "crawl_failed": "Échec de la récupération",
+      "request_failed": "Échec de la requête au site",
+      "invalid_snapshot": "Résultat incomplet",
+      "import_conflict": "Conflit d’import",
+      "dependency_unavailable": "Service requis indisponible",
+      "worker_interrupted": "Tâche interrompue",
+      "timeout": "Délai dépassé"
+    },
+    "reasons": {
+      "unit_mismatch": "Unité écrite autrement",
+      "ambiguous_catalog": "Même nom dans la même unité",
+      "catalog_unit_missing": "Unité absente du catalogue",
+      "site_unit_missing": "Unité absente de la page",
+      "catalog_name_absent": "Nom absent du catalogue",
+      "ambiguous_site": "Pages en double"
+    }
   }
 }

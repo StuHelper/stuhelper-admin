@@ -92,6 +92,13 @@
       "tests/e2e/feedback.spec.mjs#feedback preserves pending writes and reply identity across retry",
       "tests/e2e/feedback.spec.mjs#feedback known rejections preserve editable drafts and issue new request keys",
       "apps/web-antd/src/features/feedback/FeedbackView.test.ts#protects route changes and refresh while drafts or unknown replies exist"
+    ],
+    "TEACHER-SITES-01": [
+      "apps/web-antd/src/features/academic/TeacherSitesView.test.ts#shows mark counts, the latest run and unmatched homepages without staff numbers"
+    ],
+    "TEACHER-SITES-02": [
+      "apps/web-antd/src/features/academic/TeacherSitesView.test.ts#starts one incremental refresh with an idempotency key and reports a running refresh",
+      "apps/web-antd/src/features/academic/TeacherSitesView.test.ts#disables both refresh buttons while a run is queued or running"
     ]
   }
 }

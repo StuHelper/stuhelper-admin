@@ -34,7 +34,8 @@
     "accessAudit": "操作记录",
     "lookup": "信息查询",
     "catalogTimetable": "学校作息",
-    "qqGroups": "QQ 群管理"
+    "qqGroups": "QQ 群管理",
+    "catalogTeacherSites": "教师官网刷新"
   },
   "common": {
     "all": "全部",
@@ -1631,5 +1632,69 @@
     "sent": "邮件服务器已接受回复",
     "failed": "发送失败",
     "unknown": "发送结果未知，请核对邮箱"
+  },
+  "teacherSites": {
+    "title": "教师官网刷新",
+    "intro": "从北航教师主页平台读取教师名单，与授课记录一起决定教师列表显示哪些教师。每月自动增量刷新一次，全量刷新只能在这里手动开始。",
+    "marks": "教师标记",
+    "eligible": "显示的教师",
+    "teaching": "有授课记录",
+    "official": "官网唯一匹配",
+    "both": "两者都有",
+    "latestRun": "最近一次刷新",
+    "runIncremental": "增量刷新",
+    "runFull": "全量刷新",
+    "fullConfirm": "全量刷新会重新抓取全部教师主页，耗时较长。确定开始吗？",
+    "alreadyRunning": "已有刷新正在进行，请等它结束。",
+    "schedule": "自动刷新：每月一次增量刷新。增量刷新读取完整名单，只重新抓取有变化的主页。",
+    "mode": "类型",
+    "requestedAt": "开始时间",
+    "finishedAt": "结束时间",
+    "duration": "耗时",
+    "seconds": "{value} 秒",
+    "requests": "请求数",
+    "sites": "官网主页数",
+    "failure": "失败原因",
+    "noRun": "还没有刷新记录。",
+    "unmatched": "未匹配的官网主页",
+    "name": "官网姓名",
+    "unit": "官网单位",
+    "reason": "原因",
+    "candidates": "候选数",
+    "allReasons": "全部原因（{count}）",
+    "reasonCount": "{reason}（{count}）",
+    "observedAt": "名单读取于 {time}，共 {count} 个",
+    "status": {
+      "queued": "排队中",
+      "running": "进行中",
+      "succeeded": "成功",
+      "failed": "失败",
+      "timed_out": "超时"
+    },
+    "modes": {
+      "incremental": "增量",
+      "full": "全量"
+    },
+    "triggers": {
+      "manual": "手动",
+      "scheduled": "定时"
+    },
+    "failures": {
+      "crawl_failed": "抓取失败",
+      "request_failed": "请求官网失败",
+      "invalid_snapshot": "抓取结果不完整",
+      "import_conflict": "导入冲突",
+      "dependency_unavailable": "依赖服务不可用",
+      "worker_interrupted": "任务被中断",
+      "timeout": "超时"
+    },
+    "reasons": {
+      "unit_mismatch": "单位写法不同",
+      "ambiguous_catalog": "数据库同单位有同名",
+      "catalog_unit_missing": "数据库缺单位",
+      "site_unit_missing": "官网缺单位",
+      "catalog_name_absent": "数据库没有同名",
+      "ambiguous_site": "官网有重复主页"
+    }
   }
 }

@@ -51,4 +51,19 @@ describe('contract validation', () => {
       ),
     ).toBe(false);
   });
+  it('accepts null for a nullable reference and still checks a present value', () => {
+    const set = {
+      Holder: {
+        type: 'object',
+        required: ['latest'],
+        properties: { latest: { $ref: '#/components/schemas/Inner', nullable: true } },
+      },
+      Inner: { type: 'object', required: ['id'], properties: { id: { type: 'string' } } },
+    };
+    const holder = { $ref: '#/components/schemas/Holder' };
+    expect(validates({ latest: null }, holder, set)).toBe(true);
+    expect(validates({ latest: { id: 'run' } }, holder, set)).toBe(true);
+    expect(validates({ latest: { id: 1 } }, holder, set)).toBe(false);
+    expect(validates({ latest: null }, { $ref: '#/components/schemas/Inner' }, set)).toBe(false);
+  });
 });
