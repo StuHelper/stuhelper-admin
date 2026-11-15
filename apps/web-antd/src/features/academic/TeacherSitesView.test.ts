@@ -109,3 +109,41 @@ it('clears names already shown when reading the list is denied', async () => {
   expect(root.textContent).not.toContain('Synthetic Teacher');
   expect(root.textContent).toContain('error:forbidden');
 });
+
+it('recovers polling after a temporary error and stops exposing status after permission denial', async () => {
+  vi.useFakeTimers({ shouldAdvanceTime: true });
+  cleanups.push(() => vi.useRealTimers());
+  let reads = 0;
+  mock.json.mockImplementation(async (path: string) => {
+    if (!path.endsWith('/refresh')) return page('');
+    reads++;
+    if (reads === 2) throw new ApiError('unavailable', false, 503);
+    if (reads === 4) throw new ApiError('forbidden', false, 403);
+    return { latest: run('running'), counts };
+  });
+  const root = await mount();
+  await vi.advanceTimersByTimeAsync(5000); await settle();
+  expect(root.textContent).toContain('error:unavailable');
+  expect(button(root, 'page.teacherSites.runIncremental')!.disabled).toBe(true);
+  await vi.advanceTimersByTimeAsync(5000); await settle();
+  expect(reads).toBe(3);
+  expect(root.textContent).not.toContain('error:unavailable');
+  await vi.advanceTimersByTimeAsync(5000); await settle();
+  expect(root.textContent).not.toContain('page.teacherSites.status.running');
+  await vi.advanceTimersByTimeAsync(10_000); await settle();
+  expect(reads).toBe(4);
+  expect(button(root, 'page.common.retry')).toBeDefined();
+});
+
+it('updates global reason counts when a filtered list receives a newer snapshot', async () => {
+  mock.json.mockImplementation(async (path: string, _validate: unknown, options?: { query?: { reason?: string } }) => {
+    if (path.endsWith('/refresh')) return { latest: run('succeeded'), counts };
+    return { ...page(options?.query?.reason ?? ''), reason_counts: { unit_mismatch: 451, ambiguous_catalog: options?.query?.reason ? 900 : 318 } };
+  });
+  const root = await mount();
+  root.querySelector('.ant-select-selector')?.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })); await settle();
+  const option = [...document.querySelectorAll('.ant-select-item-option')].find((item) => item.textContent?.includes('ambiguous_catalog'));
+  expect(option).toBeDefined();
+  option?.dispatchEvent(new MouseEvent('click', { bubbles: true })); await settle();
+  expect(root.querySelector('.ant-select-selection-item')?.textContent).toContain('900');
+});

@@ -62,7 +62,7 @@ watch(
 watch(
   () => status.status.value,
   (value) => {
-    if (value === 'error') known.value = undefined;
+    if (value === 'error' && ['forbidden', 'unauthenticated'].includes(status.error.value)) known.value = undefined;
   },
 );
 const latest = computed(() => known.value?.latest ?? undefined);
@@ -73,10 +73,12 @@ const active = computed(
 // While a run is queued or running, check again every five seconds.
 let timer: ReturnType<typeof setTimeout> | undefined;
 watch(
-  () => [active.value, known.value] as const,
+  () => [active.value, known.value, status.status.value] as const,
   () => {
     clearTimeout(timer);
-    if (active.value) timer = setTimeout(() => void status.reload(), 5000);
+    const retryable = status.status.value === 'ready' ||
+      status.status.value === 'error' && ['network', 'rate_limited', 'timeout', 'unavailable'].includes(status.error.value);
+    if (active.value && retryable) timer = setTimeout(() => void status.reload(), 5000);
   },
 );
 onBeforeUnmount(() => clearTimeout(timer));
@@ -121,7 +123,7 @@ async function load(more = false) {
     next.value = page.next;
     total.value = page.total;
     observedAt.value = page.observed_at;
-    if (!reason.value) reasonCounts.value = page.reason_counts as Record<string, number>;
+    reasonCounts.value = page.reason_counts as Record<string, number>;
   } catch (error_) {
     if (current !== generation) return;
     listError.value = errorCode(error_);
@@ -140,6 +142,7 @@ async function load(more = false) {
 watch(
   school,
   () => {
+    known.value = undefined;
     void status.reload();
     void load();
   },
@@ -201,6 +204,13 @@ const dash = '—';
           role="alert"
           :message="errorText(status.error.value)"
         />
+        <Button
+          v-if="status.status.value === 'error'"
+          class="mb-4"
+          @click="status.reload()"
+        >
+          {{ t('page.common.retry') }}
+        </Button>
         <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
           <Statistic
             :title="t('page.teacherSites.eligible')"
