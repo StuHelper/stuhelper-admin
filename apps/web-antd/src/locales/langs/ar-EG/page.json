@@ -34,7 +34,8 @@
     "accessAudit": "سجل العمليات",
     "lookup": "البحث عن المعلومات",
     "catalogTimetable": "مواعيد الحصص",
-    "qqGroups": "مجموعات QQ"
+    "qqGroups": "مجموعات QQ",
+    "catalogTeacherSites": "صفحات أعضاء هيئة التدريس"
   },
   "common": {
     "all": "الكل",
@@ -1631,5 +1632,69 @@
     "sent": "قبل خادم البريد الرد",
     "failed": "فشل الإرسال",
     "unknown": "نتيجة الإرسال غير معروفة؛ تحقق من البريد"
+  },
+  "teacherSites": {
+    "title": "تحديث صفحات أعضاء هيئة التدريس",
+    "intro": "يقرأ قائمة المدرّسين من موقع الصفحات الشخصية في جامعة بيهانغ، ويحدد مع سجلات التدريس المدرّسين الذين تظهرهم القائمة. يُجرى تحديث تزايدي كل شهر، ولا يبدأ التحديث الكامل إلا من هنا.",
+    "marks": "علامات المدرّسين",
+    "eligible": "المدرّسون الظاهرون",
+    "teaching": "لهم سجلات تدريس",
+    "official": "مطابقون لصفحة",
+    "both": "كلاهما",
+    "latestRun": "آخر تحديث",
+    "runIncremental": "تحديث تزايدي",
+    "runFull": "تحديث كامل",
+    "fullConfirm": "يعيد التحديث الكامل جلب جميع الصفحات ويستغرق وقتًا أطول. هل تريد البدء؟",
+    "alreadyRunning": "يوجد تحديث قيد التشغيل. انتظر حتى ينتهي.",
+    "schedule": "مجدول: تحديث تزايدي واحد شهريًا. يقرأ القائمة كاملة ويجلب الصفحات المتغيرة فقط.",
+    "mode": "النوع",
+    "requestedAt": "البدء",
+    "finishedAt": "الانتهاء",
+    "duration": "المدة",
+    "seconds": "{value} ث",
+    "requests": "الطلبات",
+    "sites": "الصفحات",
+    "failure": "سبب الفشل",
+    "noRun": "لم يُجرَ أي تحديث بعد.",
+    "unmatched": "صفحات غير مطابقة",
+    "name": "الاسم في الصفحة",
+    "unit": "الوحدة في الصفحة",
+    "reason": "السبب",
+    "candidates": "المرشحون",
+    "allReasons": "كل الأسباب ({count})",
+    "reasonCount": "{reason} ({count})",
+    "observedAt": "قُرئت القائمة في {time}، الإجمالي {count}",
+    "status": {
+      "queued": "في الانتظار",
+      "running": "قيد التشغيل",
+      "succeeded": "نجح",
+      "failed": "فشل",
+      "timed_out": "انتهت المهلة"
+    },
+    "modes": {
+      "incremental": "تزايدي",
+      "full": "كامل"
+    },
+    "triggers": {
+      "manual": "يدوي",
+      "scheduled": "مجدول"
+    },
+    "failures": {
+      "crawl_failed": "فشل الجلب",
+      "request_failed": "فشل طلب الموقع",
+      "invalid_snapshot": "نتيجة غير مكتملة",
+      "import_conflict": "تعارض في الاستيراد",
+      "dependency_unavailable": "خدمة مطلوبة غير متاحة",
+      "worker_interrupted": "توقفت المهمة",
+      "timeout": "انتهت المهلة"
+    },
+    "reasons": {
+      "unit_mismatch": "الوحدة مكتوبة بطريقة مختلفة",
+      "ambiguous_catalog": "الاسم نفسه في الوحدة نفسها",
+      "catalog_unit_missing": "لا وحدة في البيانات",
+      "site_unit_missing": "لا وحدة في الصفحة",
+      "catalog_name_absent": "الاسم غير موجود في البيانات",
+      "ambiguous_site": "صفحات مكررة"
+    }
   }
 }

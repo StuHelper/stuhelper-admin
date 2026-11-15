@@ -27,6 +27,7 @@ export const menus: MenuRecordRaw[] = [
     children: [
       { name: 'page.menu.catalog', path: '/catalog' },
       { name: 'page.menu.catalogImports', path: '/catalog/imports' },
+      { name: 'page.menu.catalogTeacherSites', path: '/catalog/teacher-sites' },
       { name: 'page.menu.catalogTimetable', path: '/catalog/timetable' },
     ],
   },
