@@ -35,7 +35,8 @@
     "lookup": "Consulta de información",
     "catalogTimetable": "Horario de franjas",
     "qqGroups": "Grupos de QQ",
-    "catalogTeacherSites": "Páginas del profesorado"
+    "catalogTeacherSites": "Páginas del profesorado",
+    "closures": "Cierres de cuenta"
   },
   "common": {
     "all": "Todos",
@@ -1695,6 +1696,61 @@
       "site_unit_missing": "Sin unidad en la página",
       "catalog_name_absent": "Nombre ausente en el catálogo",
       "ambiguous_site": "Páginas duplicadas"
+    }
+  },
+  "closures": {
+    "title": "Administración de cierres de cuenta",
+    "intro": "Revise las solicitudes de cierre de cuenta de la aplicación, los pasos completados y los bloqueos. Tras los siete días de reflexión, el administrador puede reanudar las solicitudes bloqueadas sin afectar al SSO compartido.",
+    "detailTitle": "Detalle de solicitud de cierre",
+    "empty": "No hay solicitudes de cierre para este filtro.",
+    "closureId": "ID de solicitud",
+    "profileId": "ID de perfil",
+    "requestedAt": "Fecha de solicitud",
+    "coolingEndsAt": "Fin del periodo de reflexión",
+    "completedAt": "Fecha de finalización",
+    "completedSteps": "Progreso de limpieza",
+    "stepDone": "Completado",
+    "stepPending": "Pendiente",
+    "skippedModules": "Módulos omitidos por no haberse instalado",
+    "noSkipped": "Ningún módulo omitido",
+    "blocker": "Motivo de bloqueo",
+    "noBlocker": "Sin bloqueo",
+    "blockerHint": "Confirme la liquidación de saldo o la recuperación del servicio correspondiente antes de reanudar el cierre.",
+    "pointsPolicy": "Política de puntos",
+    "coolingHint": "El periodo de reflexión de siete días termina el {time}. El solicitante puede cancelar antes del vencimiento.",
+    "process": "Reanudar cierre de cuenta",
+    "completedNotice": "El cierre de la cuenta finalizó y el contenido público quedó desvinculado.",
+    "resumedNotice": "Se reanudó el procesamiento; revise los pasos y el estado de bloqueo.",
+    "states": {
+      "cooling": "En periodo de reflexión",
+      "awaiting_assets": "Esperando liquidación de activos",
+      "processing": "Ejecutando limpieza",
+      "closed": "Cerrada",
+      "cancelled": "Cancelada"
+    },
+    "steps": {
+      "assets": "Verificación de saldo y limpieza de puntos",
+      "sessions": "Revocación de sesiones locales",
+      "authorizations": "Retirada de autorizaciones y vinculaciones",
+      "content": "Desvinculación de contenido y borrado de favoritos"
+    },
+    "blockers": {
+      "assets_unavailable": "Servicio de facturación no disponible",
+      "assets_pending": "Saldo restante, reembolso o pago pendiente",
+      "sessions_unavailable": "Servicio de sesiones no disponible",
+      "authorizations_unavailable": "Servicio de autorizaciones o vinculaciones no disponible",
+      "content_unavailable": "Servicio de contenidos o favoritos no disponible"
+    },
+    "modules": {
+      "billing": "Facturación",
+      "open-platform": "Plataforma abierta",
+      "reviews": "Reseñas",
+      "resources": "Materiales de estudio",
+      "favorites": "Favoritos",
+      "qq-binding": "Vinculación QQ"
+    },
+    "pointsPolicies": {
+      "forfeit_all_points_and_pending_deductions": "Anular todos los puntos y deducciones pendientes al cerrar definitivamente sin conversión a efectivo ni Ivory"
     }
   }
 }
