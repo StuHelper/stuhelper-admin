@@ -59,7 +59,8 @@
       "tests/e2e/commerce.spec.mjs#a refund without payee details says so"
     ],
     "AE-ADMIN-01": [
-      "tests/e2e/eligibility.spec.mjs#a school rule for buying resources is saved with the version read and leaves downloads unchanged"
+      "tests/e2e/eligibility.spec.mjs#a school rule for buying resources is saved with the version read and leaves downloads unchanged",
+      "tests/e2e/shared-views-ux.spec.mjs#eligibility caps concurrent rule reads and refreshes only the edited row after saving"
     ],
     "AE-ADMIN-02": [
       "tests/e2e/eligibility.spec.mjs#an empty rule requires only sign-in and a stale version is rejected"
@@ -86,7 +87,8 @@
     "CM-19": [
       "tests/e2e/feedback.spec.mjs#feedback reply refresh cannot overwrite another operators note with a newer revision",
       "tests/e2e/feedback.spec.mjs#feedback clears private mail after permission revocation",
-      "tests/e2e/feedback.spec.mjs#feedback opens and updates a detail whose escaped replies exceed the default JSON limit"
+      "tests/e2e/feedback.spec.mjs#feedback opens and updates a detail whose escaped replies exceed the default JSON limit",
+      "tests/e2e/shared-views-ux.spec.mjs#feedback appends pages without overwriting earlier items and refunds switch between Segmented and Select by viewport"
     ],
     "CM-20": [
       "tests/e2e/feedback.spec.mjs#feedback preserves pending writes and reply identity across retry",

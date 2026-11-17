@@ -8,6 +8,7 @@ import { useI18n } from '@vben/locales';
 import { Alert, Button, Card, Checkbox, CheckboxGroup, DatePicker, Descriptions, DescriptionsItem, Drawer, Form, FormItem, Image, Input, InputNumber, Result, Space, Switch, Table, TabPane, Tabs, Tag, Textarea } from 'ant-design-vue';
 
 import { errorCode } from '#/shared/api/errors';
+import { useAsync, usePaged, useTask } from '#/shared/composables/async';
 import { useFormat } from '#/shared/format';
 import AdminPage from '#/shared/ui/AdminPage.vue';
 import { useErrorText } from '#/shared/ui/messages';
@@ -31,14 +32,7 @@ const accessError = ref('');
 const schools = ref<School[]>([]);
 const schoolId = ref('');
 const tab = ref<Tab>('reviews');
-const busy = ref(false);
-const error = ref('');
 const notice = ref('');
-const applications = ref<Application[]>([]);
-const removals = ref<RemovalRequest[]>([]);
-const jobs = ref<Job[]>([]);
-const suggestions = ref<Suggestion[]>([]);
-const cursor = ref('');
 const reviewing = shallowRef<Application>();
 const manual = shallowRef<Schemas['ManualInput']>();
 const pictures = ref<{ id: string; type: string; url: string }[]>([]);
@@ -59,75 +53,103 @@ function clearPictures() {
   for (const picture of pictures.value) URL.revokeObjectURL(picture.url);
   pictures.value = [];
 }
-
-async function action(work: () => Promise<void>, done = '') {
-  if (busy.value) return;
-  busy.value = true;
-  error.value = '';
+function clearPrivate() {
+  reviewing.value = undefined;
+  manual.value = undefined;
+  clearPictures();
+  credential.value = undefined;
+  studentProfile.value = undefined;
+  note.value = '';
   notice.value = '';
-  try {
-    await work();
-    notice.value = done;
-  } catch (error_) {
-    error.value = errorCode(error_);
-  } finally {
-    busy.value = false;
-  }
 }
 
-async function load(append = false) {
-  await action(async () => {
-    const after = append ? cursor.value : '';
+const applications = usePaged<Application>(
+  (after, signal) =>
+    schoolId.value
+      ? api.list('Application', `/api/v1/admin/verification/schools/${encodeURIComponent(schoolId.value)}/applications`, { after, signal })
+      : Promise.resolve({ items: [], next: '' }),
+  { onDenied: clearPrivate },
+);
+const removals = usePaged<RemovalRequest>(
+  (after, signal) =>
+    schoolId.value
+      ? api.list('RemovalRequest', `/api/v1/admin/verification/schools/${encodeURIComponent(schoolId.value)}/requests`, { after, signal })
+      : Promise.resolve({ items: [], next: '' }),
+  { onDenied: clearPrivate },
+);
+const jobs = usePaged<Job>(
+  (after, signal) =>
+    schoolId.value
+      ? api.list('Job', `/api/v1/admin/verification/jobs?school_id=${encodeURIComponent(schoolId.value)}`, { after, signal })
+      : Promise.resolve({ items: [], next: '' }),
+  { onDenied: clearPrivate },
+);
+const suggestions = usePaged<Suggestion>(
+  (after, signal) => api.list('Suggestion', '/api/v1/admin/verification/suggestions', { after, signal }),
+  { onDenied: clearPrivate },
+);
+const schoolConfig = useAsync(
+  async (signal) => {
     const school = encodeURIComponent(schoolId.value);
-    if (!append) {
-      reviewing.value = undefined;
-      clearPictures();
+    try {
+      const found = await api.get('School', `/api/v1/admin/verification/schools/${school}`, signal);
+      Object.assign(config, found);
+      materialTypes.value = found.material_types.join(', ');
+      return found;
+    } catch (error_) {
+      if (errorCode(error_) !== 'not_found') throw error_;
+      const empty = blankSchool(schoolId.value);
+      Object.assign(config, empty);
+      materialTypes.value = empty.material_types.join(', ');
+      return empty;
     }
-    switch (tab.value) {
-      case 'configuration': {
-        try {
-          Object.assign(config, await api.get('School', `/api/v1/admin/verification/schools/${school}`));
-        } catch (error_) {
-          if (errorCode(error_) !== 'not_found') throw error_;
-          Object.assign(config, blankSchool(schoolId.value));
-        }
-        materialTypes.value = config.material_types.join(', ');
-        cursor.value = '';
-        break;
-      }
-      case 'jobs': {
-        const page = await api.list('Job', `/api/v1/admin/verification/jobs?school_id=${school}`, { after });
-        jobs.value = append ? [...jobs.value, ...page.items] : page.items;
-        cursor.value = page.next;
-        break;
-      }
-      case 'requests': {
-        const page = await api.list('RemovalRequest', `/api/v1/admin/verification/schools/${school}/requests`, { after });
-        removals.value = append ? [...removals.value, ...page.items] : page.items;
-        cursor.value = page.next;
-        break;
-      }
-      case 'reviews': {
-        const page = await api.list('Application', `/api/v1/admin/verification/schools/${school}/applications`, { after });
-        applications.value = append ? [...applications.value, ...page.items] : page.items;
-        cursor.value = page.next;
-        break;
-      }
-      case 'suggestions': {
-        const page = await api.list('Suggestion', '/api/v1/admin/verification/suggestions', { after });
-        suggestions.value = append ? [...suggestions.value, ...page.items] : page.items;
-        cursor.value = page.next;
-        break;
-      }
-      default: {
-        cursor.value = '';
-      }
-    }
+  },
+  { onDenied: clearPrivate },
+);
+const task = useTask({ onDenied: clearPrivate });
+
+const currentPaged = computed(() => {
+  if (tab.value === 'reviews') return applications;
+  if (tab.value === 'requests') return removals;
+  if (tab.value === 'jobs') return jobs;
+  if (tab.value === 'suggestions') return suggestions;
+  return undefined;
+});
+const busy = computed(
+  () =>
+    task.busy.value ||
+    schoolConfig.status.value === 'loading' ||
+    currentPaged.value?.status.value === 'loading',
+);
+const activeError = computed(
+  () =>
+    task.error.value ||
+    (tab.value === 'configuration'
+      ? schoolConfig.error.value
+      : (currentPaged.value?.error.value ?? '')),
+);
+
+async function runAction(work: () => Promise<void>, done = '') {
+  if (busy.value) return;
+  notice.value = '';
+  const ok = await task.run(async () => {
+    await work();
+    return true;
   });
+  if (ok) notice.value = done;
+}
+
+function reloadTab() {
+  notice.value = '';
+  reviewing.value = undefined;
+  clearPictures();
+  if (!schoolId.value && tab.value !== 'suggestions') return;
+  if (tab.value === 'configuration') void schoolConfig.reload();
+  else void currentPaged.value?.reload();
 }
 
 async function openReview(row: Application) {
-  await action(async () => {
+  await runAction(async () => {
     clearPictures();
     const id = encodeURIComponent(row.id);
     const form = await api.get('ManualInput', `/api/v1/admin/verification/applications/${id}/form`);
@@ -157,44 +179,44 @@ function closeReview() {
 async function review(decision: Schemas['ReviewInput']['decision']) {
   const row = reviewing.value;
   if (!row) return;
-  await action(async () => {
+  await runAction(async () => {
     const body: Schemas['ReviewInput'] = { decision, note: note.value, revision: row.revision, ...(decision === 'approve' && expiry.value ? { expires_at: expiry.value } : {}) };
     await api.write('Application', `/api/v1/admin/verification/applications/${encodeURIComponent(row.id)}/review`, body);
-    applications.value = applications.value.filter((item) => item.id !== row.id);
+    applications.items.value = applications.items.value.filter((item) => item.id !== row.id);
     reviewing.value = undefined;
     clearPictures();
   }, t('page.common.saved'));
 }
 
 async function decideRemoval(row: RemovalRequest, approve: boolean) {
-  await action(async () => {
+  await runAction(async () => {
     const body: Schemas['DecisionInput'] = { approve, note: notes[row.id] ?? '', revision: row.revision };
     await api.write('RemovalRequest', `/api/v1/admin/verification/requests/${encodeURIComponent(row.id)}/review`, body);
-    removals.value = removals.value.filter((item) => item.id !== row.id);
+    removals.items.value = removals.items.value.filter((item) => item.id !== row.id);
   }, t('page.common.saved'));
 }
 async function decideSuggestion(row: Suggestion, approve: boolean) {
-  await action(async () => {
+  await runAction(async () => {
     const body: Schemas['DecisionInput'] = { approve, note: notes[row.id] ?? '', revision: row.revision };
     const saved = await api.write('Suggestion', `/api/v1/admin/verification/suggestions/${encodeURIComponent(row.id)}/review`, body);
-    suggestions.value = suggestions.value.map((item) => (item.id === saved.id ? saved : item));
+    suggestions.items.value = suggestions.items.value.map((item) => (item.id === saved.id ? saved : item));
   }, t('page.common.saved'));
 }
 async function retryJob(job: Job) {
-  await action(async () => {
+  await runAction(async () => {
     const updated = await api.write('Job', `/api/v1/admin/verification/jobs/${encodeURIComponent(job.id)}/retry`);
-    jobs.value = jobs.value.map((item) => (item.id === updated.id ? updated : item));
+    jobs.items.value = jobs.items.value.map((item) => (item.id === updated.id ? updated : item));
   }, t('page.common.saved'));
 }
 async function saveConfig() {
-  await action(async () => {
+  await runAction(async () => {
     const body = { ...config, material_types: materialTypes.value.split(',').map((value) => value.trim()).filter(Boolean) };
     Object.assign(config, await api.write('School', `/api/v1/admin/verification/schools/${encodeURIComponent(config.id)}`, body, 'PUT'));
   }, t('page.common.saved'));
 }
 
 async function lookupCredential() {
-  await action(async () => {
+  await runAction(async () => {
     studentProfile.value = undefined;
     credential.value = undefined;
     note.value = '';
@@ -204,7 +226,7 @@ async function lookupCredential() {
 async function manageCredential(kind: 'graduate' | 'revoke') {
   const current = credential.value;
   if (!current) return;
-  await action(async () => {
+  await runAction(async () => {
     const body: Schemas['DecisionInput'] = { approve: true, note: note.value, revision: current.revision };
     credential.value = await api.write('Credential', `/api/v1/admin/verification/credentials/${encodeURIComponent(current.id)}/${kind}`, body);
   }, t('page.common.saved'));
@@ -213,7 +235,7 @@ async function manageCredential(kind: 'graduate' | 'revoke') {
 async function showProfile(mode: 'basic' | 'document' | 'full' | 'raw') {
   const current = credential.value;
   if (!current) return;
-  await action(async () => {
+  await runAction(async () => {
     studentProfile.value = undefined;
     const full = mode === 'full' || mode === 'raw';
     const document = mode === 'document' || mode === 'raw';
@@ -227,15 +249,13 @@ function profileValue(value: unknown, field: string) {
 }
 
 watch(schoolId, () => {
-  cursor.value = '';
-  applications.value = [];
-  removals.value = [];
-  jobs.value = [];
-  if (access.value === 'allowed' && schoolId.value) void load();
+  applications.clear();
+  removals.clear();
+  jobs.clear();
+  if (access.value === 'allowed' && schoolId.value) reloadTab();
 });
 watch(tab, () => {
-  cursor.value = '';
-  if (schoolId.value) void load();
+  if (schoolId.value || tab.value === 'suggestions') reloadTab();
 });
 watch(credentialId, () => {
   credential.value = undefined;
@@ -289,12 +309,12 @@ function chooseSchool(school: School) {
           </FormItem>
         </Form>
       </Card>
-      <Alert v-if="error" type="error" show-icon role="alert" :message="errorText(error)" />
+      <Alert v-if="activeError" type="error" show-icon role="alert" :message="errorText(activeError)" />
       <Alert v-if="notice" type="success" show-icon role="status" :message="notice" />
       <Card :bordered="false">
         <Tabs v-model:active-key="tab">
           <TabPane key="reviews" :tab="t('page.verification.tabs.reviews')">
-            <Table :columns="applicationColumns" :data-source="applications" :pagination="false" row-key="id" size="middle" :loading="busy && !reviewing" :scroll="{ x: 640 }" :locale="{ emptyText: t('page.verification.noApplications') }">
+            <Table :columns="applicationColumns" :data-source="applications.items.value" :pagination="false" row-key="id" size="middle" :loading="applications.status.value === 'loading' && !applications.appending.value" :scroll="{ x: 640 }" :locale="{ emptyText: t('page.verification.noApplications') }">
               <template #bodyCell="{ column, record }">
                 <template v-if="column.key === 'method'">{{ label(`page.verification.methods.${record.method}`) }}</template>
                 <template v-else-if="column.key === 'study'">{{ label(`page.verification.stages.${record.stage}`) }} · {{ label(`page.verification.kinds.${record.kind}`) }}</template>
@@ -305,12 +325,12 @@ function chooseSchool(school: School) {
             </Table>
           </TabPane>
           <TabPane key="requests" :tab="t('page.verification.tabs.requests')">
-            <p v-if="removals.length === 0 && !busy" class="text-muted-foreground">{{ t('page.verification.noRequests') }}</p>
-            <Card v-for="row in removals" :key="row.id" size="small" class="mb-3" :title="label(`page.verification.removalKind.${row.kind}`)">
+            <p v-if="removals.items.value.length === 0 && !busy" class="text-muted-foreground">{{ t('page.verification.noRequests') }}</p>
+            <Card v-for="row in removals.items.value" :key="row.id" size="small" class="mb-3" :title="label(`page.verification.removalKind.${row.kind}`)">
               <p class="whitespace-pre-wrap">{{ row.reason }}</p>
               <p class="text-muted-foreground text-xs">{{ t('page.verification.credential') }}: <span class="font-mono">{{ row.credential_id }}</span> · {{ format.dateTime(row.created_at) }}</p>
-              <FormItem class="mb-2 mt-3" :label="t('page.verification.note')" html-for="verificationview-field-2">
-                <Textarea id="verificationview-field-2" v-model:value="notes[row.id]" :rows="2" :maxlength="500" :disabled="busy" />
+              <FormItem class="mb-2 mt-3" :label="t('page.verification.note')" :html-for="`verification-removal-${row.id}`">
+                <Textarea :id="`verification-removal-${row.id}`" v-model:value="notes[row.id]" :rows="2" :maxlength="500" :disabled="busy" />
               </FormItem>
               <Space>
                 <Button type="primary" :disabled="busy" @click="decideRemoval(row, true)">{{ t('page.verification.approve') }}</Button>
@@ -377,7 +397,7 @@ function chooseSchool(school: School) {
             </Form>
           </TabPane>
           <TabPane key="jobs" :tab="t('page.verification.tabs.jobs')">
-            <Table :columns="jobColumns" :data-source="jobs" :pagination="false" row-key="id" size="middle" :loading="busy" :scroll="{ x: 560 }" :locale="{ emptyText: t('page.common.empty') }">
+            <Table :columns="jobColumns" :data-source="jobs.items.value" :pagination="false" row-key="id" size="middle" :loading="jobs.status.value === 'loading' && !jobs.appending.value" :scroll="{ x: 560 }" :locale="{ emptyText: t('page.common.empty') }">
               <template #bodyCell="{ column, record }">
                 <template v-if="column.key === 'kind'">{{ label(`page.verification.jobKinds.${record.kind}`) }}</template>
                 <template v-else-if="column.key === 'state'"><Tag :color="record.state === 'manual' ? 'red' : 'default'">{{ label(`page.verification.jobStates.${record.state}`) }}</Tag></template>
@@ -387,12 +407,12 @@ function chooseSchool(school: School) {
             </Table>
           </TabPane>
           <TabPane key="suggestions" :tab="t('page.verification.tabs.suggestions')">
-            <p v-if="suggestions.length === 0 && !busy" class="text-muted-foreground">{{ t('page.common.empty') }}</p>
-            <Card v-for="row in suggestions" :key="row.id" size="small" class="mb-3" :title="row.name">
+            <p v-if="suggestions.items.value.length === 0 && !busy" class="text-muted-foreground">{{ t('page.common.empty') }}</p>
+            <Card v-for="row in suggestions.items.value" :key="row.id" size="small" class="mb-3" :title="row.name">
               <a :href="row.website" target="_blank" rel="noopener noreferrer" class="break-all">{{ row.website }}</a>
               <p class="mt-2"><Tag>{{ label(`page.verification.states.${row.state}`) }}</Tag><span v-if="row.note" class="ms-2 text-sm">{{ row.note }}</span></p>
               <template v-if="row.state === 'pending'">
-                <FormItem class="mb-2 mt-3" :label="t('page.verification.note')" html-for="verificationview-field-12"><Textarea id="verificationview-field-12" v-model:value="notes[row.id]" :rows="2" :maxlength="500" :disabled="busy" /></FormItem>
+                <FormItem class="mb-2 mt-3" :label="t('page.verification.note')" :html-for="`verification-suggestion-${row.id}`"><Textarea :id="`verification-suggestion-${row.id}`" v-model:value="notes[row.id]" :rows="2" :maxlength="500" :disabled="busy" /></FormItem>
                 <Space>
                   <Button type="primary" :disabled="busy" @click="decideSuggestion(row, true)">{{ t('page.verification.approve') }}</Button>
                   <Button danger :disabled="busy" @click="decideSuggestion(row, false)">{{ t('page.verification.reject') }}</Button>
@@ -402,7 +422,7 @@ function chooseSchool(school: School) {
           </TabPane>
         </Tabs>
         <div class="mt-4 flex justify-center">
-          <Button v-if="cursor" :disabled="busy" @click="load(true)">{{ t('page.common.loadMore') }}</Button>
+          <Button v-if="currentPaged?.next.value" :loading="currentPaged?.appending.value" :disabled="busy" @click="currentPaged?.loadMore">{{ t('page.common.loadMore') }}</Button>
         </div>
       </Card>
     </div>
@@ -434,7 +454,7 @@ function chooseSchool(school: School) {
           <Button :disabled="busy || !note.trim()" @click="review('supplement')">{{ t('page.verification.supplement') }}</Button>
           <Button danger :disabled="busy || !note.trim()" @click="review('reject')">{{ t('page.verification.reject') }}</Button>
         </Space>
-        <Alert v-if="error" type="error" show-icon role="alert" :message="errorText(error)" />
+        <Alert v-if="activeError" type="error" show-icon role="alert" :message="errorText(activeError)" />
       </div>
     </Drawer>
   </AdminPage>

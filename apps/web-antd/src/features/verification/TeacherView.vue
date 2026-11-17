@@ -11,6 +11,7 @@ import { Alert, Button, Card, DatePicker, Descriptions, DescriptionsItem, Drawer
 
 import { useAcademicAdmin } from '#/features/academic/api';
 import { errorCode } from '#/shared/api/errors';
+import { usePaged, useTask } from '#/shared/composables/async';
 import { useLeaveGuard } from '#/shared/composables/leave';
 import { useFormat } from '#/shared/format';
 import AdminPage from '#/shared/ui/AdminPage.vue';
@@ -38,36 +39,7 @@ const accessError = ref('');
 const schools = ref<School[]>([]);
 const schoolId = ref('');
 const tab = ref<Tab>('reviews');
-const busy = ref(false);
-const error = ref('');
 const notice = ref('');
-
-async function action(work: () => Promise<void>, done = '') {
-  if (busy.value) return;
-  busy.value = true;
-  error.value = '';
-  notice.value = '';
-  try {
-    await work();
-    notice.value = done;
-  } catch (error_) {
-    error.value = errorCode(error_);
-  } finally {
-    busy.value = false;
-  }
-}
-
-// Pending teacher applications of the chosen school, ordered by ID.
-const applications = ref<Application[]>([]);
-const cursor = ref('');
-async function load(append = false) {
-  if (!schoolId.value) return;
-  await action(async () => {
-    const page = await api.list('Application', `/api/v1/admin/verification/schools/${encodeURIComponent(schoolId.value)}/teacher-applications`, { after: append ? cursor.value : '' });
-    applications.value = append ? [...applications.value, ...page.items] : page.items;
-    cursor.value = page.next;
-  });
-}
 
 // Review drawer: the submitted form, its materials and the teacher profiles to bind.
 const reviewing = shallowRef<Application>();
@@ -78,13 +50,59 @@ const expiry = ref<string>();
 const teacherIds = ref<string[]>([]);
 const teacherOptions = ref<CatalogObject[]>([]);
 const searching = ref(false);
+const searchError = ref('');
 let searchSeq = 0;
+
+// Qualification lookup and revocation.
+const credentialId = ref('');
+const credential = shallowRef<TeacherCredential>();
+const credentialNames = ref(new Map<string, CatalogObject>());
+const revokeNote = ref('');
+
 function clearPictures() {
   for (const picture of pictures.value) URL.revokeObjectURL(picture.url);
   pictures.value = [];
 }
+function clearPrivate() {
+  reviewing.value = undefined;
+  form.value = undefined;
+  clearPictures();
+  credential.value = undefined;
+  credentialNames.value = new Map();
+  note.value = '';
+  revokeNote.value = '';
+  notice.value = '';
+}
+
+const applications = usePaged<Application>(
+  async (after, signal) => {
+    if (!schoolId.value) return { items: [], next: '' };
+    return api.list(
+      'Application',
+      `/api/v1/admin/verification/schools/${encodeURIComponent(schoolId.value)}/teacher-applications`,
+      { after, signal },
+    );
+  },
+  { onDenied: clearPrivate },
+);
+const task = useTask({ onDenied: clearPrivate });
+
+const busy = computed(() => applications.status.value === 'loading' || task.busy.value);
+const activeError = computed(() => task.error.value || searchError.value || applications.error.value);
+
+async function runAction(work: () => Promise<void>, done = '') {
+  if (busy.value) return;
+  notice.value = '';
+  searchError.value = '';
+  const ok = await task.run(async () => {
+    await work();
+    return true;
+  });
+  if (ok) notice.value = done;
+}
+
 async function openReview(row: Application) {
-  await action(async () => {
+  await runAction(async () => {
     clearPictures();
     const id = encodeURIComponent(row.id);
     const submitted = await api.get('TeacherForm', `/api/v1/admin/verification/applications/${id}/teacher-form`);
@@ -113,6 +131,7 @@ async function searchTeachers(query: string) {
   if (!school) return;
   const seq = ++searchSeq;
   searching.value = true;
+  searchError.value = '';
   try {
     const page = await catalog.objects({ kind: 'teacher', school_id: school, q: query.trim() || undefined, limit: 20 });
     if (seq !== searchSeq) return;
@@ -120,7 +139,7 @@ async function searchTeachers(query: string) {
     const chosen = teacherOptions.value.filter((item) => teacherIds.value.includes(item.id));
     teacherOptions.value = [...chosen, ...page.items.filter((item) => !teacherIds.value.includes(item.id))];
   } catch (error_) {
-    if (seq === searchSeq) error.value = errorCode(error_);
+    if (seq === searchSeq) searchError.value = errorCode(error_);
   } finally {
     if (seq === searchSeq) searching.value = false;
   }
@@ -135,22 +154,17 @@ function closeReview() {
 async function review(decision: Schemas['TeacherReviewInput']['decision']) {
   const row = reviewing.value;
   if (!row) return;
-  await action(async () => {
+  await runAction(async () => {
     const body: Schemas['TeacherReviewInput'] = { decision, note: note.value.trim(), revision: row.revision, teacher_ids: decision === 'approve' ? teacherIds.value : [], ...(decision === 'approve' ? { expires_at: expiry.value ?? null } : {}) };
     await api.write('Application', `/api/v1/admin/verification/applications/${encodeURIComponent(row.id)}/teacher-review`, body);
-    applications.value = applications.value.filter((item) => item.id !== row.id);
+    applications.items.value = applications.items.value.filter((item) => item.id !== row.id);
     reviewing.value = undefined;
     clearPictures();
   }, t(`page.teacherVerification.done.${decision}`));
 }
 
-// Qualification lookup and revocation.
-const credentialId = ref('');
-const credential = shallowRef<TeacherCredential>();
-const credentialNames = ref(new Map<string, CatalogObject>());
-const revokeNote = ref('');
 async function lookupCredential() {
-  await action(async () => {
+  await runAction(async () => {
     credential.value = undefined;
     revokeNote.value = '';
     const found = await api.get('TeacherCredential', `/api/v1/admin/verification/teacher-credentials/${encodeURIComponent(credentialId.value.trim())}`);
@@ -161,7 +175,7 @@ async function lookupCredential() {
 async function revoke() {
   const current = credential.value;
   if (!current || !revokeNote.value.trim()) return;
-  await action(async () => {
+  await runAction(async () => {
     const body: Schemas['DecisionInput'] = { approve: true, note: revokeNote.value.trim(), revision: current.revision };
     credential.value = await api.write('TeacherCredential', `/api/v1/admin/verification/teacher-credentials/${encodeURIComponent(current.id)}/revoke`, body);
     revokeNote.value = '';
@@ -172,9 +186,7 @@ watch(credentialId, () => {
 });
 
 watch(schoolId, () => {
-  applications.value = [];
-  cursor.value = '';
-  void load();
+  void applications.reload();
 });
 onMounted(async () => {
   try {
@@ -209,7 +221,7 @@ function chooseSchool(school: School) {
     <Card v-if="access === 'checking'" :bordered="false" :loading="true" />
     <Result v-else-if="access !== 'allowed'" :status="access === 'denied' ? '403' : 'warning'" :title="t(access === 'denied' ? 'page.verification.noAccess' : 'page.errors.unavailable')" :sub-title="errorText(accessError)" />
     <div v-else class="flex flex-col gap-4">
-      <Alert v-if="error && !reviewing" type="error" show-icon role="alert" :message="errorText(error)" />
+      <Alert v-if="activeError && !reviewing" type="error" show-icon role="alert" :message="errorText(activeError)" />
       <Alert v-if="notice" type="success" show-icon role="status" :message="notice" />
       <Card :bordered="false">
         <Tabs v-model:active-key="tab">
@@ -218,9 +230,9 @@ function chooseSchool(school: School) {
               <FormItem :label="t('page.common.school')" html-for="teacher-school">
                 <SchoolSelect input-id="teacher-school" :model-value="schoolId" :schools="schools" class="w-64 max-w-full" :disabled="busy" @select="chooseSchool" />
               </FormItem>
-              <FormItem><Button :disabled="busy || !schoolId" @click="load()">{{ t('page.common.refresh') }}</Button></FormItem>
+              <FormItem><Button :disabled="busy || !schoolId" @click="applications.reload()">{{ t('page.common.refresh') }}</Button></FormItem>
             </Form>
-            <Table :columns="columns" :data-source="applications" :pagination="false" row-key="id" size="middle" :loading="busy && !reviewing" :scroll="{ x: 560 }" :locale="{ emptyText: t('page.teacherVerification.empty') }">
+            <Table :columns="columns" :data-source="applications.items.value" :pagination="false" row-key="id" size="middle" :loading="applications.status.value === 'loading' && !applications.appending.value" :scroll="{ x: 560 }" :locale="{ emptyText: t('page.teacherVerification.empty') }">
               <template #bodyCell="{ column, record }">
                 <template v-if="column.key === 'state'"><Tag>{{ t(`page.verification.states.${record.state}`) }}</Tag></template>
                 <template v-else-if="column.key === 'created'">{{ format.dateTime(record.created_at) }}</template>
@@ -229,7 +241,7 @@ function chooseSchool(school: School) {
               </template>
             </Table>
             <div class="mt-4 flex justify-center">
-              <Button v-if="cursor" :disabled="busy" @click="load(true)">{{ t('page.common.loadMore') }}</Button>
+              <Button v-if="applications.next.value" :loading="applications.appending.value" :disabled="busy" @click="applications.loadMore">{{ t('page.common.loadMore') }}</Button>
             </div>
           </TabPane>
           <TabPane key="credentials" :tab="t('page.teacherVerification.tabs.credentials')">
@@ -306,7 +318,7 @@ function chooseSchool(school: School) {
           <Button :disabled="busy || !note.trim()" @click="review('supplement')">{{ t('page.verification.supplement') }}</Button>
           <Button danger :disabled="busy || !note.trim()" @click="review('reject')">{{ t('page.verification.reject') }}</Button>
         </Space>
-        <Alert v-if="error" type="error" show-icon role="alert" :message="errorText(error)" />
+        <Alert v-if="activeError" type="error" show-icon role="alert" :message="errorText(activeError)" />
       </div>
     </Drawer>
   </AdminPage>

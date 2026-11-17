@@ -41,6 +41,21 @@ async function server(page) {
   return state;
 }
 
+async function chooseRefundState(page, label) {
+  const segmented = page.locator('.ant-segmented');
+  const select = page.locator('main .ant-select-selector').first();
+  await expect(segmented.or(select)).toBeVisible();
+  if (await segmented.count()) {
+    await segmented.getByText(label, { exact: true }).click();
+    return;
+  }
+  await select.click();
+  await page
+    .locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden)')
+    .getByTitle(label, { exact: true })
+    .click();
+}
+
 test('a submitted refund is approved for manual payout and the payout result is recorded', async ({ page }, info) => {
   const all = catalogue(info); const b = all.billing; const state = await server(page);
   await page.goto(`${base}/billing/refunds?lang=${info.project.metadata.locale}`);
@@ -58,7 +73,7 @@ test('a submitted refund is approved for manual payout and the payout result is 
   await drawer.locator('.ant-drawer-close').click();
   await expect(page.getByText(b.refunds.empty, { exact: true })).toBeVisible();
 
-  await page.getByText(b.orderState.awaiting_manual, { exact: true }).click();
+  await chooseRefundState(page, b.orderState.awaiting_manual);
   await page.getByRole('button', { name: b.refunds.handle, exact: true }).click();
   await expect(drawer.getByText('rcpt-9', { exact: true })).toBeVisible();
   const record = drawer.getByRole('button', { name: b.refunds.record, exact: true });
@@ -108,7 +123,7 @@ test('an account lookup shows the wallet and a reward is granted once per event'
 test('a refund whose automatic queries ran out gets one more query with cited evidence', async ({ page }, info) => {
   const all = catalogue(info); const b = all.billing; const state = await server(page);
   await page.goto(`${base}/billing/refunds?lang=${info.project.metadata.locale}`);
-  await page.getByText(b.orderState.needs_review, { exact: true }).click();
+  await chooseRefundState(page, b.orderState.needs_review);
   await page.getByRole('button', { name: b.refunds.handle, exact: true }).click();
   const drawer = page.locator('.ant-drawer-content');
   const submit = drawer.getByRole('button', { name: b.review.submit, exact: true });

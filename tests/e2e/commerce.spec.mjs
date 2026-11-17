@@ -190,10 +190,25 @@ test('a membership refund may be partial but not above the price paid', async ({
   expect(state.writes[0].body).toEqual({ target, order_id: 'm1', amount: 750, reason: 'Service outage.' });
 });
 
+async function chooseRefundState(page, label) {
+  const segmented = page.locator('.ant-segmented');
+  const select = page.locator('main .ant-select-selector').first();
+  await expect(segmented.or(select)).toBeVisible();
+  if (await segmented.count()) {
+    await segmented.getByText(label, { exact: true }).click();
+    return;
+  }
+  await select.click();
+  await page
+    .locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden)')
+    .getByTitle(label, { exact: true })
+    .click();
+}
+
 test('payee details are read only on request and a missing record is stated', async ({ page }, info) => {
   const all = catalogue(info); const r = all.billing.refunds; const state = await server(page, { payee: { method: 'bank', name: 'Li Hua', account: '6222 0000 1111' } });
   await page.goto(`${base}/billing/refunds?lang=${info.project.metadata.locale}`);
-  await page.locator('.ant-segmented').getByText(all.billing.orderState.awaiting_manual, { exact: true }).click();
+  await chooseRefundState(page, all.billing.orderState.awaiting_manual);
   await page.getByRole('button', { name: r.handle, exact: true }).click();
   const drawer = page.locator('.ant-drawer-content');
   await expect(drawer.getByText(r.payeeHint, { exact: true })).toBeVisible();
@@ -209,7 +224,7 @@ test('payee details are read only on request and a missing record is stated', as
 test('a refund without payee details says so', async ({ page }, info) => {
   const all = catalogue(info); const r = all.billing.refunds; await server(page);
   await page.goto(`${base}/billing/refunds?lang=${info.project.metadata.locale}`);
-  await page.locator('.ant-segmented').getByText(all.billing.orderState.awaiting_manual, { exact: true }).click();
+  await chooseRefundState(page, all.billing.orderState.awaiting_manual);
   await page.getByRole('button', { name: r.handle, exact: true }).click();
   await page.locator('.ant-drawer-content').getByRole('button', { name: r.showPayee, exact: true }).click();
   await expect(page.getByText(r.noPayee, { exact: true })).toBeVisible();

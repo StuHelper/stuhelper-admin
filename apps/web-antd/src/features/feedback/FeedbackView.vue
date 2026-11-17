@@ -5,8 +5,11 @@ import { computed, onMounted, ref } from 'vue';
 
 import { useI18n } from '@vben/locales';
 
-import { errorCode, isUncertain } from '#/shared/api/errors';
+import { Alert, Button, Card, Form, FormItem, Select, Space, Tag, Textarea } from 'ant-design-vue';
+
+import { saveBlob } from '#/shared/api/http';
 import { schemaOf } from '#/shared/api/schema';
+import { useMutation, usePaged, useTask } from '#/shared/composables/async';
 import { useLeaveGuard } from '#/shared/composables/leave';
 import { useFormat } from '#/shared/format';
 import { useHttp } from '#/shared/session';
@@ -27,24 +30,69 @@ const errorText = useErrorText();
 const parsePage = schemaOf<components['schemas']['FeedbackPage']>(contract.components.schemas, 'FeedbackPage');
 const parseMessage = schemaOf<Feedback>(contract.components.schemas, 'Feedback');
 const parseReply = schemaOf<components['schemas']['FeedbackReply']>(contract.components.schemas, 'FeedbackReply');
-const items = ref<Feedback[]>([]);
+
 const selected = ref<Feedback>();
 const state = ref<Feedback['state']>('new');
 const filter = ref('');
 const note = ref('');
 const body = ref('');
-const next = ref('');
-const busy = ref(false);
-const error = ref('');
 const success = ref('');
-const pendingReply = ref<{ body: string; id: string; key: string }>();
-const pendingUpdate = ref<{ body: components['schemas']['FeedbackUpdate']; id: string; key: string }>();
 const states: Feedback['state'][] = ['new', 'processing', 'resolved', 'spam'];
+const stateColor: Record<Feedback['state'], string> = { new: 'blue', processing: 'gold', resolved: 'green', spam: 'default' };
 // A details refresh must not silently upgrade the revision of an existing draft.
 const editBase = ref({ revision: 0, state: 'new', note: '' });
-const editDirty = computed(() => !!selected.value && (state.value !== editBase.value.state || note.value !== editBase.value.note));
+
+function clearPrivate() {
+  selected.value = undefined;
+  note.value = '';
+  body.value = '';
+  success.value = '';
+  editBase.value = { revision: 0, state: 'new', note: '' };
+}
+
+const messages = usePaged<Feedback>(
+  async (after, signal) => {
+    const page = await http.json('/api/v1/moderation/feedback', parsePage, {
+      query: { after, state: filter.value, limit: 25 },
+      signal,
+    });
+    return { items: page.items, next: page.next_cursor };
+  },
+  { onDenied: clearPrivate },
+);
+const opening = useTask({ onDenied: clearPrivate });
+const downloading = useTask({ onDenied: clearPrivate });
+const updateWrite = useMutation({ onDenied: clearPrivate });
+const replyWrite = useMutation({ onDenied: clearPrivate });
+
+const busy = computed(
+  () =>
+    messages.status.value === 'loading' ||
+    opening.busy.value ||
+    downloading.busy.value ||
+    updateWrite.busy.value ||
+    replyWrite.busy.value,
+);
+const activeError = computed(
+  () =>
+    updateWrite.error.value ||
+    replyWrite.error.value ||
+    opening.error.value ||
+    downloading.error.value ||
+    messages.error.value,
+);
+const editDirty = computed(
+  () =>
+    !!selected.value &&
+    (state.value !== editBase.value.state || note.value !== editBase.value.note),
+);
 const dirty = computed(() => editDirty.value || !!body.value);
-useLeaveGuard(() => pendingReply.value || pendingUpdate.value ? t('page.common.leaveUncertain') : (dirty.value ? t('page.common.leaveUnsaved') : ''));
+useLeaveGuard(() =>
+  replyWrite.uncertain.value || updateWrite.uncertain.value
+    ? t('page.common.leaveUncertain')
+    : (dirty.value ? t('page.common.leaveUnsaved') : ''),
+);
+
 function adopt(message: Feedback) {
   selected.value = message;
   state.value = message.state;
@@ -52,133 +100,234 @@ function adopt(message: Feedback) {
   editBase.value = { revision: message.revision, state: message.state, note: message.note };
 }
 
-function failed(cause: unknown) {
-  error.value = errorCode(cause);
-  if (['forbidden', 'unauthenticated'].includes(error.value)) { selected.value = undefined; items.value = []; note.value = ''; body.value = ''; editBase.value = { revision: 0, state: 'new', note: '' }; pendingReply.value = undefined; pendingUpdate.value = undefined; }
+function reloadList() {
+  success.value = '';
+  updateWrite.dismiss();
+  replyWrite.dismiss();
+  void messages.reload();
 }
-async function load(after = '') {
-  if (busy.value) return;
-  busy.value = true; error.value = ''; success.value = '';
-  try {
-    const page = await http.json('/api/v1/moderation/feedback', parsePage, { query: { after, state: filter.value, limit: 25 } });
-    items.value = page.items; next.value = page.next_cursor;
-  } catch (error_) { failed(error_); }
-  finally { busy.value = false; }
-}
+
 async function open(id: string) {
-  if (busy.value || pendingReply.value || pendingUpdate.value) return;
+  if (busy.value || replyWrite.uncertain.value || updateWrite.uncertain.value) return;
   if (dirty.value && !window.confirm(t('page.common.leaveUnsaved'))) return;
-  busy.value = true; error.value = ''; success.value = '';
-  try {
-    const message = await http.json(`/api/v1/moderation/feedback/${encodeURIComponent(id)}`, parseMessage, detailOptions);
-    adopt(message); body.value = '';
-  } catch (error_) { failed(error_); }
-  finally { busy.value = false; }
+  success.value = '';
+  updateWrite.dismiss();
+  replyWrite.dismiss();
+  const message = await opening.run(() =>
+    http.json(`/api/v1/moderation/feedback/${encodeURIComponent(id)}`, parseMessage, detailOptions),
+  );
+  if (message) {
+    adopt(message);
+    body.value = '';
+  }
 }
+
 async function save() {
-  if (busy.value || !selected.value || pendingReply.value) return;
-  pendingUpdate.value ??= { id: selected.value.id, key: crypto.randomUUID(), body: { revision: editBase.value.revision, state: state.value, note: note.value } };
-  const request = pendingUpdate.value;
-  busy.value = true; error.value = ''; success.value = '';
-  try {
-    adopt(await http.json(`/api/v1/moderation/feedback/${encodeURIComponent(request.id)}`, parseMessage, { ...detailOptions, method: 'PATCH', key: request.key, body: request.body }));
-    pendingUpdate.value = undefined; success.value = 'saved';
-    items.value = items.value.map((item) => item.id === selected.value?.id ? selected.value : item);
-  } catch (error_) {
-    failed(error_);
-    if (!isUncertain(error_)) pendingUpdate.value = undefined;
-  } finally { busy.value = false; }
+  const current = selected.value;
+  if (busy.value || !current || replyWrite.uncertain.value) return;
+  success.value = '';
+  const targetId = current.id;
+  const payload: components['schemas']['FeedbackUpdate'] = {
+    revision: editBase.value.revision,
+    state: state.value,
+    note: note.value,
+  };
+  const updated = (await (updateWrite.uncertain.value
+    ? updateWrite.retry()
+    : updateWrite.run(
+        `feedback-update:${targetId}:${payload.revision}:${payload.state}:${payload.note}`,
+        payload,
+        (value, key) =>
+          http.json(`/api/v1/moderation/feedback/${encodeURIComponent(targetId)}`, parseMessage, {
+            ...detailOptions,
+            method: 'PATCH',
+            key,
+            body: value,
+          }),
+      ))) as Feedback | undefined;
+  if (!updated) return;
+  adopt(updated);
+  success.value = 'saved';
+  messages.items.value = messages.items.value.map((item) =>
+    item.id === updated.id ? updated : item,
+  );
 }
+
 async function send() {
-  if (busy.value || !selected.value || pendingUpdate.value || !body.value.trim()) return;
-  pendingReply.value ??= { id: selected.value.id, key: crypto.randomUUID(), body: body.value };
-  const request = pendingReply.value;
-  busy.value = true; error.value = ''; success.value = '';
-  try {
-    const reply = await http.json(`/api/v1/moderation/feedback/${encodeURIComponent(request.id)}/replies`, parseReply, { method: 'POST', key: request.key, body: { body: request.body }, timeout: 40_000 });
-    pendingReply.value = undefined; body.value = ''; success.value = reply.state;
-    const fresh = await http.json(`/api/v1/moderation/feedback/${encodeURIComponent(request.id)}`, parseMessage, detailOptions);
-    if (editDirty.value) selected.value = fresh;
-    else adopt(fresh);
-  } catch (error_) { failed(error_); if (!isUncertain(error_)) pendingReply.value = undefined; }
-  finally { busy.value = false; }
+  const current = selected.value;
+  if (busy.value || !current || updateWrite.uncertain.value) return;
+  if (!replyWrite.uncertain.value && !body.value.trim()) return;
+  success.value = '';
+  const targetId = current.id;
+  const reply = (await (replyWrite.uncertain.value
+    ? replyWrite.retry()
+    : replyWrite.run(
+        `feedback-reply:${targetId}:${body.value}`,
+        { body: body.value },
+        (value, key) =>
+          http.json(`/api/v1/moderation/feedback/${encodeURIComponent(targetId)}/replies`, parseReply, {
+            method: 'POST',
+            key,
+            body: value,
+            timeout: 40_000,
+          }),
+      ))) as components['schemas']['FeedbackReply'] | undefined;
+  if (!reply) return;
+  body.value = '';
+  success.value = reply.state;
+  const fresh = await opening.run(() =>
+    http.json(`/api/v1/moderation/feedback/${encodeURIComponent(targetId)}`, parseMessage, detailOptions),
+  );
+  if (!fresh) return;
+  if (editDirty.value) selected.value = fresh;
+  else adopt(fresh);
 }
+
 async function download(attachment: components['schemas']['FeedbackAttachment']) {
-  if (busy.value || !selected.value) return;
-  busy.value = true; error.value = '';
-  try {
-    const blob = await http.blob(`/api/v1/moderation/feedback/${encodeURIComponent(selected.value.id)}/attachments/${encodeURIComponent(attachment.id)}`, 5 * 1024 * 1024);
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a'); link.href = url; link.download = attachment.name; link.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  } catch (error_) { failed(error_); }
-  finally { busy.value = false; }
+  const current = selected.value;
+  if (busy.value || !current) return;
+  const blob = await downloading.run(() =>
+    http.blob(
+      `/api/v1/moderation/feedback/${encodeURIComponent(current.id)}/attachments/${encodeURIComponent(attachment.id)}`,
+      5 * 1024 * 1024,
+    ),
+  );
+  if (blob) saveBlob(blob, attachment.name);
 }
-onMounted(() => load());
+
+const filterOptions = computed(() => [
+  { value: '', label: t('page.feedback.all') },
+  ...states.map((value) => ({ value, label: t(`page.feedback.${value}`) })),
+]);
+const stateOptions = computed(() =>
+  states.map((value) => ({ value, label: t(`page.feedback.${value}`) })),
+);
+
+onMounted(() => {
+  void messages.reload();
+});
 </script>
 
 <template>
   <AdminPage :title="t('page.feedback.title')" :description="t('page.feedback.description', { address: contactAddress })">
     <div class="flex flex-col gap-4" :aria-busy="busy">
       <p v-if="busy" role="status">{{ t('page.feedback.loading') }}</p>
-      <p v-if="error" role="alert" class="text-destructive">{{ errorText(error) }}</p>
-      <p v-if="success" role="status">{{ t(`page.feedback.${success}`) }}</p>
-      <div class="flex flex-wrap items-end gap-3">
-        <label class="flex flex-col gap-1">{{ t('page.feedback.filter') }}
-          <select :aria-label="t('page.feedback.filter')" v-model="filter" class="bg-background rounded border p-2" :disabled="busy" @change="load()">
-            <option value="">{{ t('page.feedback.all') }}</option>
-            <option v-for="value in states" :key="value" :value="value">{{ t(`page.feedback.${value}`) }}</option>
-          </select>
-        </label>
-        <button class="rounded border px-4 py-2" type="button" :disabled="busy" @click="load()">{{ t('page.feedback.refresh') }}</button>
-        <a class="underline" href="mailto:feedback@stuhelper.com">{{ contactAddress }}</a>
-      </div>
-      <p v-if="!busy && items.length === 0">{{ t('page.feedback.empty') }}</p>
+      <Alert v-if="activeError" type="error" show-icon role="alert" :message="errorText(activeError)" />
+      <Alert v-if="success" type="success" show-icon role="status" :message="t(`page.feedback.${success}`)" />
+      <Card :bordered="false">
+        <Space wrap align="end">
+          <div class="flex flex-col gap-1">
+            <span class="text-sm">{{ t('page.feedback.filter') }}</span>
+            <Select
+              v-model:value="filter"
+              class="w-44 max-w-full"
+              :aria-label="t('page.feedback.filter')"
+              :disabled="busy"
+              :options="filterOptions"
+              @change="reloadList"
+            />
+          </div>
+          <Button html-type="button" :disabled="busy" @click="reloadList">{{ t('page.feedback.refresh') }}</Button>
+          <a class="text-sm underline" href="mailto:feedback@stuhelper.com">{{ contactAddress }}</a>
+        </Space>
+      </Card>
+      <p v-if="!busy && messages.items.value.length === 0" class="text-muted-foreground">{{ t('page.feedback.empty') }}</p>
       <div class="grid min-w-0 gap-4 lg:grid-cols-2">
         <section class="min-w-0" :aria-label="t('page.feedback.title')">
           <ul class="flex flex-col gap-2">
-            <li v-for="item in items" :key="item.id">
-              <button class="bg-card flex w-full flex-col gap-1 rounded border p-4 text-start disabled:opacity-60" :disabled="busy || !!pendingReply || !!pendingUpdate" @click="open(item.id)">
+            <li v-for="item in messages.items.value" :key="item.id">
+              <button
+                type="button"
+                class="bg-card hover:border-primary flex w-full flex-col gap-1 rounded border p-4 text-start transition-colors disabled:opacity-60"
+                :disabled="busy || replyWrite.uncertain.value || updateWrite.uncertain.value"
+                @click="open(item.id)"
+              >
                 <strong class="break-all">{{ item.subject || t('page.feedback.noSubject') }}</strong>
-                <span class="break-all">{{ item.sender }}</span>
-                <span>{{ t(`page.feedback.${item.state}`) }} <span v-if="item.suspicious">· {{ t('page.feedback.suspicious') }}</span></span>
-                <time :datetime="item.received_at">{{ format.dateTime(item.received_at) }}</time>
+                <span class="text-muted-foreground break-all text-sm">{{ item.sender }}</span>
+                <span class="flex flex-wrap items-center gap-1 text-xs">
+                  <Tag :color="stateColor[item.state]">{{ t(`page.feedback.${item.state}`) }}</Tag>
+                  <Tag v-if="item.suspicious" color="orange">{{ t('page.feedback.suspicious') }}</Tag>
+                </span>
+                <time class="text-muted-foreground text-xs" :datetime="item.received_at">{{ format.dateTime(item.received_at) }}</time>
               </button>
             </li>
           </ul>
-          <button v-if="next" class="mt-3 rounded border px-4 py-2" :disabled="busy" @click="load(next)">{{ t('page.feedback.next') }}</button>
+          <div v-if="messages.next.value" class="mt-3">
+            <Button :loading="messages.appending.value" :disabled="busy" @click="messages.loadMore">{{ t('page.feedback.next') }}</Button>
+          </div>
         </section>
-        <section v-if="selected" class="bg-card flex min-w-0 flex-col gap-4 rounded border p-4" :aria-label="t('page.feedback.details')">
-          <h2 class="break-all text-lg font-semibold">{{ selected.subject || t('page.feedback.noSubject') }}</h2>
-          <p class="break-all">{{ t('page.feedback.sender') }}: {{ selected.sender }}</p>
-          <p v-if="selected.suspicious" class="rounded border p-2">{{ t('page.feedback.suspiciousHelp') }}</p>
-          <details><summary>{{ t('page.feedback.authentication') }}</summary><pre class="whitespace-pre-wrap break-all text-sm">{{ selected.authentication_results || t('page.feedback.missing') }}</pre></details>
-          <p class="whitespace-pre-wrap break-words">{{ selected.body }}</p>
-          <ul v-if="selected.attachments.length > 0" class="flex flex-col gap-2" :aria-label="t('page.feedback.attachments')">
-            <li v-for="attachment in selected.attachments" :key="attachment.id" class="break-all">
-              <button v-if="attachment.status === 'stored'" class="underline" :disabled="busy" @click="download(attachment)">{{ attachment.name }} {{ format.bytes(attachment.size) }}</button>
-              <span v-else>{{ attachment.name }} {{ t('page.feedback.rejected') }}</span>
-            </li>
-          </ul>
-          <p class="break-all">{{ t('page.feedback.assignee') }}: {{ selected.assignee || t('page.feedback.unassigned') }}</p>
-          <form class="flex flex-col gap-3" @submit.prevent="save">
-            <label class="flex flex-col gap-1">{{ t('page.feedback.state') }}
-              <select :aria-label="t('page.feedback.state')" v-model="state" class="bg-background rounded border p-2" :disabled="busy || !!pendingUpdate || !!pendingReply"><option v-for="value in states" :key="value" :value="value">{{ t(`page.feedback.${value}`) }}</option></select>
-            </label>
-            <label class="flex flex-col gap-1">{{ t('page.feedback.note') }}<textarea v-model="note" rows="3" maxlength="2500" class="bg-background rounded border p-2" :disabled="busy || !!pendingUpdate || !!pendingReply"></textarea></label>
-            <p v-if="pendingUpdate" role="status">{{ t('page.feedback.retryPending') }}</p>
-            <button class="bg-primary text-primary-foreground rounded px-4 py-2" :disabled="busy || !!pendingReply" type="submit">{{ t(pendingUpdate ? 'page.feedback.retry' : 'page.feedback.save') }}</button>
-          </form>
-          <h3 class="font-semibold">{{ t('page.feedback.replies') }}</h3>
-          <article v-for="reply in selected.replies" :key="reply.id" class="rounded border p-3">
-            <p>{{ t(`page.feedback.${reply.state}`) }} · {{ reply.actor }}</p><p class="whitespace-pre-wrap break-words">{{ reply.body }}</p>
-          </article>
-          <form class="flex flex-col gap-3" @submit.prevent="send">
-            <label class="flex flex-col gap-1">{{ t('page.feedback.reply') }}<textarea v-model="body" rows="5" maxlength="5000" required class="bg-background rounded border p-2" :disabled="busy || !!pendingReply || !!pendingUpdate"></textarea></label>
-            <p>{{ t('page.feedback.replyHelp', { address: contactAddress }) }}</p><p v-if="pendingReply" role="status">{{ t('page.feedback.retryPending') }}</p>
-            <button class="bg-primary text-primary-foreground rounded px-4 py-2" :disabled="busy || !!pendingUpdate || !body.trim()" type="submit">{{ t(pendingReply ? 'page.feedback.retry' : 'page.feedback.send') }}</button>
-          </form>
-        </section>
+        <Card v-if="selected" :bordered="false" class="min-w-0" :aria-label="t('page.feedback.details')">
+          <div class="flex min-w-0 flex-col gap-4">
+            <h2 class="break-all text-lg font-semibold">{{ selected.subject || t('page.feedback.noSubject') }}</h2>
+            <p class="break-all">{{ t('page.feedback.sender') }}: {{ selected.sender }}</p>
+            <Alert v-if="selected.suspicious" role="note" type="warning" show-icon :message="t('page.feedback.suspiciousHelp')" />
+            <details>
+              <summary class="cursor-pointer text-sm">{{ t('page.feedback.authentication') }}</summary>
+              <pre class="whitespace-pre-wrap break-all text-sm">{{ selected.authentication_results || t('page.feedback.missing') }}</pre>
+            </details>
+            <p class="whitespace-pre-wrap break-words">{{ selected.body }}</p>
+            <ul v-if="selected.attachments.length > 0" class="flex flex-col gap-2" :aria-label="t('page.feedback.attachments')">
+              <li v-for="attachment in selected.attachments" :key="attachment.id" class="break-all">
+                <Button v-if="attachment.status === 'stored'" type="link" size="small" class="p-0" :disabled="busy" @click="download(attachment)">
+                  {{ attachment.name }} {{ format.bytes(attachment.size) }}
+                </Button>
+                <span v-else>{{ attachment.name }} {{ t('page.feedback.rejected') }}</span>
+              </li>
+            </ul>
+            <p class="break-all">{{ t('page.feedback.assignee') }}: {{ selected.assignee || t('page.feedback.unassigned') }}</p>
+            <Form layout="vertical" @submit.prevent="save">
+              <FormItem :label="t('page.feedback.state')" html-for="feedback-state">
+                <Select
+                  id="feedback-state"
+                  v-model:value="state"
+                  :aria-label="t('page.feedback.state')"
+                  :disabled="busy || updateWrite.uncertain.value || replyWrite.uncertain.value"
+                  :options="stateOptions"
+                />
+              </FormItem>
+              <FormItem :label="t('page.feedback.note')" html-for="feedback-note">
+                <Textarea
+                  id="feedback-note"
+                  v-model:value="note"
+                  :rows="3"
+                  :maxlength="2500"
+                  :disabled="busy || updateWrite.uncertain.value || replyWrite.uncertain.value"
+                />
+              </FormItem>
+              <p v-if="updateWrite.uncertain.value" role="status" class="mb-2 text-sm">{{ t('page.feedback.retryPending') }}</p>
+              <Button type="primary" html-type="submit" :loading="updateWrite.busy.value" :disabled="busy || replyWrite.uncertain.value">
+                {{ t(updateWrite.uncertain.value ? 'page.feedback.retry' : 'page.feedback.save') }}
+              </Button>
+            </Form>
+            <h3 class="font-semibold">{{ t('page.feedback.replies') }}</h3>
+            <article v-for="reply in selected.replies" :key="reply.id" class="rounded border p-3">
+              <p class="text-muted-foreground text-xs">{{ t(`page.feedback.${reply.state}`) }} · {{ reply.actor }}</p>
+              <p class="whitespace-pre-wrap break-words">{{ reply.body }}</p>
+            </article>
+            <Form layout="vertical" @submit.prevent="send">
+              <FormItem :label="t('page.feedback.reply')" required html-for="feedback-reply">
+                <Textarea
+                  id="feedback-reply"
+                  v-model:value="body"
+                  :rows="5"
+                  :maxlength="5000"
+                  required
+                  :disabled="busy || replyWrite.uncertain.value || updateWrite.uncertain.value"
+                />
+              </FormItem>
+              <p class="text-muted-foreground mb-2 text-sm">{{ t('page.feedback.replyHelp', { address: contactAddress }) }}</p>
+              <p v-if="replyWrite.uncertain.value" role="status" class="mb-2 text-sm">{{ t('page.feedback.retryPending') }}</p>
+              <Button
+                type="primary"
+                html-type="submit"
+                :loading="replyWrite.busy.value"
+                :disabled="busy || updateWrite.uncertain.value || (!replyWrite.uncertain.value && !body.trim())"
+              >
+                {{ t(replyWrite.uncertain.value ? 'page.feedback.retry' : 'page.feedback.send') }}
+              </Button>
+            </Form>
+          </div>
+        </Card>
       </div>
     </div>
   </AdminPage>
