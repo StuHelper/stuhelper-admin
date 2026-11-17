@@ -366,7 +366,21 @@
     },
     "autoNext": "Abrir siguiente tras decidir",
     "previous": "Anterior",
-    "next": "Siguiente"
+    "next": "Siguiente",
+    "target": "Elemento evaluado",
+    "term": "Semestre académico",
+    "proposedEdit": "Comparación de cambios propuestos por el autor",
+    "showDiff": "Resaltar diferencias",
+    "showPlain": "Mostrar solo texto nuevo",
+    "latestVersions": "Volver a versiones recientes",
+    "presetsLabel": "Plantillas de motivos frecuentes",
+    "presets": {
+      "approved": "Cumple las normas de la comunidad y queda aprobado.",
+      "abuse": "Contiene ataques personales o lenguaje inapropiado.",
+      "spam": "Contiene publicidad, spam o contenido ajeno al tema.",
+      "privacy": "Expone datos personales privados o información sensible.",
+      "unsubstantiated": "No hay pruebas suficientes de infracción de las normas."
+    }
   },
   "catalog": {
     "title": "Gestión de cursos y docentes",
@@ -554,6 +568,22 @@
       "points": "Precio en puntos",
       "ivory": "Precio en Ivory",
       "save": "Guardar precio"
+    },
+    "previewFile": "Vista previa integrada",
+    "hidePreview": "Ocultar vista previa",
+    "previewTooLarge": "El archivo supera el límite de 15 MB para vista previa; descárguelo para revisarlo.",
+    "previewUnsupported": "Este formato no admite vista previa integrada; descargue el archivo.",
+    "rotateLeft": "Girar a la izquierda",
+    "rotateRight": "Girar a la derecha",
+    "zoomIn": "Acercar",
+    "zoomOut": "Alejar",
+    "resetView": "Restablecer vista",
+    "presets": {
+      "approved": "Archivo legible con origen y categoría verificados.",
+      "copyright": "Falta indicar la fuente o licencia; añádalo y vuelva a enviarlo.",
+      "corrupted": "El archivo está dañado, incompleto o ilegible; súbalo nuevamente.",
+      "duplicate": "Ya existe un recurso idéntico en este directorio.",
+      "mismatch": "El contenido del archivo no coincide con el título, curso o categoría."
     }
   },
   "verification": {
@@ -727,6 +757,13 @@
       "self_reported": "Aportado por el usuario",
       "legacy_credential": "Verificación histórica",
       "synthetic": "Datos de prueba sintéticos"
+    },
+    "presets": {
+      "blurry": "La foto del documento está borrosa u oculta; suba una imagen nítida del original.",
+      "unregistered": "Falta el sello o página de matrícula vigente del semestre actual; adjúntelo.",
+      "mismatch": "El nombre, número o facultad indicados no coinciden con el documento.",
+      "wrongType": "El tipo de documento subido no está admitido para esta universidad.",
+      "teacherProof": "Falta comprobante válido de vinculación docente o cátedra; adjúntelo."
     }
   },
   "storage": {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { AttributionPreview, Decision, Task } from './api';
+import type { AttributionPreview, CatalogObject, Decision, Task } from './api';
 
 import {
   computed,
@@ -31,12 +31,14 @@ import {
 } from 'ant-design-vue';
 
 import { ApiError, errorCode } from '#/shared/api/errors';
-import { useAsync, useMutation } from '#/shared/composables/async';
+import { useAsync, useMutation, usePaged } from '#/shared/composables/async';
 import { useFormat } from '#/shared/format';
 import LoadState from '#/shared/ui/LoadState.vue';
 import MutationAlert from '#/shared/ui/MutationAlert.vue';
+import ReasonPresets from '#/shared/ui/ReasonPresets.vue';
 
 import { dimensions, pageSize, useAcademicAdmin } from './api';
+import { diffText } from './textDiff';
 
 /**
  * Review one entry, optionally through an existing moderation task. A decision
@@ -52,6 +54,8 @@ const emit = defineEmits<{
   decided: [message: string];
   pending: [busy: boolean, dirty: boolean];
 }>();
+const presetKeys = ['approved', 'abuse', 'spam', 'privacy', 'unsubstantiated'] as const;
+
 const { t, te } = useI18n();
 const format = useFormat();
 const api = useAcademicAdmin();
@@ -67,7 +71,7 @@ const teacher = ref('');
 const attribution = shallowRef<AttributionPreview>();
 const attributionError = ref('');
 const success = ref('');
-const historyBefore = ref('');
+const showDiff = ref(true);
 const baseline = ref('');
 const form = () =>
   JSON.stringify([
@@ -98,9 +102,9 @@ const data = useAsync(async (signal) => {
   const entry = await api.entry(entryId, signal);
   // A task must not open content outside the selected school.
   if (entry.school_id !== props.schoolId) throw new ApiError('forbidden');
-  const teachers =
+  const [teachers, objects] = await Promise.all([
     entry.input.kind === 'course'
-      ? await api.options(
+      ? api.options(
           {
             kind: 'teacher',
             course_id: entry.input.target_id,
@@ -108,10 +112,36 @@ const data = useAsync(async (signal) => {
           },
           signal,
         )
-      : [];
-  return { entry, task: record, teachers };
+      : Promise.resolve([]),
+    api
+      .lookup([entry.input.target_id, entry.input.term_id], signal)
+      .catch(() => new Map<string, CatalogObject>()),
+  ]);
+  return { entry, objects, task: record, teachers };
 });
 const entry = computed(() => data.data.value?.entry);
+const targetLabel = computed(() => {
+  const current = entry.value;
+  if (!current) return '';
+  const found = data.data.value?.objects.get(current.input.target_id);
+  if (!found) return current.input.target_id;
+  return found.code ? `${found.name} (${found.code})` : found.name;
+});
+const termLabel = computed(() => {
+  const termId = entry.value?.input.term_id;
+  if (!termId) return '';
+  return data.data.value?.objects.get(termId)?.name ?? termId;
+});
+const proposedSegments = computed(() => {
+  const current = entry.value;
+  const proposed = task.value?.submission.proposed_body;
+  if (!current || !proposed) return [];
+  return diffText(current.input.body, proposed);
+});
+const reasonPresets = computed(() =>
+  presetKeys.map((key) => ({ key, text: t(`page.moderation.presets.${key}`) })),
+);
+
 const related = useAsync(async (signal) =>
   entry.value
     ? api.tasks(
@@ -120,25 +150,40 @@ const related = useAsync(async (signal) =>
       )
     : [],
 );
-const versions = useAsync(async (signal) =>
-  entry.value
-    ? api.history(
-        entry.value.id,
-        { before: historyBefore.value, limit: pageSize },
-        signal,
-      )
-    : [],
-);
+const versions = usePaged(async (before, signal) => {
+  if (!entry.value) return { items: [], next: '' };
+  const rows = await api.history(
+    entry.value.id,
+    { ...(before ? { before } : {}), limit: pageSize },
+    signal,
+  );
+  const last = rows.at(-1);
+  return {
+    items: rows,
+    next: rows.length === pageSize && last ? String(last.revision) : '',
+  };
+});
+function versionSegments(index: number, versionBody: string) {
+  const older = versions.items.value[index + 1]?.input.body;
+  if (older !== undefined) return diffText(older, versionBody);
+  const current = entry.value?.input.body;
+  if (current !== undefined && current !== versionBody) {
+    return diffText(versionBody, current);
+  }
+  return [];
+}
 
 async function load(preserve = false) {
   await data.reload();
   const result = data.data.value;
   if (!result) return;
   task.value = result.task;
-  historyBefore.value = '';
   void related.reload();
   void versions.reload();
   if (preserve) return;
+  opening.dismiss();
+  deciding.dismiss();
+  retrying.dismiss();
   action.value = undefined;
   body.value = result.task?.submission.proposed_body || result.entry.input.body;
   reason.value = '';
@@ -275,7 +320,6 @@ function decided(result: Task) {
       ? 'page.moderation.decisionApplied'
       : 'page.moderation.decisionQueued',
   );
-  emit('changed');
   emit('decided', `${t(`page.moderation.taskKind.${result.submission.kind}`)} · ${t(`page.moderation.taskState.${result.state}`)}`);
 }
 
@@ -348,47 +392,49 @@ defineExpose({ dirty, busy, uncertain });
       <template v-if="entry">
         <Descriptions :column="{ xs: 1, sm: 2 }" size="small" bordered>
           <DescriptionsItem :label="t('page.moderation.contentKind')">
-{{
-            t(`page.moderation.kind.${entry.input.kind}`)
-          }}
-</DescriptionsItem>
+            {{ t(`page.moderation.kind.${entry.input.kind}`) }}
+          </DescriptionsItem>
+          <DescriptionsItem :label="t('page.moderation.target')">
+            <span class="break-words">{{ targetLabel }}</span>
+          </DescriptionsItem>
+          <DescriptionsItem v-if="termLabel" :label="t('page.moderation.term')">
+            {{ termLabel }}
+          </DescriptionsItem>
           <DescriptionsItem :label="t('page.common.status')">
             <Tag>{{ label(`page.moderation.state.${entry.state}`) }}</Tag>
             <Tag v-if="entry.featured" color="green">
-{{
-              t('page.moderation.featured')
-            }}
-</Tag>
+              {{ t('page.moderation.featured') }}
+            </Tag>
           </DescriptionsItem>
           <DescriptionsItem :label="t('page.moderation.author')">
-{{
+            {{
               entry.anonymous
                 ? t('page.moderation.anonymous')
                 : t('page.moderation.signed')
             }}
             · {{ entry.author_handle }}
-</DescriptionsItem>
+          </DescriptionsItem>
           <DescriptionsItem :label="t('page.common.revision')">
-{{
-            format.number(entry.revision)
-          }}
-</DescriptionsItem>
+            {{ format.number(entry.revision) }}
+          </DescriptionsItem>
           <DescriptionsItem :label="t('page.moderation.publishedAt')">
-{{
-            entry.published_at ? format.dateTime(entry.published_at) : t('page.common.notProvided')
-          }}
-</DescriptionsItem>
+            {{
+              entry.published_at
+                ? format.dateTime(entry.published_at)
+                : t('page.common.notProvided')
+            }}
+          </DescriptionsItem>
           <DescriptionsItem
             v-if="entry.input.kind === 'course'"
             :label="t('page.moderation.teacher')"
-            >
-{{
+          >
+            {{
               entry.input.teacher_id
                 ? (teacherNames.get(entry.input.teacher_id) ??
                   entry.input.teacher_id)
                 : t('page.moderation.noTeacher')
             }}
-</DescriptionsItem>
+          </DescriptionsItem>
         </Descriptions>
 
         <section class="rounded border p-4">
@@ -401,7 +447,7 @@ defineExpose({ dirty, busy, uncertain });
             class="mt-3 flex flex-wrap gap-2"
           >
             <Tag v-for="(name, index) in dimensions" :key="name">
-{{ t(`page.moderation.ratings.${name}.label`) }} ·
+              {{ t(`page.moderation.ratings.${name}.label`) }} ·
               {{
                 (entry.input.ratings[index] ?? 0) > 0
                   ? t(
@@ -409,8 +455,51 @@ defineExpose({ dirty, busy, uncertain });
                     )
                   : t('page.moderation.unrated')
               }}
-</Tag>
+            </Tag>
           </div>
+        </section>
+
+        <section
+          v-if="task?.submission.proposed_body"
+          class="rounded border p-4"
+        >
+          <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
+            <h4 class="text-sm font-semibold">
+              {{ t('page.moderation.proposedEdit') }}
+            </h4>
+            <Button
+              size="small"
+              html-type="button"
+              @click="showDiff = !showDiff"
+            >
+              {{
+                t(
+                  showDiff
+                    ? 'page.moderation.showPlain'
+                    : 'page.moderation.showDiff',
+                )
+              }}
+            </Button>
+          </div>
+          <p v-if="showDiff" class="whitespace-pre-wrap break-words text-sm">
+            <template
+              v-for="(segment, index) in proposedSegments"
+              :key="index"
+            >
+              <del
+                v-if="segment.kind === 'removed'"
+                class="bg-red-500/15 text-red-700 line-through dark:text-red-300"
+              >{{ segment.text }}</del>
+              <ins
+                v-else-if="segment.kind === 'added'"
+                class="bg-emerald-500/15 text-emerald-700 underline dark:text-emerald-300"
+              >{{ segment.text }}</ins>
+              <span v-else>{{ segment.text }}</span>
+            </template>
+          </p>
+          <p v-else class="whitespace-pre-wrap break-words text-sm">
+            {{ task.submission.proposed_body }}
+          </p>
         </section>
 
         <Alert
@@ -445,16 +534,16 @@ defineExpose({ dirty, busy, uncertain });
               size="small"
               :loading="retrying.busy.value"
               @click="retryDelivery"
-              >
-{{ t('page.moderation.retryDelivery') }}
-</Button>
+            >
+              {{ t('page.moderation.retryDelivery') }}
+            </Button>
           </template>
         </Alert>
 
         <Form v-if="editable" layout="vertical" @submit.prevent="decide">
           <FormItem :label="t('page.moderation.action')" required html-for="decisionpanel-field-1">
             <Select
-id="decisionpanel-field-1"
+              id="decisionpanel-field-1"
               v-model:value="action"
               :disabled="busy || uncertain"
               :placeholder="t('page.common.choose')"
@@ -472,7 +561,7 @@ id="decisionpanel-field-1"
           <template v-if="action === 'reassign'">
             <FormItem :label="t('page.moderation.teacher')" html-for="decisionpanel-field-2">
               <Select
-id="decisionpanel-field-2"
+                id="decisionpanel-field-2"
                 v-model:value="teacher"
                 :disabled="busy || uncertain"
                 :options="[
@@ -486,10 +575,8 @@ id="decisionpanel-field-2"
             </FormItem>
             <Space class="mb-4" wrap>
               <Button :disabled="busy" @click="inspectAttribution">
-{{
-                t('page.moderation.previewAttribution')
-              }}
-</Button>
+                {{ t('page.moderation.previewAttribution') }}
+              </Button>
               <span v-if="attribution">{{
                 t('page.moderation.attributionResult', {
                   teachers:
@@ -507,10 +594,10 @@ id="decisionpanel-field-2"
             v-if="action === 'edit'"
             :label="t('page.moderation.editedBody')"
             required
-           html-for="decisionpanel-field-3"
->
+            html-for="decisionpanel-field-3"
+          >
             <Textarea
-id="decisionpanel-field-3"
+              id="decisionpanel-field-3"
               v-model:value="body"
               :rows="8"
               :maxlength="16000"
@@ -519,14 +606,18 @@ id="decisionpanel-field-3"
           </FormItem>
           <FormItem v-if="action === 'identity'">
             <Checkbox v-model:checked="signed" :disabled="busy || uncertain">
-{{
-              t('page.moderation.signedIdentity')
-            }}
-</Checkbox>
+              {{ t('page.moderation.signedIdentity') }}
+            </Checkbox>
           </FormItem>
           <FormItem :label="t('page.moderation.reason')" required html-for="decisionpanel-field-4">
+            <ReasonPresets
+              v-model="reason"
+              :presets="reasonPresets"
+              :disabled="busy || uncertain"
+              :max-length="2000"
+            />
             <Textarea
-id="decisionpanel-field-4"
+              id="decisionpanel-field-4"
               v-model:value="reason"
               :rows="3"
               :maxlength="2000"
@@ -551,16 +642,16 @@ id="decisionpanel-field-4"
                 !reason.trim() ||
                 (action === 'reassign' && !attribution)
               "
-              >
-{{ t('page.moderation.applyDecision') }}
-</Button>
+            >
+              {{ t('page.moderation.applyDecision') }}
+            </Button>
             <Button
               v-if="deciding.error.value === 'conflict'"
               :disabled="busy"
               @click="load(true)"
-              >
-{{ t('page.common.reloadCompare') }}
-</Button>
+            >
+              {{ t('page.common.reloadCompare') }}
+            </Button>
           </Space>
         </Form>
         <MutationAlert
@@ -608,11 +699,22 @@ id="decisionpanel-field-4"
             <LoadState
               :status="versions.status.value"
               :error="versions.error.value"
-              :empty="(versions.data.value ?? []).length === 0"
+              :empty="versions.items.value.length === 0"
               @retry="versions.reload"
             >
+              <div v-if="versions.items.value.length > 0" class="mb-2 flex justify-end">
+                <Button size="small" html-type="button" @click="showDiff = !showDiff">
+                  {{
+                    t(
+                      showDiff
+                        ? 'page.moderation.showPlain'
+                        : 'page.moderation.showDiff',
+                    )
+                  }}
+                </Button>
+              </div>
               <article
-                v-for="version in versions.data.value"
+                v-for="(version, index) in versions.items.value"
                 :key="version.revision"
                 class="mb-3 rounded border p-3"
               >
@@ -626,10 +728,29 @@ id="decisionpanel-field-4"
                     {{
                       label(`page.moderation.changeOrigin.${version.change_origin}`)
                     }}
-</template>
+                  </template>
                 </p>
                 <p v-if="version.input.title">{{ version.input.title }}</p>
-                <p class="whitespace-pre-wrap text-sm">
+                <p
+                  v-if="showDiff && versionSegments(index, version.input.body).length > 0"
+                  class="whitespace-pre-wrap break-words text-sm"
+                >
+                  <template
+                    v-for="(segment, segIndex) in versionSegments(index, version.input.body)"
+                    :key="segIndex"
+                  >
+                    <del
+                      v-if="segment.kind === 'removed'"
+                      class="bg-red-500/15 text-red-700 line-through dark:text-red-300"
+                    >{{ segment.text }}</del>
+                    <ins
+                      v-else-if="segment.kind === 'added'"
+                      class="bg-emerald-500/15 text-emerald-700 underline dark:text-emerald-300"
+                    >{{ segment.text }}</ins>
+                    <span v-else>{{ segment.text }}</span>
+                  </template>
+                </p>
+                <p v-else class="whitespace-pre-wrap break-words text-sm">
                   {{ version.input.body }}
                 </p>
                 <p
@@ -639,18 +760,24 @@ id="decisionpanel-field-4"
                   {{ version.change_reason }}
                 </p>
               </article>
-              <Button
-                v-if="(versions.data.value?.length ?? 0) === pageSize"
-                size="small"
-                @click="
-                  historyBefore = String(
-                    versions.data.value?.at(-1)?.revision ?? 0,
-                  );
-                  versions.reload();
-                "
+              <Space wrap>
+                <Button
+                  v-if="versions.next.value"
+                  size="small"
+                  :loading="versions.appending.value"
+                  @click="versions.loadMore"
                 >
-{{ t('page.moderation.olderVersions') }}
-</Button>
+                  {{ t('page.moderation.olderVersions') }}
+                </Button>
+                <Button
+                  v-if="versions.items.value.length > pageSize"
+                  size="small"
+                  :disabled="versions.status.value === 'loading'"
+                  @click="versions.reload"
+                >
+                  {{ t('page.moderation.latestVersions') }}
+                </Button>
+              </Space>
             </LoadState>
           </CollapsePanel>
         </Collapse>

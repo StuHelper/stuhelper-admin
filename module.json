@@ -29,7 +29,11 @@
       "tests/e2e/resources.spec.mjs#category configuration preserves stable ids, fields and original-request retry"
     ],
     "RES-ADMIN-02": [
-      "tests/e2e/resources.spec.mjs#review reads the pending file and retries an unknown decision without duplication"
+      "tests/e2e/resources.spec.mjs#review reads the pending file and retries an unknown decision without duplication",
+      "tests/e2e/review-workbench.spec.mjs#resource review previews sandboxed PDFs, warns above 15 MiB, applies reason presets and advances across pages"
+    ],
+    "CM-01": [
+      "tests/e2e/review-workbench.spec.mjs#moderation decision panel shows target course and term, highlights proposed edits and appends older versions"
     ],
     "RES-ADMIN-03": [
       "tests/e2e/resources.spec.mjs#grant creation and revocation retain the subject and respect current permissions"

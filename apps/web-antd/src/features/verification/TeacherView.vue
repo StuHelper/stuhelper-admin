@@ -7,14 +7,16 @@ import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vu
 
 import { useI18n } from '@vben/locales';
 
-import { Alert, Button, Card, DatePicker, Descriptions, DescriptionsItem, Drawer, Form, FormItem, Image, Input, Result, Select, Space, Table, TabPane, Tabs, Tag, Textarea } from 'ant-design-vue';
+import { Alert, Button, Card, Checkbox, DatePicker, Descriptions, DescriptionsItem, Drawer, Form, FormItem, Input, Result, Select, Space, Table, TabPane, Tabs, Tag, Textarea } from 'ant-design-vue';
 
 import { useAcademicAdmin } from '#/features/academic/api';
 import { errorCode } from '#/shared/api/errors';
 import { useLeaveGuard } from '#/shared/composables/leave';
 import { useFormat } from '#/shared/format';
 import AdminPage from '#/shared/ui/AdminPage.vue';
+import MaterialPreview from '#/shared/ui/MaterialPreview.vue';
 import { useErrorText } from '#/shared/ui/messages';
+import ReasonPresets from '#/shared/ui/ReasonPresets.vue';
 
 import { useVerification } from './api';
 import SchoolSelect from './SchoolSelect.vue';
@@ -26,7 +28,19 @@ import SchoolSelect from './SchoolSelect.vue';
  * verification; the server rejects self-review and teachers from another school.
  */
 type Tab = 'credentials' | 'reviews';
-type Picture = { id: string; type: string; url: string };
+interface Picture {
+  id: string;
+  objectUrl?: string;
+  size?: number;
+  tooLarge?: boolean;
+  type: string;
+  url: string;
+}
+
+const inlinePreviewLimit = 15 * 1024 * 1024;
+const applicationStates: Application['state'][] = ['pending_review', 'supplement_required', 'approved', 'rejected', 'expired', 'deleted'];
+const presetKeys = ['blurry', 'teacherProof', 'mismatch', 'wrongType'] as const;
+
 const { t } = useI18n();
 const format = useFormat();
 const errorText = useErrorText();
@@ -38,6 +52,8 @@ const accessError = ref('');
 const schools = ref<School[]>([]);
 const schoolId = ref('');
 const tab = ref<Tab>('reviews');
+const stateFilter = ref<'' | Application['state']>('');
+const autoNext = ref(true);
 const busy = ref(false);
 const error = ref('');
 const notice = ref('');
@@ -57,9 +73,20 @@ async function action(work: () => Promise<void>, done = '') {
   }
 }
 
-// Pending teacher applications of the chosen school, ordered by ID.
+// Teacher applications of the chosen school, ordered by ID.
 const applications = ref<Application[]>([]);
 const cursor = ref('');
+const visibleApplications = computed(() =>
+  stateFilter.value ? applications.value.filter((item) => item.state === stateFilter.value) : applications.value,
+);
+const teacherPresets = computed(() =>
+  presetKeys.map((key) => ({ key, text: t(`page.verification.presets.${key}`) })),
+);
+const stateOptions = computed(() => [
+  { value: '', label: t('page.common.all') },
+  ...applicationStates.map((value) => ({ value, label: t(`page.verification.states.${value}`) })),
+]);
+
 async function load(append = false) {
   if (!schoolId.value) return;
   await action(async () => {
@@ -80,33 +107,63 @@ const teacherOptions = ref<CatalogObject[]>([]);
 const searching = ref(false);
 let searchSeq = 0;
 function clearPictures() {
-  for (const picture of pictures.value) URL.revokeObjectURL(picture.url);
+  for (const picture of pictures.value) {
+    if (picture.objectUrl) URL.revokeObjectURL(picture.objectUrl);
+  }
   pictures.value = [];
 }
-async function openReview(row: Application) {
-  await action(async () => {
-    clearPictures();
-    const id = encodeURIComponent(row.id);
-    const submitted = await api.get('TeacherForm', `/api/v1/admin/verification/applications/${id}/teacher-form`);
-    const images: Picture[] = [];
-    try {
-      for (const materialId of submitted.material_ids) {
+async function loadReviewTarget(row: Application) {
+  clearPictures();
+  const id = encodeURIComponent(row.id);
+  const submitted = await api.get('TeacherForm', `/api/v1/admin/verification/applications/${id}/teacher-form`);
+  const images: Picture[] = [];
+  try {
+    for (const materialId of submitted.material_ids) {
+      const directUrl = `/api/v1/verification/materials/${encodeURIComponent(materialId)}`;
+      try {
         const blob = await api.material(materialId);
-        images.push({ id: materialId, type: blob.type, url: URL.createObjectURL(blob) });
+        if (blob.size > inlinePreviewLimit) {
+          images.push({ id: materialId, size: blob.size, tooLarge: true, type: blob.type, url: directUrl });
+        } else {
+          const objectUrl = URL.createObjectURL(blob);
+          images.push({ id: materialId, objectUrl, size: blob.size, type: blob.type, url: objectUrl });
+        }
+      } catch (error_) {
+        if (errorCode(error_) === 'response_too_large') {
+          images.push({ id: materialId, tooLarge: true, type: 'application/pdf', url: directUrl });
+        } else {
+          throw error_;
+        }
       }
-    } catch (error_) {
-      for (const image of images) URL.revokeObjectURL(image.url);
-      throw error_;
     }
-    reviewing.value = row;
-    form.value = submitted;
-    pictures.value = images;
-    note.value = '';
-    expiry.value = undefined;
-    teacherIds.value = [];
-    teacherOptions.value = [];
-    void searchTeachers(submitted.name);
-  });
+  } catch (error_) {
+    for (const image of images) {
+      if (image.objectUrl) URL.revokeObjectURL(image.objectUrl);
+    }
+    throw error_;
+  }
+  reviewing.value = row;
+  form.value = submitted;
+  pictures.value = images;
+  note.value = '';
+  expiry.value = undefined;
+  teacherIds.value = [];
+  teacherOptions.value = [];
+  void searchTeachers(submitted.name);
+}
+function neighbour(step: number) {
+  const rows = visibleApplications.value;
+  const index = rows.findIndex((item) => item.id === reviewing.value?.id);
+  return index === -1 ? undefined : rows[index + step];
+}
+async function moveReview(step: number) {
+  const target = neighbour(step);
+  if (!target || busy.value) return;
+  if (dirty.value && !window.confirm(t('page.common.leaveUnsaved'))) return;
+  await openReview(target);
+}
+async function openReview(row: Application) {
+  await action(() => loadReviewTarget(row));
 }
 async function searchTeachers(query: string) {
   const school = reviewing.value?.school_id;
@@ -128,17 +185,29 @@ async function searchTeachers(query: string) {
 const dirty = computed(() => !!reviewing.value && (!!note.value.trim() || teacherIds.value.length > 0));
 useLeaveGuard(() => (dirty.value || busy.value ? t('page.common.leaveUnsaved') : ''));
 function closeReview() {
-  if (busy.value) return;
+  if (busy.value || (dirty.value && !window.confirm(t('page.common.leaveUnsaved')))) return;
   reviewing.value = undefined;
   clearPictures();
 }
 async function review(decision: Schemas['TeacherReviewInput']['decision']) {
   const row = reviewing.value;
   if (!row) return;
+  const following = neighbour(1);
   await action(async () => {
     const body: Schemas['TeacherReviewInput'] = { decision, note: note.value.trim(), revision: row.revision, teacher_ids: decision === 'approve' ? teacherIds.value : [], ...(decision === 'approve' ? { expires_at: expiry.value ?? null } : {}) };
     await api.write('Application', `/api/v1/admin/verification/applications/${encodeURIComponent(row.id)}/teacher-review`, body);
     applications.value = applications.value.filter((item) => item.id !== row.id);
+    let nextRow = autoNext.value ? following : undefined;
+    if (autoNext.value && !nextRow && cursor.value) {
+      const page = await api.list('Application', `/api/v1/admin/verification/schools/${encodeURIComponent(schoolId.value)}/teacher-applications`);
+      applications.value = page.items;
+      cursor.value = page.next;
+      nextRow = visibleApplications.value.find((item) => item.id !== row.id && item.state === 'pending_review') ?? visibleApplications.value.find((item) => item.id !== row.id);
+    }
+    if (nextRow) {
+      await loadReviewTarget(nextRow);
+      return;
+    }
     reviewing.value = undefined;
     clearPictures();
   }, t(`page.teacherVerification.done.${decision}`));
@@ -214,13 +283,16 @@ function chooseSchool(school: School) {
       <Card :bordered="false">
         <Tabs v-model:active-key="tab">
           <TabPane key="reviews" :tab="t('page.teacherVerification.tabs.reviews')">
-            <Form layout="inline" class="mb-4">
+            <Form layout="inline" class="mb-4 flex flex-wrap gap-y-2">
               <FormItem :label="t('page.common.school')" html-for="teacher-school">
                 <SchoolSelect input-id="teacher-school" :model-value="schoolId" :schools="schools" class="w-64 max-w-full" :disabled="busy" @select="chooseSchool" />
               </FormItem>
+              <FormItem :label="t('page.common.status')" html-for="teacher-state-filter">
+                <Select id="teacher-state-filter" v-model:value="stateFilter" class="w-44 max-w-full" :disabled="busy" :options="stateOptions" />
+              </FormItem>
               <FormItem><Button :disabled="busy || !schoolId" @click="load()">{{ t('page.common.refresh') }}</Button></FormItem>
             </Form>
-            <Table :columns="columns" :data-source="applications" :pagination="false" row-key="id" size="middle" :loading="busy && !reviewing" :scroll="{ x: 560 }" :locale="{ emptyText: t('page.teacherVerification.empty') }">
+            <Table :columns="columns" :data-source="visibleApplications" :pagination="false" row-key="id" size="middle" :loading="busy && !reviewing" :scroll="{ x: 560 }" :locale="{ emptyText: t('page.teacherVerification.empty') }">
               <template #bodyCell="{ column, record }">
                 <template v-if="column.key === 'state'"><Tag>{{ t(`page.verification.states.${record.state}`) }}</Tag></template>
                 <template v-else-if="column.key === 'created'">{{ format.dateTime(record.created_at) }}</template>
@@ -264,6 +336,13 @@ function chooseSchool(school: School) {
 
     <Drawer :open="!!reviewing" :width="760" :title="t('page.teacherVerification.reviewTitle')" :mask-closable="false" destroy-on-close @close="closeReview">
       <div v-if="reviewing && form" class="flex flex-col gap-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <Checkbox v-model:checked="autoNext">{{ t('page.moderation.autoNext') }}</Checkbox>
+          <Space>
+            <Button size="small" :disabled="busy || !neighbour(-1)" @click="moveReview(-1)">{{ t('page.moderation.previous') }}</Button>
+            <Button size="small" :disabled="busy || !neighbour(1)" @click="moveReview(1)">{{ t('page.moderation.next') }}</Button>
+          </Space>
+        </div>
         <Descriptions :column="{ xs: 1, sm: 2 }" size="small" bordered>
           <DescriptionsItem :label="t('page.common.school')">{{ schoolName(reviewing.school_id) }}</DescriptionsItem>
           <DescriptionsItem :label="t('page.verification.name')">{{ form.name }}</DescriptionsItem>
@@ -273,11 +352,16 @@ function chooseSchool(school: School) {
           <DescriptionsItem :label="t('page.verification.materialType')">{{ form.material_type }}</DescriptionsItem>
           <DescriptionsItem :label="t('page.teacherVerification.public')">{{ disclosureText(form.disclosures) }}</DescriptionsItem>
         </Descriptions>
-        <div class="grid gap-3 sm:grid-cols-2">
-          <template v-for="(picture, index) in pictures" :key="picture.id">
-            <Image v-if="picture.type.startsWith('image/')" :src="picture.url" :alt="t('page.verification.material', { index: index + 1 })" />
-            <a v-else :href="picture.url" target="_blank" rel="noopener noreferrer">{{ t('page.verification.material', { index: index + 1 }) }}</a>
-          </template>
+        <div class="flex flex-col gap-3">
+          <MaterialPreview
+            v-for="(picture, index) in pictures"
+            :key="picture.id"
+            :content-type="picture.type"
+            :label="t('page.verification.material', { index: index + 1 })"
+            :size="picture.size"
+            :too-large="picture.tooLarge"
+            :url="picture.url"
+          />
         </div>
         <Form layout="vertical">
           <FormItem :label="t('page.teacherVerification.profiles')" :extra="t('page.teacherVerification.profilesHint')" html-for="teacher-profiles">
@@ -298,6 +382,7 @@ function chooseSchool(school: School) {
             <DatePicker id="teacher-expiry" v-model:value="expiry" show-time value-format="YYYY-MM-DDTHH:mm:ssZ" :disabled="busy" />
           </FormItem>
           <FormItem :label="t('page.verification.note')" :extra="t('page.teacherVerification.noteHint')" html-for="teacher-review-note">
+            <ReasonPresets v-model="note" :presets="teacherPresets" :disabled="busy" :max-length="500" />
             <Textarea id="teacher-review-note" v-model:value="note" :rows="3" :maxlength="500" :disabled="busy" />
           </FormItem>
         </Form>

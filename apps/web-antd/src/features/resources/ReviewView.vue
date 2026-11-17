@@ -2,7 +2,7 @@
 import type { Decision, Task } from '../academic/api';
 import type { Resource } from './api';
 
-import { computed, ref, shallowRef, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue';
 
 import { useI18n } from '@vben/locales';
 
@@ -14,8 +14,10 @@ import { useLeaveGuard } from '#/shared/composables/leave';
 import { useFormat } from '#/shared/format';
 import AdminPage from '#/shared/ui/AdminPage.vue';
 import LoadState from '#/shared/ui/LoadState.vue';
+import MaterialPreview from '#/shared/ui/MaterialPreview.vue';
 import { useErrorText } from '#/shared/ui/messages';
 import MutationAlert from '#/shared/ui/MutationAlert.vue';
+import ReasonPresets from '#/shared/ui/ReasonPresets.vue';
 
 import { arrayCursor, useAcademicAdmin } from '../academic/api';
 import { useCampusId } from '../academic/campus';
@@ -27,6 +29,9 @@ import { attributeText, localName, pageSize, useResourcesApi } from './api';
  * pending version is read and downloaded through the review endpoint; the
  * published version stays available until a decision is applied.
  */
+const inlinePreviewLimit = 15 * 1024 * 1024;
+const presetKeys = ['approved', 'copyright', 'corrupted', 'duplicate', 'mismatch'] as const;
+
 const { t, te, locale } = useI18n();
 const format = useFormat();
 const errorText = useErrorText();
@@ -35,6 +40,7 @@ const api = useResourcesApi();
 const deciding = useMutation();
 const retrying = useMutation();
 const download = useTask();
+const previewLoad = useTask();
 const school = useCampusId();
 const taskState = ref('waiting');
 const selected = shallowRef<Task>();
@@ -45,6 +51,15 @@ const reason = ref('');
 const success = ref('');
 const lastResult = ref('');
 const autoNext = ref(true);
+const previewOpen = ref(false);
+const previewUrl = ref('');
+
+function clearPreview() {
+  if (previewUrl.value) URL.revokeObjectURL(previewUrl.value);
+  previewUrl.value = '';
+  previewOpen.value = false;
+}
+onBeforeUnmount(clearPreview);
 
 const tasks = usePaged(async (after, signal) => {
   if (!school.value) return { items: [], next: '' };
@@ -54,14 +69,24 @@ const tasks = usePaged(async (after, signal) => {
 // Resource tasks reference "resource:<version id>".
 const versionId = computed(() => selected.value?.submission.object_id.replace(/^resource:/, '') ?? '');
 const version = computed(() => (entry.value?.proposal?.id === versionId.value ? entry.value?.proposal : entry.value?.current));
+const previewable = computed(() => {
+  const kind = version.value?.file?.content_type ?? '';
+  return kind === 'application/pdf' || kind.startsWith('image/');
+});
+const previewTooLarge = computed(() => previewable.value && (version.value?.file?.size ?? 0) > inlinePreviewLimit);
+const reasonPresets = computed(() => presetKeys.map((key) => ({ key, text: t(`page.resources.presets.${key}`) })));
 const busy = computed(() => deciding.busy.value || deciding.uncertain.value || retrying.busy.value || retrying.uncertain.value);
 watch(school, () => {
+  clearPreview();
   selected.value = undefined;
   void tasks.reload();
 });
 useLeaveGuard(() => (busy.value || reason.value ? t(deciding.uncertain.value ? 'page.common.leaveUncertain' : 'page.common.leaveUnsaved') : ''));
 async function open(task: Task) {
   if (busy.value) return;
+  clearPreview();
+  deciding.dismiss();
+  retrying.dismiss();
   openError.value = '';
   success.value = '';
   try {
@@ -76,8 +101,25 @@ async function open(task: Task) {
 }
 function close() {
   if (busy.value || (reason.value && !window.confirm(t('page.common.leaveUnsaved')))) return;
+  clearPreview();
   selected.value = undefined;
   entry.value = undefined;
+}
+
+async function togglePreview() {
+  if (previewOpen.value) {
+    previewOpen.value = false;
+    return;
+  }
+  const file = version.value?.file;
+  const id = version.value?.id;
+  if (!file || !id || !previewable.value || previewTooLarge.value) return;
+  if (!previewUrl.value) {
+    const blob = await previewLoad.run(() => api.reviewFile(id, file.size));
+    if (!blob) return;
+    previewUrl.value = URL.createObjectURL(blob);
+  }
+  previewOpen.value = true;
 }
 
 async function decide() {
@@ -86,18 +128,18 @@ async function decide() {
   if (!task || !current) return;
   const body = { revision: task.revision, decision: { id: '', object_id: task.submission.object_id, revision: current.revision, action: action.value, signed: false, reason: reason.value } };
   const result = await deciding.run(`decide:${task.id}`, body, (value, key) => moderation.decide(task.id, value, key));
-  if (result) decided(result);
+  if (result) void decided(result);
 }
 async function retryDecision() {
   const result = await deciding.retry();
   // The retried request returns the task of the original decision.
-  if (result) decided(result as Task);
+  if (result) void decided(result as Task);
 }
 async function retryDelivery() {
   const task = selected.value;
   if (!task) return;
   const result = await retrying.run(`retry:${task.id}`, { revision: task.revision }, (value, key) => moderation.retryTask(task.id, value, key));
-  if (result) decided(result);
+  if (result) void decided(result);
 }
 async function decided(task: Task) {
   // Remember the following row first: the decided row may leave this filter.
@@ -107,7 +149,9 @@ async function decided(task: Task) {
   lastResult.value = `${version.value?.metadata.title ?? ''} · ${label(`page.moderation.taskState.${task.state}`)}`;
   success.value = lastResult.value;
   await tasks.reload();
-  if (autoNext.value && following) await open(following);
+  if (!autoNext.value) return;
+  const nextTarget = following ?? tasks.items.value.find((row) => row.id !== task.id && row.state === 'waiting');
+  if (nextTarget) await open(nextTarget);
 }
 function neighbour(step: number) {
   const rows = tasks.items.value;
@@ -172,14 +216,12 @@ const columns = computed(() => [
     </div>
 
     <Drawer :open="!!selected && !!entry" :width="720" :title="t('page.resources.reviewDetail')" :mask-closable="false" destroy-on-close @close="close">
-      <template #extra>
-        <Space>
+      <div v-if="selected && entry && version" class="flex flex-col gap-4">
+        <Space wrap>
           <Checkbox v-model:checked="autoNext">{{ t('page.moderation.autoNext') }}</Checkbox>
           <Button size="small" :disabled="busy || !neighbour(-1)" @click="move(-1)">{{ t('page.moderation.previous') }}</Button>
           <Button size="small" :disabled="busy || !neighbour(1)" @click="move(1)">{{ t('page.moderation.next') }}</Button>
         </Space>
-      </template>
-      <div v-if="selected && entry && version" class="flex flex-col gap-4">
         <Descriptions :column="1" size="small" bordered>
           <DescriptionsItem :label="t('page.resources.title')">{{ version.metadata.title }}</DescriptionsItem>
           <DescriptionsItem :label="t('page.resources.description')"><span class="whitespace-pre-wrap">{{ version.metadata.description || t('page.common.notProvided') }}</span></DescriptionsItem>
@@ -197,16 +239,33 @@ const columns = computed(() => [
           </template>
         </Alert>
         <Space wrap>
+          <Button v-if="version.file && previewable && !previewTooLarge" :loading="previewLoad.busy.value" @click="togglePreview">{{ t(previewOpen ? 'page.resources.hidePreview' : 'page.resources.previewFile') }}</Button>
           <Button v-if="version.file" :loading="download.busy.value" @click="save">{{ t('page.resources.downloadFile') }}</Button>
           <Tag>{{ label(`page.moderation.taskState.${selected.state}`) }}</Tag>
           <span v-if="selected.decision" class="text-sm">{{ t('page.moderation.decisionNote', { reason: selected.decision.reason }) }}</span>
         </Space>
-        <p v-if="download.error.value" class="text-destructive" role="alert">{{ errorText(download.error.value) }}</p>
+        <MaterialPreview
+          v-if="version.file && previewTooLarge"
+          :content-type="version.file.content_type"
+          :label="version.file.filename"
+          :size="version.file.size"
+          :too-large="true"
+        />
+        <MaterialPreview
+          v-else-if="version.file && previewOpen && previewUrl"
+          :content-type="version.file.content_type"
+          :label="version.file.filename"
+          :size="version.file.size"
+          :url="previewUrl"
+        />
+        <p v-else-if="version.file && !previewable" class="text-muted-foreground text-xs">{{ t('page.resources.previewUnsupported') }}</p>
+        <p v-if="download.error.value || previewLoad.error.value" class="text-destructive" role="alert">{{ errorText(download.error.value || previewLoad.error.value) }}</p>
         <Form v-if="selected.state === 'waiting' || deciding.uncertain.value" layout="vertical" @submit.prevent="decide">
           <FormItem :label="t('page.moderation.action')" html-for="reviewview-field-2">
             <Select id="reviewview-field-2" v-model:value="action" :disabled="busy" :options="(['publish', 'hide', 'restore', 'delete', 'dismiss'] as const).map((value) => ({ value, label: t(`page.resources.reviewActions.${value}`) }))" />
           </FormItem>
           <FormItem :label="t('page.common.reason')" required html-for="reviewview-field-3">
+            <ReasonPresets v-model="reason" :presets="reasonPresets" :disabled="busy" :max-length="2000" />
             <Textarea id="reviewview-field-3" v-model:value="reason" :rows="3" :maxlength="2000" :disabled="busy" />
           </FormItem>
           <MutationAlert :busy="deciding.busy.value" :error="deciding.error.value" :uncertain="deciding.uncertain.value" :success="success" @retry="retryDecision" />

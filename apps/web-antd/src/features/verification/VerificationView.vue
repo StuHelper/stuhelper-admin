@@ -5,12 +5,15 @@ import { computed, onBeforeUnmount, onMounted, reactive, ref, shallowRef, watch 
 
 import { useI18n } from '@vben/locales';
 
-import { Alert, Button, Card, Checkbox, CheckboxGroup, DatePicker, Descriptions, DescriptionsItem, Drawer, Form, FormItem, Image, Input, InputNumber, Result, Space, Switch, Table, TabPane, Tabs, Tag, Textarea } from 'ant-design-vue';
+import { Alert, Button, Card, Checkbox, CheckboxGroup, DatePicker, Descriptions, DescriptionsItem, Drawer, Form, FormItem, Input, InputNumber, Result, Select, Space, Switch, Table, TabPane, Tabs, Tag, Textarea } from 'ant-design-vue';
 
 import { errorCode } from '#/shared/api/errors';
+import { useLeaveGuard } from '#/shared/composables/leave';
 import { useFormat } from '#/shared/format';
 import AdminPage from '#/shared/ui/AdminPage.vue';
+import MaterialPreview from '#/shared/ui/MaterialPreview.vue';
 import { useErrorText } from '#/shared/ui/messages';
+import ReasonPresets from '#/shared/ui/ReasonPresets.vue';
 
 import { methods, useVerification } from './api';
 import SchoolSelect from './SchoolSelect.vue';
@@ -22,6 +25,19 @@ import SchoolSelect from './SchoolSelect.vue';
  * authorized by the server; full identity fields need their own permission.
  */
 type Tab = 'configuration' | 'credentials' | 'jobs' | 'requests' | 'reviews' | 'suggestions';
+interface PreviewItem {
+  id: string;
+  objectUrl?: string;
+  size?: number;
+  tooLarge?: boolean;
+  type: string;
+  url: string;
+}
+
+const inlinePreviewLimit = 15 * 1024 * 1024;
+const applicationStates: Application['state'][] = ['pending_review', 'supplement_required', 'approved', 'rejected', 'in_progress', 'expired', 'deleted'];
+const presetKeys = ['blurry', 'unregistered', 'mismatch', 'wrongType'] as const;
+
 const { t, te } = useI18n();
 const format = useFormat();
 const errorText = useErrorText();
@@ -31,6 +47,8 @@ const accessError = ref('');
 const schools = ref<School[]>([]);
 const schoolId = ref('');
 const tab = ref<Tab>('reviews');
+const stateFilter = ref<'' | Application['state']>('');
+const autoNext = ref(true);
 const busy = ref(false);
 const error = ref('');
 const notice = ref('');
@@ -41,7 +59,7 @@ const suggestions = ref<Suggestion[]>([]);
 const cursor = ref('');
 const reviewing = shallowRef<Application>();
 const manual = shallowRef<Schemas['ManualInput']>();
-const pictures = ref<{ id: string; type: string; url: string }[]>([]);
+const pictures = ref<PreviewItem[]>([]);
 const note = ref('');
 const expiry = ref<string>();
 const credentialId = ref('');
@@ -52,11 +70,26 @@ const blankSchool = (id: string): School => ({ id, name: '', enabled: false, met
 const config = reactive<School>(blankSchool(''));
 const materialTypes = ref('');
 
+const visibleApplications = computed(() =>
+  stateFilter.value ? applications.value.filter((item) => item.state === stateFilter.value) : applications.value,
+);
+const studentPresets = computed(() =>
+  presetKeys.map((key) => ({ key, text: t(`page.verification.presets.${key}`) })),
+);
+const stateOptions = computed(() => [
+  { value: '', label: t('page.common.all') },
+  ...applicationStates.map((value) => ({ value, label: label(`page.verification.states.${value}`) })),
+]);
+
+useLeaveGuard(() => ((reviewing.value && note.value.trim()) || busy.value ? t('page.common.leaveUnsaved') : ''));
+
 function label(key: string) {
   return te(key) ? t(key) : (key.split('.').at(-1) ?? '');
 }
 function clearPictures() {
-  for (const picture of pictures.value) URL.revokeObjectURL(picture.url);
+  for (const picture of pictures.value) {
+    if (picture.objectUrl) URL.revokeObjectURL(picture.objectUrl);
+  }
   pictures.value = [];
 }
 
@@ -126,41 +159,86 @@ async function load(append = false) {
   });
 }
 
-async function openReview(row: Application) {
-  await action(async () => {
-    clearPictures();
-    const id = encodeURIComponent(row.id);
-    const form = await api.get('ManualInput', `/api/v1/admin/verification/applications/${id}/form`);
-    const materials = await api.list('Material', `/api/v1/verification/applications/${id}/materials`);
-    const images: typeof pictures.value = [];
-    try {
-      for (const material of materials.items) {
-        const blob = await api.material(material.id);
-        images.push({ id: material.id, type: blob.type, url: URL.createObjectURL(blob) });
+async function loadReviewTarget(row: Application) {
+  clearPictures();
+  const id = encodeURIComponent(row.id);
+  const form = await api.get('ManualInput', `/api/v1/admin/verification/applications/${id}/form`);
+  const materials = await api.list('Material', `/api/v1/verification/applications/${id}/materials`);
+  const items: PreviewItem[] = [];
+  try {
+    for (const material of materials.items) {
+      const directUrl = `/api/v1/verification/materials/${encodeURIComponent(material.id)}`;
+      if (material.size > inlinePreviewLimit) {
+        items.push({ id: material.id, size: material.size, tooLarge: true, type: material.content_type, url: directUrl });
+        continue;
       }
-    } catch (error_) {
-      for (const image of images) URL.revokeObjectURL(image.url);
-      throw error_;
+      try {
+        const blob = await api.material(material.id);
+        if (blob.size > inlinePreviewLimit) {
+          items.push({ id: material.id, size: blob.size, tooLarge: true, type: blob.type, url: directUrl });
+        } else {
+          const objectUrl = URL.createObjectURL(blob);
+          items.push({ id: material.id, objectUrl, size: blob.size, type: blob.type, url: objectUrl });
+        }
+      } catch (error_) {
+        if (errorCode(error_) === 'response_too_large') {
+          items.push({ id: material.id, size: material.size, tooLarge: true, type: material.content_type, url: directUrl });
+        } else {
+          throw error_;
+        }
+      }
     }
-    reviewing.value = row;
-    manual.value = form;
-    pictures.value = images;
-    note.value = '';
-    expiry.value = undefined;
-  });
+  } catch (error_) {
+    for (const item of items) {
+      if (item.objectUrl) URL.revokeObjectURL(item.objectUrl);
+    }
+    throw error_;
+  }
+  reviewing.value = row;
+  manual.value = form;
+  pictures.value = items;
+  note.value = '';
+  expiry.value = undefined;
+}
+
+function neighbour(step: number) {
+  const rows = visibleApplications.value;
+  const index = rows.findIndex((item) => item.id === reviewing.value?.id);
+  return index === -1 ? undefined : rows[index + step];
+}
+async function moveReview(step: number) {
+  const target = neighbour(step);
+  if (!target || busy.value) return;
+  if (note.value.trim() && !window.confirm(t('page.common.leaveUnsaved'))) return;
+  await openReview(target);
+}
+async function openReview(row: Application) {
+  await action(() => loadReviewTarget(row));
 }
 function closeReview() {
-  if (busy.value) return;
+  if (busy.value || (note.value.trim() && !window.confirm(t('page.common.leaveUnsaved')))) return;
   reviewing.value = undefined;
   clearPictures();
 }
 async function review(decision: Schemas['ReviewInput']['decision']) {
   const row = reviewing.value;
   if (!row) return;
+  const following = neighbour(1);
   await action(async () => {
     const body: Schemas['ReviewInput'] = { decision, note: note.value, revision: row.revision, ...(decision === 'approve' && expiry.value ? { expires_at: expiry.value } : {}) };
     await api.write('Application', `/api/v1/admin/verification/applications/${encodeURIComponent(row.id)}/review`, body);
     applications.value = applications.value.filter((item) => item.id !== row.id);
+    let nextRow = autoNext.value ? following : undefined;
+    if (autoNext.value && !nextRow && cursor.value) {
+      const page = await api.list('Application', `/api/v1/admin/verification/schools/${encodeURIComponent(schoolId.value)}/applications`);
+      applications.value = page.items;
+      cursor.value = page.next;
+      nextRow = visibleApplications.value.find((item) => item.id !== row.id && item.state === 'pending_review') ?? visibleApplications.value.find((item) => item.id !== row.id);
+    }
+    if (nextRow) {
+      await loadReviewTarget(nextRow);
+      return;
+    }
     reviewing.value = undefined;
     clearPictures();
   }, t('page.common.saved'));
@@ -294,7 +372,15 @@ function chooseSchool(school: School) {
       <Card :bordered="false">
         <Tabs v-model:active-key="tab">
           <TabPane key="reviews" :tab="t('page.verification.tabs.reviews')">
-            <Table :columns="applicationColumns" :data-source="applications" :pagination="false" row-key="id" size="middle" :loading="busy && !reviewing" :scroll="{ x: 640 }" :locale="{ emptyText: t('page.verification.noApplications') }">
+            <Form layout="inline" class="mb-4 flex flex-wrap gap-y-2">
+              <FormItem :label="t('page.common.status')" html-for="verification-state-filter">
+                <Select id="verification-state-filter" v-model:value="stateFilter" class="w-44 max-w-full" :disabled="busy" :options="stateOptions" />
+              </FormItem>
+              <FormItem>
+                <Button :disabled="busy || !schoolId" @click="load()">{{ t('page.common.refresh') }}</Button>
+              </FormItem>
+            </Form>
+            <Table :columns="applicationColumns" :data-source="visibleApplications" :pagination="false" row-key="id" size="middle" :loading="busy && !reviewing" :scroll="{ x: 640 }" :locale="{ emptyText: t('page.verification.noApplications') }">
               <template #bodyCell="{ column, record }">
                 <template v-if="column.key === 'method'">{{ label(`page.verification.methods.${record.method}`) }}</template>
                 <template v-else-if="column.key === 'study'">{{ label(`page.verification.stages.${record.stage}`) }} · {{ label(`page.verification.kinds.${record.kind}`) }}</template>
@@ -309,8 +395,8 @@ function chooseSchool(school: School) {
             <Card v-for="row in removals" :key="row.id" size="small" class="mb-3" :title="label(`page.verification.removalKind.${row.kind}`)">
               <p class="whitespace-pre-wrap">{{ row.reason }}</p>
               <p class="text-muted-foreground text-xs">{{ t('page.verification.credential') }}: <span class="font-mono">{{ row.credential_id }}</span> · {{ format.dateTime(row.created_at) }}</p>
-              <FormItem class="mb-2 mt-3" :label="t('page.verification.note')" html-for="verificationview-field-2">
-                <Textarea id="verificationview-field-2" v-model:value="notes[row.id]" :rows="2" :maxlength="500" :disabled="busy" />
+              <FormItem class="mb-2 mt-3" :label="t('page.verification.note')" :html-for="`verification-removal-note-${row.id}`">
+                <Textarea :id="`verification-removal-note-${row.id}`" v-model:value="notes[row.id]" :rows="2" :maxlength="500" :disabled="busy" />
               </FormItem>
               <Space>
                 <Button type="primary" :disabled="busy" @click="decideRemoval(row, true)">{{ t('page.verification.approve') }}</Button>
@@ -392,7 +478,7 @@ function chooseSchool(school: School) {
               <a :href="row.website" target="_blank" rel="noopener noreferrer" class="break-all">{{ row.website }}</a>
               <p class="mt-2"><Tag>{{ label(`page.verification.states.${row.state}`) }}</Tag><span v-if="row.note" class="ms-2 text-sm">{{ row.note }}</span></p>
               <template v-if="row.state === 'pending'">
-                <FormItem class="mb-2 mt-3" :label="t('page.verification.note')" html-for="verificationview-field-12"><Textarea id="verificationview-field-12" v-model:value="notes[row.id]" :rows="2" :maxlength="500" :disabled="busy" /></FormItem>
+                <FormItem class="mb-2 mt-3" :label="t('page.verification.note')" :html-for="`verification-suggestion-note-${row.id}`"><Textarea :id="`verification-suggestion-note-${row.id}`" v-model:value="notes[row.id]" :rows="2" :maxlength="500" :disabled="busy" /></FormItem>
                 <Space>
                   <Button type="primary" :disabled="busy" @click="decideSuggestion(row, true)">{{ t('page.verification.approve') }}</Button>
                   <Button danger :disabled="busy" @click="decideSuggestion(row, false)">{{ t('page.verification.reject') }}</Button>
@@ -409,6 +495,13 @@ function chooseSchool(school: School) {
 
     <Drawer :open="!!reviewing" :width="760" :title="t('page.verification.reviewTitle')" :mask-closable="false" destroy-on-close @close="closeReview">
       <div v-if="reviewing && manual" class="flex flex-col gap-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <Checkbox v-model:checked="autoNext">{{ t('page.moderation.autoNext') }}</Checkbox>
+          <Space>
+            <Button size="small" :disabled="busy || !neighbour(-1)" @click="moveReview(-1)">{{ t('page.moderation.previous') }}</Button>
+            <Button size="small" :disabled="busy || !neighbour(1)" @click="moveReview(1)">{{ t('page.moderation.next') }}</Button>
+          </Space>
+        </div>
         <Descriptions :column="{ xs: 1, sm: 2 }" size="small" bordered>
           <DescriptionsItem :label="t('page.verification.studentId')">{{ manual.student_id }}</DescriptionsItem>
           <DescriptionsItem :label="t('page.verification.name')">{{ manual.name }}</DescriptionsItem>
@@ -417,14 +510,22 @@ function chooseSchool(school: School) {
           <DescriptionsItem :label="t('page.verification.materialType')">{{ label(`page.verification.materialTypes.${manual.material_type}`) }}</DescriptionsItem>
           <DescriptionsItem :label="t('page.verification.study')">{{ label(`page.verification.stages.${reviewing.stage}`) }} · {{ label(`page.verification.kinds.${reviewing.kind}`) }}</DescriptionsItem>
         </Descriptions>
-        <div class="grid gap-3 sm:grid-cols-2">
-          <template v-for="(picture, index) in pictures" :key="picture.id">
-            <Image v-if="picture.type.startsWith('image/')" :src="picture.url" :alt="t('page.verification.material', { index: index + 1 })" />
-            <a v-else :href="picture.url" target="_blank" rel="noopener noreferrer">{{ t('page.verification.material', { index: index + 1 }) }}</a>
-          </template>
+        <div class="flex flex-col gap-3">
+          <MaterialPreview
+            v-for="(picture, index) in pictures"
+            :key="picture.id"
+            :content-type="picture.type"
+            :label="t('page.verification.material', { index: index + 1 })"
+            :size="picture.size"
+            :too-large="picture.tooLarge"
+            :url="picture.url"
+          />
         </div>
         <Form layout="vertical">
-          <FormItem :label="t('page.verification.note')" html-for="verificationview-field-13"><Textarea id="verificationview-field-13" v-model:value="note" :rows="3" :maxlength="500" :disabled="busy" /></FormItem>
+          <FormItem :label="t('page.verification.note')" html-for="verificationview-field-13">
+            <ReasonPresets v-model="note" :presets="studentPresets" :disabled="busy" :max-length="500" />
+            <Textarea id="verificationview-field-13" v-model:value="note" :rows="3" :maxlength="500" :disabled="busy" />
+          </FormItem>
           <FormItem v-if="reviewing.kind === 'newcomer'" :label="t('page.verification.expiryOverride')" :extra="t('page.verification.expiryOverrideHint')" html-for="verificationview-field-14">
             <DatePicker id="verificationview-field-14" v-model:value="expiry" show-time value-format="YYYY-MM-DDTHH:mm:ssZ" :disabled="busy" />
           </FormItem>
