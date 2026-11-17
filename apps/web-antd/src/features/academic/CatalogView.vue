@@ -104,6 +104,7 @@ const rows = usePaged(async (after, signal) => {
       include_inactive: true,
     },
     signal,
+    true,
   );
   return { items: page.items, next: page.next };
 });
