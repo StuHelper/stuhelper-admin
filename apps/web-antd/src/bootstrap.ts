@@ -1,4 +1,4 @@
-import { createApp, watchEffect } from 'vue';
+import { createApp, watch, watchEffect } from 'vue';
 
 import { registerAccessDirective } from '@vben/access';
 import { registerLoadingDirective } from '@vben/common-ui/es/loading';
@@ -14,6 +14,10 @@ import { $t, setupI18n } from '#/locales';
 import { initComponentAdapter } from './adapter/component';
 import { initSetupVbenForm } from './adapter/form';
 import App from './app.vue';
+import {
+  catalogJumpKey,
+  createCatalogJumpStore,
+} from './features/academic/catalogJump';
 import { availableMenus } from './menus';
 import { router } from './router';
 import { hostFetchKey, sessionFetch } from './shared/api/transport';
@@ -43,7 +47,17 @@ async function bootstrap(namespace: string, fetcher: typeof fetch = sessionFetch
   app.provide(capabilitiesKey, capabilities);
   void capabilities.load();
   const session = createSessionStore(fetcher);
-  app.provide(hostFetchKey, fetcher).provide(sessionKey, session);
+  const catalogJump = createCatalogJumpStore();
+  app
+    .provide(hostFetchKey, fetcher)
+    .provide(sessionKey, session)
+    .provide(catalogJumpKey, catalogJump);
+  watch(
+    () => session.state.value,
+    (next, previous) => {
+      if (previous === 'member' && next === 'guest') catalogJump.clear();
+    },
+  );
   void session.reload();
 
   // 注册v-loading指令

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { TeacherRefreshRun, UnmatchedTeacherSite } from './api';
 
-import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue';
+import { computed, inject, onBeforeUnmount, ref, shallowRef, watch } from 'vue';
+import { routerKey } from 'vue-router';
 
 import { useI18n } from '@vben/locales';
 
@@ -30,6 +31,7 @@ import MutationAlert from '#/shared/ui/MutationAlert.vue';
 import { useAcademicAdmin } from './api';
 import { useCampusId } from './campus';
 import CampusPending from './CampusPending.vue';
+import { useCatalogJump } from './catalogJump';
 
 /**
  * Teacher homepage refresh for the selected school. The scheduled refresh runs
@@ -42,7 +44,14 @@ const { t } = useI18n();
 const format = useFormat();
 const errorText = useErrorText();
 const api = useAcademicAdmin();
+const catalogJump = useCatalogJump();
+const router = inject(routerKey, null);
 const school = useCampusId();
+
+function checkInCatalog(name: string) {
+  catalogJump.prepare('teacher', name);
+  void router?.push('/catalog');
+}
 const start = useMutation();
 
 const status = useAsync((signal) =>
@@ -184,6 +193,7 @@ const columns = computed(() => [
     title: t('page.teacherSites.candidates'),
     align: 'right' as const,
   },
+  { key: 'action', title: t('page.common.operation') },
 ]);
 const dash = '—';
 </script>
@@ -381,6 +391,11 @@ const dash = '—';
             </template>
             <template v-else-if="column.key === 'candidates'">
               {{ format.number(record.candidate_count) }}
+            </template>
+            <template v-else-if="column.key === 'action'">
+              <Button type="link" size="small" @click="checkInCatalog(record.name)">
+                {{ t('page.teacherSites.checkCatalog') }}
+              </Button>
             </template>
           </template>
         </Table>

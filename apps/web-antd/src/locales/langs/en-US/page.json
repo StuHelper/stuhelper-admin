@@ -427,7 +427,9 @@
       "applied": "Applied"
     },
     "confirmImport": "Confirm import",
-    "imported": "Import complete: catalog objects {objects}, enrollments {enrollments}, manual corrections kept {preserved}."
+    "imported": "Import complete: catalog objects {objects}, enrollments {enrollments}, manual corrections kept {preserved}.",
+    "changeFilter": "Filter by change status",
+    "changeCount": "{state} ({count})"
   },
   "resources": {
     "manageTitle": "Resource management",
@@ -793,7 +795,15 @@
       "replica_shortage": "Healthy replicas are below target.",
       "no_healthy_source": "No healthy source is available.",
       "insufficient_eligible_capacity": "Insufficient eligible accounts or capacity."
-    }
+    },
+    "quotaUnit": "Capacity unit",
+    "quotaUnits": {
+      "B": "Bytes (B)",
+      "GB": "Gigabytes (GB)",
+      "TB": "Terabytes (TB)"
+    },
+    "quotaPreview": "Minimum allowed: {min} (used + reserved) · Converted: {value}",
+    "quotaMinimumOnly": "Minimum allowed: {min} (used + reserved)"
   },
   "contribution": {
     "title": "Storage contribution management",
@@ -1695,6 +1705,7 @@
       "site_unit_missing": "No unit on the homepage",
       "catalog_name_absent": "No such name in the catalog",
       "ambiguous_site": "Duplicate homepages"
-    }
+    },
+    "checkCatalog": "Check in catalog"
   }
 }

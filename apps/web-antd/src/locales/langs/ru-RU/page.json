@@ -427,7 +427,9 @@
       "applied": "Выполнено"
     },
     "confirmImport": "Подтвердить импорт",
-    "imported": "Импорт завершён: объекты {objects}, записи {enrollments}, сохранено ручных правок {preserved}."
+    "imported": "Импорт завершён: объекты {objects}, записи {enrollments}, сохранено ручных правок {preserved}.",
+    "changeFilter": "Фильтр по статусу изменений",
+    "changeCount": "{state}: {count}"
   },
   "resources": {
     "manageTitle": "Управление материалами",
@@ -793,7 +795,15 @@
       "replica_shortage": "Исправных копий меньше целевого числа.",
       "no_healthy_source": "Нет исправного источника.",
       "insufficient_eligible_capacity": "Недостаточно подходящих аккаунтов или места."
-    }
+    },
+    "quotaUnit": "Единица объёма",
+    "quotaUnits": {
+      "B": "Байты (Б)",
+      "GB": "Гигабайты (ГБ)",
+      "TB": "Терабайты (ТБ)"
+    },
+    "quotaPreview": "Минимум: {min} (занято + резерв) · В пересчёте: {value}",
+    "quotaMinimumOnly": "Минимум: {min} (занято + резерв)"
   },
   "contribution": {
     "title": "Управление предоставленным хранилищем",
@@ -1695,6 +1705,7 @@
       "site_unit_missing": "Нет подразделения на странице",
       "catalog_name_absent": "Имени нет в каталоге",
       "ambiguous_site": "Повторяющиеся страницы"
-    }
+    },
+    "checkCatalog": "Проверить в каталоге"
   }
 }

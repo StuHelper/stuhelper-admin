@@ -427,7 +427,9 @@
       "applied": "نُفذ"
     },
     "confirmImport": "تأكيد الاستيراد",
-    "imported": "اكتمل الاستيراد: الكائنات {objects}، التسجيلات {enrollments}، التصحيحات المحفوظة {preserved}."
+    "imported": "اكتمل الاستيراد: الكائنات {objects}، التسجيلات {enrollments}، التصحيحات المحفوظة {preserved}.",
+    "changeFilter": "تصفية حسب حالة التغيير",
+    "changeCount": "{state}: {count} عنصر"
   },
   "resources": {
     "manageTitle": "إدارة المواد",
@@ -793,7 +795,15 @@
       "replica_shortage": "عدد النسخ السليمة أقل من المستهدف.",
       "no_healthy_source": "لا يتوفر مصدر سليم.",
       "insufficient_eligible_capacity": "الحسابات المؤهلة أو السعة المتاحة غير كافية."
-    }
+    },
+    "quotaUnit": "وحدة السعة",
+    "quotaUnits": {
+      "B": "بايت (B)",
+      "GB": "جيجابايت (GB)",
+      "TB": "تيرابايت (TB)"
+    },
+    "quotaPreview": "الحد الأدنى المسموح: {min} (المستخدم + المحجوز) · القيمة المحوّلة: {value}",
+    "quotaMinimumOnly": "الحد الأدنى المسموح: {min} (المستخدم + المحجوز)"
   },
   "contribution": {
     "title": "إدارة مساهمات التخزين",
@@ -1695,6 +1705,7 @@
       "site_unit_missing": "لا وحدة في الصفحة",
       "catalog_name_absent": "الاسم غير موجود في البيانات",
       "ambiguous_site": "صفحات مكررة"
-    }
+    },
+    "checkCatalog": "التحقق في الدليل"
   }
 }
