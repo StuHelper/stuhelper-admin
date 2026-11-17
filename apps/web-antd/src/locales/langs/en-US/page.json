@@ -176,7 +176,11 @@
       "resources": "Resources to review",
       "failed": "Failed tasks",
       "verification": "Verifications to review",
-      "storage": "Blocked storage jobs"
+      "storage": "Blocked storage jobs",
+      "refunds": "Pending refunds",
+      "feedback": "New feedback messages",
+      "teacherVerification": "Pending teacher verifications",
+      "openPlatform": "Pending open-platform apps"
     },
     "todoUnknown": "Unknown",
     "todoFailed": "Some counts could not load.",

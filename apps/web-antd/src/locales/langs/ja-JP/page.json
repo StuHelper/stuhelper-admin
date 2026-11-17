@@ -176,7 +176,11 @@
       "resources": "審査待ち資料",
       "failed": "失敗した処理",
       "verification": "審査待ち認証",
-      "storage": "停止中のストレージ処理"
+      "storage": "停止中のストレージ処理",
+      "refunds": "未処理の返金",
+      "feedback": "新着フィードバックメール",
+      "teacherVerification": "審査待ち教員認証",
+      "openPlatform": "審査待ち外部連携アプリ"
     },
     "todoUnknown": "不明",
     "todoFailed": "一部の件数を読み込めません。",

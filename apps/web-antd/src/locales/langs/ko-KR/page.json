@@ -176,7 +176,11 @@
       "resources": "검토 대기 자료",
       "failed": "실패한 처리",
       "verification": "검토 대기 인증",
-      "storage": "차단된 저장소 작업"
+      "storage": "차단된 저장소 작업",
+      "refunds": "처리 대기 환불",
+      "feedback": "새 피드백 메일",
+      "teacherVerification": "심사 대기 교원 인증",
+      "openPlatform": "심사 대기 오픈 플랫폼 앱"
     },
     "todoUnknown": "알 수 없음",
     "todoFailed": "일부 건수를 불러오지 못했습니다.",
