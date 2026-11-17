@@ -41,6 +41,9 @@ export type Submission = Moderation['schemas']['Submission'];
 const catalog = catalogContract.components.schemas;
 const reviews = reviewsContract.components.schemas;
 const moderation = moderationContract.components.schemas;
+// Object kinds the public catalog no longer returns to ordinary readers.
+const hiddenKinds = new Set(['assignment', 'class', 'schedule', 'term_course']);
+
 const parse = {
   object: schemaOf<CatalogObject>(catalog, 'Object'),
   page: schemaOf<Catalog['schemas']['Page']>(catalog, 'Page'),
@@ -181,27 +184,42 @@ export class AcademicAdminApi {
 
   object(id: string, signal?: AbortSignal) {
     return this.http.json(
-      `/api/v1/catalog/objects/${segment(id)}`,
+      `/api/v1/catalog/admin/objects/${segment(id)}`,
       parse.object,
       { signal },
     );
   }
 
-  objects(query: Query, signal?: AbortSignal) {
-    return this.http.json('/api/v1/catalog/objects', parse.page, {
-      query,
-      signal,
-    });
+  /**
+   * Object lists. Offerings, teaching classes, assignments and schedules are hidden from the
+   * public catalog, so those kinds and filters, and any maintenance list (`admin`), read the
+   * maintenance endpoint, which requires catalog maintenance permission for `school_id`.
+   */
+  objects(query: Query, signal?: AbortSignal, admin = false) {
+    const hidden =
+      hiddenKinds.has(String(query.kind ?? '')) ||
+      !!query.term_course_id ||
+      !!query.class_id;
+    const path =
+      (admin || hidden) && query.school_id
+        ? '/api/v1/catalog/admin/objects'
+        : '/api/v1/catalog/objects';
+    return this.http.json(path, parse.page, { query, signal });
   }
 
   /** Every option for a selector, at most ten pages. */
-  async options(query: Query, signal?: AbortSignal): Promise<CatalogObject[]> {
+  async options(
+    query: Query,
+    signal?: AbortSignal,
+    admin = false,
+  ): Promise<CatalogObject[]> {
     const items: CatalogObject[] = [];
     let after = '';
     for (let page = 0; page < 10; page++) {
       const result = await this.objects(
         { ...query, limit: 100, after },
         signal,
+        admin,
       );
       items.push(...result.items);
       if (!result.next) return items;
@@ -316,9 +334,10 @@ export class AcademicAdminApi {
     });
   }
 
+  /** The full maintenance summary, including the offering count hidden from the public catalog. */
   summary(id: string, signal?: AbortSignal) {
     return this.http.json(
-      `/api/v1/catalog/objects/${segment(id)}/summary`,
+      `/api/v1/catalog/admin/objects/${segment(id)}/summary`,
       parse.summary,
       { signal },
     );
