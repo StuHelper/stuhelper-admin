@@ -1696,5 +1696,15 @@
       "catalog_name_absent": "Nombre ausente en el catálogo",
       "ambiguous_site": "Páginas duplicadas"
     }
+  },
+  "accountJump": {
+    "copyAccount": "Copiar identificador de cuenta",
+    "copied": "Copiado",
+    "toBilling": "Cuenta de facturación",
+    "toQqBinding": "Vinculación QQ",
+    "toRoles": "Permisos de rol",
+    "toSessions": "Cierre de sesiones",
+    "prefilledHint": "Rellenado con la cuenta seleccionada; verifique y pulse buscar.",
+    "recentIssuerHint": "Se completó con el emisor consultado más recientemente en esta sesión."
   }
 }

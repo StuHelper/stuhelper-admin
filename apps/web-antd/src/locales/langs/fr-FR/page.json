@@ -1696,5 +1696,15 @@
       "catalog_name_absent": "Nom absent du catalogue",
       "ambiguous_site": "Pages en double"
     }
+  },
+  "accountJump": {
+    "copyAccount": "Copier l’identifiant du compte",
+    "copied": "Copié",
+    "toBilling": "Compte de facturation",
+    "toQqBinding": "Liaison QQ",
+    "toRoles": "Attribution des rôles",
+    "toSessions": "Révocation de session",
+    "prefilledHint": "Prérempli à partir du compte sélectionné ; vérifiez avant de lancer la recherche.",
+    "recentIssuerHint": "Émetteur prérempli d’après la dernière consultation de cette session."
   }
 }

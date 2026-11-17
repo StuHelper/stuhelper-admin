@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import type { Part, Status } from './api';
 
-import { computed, ref, shallowRef } from 'vue';
+import { computed, onMounted, ref, shallowRef } from 'vue';
 
 import { useI18n } from '@vben/locales';
 
 import { Alert, Button, Card, Form, FormItem, Input, List, ListItem, Modal, Tag, Textarea } from 'ant-design-vue';
 
+import { useAccountJump } from '#/shared/account-jump';
 import { errorCode } from '#/shared/api/errors';
 import { useMutation } from '#/shared/composables/async';
 import { useLeaveGuard } from '#/shared/composables/leave';
@@ -23,18 +24,30 @@ import { parts, useQqBindingAdmin } from './api';
 const { t } = useI18n();
 const errorText = useErrorText();
 const api = useQqBindingAdmin();
+const accountJump = useAccountJump();
 
 const owner = ref('');
+const prefilled = ref(false);
 const shown = ref('');
 const success = ref('');
 const status = shallowRef<Status>();
 const loading = ref(false);
 const lookupError = ref('');
+
+onMounted(() => {
+  const jumped = accountJump.consume('qqBinding');
+  if (jumped) {
+    owner.value = jumped.principalKey;
+    prefilled.value = true;
+  }
+});
+
 async function lookup() {
   const key = owner.value.trim();
   if (!key || loading.value) return;
   loading.value = true;
   lookupError.value = '';
+  prefilled.value = false;
   status.value = undefined;
   success.value = '';
   try {
@@ -84,6 +97,7 @@ function cancelRelease() {
   <AdminPage :title="t('page.qqBinding.title')" :description="t('page.qqBinding.intro')">
     <div class="flex flex-col gap-4">
       <Card :bordered="false">
+        <Alert v-if="prefilled" class="mb-4" type="info" show-icon closable :message="t('page.accountJump.prefilledHint')" @close="prefilled = false" />
         <Form layout="vertical" class="max-w-2xl" @submit.prevent="lookup">
           <FormItem :label="t('page.qqBinding.owner')" :extra="t('page.qqBinding.ownerHint')" html-for="qq-binding-owner">
             <Input id="qq-binding-owner" v-model:value="owner" :maxlength="2048" allow-clear autocomplete="off" />

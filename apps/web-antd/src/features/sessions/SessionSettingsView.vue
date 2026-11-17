@@ -5,6 +5,7 @@ import { onMounted, ref, watch } from 'vue';
 
 import { useI18n } from '@vben/locales';
 
+import { useAccountJump } from '#/shared/account-jump';
 import { errorCode } from '#/shared/api/errors';
 import { schemaOf } from '#/shared/api/schema';
 import { useHttp } from '#/shared/session';
@@ -15,6 +16,7 @@ import contract from '../../../../../contracts/session.openapi.json';
 
 const { t } = useI18n();
 const http = useHttp();
+const accountJump = useAccountJump();
 const errorText = useErrorText();
 const parsePolicy = schemaOf<components['schemas']['SessionPolicy']>(contract.components.schemas, 'SessionPolicy');
 const interval = ref(30);
@@ -22,6 +24,7 @@ const grace = ref(30);
 const version = ref(0);
 const subject = ref('');
 const confirmed = ref(false);
+const prefilled = ref(false);
 // Confirmation belongs to the exact account the administrator checked.
 watch(subject, () => { confirmed.value = false; }, { flush: 'sync' });
 const busy = ref(false);
@@ -48,7 +51,7 @@ async function save() {
 }
 async function revoke() {
   if (busy.value || !confirmed.value || !subject.value.trim()) return;
-  busy.value = true; error.value = ''; message.value = '';
+  busy.value = true; error.value = ''; message.value = ''; prefilled.value = false;
   try {
     const body: components['schemas']['ForceLogout'] = { subject: subject.value.trim() };
     await http.send('/api/v1/admin/sessions/revoke', { method: 'POST', body });
@@ -56,7 +59,15 @@ async function revoke() {
   } catch (error_) { error.value = errorCode(error_); }
   finally { busy.value = false; }
 }
-onMounted(load);
+onMounted(() => {
+  const jumped = accountJump.consume('sessions');
+  if (jumped) {
+    subject.value = jumped.subject;
+    confirmed.value = false;
+    prefilled.value = true;
+  }
+  void load();
+});
 </script>
 
 <template>
@@ -81,6 +92,7 @@ onMounted(load);
       </form>
       <form class="bg-card flex flex-col gap-4 rounded-lg border p-5" @submit.prevent="revoke">
         <h2 class="text-lg font-semibold">{{ t('page.sessionPolicy.forceTitle') }}</h2>
+        <p v-if="prefilled" class="text-muted-foreground text-sm">{{ t('page.accountJump.prefilledHint') }}</p>
         <label for="session-subject" class="flex flex-col gap-2">
           {{ t('page.sessionPolicy.subject') }}
           <input id="session-subject" v-model="subject" class="bg-background min-w-0 rounded border p-2" type="text" maxlength="256" required :disabled="busy || !version" autocomplete="off" dir="ltr" />

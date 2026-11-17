@@ -7,6 +7,7 @@ import { useI18n } from '@vben/locales';
 
 import { Alert, Button, Card, Descriptions, DescriptionsItem, Drawer, Form, FormItem, Input, Modal, Select, Table, Tag, Textarea } from 'ant-design-vue';
 
+import { useAccountJump } from '#/shared/account-jump';
 import { errorCode } from '#/shared/api/errors';
 import { useMutation } from '#/shared/composables/async';
 import { useLeaveGuard } from '#/shared/composables/leave';
@@ -26,10 +27,12 @@ import { anyScope, useAccessAdmin } from './api';
 const { t } = useI18n();
 const errorText = useErrorText();
 const api = useAccessAdmin();
+const accountJump = useAccountJump();
 
 const templates = shallowRef<Role[]>([]);
 const status = ref<'error' | 'loading' | 'ready'>('loading');
 const loadError = ref('');
+const prefilled = ref(false);
 async function loadTemplates() {
   status.value = 'loading';
   try {
@@ -40,7 +43,14 @@ async function loadTemplates() {
     status.value = 'error';
   }
 }
-onMounted(loadTemplates);
+onMounted(() => {
+  const jumped = accountJump.consume('roles');
+  if (jumped) {
+    subject.value = jumped.principalKey;
+    prefilled.value = true;
+  }
+  void loadTemplates();
+});
 
 // Creating a role: start from a template or from scratch; the ID cannot be reused.
 const creating = ref(false);
@@ -76,6 +86,7 @@ async function lookup(target = subject.value.trim()) {
   if (!target || looking.value) return;
   looking.value = true;
   lookupError.value = '';
+  prefilled.value = false;
   try {
     effective.value = await api.effective(target);
     shown.value = target;
@@ -150,6 +161,7 @@ const grantColumns = computed(() => [
   <AdminPage :title="t('page.access.title')" :description="t('page.access.intro')">
     <div class="flex flex-col gap-4">
       <Card :bordered="false" :title="t('page.access.administrator')">
+        <Alert v-if="prefilled" class="mb-4" type="info" show-icon closable :message="t('page.accountJump.prefilledHint')" @close="prefilled = false" />
         <Form layout="vertical" class="max-w-2xl" @submit.prevent="lookup()">
           <FormItem :label="t('page.access.subject')" :extra="t('page.access.subjectHint')" html-for="access-subject">
             <Input id="access-subject" v-model:value="subject" :maxlength="512" autocomplete="off" />

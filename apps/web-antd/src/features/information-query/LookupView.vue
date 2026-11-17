@@ -9,6 +9,7 @@ import { Alert, Button, Card, Checkbox, CheckboxGroup, Form, FormItem, Input, Se
 
 import { ApiError, errorCode } from '#/shared/api/errors';
 import { useFormat } from '#/shared/format';
+import AccountJumpBar from '#/shared/ui/AccountJumpBar.vue';
 import AdminPage from '#/shared/ui/AdminPage.vue';
 import LoadState from '#/shared/ui/LoadState.vue';
 import { useErrorText } from '#/shared/ui/messages';
@@ -168,6 +169,9 @@ const scopeText = (value: Scope) => [value.school, value.group, value.module].ma
                     <code class="break-all text-xs">{{ group.candidate.account }}</code>
                     <Tag :color="group.candidate.current ? 'green' : 'default'">{{ group.candidate.current ? t('page.lookup.current') : t('page.lookup.historical') }}</Tag>
                     <span class="text-muted-foreground text-xs">{{ t('page.lookup.linkedBy', { source: label(`page.lookup.sources.${group.candidate.source}`, group.candidate.source) }) }} · {{ scopeText(group.candidate.scope) }} · {{ t('page.lookup.changedAt', { time: format.dateTime(group.candidate.changed_at) }) }}</span>
+                  </div>
+                  <div class="mt-2">
+                    <AccountJumpBar :account="group.candidate.account" />
                   </div>
                   <dl v-if="group.candidate.label.length > 0" class="mt-2 grid gap-x-4 gap-y-1 text-sm md:grid-cols-[max-content_1fr]">
                     <template v-for="field in group.candidate.label" :key="field.name">

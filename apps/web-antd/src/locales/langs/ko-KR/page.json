@@ -1696,5 +1696,15 @@
       "catalog_name_absent": "데이터에 같은 이름 없음",
       "ambiguous_site": "중복 홈페이지"
     }
+  },
+  "accountJump": {
+    "copyAccount": "계정 식별자 복사",
+    "copied": "복사됨",
+    "toBilling": "계정 청구 조회",
+    "toQqBinding": "QQ 연동 조회",
+    "toRoles": "역할 권한 조회",
+    "toSessions": "세션 강제 로그아웃",
+    "prefilledHint": "선택한 계정 정보로 입력란을 미리 채웠습니다. 확인 후 조회하세요.",
+    "recentIssuerHint": "현재 세션에서 최근 조회한 발급자를 자동으로 채웠습니다."
   }
 }

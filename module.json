@@ -83,6 +83,10 @@
       "tests/e2e/session-policy.spec.mjs#session settings preserve edits on conflict and revoke only the confirmed subject",
       "tests/e2e/session-policy.spec.mjs#session settings show a retryable outage without losing input"
     ],
+    "AO-04": [
+      "tests/e2e/account-navigation.spec.mjs#lookup jumps to billing in memory without URL query params and remembers the recent issuer",
+      "tests/e2e/account-navigation.spec.mjs#refund details jump to QQ binding, roles and session logout according to enabled capabilities"
+    ],
     "CM-19": [
       "tests/e2e/feedback.spec.mjs#feedback reply refresh cannot overwrite another operators note with a newer revision",
       "tests/e2e/feedback.spec.mjs#feedback clears private mail after permission revocation",

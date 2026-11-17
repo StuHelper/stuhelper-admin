@@ -7,8 +7,10 @@ import { useI18n } from '@vben/locales';
 
 import { Alert, Button, Card, DatePicker, Form, FormItem, Input, Select, Table, Tag } from 'ant-design-vue';
 
+import { parseAccountIdentifier } from '#/shared/account-jump';
 import { errorCode } from '#/shared/api/errors';
 import { useFormat } from '#/shared/format';
+import AccountJumpBar from '#/shared/ui/AccountJumpBar.vue';
 import AdminPage from '#/shared/ui/AdminPage.vue';
 import LoadState from '#/shared/ui/LoadState.vue';
 import { useErrorText } from '#/shared/ui/messages';
@@ -106,8 +108,18 @@ const columns = computed(() => [
               <template v-if="column.key === 'time'">{{ format.dateTime(record.created_at) }}</template>
               <template v-else-if="column.key === 'source'">{{ label(`page.audit.sources.${record.source}`, record.source) }}</template>
               <template v-else-if="column.key === 'action'"><code class="text-xs">{{ record.action }}</code><div v-if="record.reason" class="text-muted-foreground text-xs">{{ record.reason }}</div></template>
-              <template v-else-if="column.key === 'actor'"><code class="break-all text-xs">{{ record.actor }}</code></template>
-              <template v-else-if="column.key === 'target'"><code class="break-all text-xs">{{ record.target }}</code></template>
+              <template v-else-if="column.key === 'actor'">
+                <div class="flex flex-col gap-1">
+                  <code class="break-all text-xs">{{ record.actor }}</code>
+                  <AccountJumpBar :account="record.actor" />
+                </div>
+              </template>
+              <template v-else-if="column.key === 'target'">
+                <div class="flex flex-col gap-1">
+                  <code class="break-all text-xs">{{ record.target }}</code>
+                  <AccountJumpBar v-if="parseAccountIdentifier(record.target).issuer" :account="record.target" />
+                </div>
+              </template>
               <template v-else-if="column.key === 'result'"><Tag :color="resultColor[record.result] ?? 'default'">{{ label(`page.audit.results.${record.result}`, record.result) }}</Tag></template>
             </template>
           </Table>

@@ -1696,5 +1696,15 @@
       "catalog_name_absent": "الاسم غير موجود في البيانات",
       "ambiguous_site": "صفحات مكررة"
     }
+  },
+  "accountJump": {
+    "copyAccount": "نسخ معرّف الحساب",
+    "copied": "تم النسخ",
+    "toBilling": "حساب الفوترة",
+    "toQqBinding": "ربط QQ",
+    "toRoles": "تفويض الأدوار",
+    "toSessions": "إنهاء الجلسات",
+    "prefilledHint": "تمت تعبئة الحقول تلقائيًا من الحساب المحدد؛ يرجى التحقق ثم البحث.",
+    "recentIssuerHint": "تمت تعبئة جهة الإصدار المستخدمة مؤخرًا في هذه الجلسة."
   }
 }
