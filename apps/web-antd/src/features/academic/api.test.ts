@@ -33,3 +33,14 @@ describe('catalog reads hidden from the public catalog', () => {
     expect(paths).toEqual(['/api/v1/catalog/admin/objects', '/api/v1/catalog/admin/objects/x/summary']);
   });
 });
+
+describe('catalog 0.10.0 course identity fields', () => {
+  it('accepts a course with an English name, former codes, former names and hours', async () => {
+    const { validates } = await import('#/shared/api/schema');
+    const module = await import('../../../../../contracts/catalog.openapi.json');
+    const contract = module.default;
+    const course = { id: 'c', kind: 'course', school_id: 's', name: 'Course', code: 'NEW101', credits: 2, hours: 32, english_name: 'Course', former_codes: ['OLD101'], former_names: ['Old Course'], canonical_id: 'c', aliases: [], revision: 1, updated_at: '2026-11-18T00:00:00Z' };
+    expect(validates(course, { $ref: '#/components/schemas/Object' }, contract.components.schemas)).toBe(true);
+    expect(validates({ items: [course], next: '' }, { $ref: '#/components/schemas/Page' }, contract.components.schemas)).toBe(true);
+  });
+});
