@@ -4,7 +4,6 @@ import type { AttributionPreview, Decision, Task } from './api';
 import {
   computed,
   onBeforeUnmount,
-  onMounted,
   ref,
   shallowRef,
   watch,
@@ -37,6 +36,7 @@ import LoadState from '#/shared/ui/LoadState.vue';
 import MutationAlert from '#/shared/ui/MutationAlert.vue';
 
 import { dimensions, pageSize, useAcademicAdmin } from './api';
+import { useTaskPoll } from './useTaskPoll';
 
 /**
  * Review one entry, optionally through an existing moderation task. A decision
@@ -184,6 +184,10 @@ watch(
   () => {
     task.value = undefined;
     success.value = '';
+    attributionError.value = '';
+    opening.dismiss();
+    deciding.dismiss();
+    retrying.dismiss();
     void load();
   },
   { immediate: true },
@@ -269,7 +273,7 @@ async function retryOriginal() {
 function decided(result: Task) {
   task.value = result;
   baseline.value = form();
-  polls = 0;
+  poller.resetPolls();
   success.value = t(
     result.state === 'applied'
       ? 'page.moderation.decisionApplied'
@@ -290,45 +294,20 @@ async function retryDelivery() {
   if (result) decided(result);
 }
 
-// Follow a saved decision until the content module reports the result.
-let polls = 0;
-let polling = false;
-let timer: ReturnType<typeof setInterval> | undefined;
-const stop = new AbortController();
-async function poll() {
-  const open = task.value;
-  if (
-    polling ||
-    busy.value ||
-    uncertain.value ||
-    open?.state !== 'decided' ||
-    polls >= 20
-  )
-    return;
-  polling = true;
-  polls++;
-  try {
-    const current = await api.task(open.id, stop.signal);
-    task.value = current;
-    if (current.state !== 'decided') {
-      success.value =
-        current.state === 'applied' ? t('page.moderation.decisionApplied') : '';
-      await load(true);
-      emit('changed');
-    }
-  } catch (error) {
-    polls = 20;
-    if (error instanceof ApiError && error.denied) data.clear();
-  } finally {
-    polling = false;
-  }
-}
-onMounted(() => {
-  timer = setInterval(() => void poll(), 3000);
+const poller = useTaskPoll({
+  task,
+  isPaused: () => busy.value || uncertain.value,
+  fetchTask: (id, signal) => api.task(id, signal),
+  onSettled: async (current) => {
+    success.value =
+      current.state === 'applied' ? t('page.moderation.decisionApplied') : '';
+    await load(true);
+    emit('changed');
+  },
+  onDenied: () => data.clear(),
 });
+
 onBeforeUnmount(() => {
-  clearInterval(timer);
-  stop.abort();
   emit('pending', false, false);
 });
 

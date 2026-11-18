@@ -63,28 +63,36 @@ const selected = shallowRef<{ entryId?: string; taskId?: string }>();
 const panelBusy = ref(false);
 const panelDirty = ref(false);
 
+const maxSkippedEmptyPages = 5;
+
 const rows = usePaged<AdminEntry | Task>(async (after, signal) => {
   if (!school.value) return { items: [], next: '' };
   if (props.mode === 'queue') {
     const [from, until] = filters.range ?? [];
-    const tasks = await api.tasks(
-      {
-        school_id: school.value,
-        state: filters.state,
-        kind: filters.taskKind,
-        content_kind: filters.kind,
-        from,
-        until,
-        after,
-        limit: pageSize,
-      },
-      signal,
-    );
-    // Resource reviews have their own queue.
-    return {
-      items: tasks.filter((task) => task.content_kind !== 'resource'),
-      next: arrayCursor(tasks, (task) => task.id),
-    };
+    let cursor = after;
+    for (let step = 0; step < maxSkippedEmptyPages; step++) {
+      const tasks = await api.tasks(
+        {
+          school_id: school.value,
+          state: filters.state,
+          kind: filters.taskKind,
+          content_kind: filters.kind,
+          from,
+          until,
+          after: cursor,
+          limit: pageSize,
+        },
+        signal,
+      );
+      const next = arrayCursor(tasks, (task) => task.id);
+      // Resource reviews have their own queue.
+      const visible = tasks.filter((task) => task.content_kind !== 'resource');
+      if (visible.length > 0 || !next || next === cursor) {
+        return { items: visible, next };
+      }
+      cursor = next;
+    }
+    return { items: [], next: cursor };
   }
   const page = await api.entries(
     {
@@ -112,10 +120,15 @@ const locked = computed(
     batch.uncertain.value,
 );
 
-watch(school, () => {
-  selected.value = undefined;
-  void rows.reload();
-});
+watch(
+  school,
+  () => {
+    selected.value = undefined;
+    if (!school.value) return;
+    void rows.reload();
+  },
+  { immediate: true },
+);
 
 function canLeave() {
   return (
@@ -357,14 +370,27 @@ id="moderationview-field-3"
 
       <CampusPending v-if="!school" @ready="school = $event" />
       <Card v-else :bordered="false">
-        <LoadState
-          v-if="rows.items.value.length === 0"
-          :status="rows.status.value"
-          :error="rows.error.value"
-          :empty="true"
-          :empty-text="t('page.moderation.empty')"
-          @retry="rows.reload"
-        />
+        <div v-if="rows.items.value.length === 0">
+          <LoadState
+            :status="rows.status.value"
+            :error="rows.error.value"
+            :empty="true"
+            :empty-text="t('page.moderation.empty')"
+            @retry="rows.reload"
+          />
+          <div
+            v-if="rows.status.value === 'ready' && rows.next.value"
+            class="mt-4 flex justify-center"
+          >
+            <Button
+              :loading="rows.appending.value"
+              :disabled="locked"
+              @click="rows.loadMore"
+            >
+              {{ t('page.common.loadMore') }}
+            </Button>
+          </div>
+        </div>
         <template v-else>
           <Table
             v-if="mode === 'queue'"
@@ -449,7 +475,9 @@ id="moderationview-field-3"
 </template>
               <template v-else-if="column.key === 'published'">
 {{
-                format.dateTime(record.published_at)
+                record.published_at
+                  ? format.dateTime(record.published_at)
+                  : t('page.common.notProvided')
               }}
 </template>
               <template v-else-if="column.key === 'action'">

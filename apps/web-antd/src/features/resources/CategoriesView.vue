@@ -39,6 +39,7 @@ function blank(): CategoryWrite {
 }
 function edit(category?: Category) {
   if (dirty.value && !window.confirm(t('page.common.leaveUnsaved'))) return;
+  save.dismiss();
   existing.value = !!category;
   id.value = category?.id ?? '';
   form.value = category ? { revision: category.revision, names: { ...category.names }, enabled: category.enabled, order: category.order, fields: snapshot(category.fields), group_by: category.group_by } : blank();
@@ -46,6 +47,37 @@ function edit(category?: Category) {
   success.value = '';
   editing.value = true;
 }
+
+const validForm = computed(() => {
+  if (!id.value.trim() || !form.value.names['zh-CN']?.trim()) return false;
+  const seenKeys = new Set<string>();
+  for (const field of form.value.fields) {
+    const key = field.key.trim();
+    if (!key || seenKeys.has(key) || !field.names['zh-CN']?.trim()) return false;
+    seenKeys.add(key);
+    if (
+      field.kind === 'integer' &&
+      typeof field.min === 'number' &&
+      typeof field.max === 'number' &&
+      field.min > field.max
+    ) {
+      return false;
+    }
+    if (field.kind === 'choice') {
+      const options = field.options ?? [];
+      if (options.length === 0) return false;
+      const seenOptions = new Set<string>();
+      for (const option of options) {
+        const optionId = option.id.trim();
+        if (!optionId || seenOptions.has(optionId) || !option.names['zh-CN']?.trim()) {
+          return false;
+        }
+        seenOptions.add(optionId);
+      }
+    }
+  }
+  return true;
+});
 function close() {
   if (save.busy.value || save.uncertain.value || (dirty.value && !window.confirm(t('page.common.leaveUnsaved')))) return;
   editing.value = false;
@@ -70,6 +102,7 @@ function removeField(index: number) {
 }
 
 async function submit() {
+  if (!validForm.value) return;
   const payload = snapshot(form.value);
   for (const field of payload.fields) {
     if (typeof field.min !== 'number') delete field.min;
@@ -180,7 +213,7 @@ const columns = computed(() => [
         </fieldset>
         <MutationAlert :busy="save.busy.value" :error="save.error.value" :uncertain="save.uncertain.value" :success="success" @retry="retry" />
         <Space class="mt-4">
-          <Button type="primary" html-type="submit" :loading="save.busy.value" :disabled="save.uncertain.value || !id || !form.names['zh-CN']">{{ t('page.common.save') }}</Button>
+          <Button type="primary" html-type="submit" :loading="save.busy.value" :disabled="save.uncertain.value || !validForm">{{ t('page.common.save') }}</Button>
         </Space>
       </Form>
     </Drawer>
