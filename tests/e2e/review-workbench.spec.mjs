@@ -26,6 +26,14 @@ async function fits(page, info) {
   ).toBe(true);
 }
 
+async function scrollIntoViewport(button) {
+  // Expanding the history panel can move the button after the drawer first scrolls.
+  await expect(async () => {
+    await button.scrollIntoViewIfNeeded();
+    await expect(button).toBeInViewport({ timeout: 350 });
+  }).toPass({ timeout: 5000 });
+}
+
 test('resource review previews sandboxed PDFs, warns above 15 MiB, applies reason presets and advances across pages', async ({
   page,
 }, info) => {
@@ -287,8 +295,7 @@ test('moderation decision panel shows target course and term, highlights propose
     name: all.moderation.olderVersions,
     exact: true,
   });
-  await olderBtn.scrollIntoViewIfNeeded();
-  await expect(olderBtn).toBeInViewport();
+  await scrollIntoViewport(olderBtn);
   await Promise.all([
     page.waitForResponse((response) => {
       const url = new URL(response.url());
@@ -307,7 +314,7 @@ test('moderation decision panel shows target course and term, highlights propose
     name: all.moderation.latestVersions,
     exact: true,
   });
-  await latestBtn.scrollIntoViewIfNeeded();
+  await scrollIntoViewport(latestBtn);
   await latestBtn.click();
   await expect(drawer.getByText('Revision body #4', { exact: true })).toHaveCount(0);
   await fits(page, info);
