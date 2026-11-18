@@ -44,14 +44,12 @@ test('storage quota accepts decimal GB and TB units and submits exact byte count
   };
   await page.route('**/api/v1/storage/operations**', async (route) => {
     if (route.request().method() === 'POST') {
-      writes.push(route.request().postDataJSON());
-      return route.fulfill({
-        json: {
-          ...gbInstance,
-          limit_bytes: 1_500_000_000_000,
-          revision: 2,
-        },
-      });
+      const command = route.request().postDataJSON();
+      writes.push(command);
+      gbInstance.limit_bytes = command.limit_bytes;
+      gbInstance.revision++;
+      gbInstance.available_bytes = gbInstance.limit_bytes - gbInstance.used_bytes - gbInstance.reserved_bytes;
+      return route.fulfill({ json: gbInstance });
     }
     return route.fulfill({
       json: { ...storageExample, instances: [gbInstance] },
@@ -66,6 +64,19 @@ test('storage quota accepts decimal GB and TB units and submits exact byte count
   await expect(
     page.getByRole('button', { name: m.actions.quota, exact: true }),
   ).toBeDisabled();
+
+  // Crossing one TB during refresh must preserve the unit of the active draft.
+  const saveLimit = async () => {
+    await page.getByRole('button', { name: m.actions.quota, exact: true }).click();
+    await page.getByRole('button', { name: all.common.confirm, exact: true }).click();
+  };
+  await quota.fill('1000');
+  await saveLimit();
+  await expect(quota).toHaveAttribute('placeholder', '1000');
+  await saveLimit();
+  await expect.poll(() => writes.map((write) => write.limit_bytes)).toEqual([
+    1_000_000_000_000, 1_000_000_000_000,
+  ]);
 
   // Switch unit to TB and enter 1.5 TB -> 1,500,000,000,000 bytes.
   await page.locator('article .ant-select-selector').click();
@@ -82,8 +93,8 @@ test('storage quota accepts decimal GB and TB units and submits exact byte count
   await page
     .getByRole('button', { name: all.common.confirm, exact: true })
     .click();
-  await expect.poll(() => writes.length).toBe(1);
-  expect(writes[0]).toMatchObject({
+  await expect.poll(() => writes.length).toBe(3);
+  expect(writes[2]).toMatchObject({
     action: 'quota',
     limit_bytes: 1_500_000_000_000,
   });

@@ -33,6 +33,10 @@ const locked = computed(() => loading.value || sending.value || pending.value !=
 const label = (key: string) => (te(key) ? t(key) : t('page.storage.unknown'));
 const confirmation = computed(() => (pending.value ? t('page.storage.confirmAction', { action: t(`page.storage.actions.${pending.value.kind === 'job' ? 'retry' : pending.value.body.action}`) }) : ''));
 const unitOf = (instance: InstanceHealth): QuotaUnit => units.value[instance.id] ?? defaultQuotaUnit(instance.limit_bytes);
+function editLimit(instance: InstanceHealth, value: string) {
+  units.value[instance.id] = unitOf(instance);
+  limits.value[instance.id] = value;
+}
 const minQuotaBytes = (instance: InstanceHealth) => instance.used_bytes + instance.reserved_bytes;
 // A quota may not drop below what is already used or reserved.
 function quota(instance: InstanceHealth) {
@@ -118,7 +122,7 @@ const failureColumns = computed(() => [
                   <Form layout="vertical" class="mt-3" @submit.prevent="prepareInstance(instance, 'quota', quota(instance))">
                     <FormItem :label="t('page.storage.quotaInput')" :extra="quotaHintText(instance)" :validate-status="quota(instance) === undefined ? 'error' : undefined" class="mb-2" :html-for="`storageview-quota-${instance.id}`">
                       <div class="flex flex-wrap gap-2">
-                        <Input :id="`storageview-quota-${instance.id}`" v-model:value="limits[instance.id]" class="min-w-0 flex-1" inputmode="decimal" :placeholder="formatQuotaPlaceholder(instance.limit_bytes, unitOf(instance))" :disabled="locked" />
+                        <Input :id="`storageview-quota-${instance.id}`" :value="limits[instance.id]" @update:value="editLimit(instance, $event)" class="min-w-0 flex-1" inputmode="decimal" :placeholder="formatQuotaPlaceholder(instance.limit_bytes, unitOf(instance))" :disabled="locked" />
                         <Select
                           :value="unitOf(instance)"
                           class="w-44 max-w-full"
