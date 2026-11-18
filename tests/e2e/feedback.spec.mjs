@@ -24,7 +24,8 @@ test('feedback preserves pending writes and reply identity across retry',async({
  await expect(page.getByText(text.suspiciousHelp)).toBeVisible();
  expect(await page.evaluate(()=>window.injected)).toBeUndefined();
  await page.getByLabel(text.note,{exact:true}).fill('Internal evidence');
- await page.getByLabel(text.state,{exact:true}).selectOption('processing');
+ await page.locator('.ant-form-item').filter({hasText:text.state}).locator('.ant-select-selector').click();
+ await page.locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden)').getByTitle(text.processing,{exact:true}).click();
  await page.getByRole('button',{name:text.save,exact:true}).click();
  await expect(page.getByRole('status').filter({hasText:text.saved})).toBeVisible();
  await page.getByLabel(text.reply,{exact:true}).fill('Synthetic reply');

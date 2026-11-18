@@ -46,7 +46,7 @@ import {
 
 import { useAcademicAdmin } from '#/features/academic/api';
 import { ApiError, errorCode, isDeniedCode } from '#/shared/api/errors';
-import { useMutation } from '#/shared/composables/async';
+import { useMutation, usePaged, useTask } from '#/shared/composables/async';
 import { useLeaveGuard } from '#/shared/composables/leave';
 import { useFormat } from '#/shared/format';
 import { sessionKey } from '#/shared/session';
@@ -81,19 +81,30 @@ const accessError = ref('');
 const schools = ref<School[]>([]);
 const schoolId = ref('');
 const tab = ref<Tab>('reviews');
-const busy = ref(false);
+const readTask = useTask({ onDenied: clearSensitive });
+const busy = readTask.busy;
 const error = ref('');
 const notice = ref('');
 
 let pendingApply: ((result: unknown) => void) | undefined;
 
+const activeError = computed(() => error.value || applications.error.value);
 const locked = computed(
-  () => busy.value || write.busy.value || write.uncertain.value,
+  () => busy.value || applications.status.value === 'loading' || write.busy.value || write.uncertain.value,
 );
 
 // Pending teacher applications of the chosen school, ordered by ID.
-const applications = ref<Application[]>([]);
-const cursor = ref('');
+const applications = usePaged<Application>(
+  async (after, signal) => {
+    if (!schoolId.value) return { items: [], next: '' };
+    return api.list(
+      'Application',
+      `/api/v1/admin/verification/schools/${encodeURIComponent(schoolId.value)}/teacher-applications`,
+      { after, signal },
+    );
+  },
+  { onDenied: deniedList },
+);
 
 // Review drawer: the submitted form, its materials and the teacher profiles to bind.
 const reviewing = shallowRef<Application>();
@@ -117,9 +128,20 @@ function clearPictures() {
   pictures.value = [];
 }
 
+function deniedList(cause: ApiError) {
+  clearSensitive();
+  error.value = errorCode(cause);
+}
+
 function clearSensitive() {
-  applications.value = [];
-  cursor.value = '';
+  applications.clear();
+  searchSeq++;
+  searching.value = false;
+  teacherIds.value = [];
+  teacherOptions.value = [];
+  revokeNote.value = '';
+  note.value = '';
+  notice.value = '';
   reviewing.value = undefined;
   form.value = undefined;
   credential.value = undefined;
@@ -136,20 +158,11 @@ watch(
 
 async function readAction(work: () => Promise<void>) {
   if (locked.value) return;
-  busy.value = true;
   error.value = '';
   notice.value = '';
   write.dismiss();
-  try {
-    await work();
-  } catch (error_) {
-    error.value = errorCode(error_);
-    if (error_ instanceof ApiError && error_.denied) {
-      clearSensitive();
-    }
-  } finally {
-    busy.value = false;
-  }
+  await readTask.run(work);
+  error.value = readTask.error.value;
 }
 
 async function runWrite<B, R>(
@@ -199,18 +212,12 @@ async function retryWrite() {
 }
 
 async function load(append = false) {
+  if (write.uncertain.value || write.busy.value) return;
+  error.value = '';
+  notice.value = '';
+  write.dismiss();
   if (!schoolId.value) return;
-  await readAction(async () => {
-    const page = await api.list(
-      'Application',
-      `/api/v1/admin/verification/schools/${encodeURIComponent(schoolId.value)}/teacher-applications`,
-      { after: append ? cursor.value : '' },
-    );
-    applications.value = append
-      ? [...applications.value, ...page.items]
-      : page.items;
-    cursor.value = page.next;
-  });
+  await (append ? applications.loadMore() : applications.reload());
 }
 
 async function openReview(row: Application) {
@@ -315,7 +322,7 @@ async function review(decision: Schemas['TeacherReviewInput']['decision']) {
         key,
       ),
     () => {
-      applications.value = applications.value.filter(
+      applications.items.value = applications.items.value.filter(
         (item) => item.id !== row.id,
       );
       reviewing.value = undefined;
@@ -375,8 +382,7 @@ watch(credentialId, () => {
 
 watch(schoolId, () => {
   if (write.uncertain.value) return;
-  applications.value = [];
-  cursor.value = '';
+  applications.clear();
   void load();
 });
 
@@ -456,11 +462,11 @@ function chooseSchool(school: School) {
         @retry="retryWrite"
       />
       <Alert
-        v-if="error && !reviewing"
+        v-if="activeError && !reviewing"
         type="error"
         show-icon
         role="alert"
-        :message="errorText(error)"
+        :message="errorText(activeError)"
       />
       <Card :bordered="false">
         <Tabs v-model:active-key="tab">
@@ -488,11 +494,11 @@ function chooseSchool(school: School) {
             </Form>
             <Table
               :columns="columns"
-              :data-source="applications"
+              :data-source="applications.items.value"
               :pagination="false"
               row-key="id"
               size="middle"
-              :loading="busy && !reviewing"
+              :loading="applications.status.value === 'loading' && !applications.appending.value"
               :scroll="{ x: 560 }"
               :locale="{ emptyText: t('page.teacherVerification.empty') }"
             >
@@ -519,7 +525,7 @@ function chooseSchool(school: School) {
               </template>
             </Table>
             <div class="mt-4 flex justify-center">
-              <Button v-if="cursor" :disabled="locked" @click="load(true)">
+              <Button v-if="applications.next.value" :disabled="locked" @click="load(true)">
                 {{ t('page.common.loadMore') }}
               </Button>
             </div>
@@ -756,11 +762,11 @@ function chooseSchool(school: School) {
           @retry="retryWrite"
         />
         <Alert
-          v-if="error"
+          v-if="activeError"
           type="error"
           show-icon
           role="alert"
-          :message="errorText(error)"
+          :message="errorText(activeError)"
         />
       </div>
     </Drawer>

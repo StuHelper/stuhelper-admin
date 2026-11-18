@@ -50,7 +50,7 @@ import {
 } from 'ant-design-vue';
 
 import { ApiError, errorCode, isDeniedCode } from '#/shared/api/errors';
-import { useMutation } from '#/shared/composables/async';
+import { useAsync, useMutation, usePaged, useTask } from '#/shared/composables/async';
 import { useLeaveGuard } from '#/shared/composables/leave';
 import { useFormat } from '#/shared/format';
 import { sessionKey } from '#/shared/session';
@@ -90,14 +90,57 @@ const accessError = ref('');
 const schools = ref<School[]>([]);
 const schoolId = ref('');
 const tab = ref<Tab>('reviews');
-const busy = ref(false);
+const readTask = useTask({ onDenied: clearSensitive });
+const profileRead = useTask({
+  onDenied: (cause) => {
+    if (cause.status === 403 && cause.code !== 'unauthenticated') studentProfile.value = undefined;
+    else clearSensitive();
+  },
+});
+const busy = computed(() => readTask.busy.value || profileRead.busy.value);
 const error = ref('');
 const notice = ref('');
-const applications = ref<Application[]>([]);
-const removals = ref<RemovalRequest[]>([]);
-const jobs = ref<Job[]>([]);
-const suggestions = ref<Suggestion[]>([]);
-const cursor = ref('');
+const applications = usePaged<Application>(
+  (after, signal) =>
+    schoolId.value
+      ? api.list('Application', `/api/v1/admin/verification/schools/${encodeURIComponent(schoolId.value)}/applications`, { after, signal })
+      : Promise.resolve({ items: [], next: '' }),
+  { onDenied: deniedList },
+);
+const removals = usePaged<RemovalRequest>(
+  (after, signal) =>
+    schoolId.value
+      ? api.list('RemovalRequest', `/api/v1/admin/verification/schools/${encodeURIComponent(schoolId.value)}/requests`, { after, signal })
+      : Promise.resolve({ items: [], next: '' }),
+  { onDenied: deniedList },
+);
+const jobs = usePaged<Job>(
+  (after, signal) =>
+    schoolId.value
+      ? api.list('Job', `/api/v1/admin/verification/jobs?school_id=${encodeURIComponent(schoolId.value)}`, { after, signal })
+      : Promise.resolve({ items: [], next: '' }),
+  { onDenied: deniedList },
+);
+const suggestions = usePaged<Suggestion>(
+  (after, signal) => api.list('Suggestion', '/api/v1/admin/verification/suggestions', { after, signal }),
+  { onDenied: deniedList },
+);
+const schoolConfig = useAsync(async (signal) => {
+  const school = schoolId.value;
+  try {
+    return await api.get('School', `/api/v1/admin/verification/schools/${encodeURIComponent(school)}`, signal);
+  } catch (error_) {
+    if (errorCode(error_) === 'not_found') return blankSchool(school);
+    throw error_;
+  }
+}, { onDenied: deniedList });
+const currentPaged = computed(() => {
+  if (tab.value === 'reviews') return applications;
+  if (tab.value === 'requests') return removals;
+  if (tab.value === 'jobs') return jobs;
+  if (tab.value === 'suggestions') return suggestions;
+  return undefined;
+});
 const reviewing = shallowRef<Application>();
 const manual = shallowRef<Schemas['ManualInput']>();
 const pictures = ref<{ id: string; type: string; url: string }[]>([]);
@@ -124,8 +167,9 @@ const materialTypes = ref('');
 
 let pendingApply: ((result: unknown) => void) | undefined;
 
+const activeError = computed(() => error.value || (tab.value === 'configuration' ? schoolConfig.error.value : currentPaged.value?.error.value));
 const locked = computed(
-  () => busy.value || write.busy.value || write.uncertain.value,
+  () => busy.value || schoolConfig.status.value === 'loading' || currentPaged.value?.status.value === 'loading' || write.busy.value || write.uncertain.value,
 );
 const dirty = computed(
   () =>
@@ -146,12 +190,19 @@ function clearPictures() {
   pictures.value = [];
 }
 
+function deniedList(cause: ApiError) {
+  clearSensitive();
+  error.value = errorCode(cause);
+}
+
 function clearSensitive() {
-  applications.value = [];
-  removals.value = [];
-  jobs.value = [];
-  suggestions.value = [];
-  cursor.value = '';
+  applications.clear();
+  removals.clear();
+  jobs.clear();
+  suggestions.clear();
+  schoolConfig.clear();
+  note.value = '';
+  notice.value = '';
   reviewing.value = undefined;
   manual.value = undefined;
   credential.value = undefined;
@@ -171,28 +222,12 @@ async function readAction(
   keepCredentialOn403 = false,
 ) {
   if (locked.value) return;
-  busy.value = true;
   error.value = '';
   notice.value = '';
   write.dismiss();
-  try {
-    await work();
-  } catch (error_) {
-    error.value = errorCode(error_);
-    if (error_ instanceof ApiError && error_.denied) {
-      if (
-        keepCredentialOn403 &&
-        error_.status === 403 &&
-        error_.code !== 'unauthenticated'
-      ) {
-        studentProfile.value = undefined;
-      } else {
-        clearSensitive();
-      }
-    }
-  } finally {
-    busy.value = false;
-  }
+  const task = keepCredentialOn403 ? profileRead : readTask;
+  await task.run(work);
+  error.value = task.error.value;
 }
 
 async function runWrite<B, R>(
@@ -242,82 +277,25 @@ async function retryWrite() {
 }
 
 async function load(append = false) {
-  await readAction(async () => {
-    const after = append ? cursor.value : '';
-    const school = encodeURIComponent(schoolId.value);
-    if (!append) {
-      reviewing.value = undefined;
-      clearPictures();
+  if (write.uncertain.value || write.busy.value) return;
+  error.value = '';
+  notice.value = '';
+  write.dismiss();
+  if (!append) {
+    reviewing.value = undefined;
+    clearPictures();
+  }
+  if (tab.value === 'configuration') {
+    await schoolConfig.reload();
+    const current = schoolConfig.data.value;
+    if (current && current.id === schoolId.value) {
+      Object.assign(config, current);
+      materialTypes.value = current.material_types.join(', ');
     }
-    switch (tab.value) {
-      case 'configuration': {
-        try {
-          Object.assign(
-            config,
-            await api.get(
-              'School',
-              `/api/v1/admin/verification/schools/${school}`,
-            ),
-          );
-        } catch (error_) {
-          if (errorCode(error_) !== 'not_found') throw error_;
-          Object.assign(config, blankSchool(schoolId.value));
-        }
-        materialTypes.value = config.material_types.join(', ');
-        cursor.value = '';
-        break;
-      }
-      case 'jobs': {
-        const page = await api.list(
-          'Job',
-          `/api/v1/admin/verification/jobs?school_id=${school}`,
-          { after },
-        );
-        jobs.value = append ? [...jobs.value, ...page.items] : page.items;
-        cursor.value = page.next;
-        break;
-      }
-      case 'requests': {
-        const page = await api.list(
-          'RemovalRequest',
-          `/api/v1/admin/verification/schools/${school}/requests`,
-          { after },
-        );
-        removals.value = append
-          ? [...removals.value, ...page.items]
-          : page.items;
-        cursor.value = page.next;
-        break;
-      }
-      case 'reviews': {
-        const page = await api.list(
-          'Application',
-          `/api/v1/admin/verification/schools/${school}/applications`,
-          { after },
-        );
-        applications.value = append
-          ? [...applications.value, ...page.items]
-          : page.items;
-        cursor.value = page.next;
-        break;
-      }
-      case 'suggestions': {
-        const page = await api.list(
-          'Suggestion',
-          '/api/v1/admin/verification/suggestions',
-          { after },
-        );
-        suggestions.value = append
-          ? [...suggestions.value, ...page.items]
-          : page.items;
-        cursor.value = page.next;
-        break;
-      }
-      default: {
-        cursor.value = '';
-      }
-    }
-  });
+  } else {
+    const page = currentPaged.value;
+    await (append ? page?.loadMore() : page?.reload());
+  }
 }
 
 async function openReview(row: Application) {
@@ -385,7 +363,7 @@ async function review(decision: Schemas['ReviewInput']['decision']) {
         key,
       ),
     () => {
-      applications.value = applications.value.filter(
+      applications.items.value = applications.items.value.filter(
         (item) => item.id !== row.id,
       );
       reviewing.value = undefined;
@@ -414,7 +392,7 @@ async function decideRemoval(row: RemovalRequest, approve: boolean) {
         key,
       ),
     () => {
-      removals.value = removals.value.filter((item) => item.id !== row.id);
+      removals.items.value = removals.items.value.filter((item) => item.id !== row.id);
       notice.value = t('page.common.saved');
     },
   );
@@ -439,7 +417,7 @@ async function decideSuggestion(row: Suggestion, approve: boolean) {
         key,
       ),
     (saved) => {
-      suggestions.value = suggestions.value.map((item) =>
+      suggestions.items.value = suggestions.items.value.map((item) =>
         item.id === saved.id ? saved : item,
       );
       notice.value = t('page.common.saved');
@@ -461,7 +439,7 @@ async function retryJob(job: Job) {
         key,
       ),
     (updated) => {
-      jobs.value = jobs.value.map((item) =>
+      jobs.items.value = jobs.items.value.map((item) =>
         item.id === updated.id ? updated : item,
       );
       notice.value = t('page.common.saved');
@@ -567,15 +545,13 @@ function profileValue(value: unknown, field: string) {
 
 watch(schoolId, () => {
   if (write.uncertain.value) return;
-  cursor.value = '';
-  applications.value = [];
-  removals.value = [];
-  jobs.value = [];
+  applications.clear();
+  removals.clear();
+  jobs.clear();
   if (access.value === 'allowed' && schoolId.value) void load();
 });
 watch(tab, () => {
   if (write.uncertain.value) return;
-  cursor.value = '';
   if (schoolId.value) void load();
 });
 watch(credentialId, () => {
@@ -682,11 +658,11 @@ function chooseSchool(school: School) {
         @retry="retryWrite"
       />
       <Alert
-        v-if="error && !reviewing"
+        v-if="activeError && !reviewing"
         type="error"
         show-icon
         role="alert"
-        :message="errorText(error)"
+        :message="errorText(activeError)"
       />
       <Card :bordered="false">
         <Tabs v-model:active-key="tab">
@@ -697,11 +673,11 @@ function chooseSchool(school: School) {
           >
             <Table
               :columns="applicationColumns"
-              :data-source="applications"
+              :data-source="applications.items.value"
               :pagination="false"
               row-key="id"
               size="middle"
-              :loading="busy && !reviewing"
+              :loading="applications.status.value === 'loading' && !applications.appending.value"
               :scroll="{ x: 640 }"
               :locale="{ emptyText: t('page.verification.noApplications') }"
             >
@@ -738,13 +714,13 @@ function chooseSchool(school: School) {
             :disabled="locked"
           >
             <p
-              v-if="removals.length === 0 && !busy"
+              v-if="removals.items.value.length === 0 && !busy"
               class="text-muted-foreground"
             >
               {{ t('page.verification.noRequests') }}
             </p>
             <Card
-              v-for="row in removals"
+              v-for="row in removals.items.value"
               :key="row.id"
               size="small"
               class="mb-3"
@@ -1053,11 +1029,11 @@ function chooseSchool(school: School) {
           >
             <Table
               :columns="jobColumns"
-              :data-source="jobs"
+              :data-source="jobs.items.value"
               :pagination="false"
               row-key="id"
               size="middle"
-              :loading="busy"
+              :loading="jobs.status.value === 'loading' && !jobs.appending.value"
               :scroll="{ x: 560 }"
               :locale="{ emptyText: t('page.common.empty') }"
             >
@@ -1093,13 +1069,13 @@ function chooseSchool(school: School) {
             :disabled="locked"
           >
             <p
-              v-if="suggestions.length === 0 && !busy"
+              v-if="suggestions.items.value.length === 0 && !busy"
               class="text-muted-foreground"
             >
               {{ t('page.common.empty') }}
             </p>
             <Card
-              v-for="row in suggestions"
+              v-for="row in suggestions.items.value"
               :key="row.id"
               size="small"
               class="mb-3"
@@ -1154,7 +1130,7 @@ function chooseSchool(school: School) {
           </TabPane>
         </Tabs>
         <div class="mt-4 flex justify-center">
-          <Button v-if="cursor" :disabled="locked" @click="load(true)">
+          <Button v-if="currentPaged?.next.value" :disabled="locked" @click="load(true)">
             {{ t('page.common.loadMore') }}
           </Button>
         </div>
@@ -1268,11 +1244,11 @@ function chooseSchool(school: School) {
           @retry="retryWrite"
         />
         <Alert
-          v-if="error"
+          v-if="activeError"
           type="error"
           show-icon
           role="alert"
-          :message="errorText(error)"
+          :message="errorText(activeError)"
         />
       </div>
     </Drawer>

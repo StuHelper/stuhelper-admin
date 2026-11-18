@@ -94,3 +94,14 @@ it('unlocks a known rejected reply and retains its draft with a new request key'
   await submit(root.querySelectorAll<HTMLFormElement>('form')[1]!);
   expect(keys).toHaveLength(2); expect(keys[1]).not.toBe(keys[0]);
 });
+
+it('clears mail rows and pagination after access to a detail is denied', async () => {
+  mock.json.mockImplementation(async (path) => {
+    if (path.endsWith('/case')) throw new ApiError('forbidden', false, 403);
+    return { items: [message()], next_cursor: 'page-two' };
+  });
+  const { root } = await mount();
+  expect(root.textContent).toContain('forbidden');
+  expect(root.textContent).not.toContain('Synthetic');
+  expect(root.textContent).not.toContain('page.feedback.next');
+});
