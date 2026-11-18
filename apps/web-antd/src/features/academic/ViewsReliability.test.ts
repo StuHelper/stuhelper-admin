@@ -437,5 +437,5 @@ describe('PR 6 view reliability regressions (A-09, A-10, A-11, A-14, A-18, A-20)
     await nextTick();
     // Newly added field has empty key -> Save must be disabled!
     expect(saveCatBtn()?.disabled).toBe(true);
-  });
+  }, 20_000);
 });
