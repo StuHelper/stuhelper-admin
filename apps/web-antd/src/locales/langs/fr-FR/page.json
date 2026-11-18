@@ -682,7 +682,8 @@
       "student": "Étudiant inscrit",
       "alumni": "Ancien étudiant",
       "newcomer": "Nouvel étudiant temporaire",
-      "unknown": "Non fourni"
+      "unknown": "Non fourni",
+      "teacher": "Enseignant"
     },
     "states": {
       "in_progress": "En cours",
@@ -1240,6 +1241,15 @@
       "anyCategory": "Toutes les catégories",
       "removeRule": "Supprimer la règle",
       "addRule": "Ajouter une règle"
+    },
+    "ledgerKind": {
+      "reward": "Octroi de récompense",
+      "reward_revoke": "Révocation de récompense",
+      "commerce_refund": "Remboursement de commande",
+      "membership_grant": "Abonnement accordé",
+      "expired": "Expiration de points",
+      "debt_repayment": "Compensation de dette",
+      "closure": "Clôture de compte"
     }
   },
   "access": {

@@ -682,7 +682,8 @@
       "student": "在学生",
       "alumni": "卒業生",
       "newcomer": "新入生の仮資格",
-      "unknown": "未提供"
+      "unknown": "未提供",
+      "teacher": "教員"
     },
     "states": {
       "in_progress": "入力中",
@@ -1240,6 +1241,15 @@
       "anyCategory": "すべての分類",
       "removeRule": "ルールを削除",
       "addRule": "ルールを追加"
+    },
+    "ledgerKind": {
+      "reward": "報酬付与",
+      "reward_revoke": "報酬回収",
+      "commerce_refund": "注文の返金",
+      "membership_grant": "会員資格の付与",
+      "expired": "ポイント失効",
+      "debt_repayment": "未控除ポイントの相殺",
+      "closure": "退会精算"
     }
   },
   "access": {

@@ -682,7 +682,8 @@
       "student": "طالب حالي",
       "alumni": "خريج",
       "newcomer": "طالب جديد بصفة مؤقتة",
-      "unknown": "غير مقدم"
+      "unknown": "غير مقدم",
+      "teacher": "عضو هيئة تدريس"
     },
     "states": {
       "in_progress": "قيد الإعداد",
@@ -1240,6 +1241,15 @@
       "anyCategory": "كل التصنيفات",
       "removeRule": "حذف القاعدة",
       "addRule": "إضافة قاعدة"
+    },
+    "ledgerKind": {
+      "reward": "منح مكافأة",
+      "reward_revoke": "استرداد مكافأة",
+      "commerce_refund": "استرداد طلب",
+      "membership_grant": "عضوية ممنوحة",
+      "expired": "انتهاء صلاحية النقاط",
+      "debt_repayment": "تسوية النقاط المستحقة",
+      "closure": "تصفية إغلاق الحساب"
     }
   },
   "access": {

@@ -682,7 +682,8 @@
       "student": "Estudiante actual",
       "alumni": "Graduado",
       "newcomer": "Nuevo estudiante temporal",
-      "unknown": "No proporcionado"
+      "unknown": "No proporcionado",
+      "teacher": "Docente"
     },
     "states": {
       "in_progress": "En curso",
@@ -1240,6 +1241,15 @@
       "anyCategory": "Todas las categorías",
       "removeRule": "Quitar regla",
       "addRule": "Añadir regla"
+    },
+    "ledgerKind": {
+      "reward": "Concesión de recompensa",
+      "reward_revoke": "Revocación de recompensa",
+      "commerce_refund": "Reembolso de pedido",
+      "membership_grant": "Membresía concedida",
+      "expired": "Vencimiento de puntos",
+      "debt_repayment": "Compensación de deuda",
+      "closure": "Liquidación por cierre de cuenta"
     }
   },
   "access": {

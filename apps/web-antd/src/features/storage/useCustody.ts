@@ -1,15 +1,18 @@
-import { onMounted, onScopeDispose, readonly, shallowRef } from 'vue';
+import { getCurrentInstance, inject, onMounted, onScopeDispose, readonly, shallowRef } from 'vue';
 
 import { custodyAPI, type CustodyBinding, CustodyError, type CustodyPage, type CustodyPolicy, type CustodyRequest, parseCustodyBinding } from '#/api/custody';
 import { useHostFetch } from '#/shared/api/transport';
+import { sessionKey } from '#/shared/session';
 
 export function useCustody(admin = false, api = custodyAPI(useHostFetch())) {
+  const session = getCurrentInstance() ? inject(sessionKey, undefined) : undefined;
   const data = shallowRef<CustodyPage | null>(null); const policy = shallowRef<CustodyPolicy | null>(null);
   const error = shallowRef<CustodyError['code'] | null>(null); const loading = shallowRef(false); const sending = shallowRef(false);
   const recovery = shallowRef<null | { item?: CustodyBinding; key: string; }>(null);
   let cursor = ''; let disposed = false; let read: AbortController | undefined; let write: AbortController | undefined;
   function failed(e: unknown) {
     error.value = e instanceof CustodyError ? e.code : 'network';
+    if (error.value === 'unauthenticated') session?.invalidate();
     if (error.value === 'forbidden' || error.value === 'unauthenticated') { data.value = null; recovery.value = null; }
   }
   async function reload(after = cursor) {
