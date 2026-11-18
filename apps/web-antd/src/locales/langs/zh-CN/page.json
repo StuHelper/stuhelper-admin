@@ -178,7 +178,11 @@
       "resources": "待审核资料",
       "failed": "处理失败",
       "verification": "待审核认证",
-      "storage": "阻塞的存储任务"
+      "storage": "阻塞的存储任务",
+      "refunds": "待处理退款",
+      "feedback": "新反馈来信",
+      "teacherVerification": "待审核教师认证",
+      "openPlatform": "待审核开放平台应用"
     },
     "todoUnknown": "未知",
     "todoFailed": "部分待办数量暂时无法加载。",
