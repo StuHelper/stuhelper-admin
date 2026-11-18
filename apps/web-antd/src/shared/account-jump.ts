@@ -108,7 +108,11 @@ export function createAccountJumpStore() {
     destination: AccountJumpDestination,
     target: AccountTarget,
   ) {
-    pending.value = { destination, target };
+    const request = { destination, target };
+    pending.value = request;
+    return () => {
+      if (pending.value === request) pending.value = undefined;
+    };
   }
 
   function consume(

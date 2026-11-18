@@ -95,10 +95,16 @@ async function copyAccount() {
   }
 }
 
-function go(destination: AccountJumpDestination, path: string) {
+async function go(destination: AccountJumpDestination, path: string) {
   if (!target.value.subject && !target.value.principalKey) return;
-  accountJump.prepare(destination, target.value);
-  void router.push(path);
+  const cancel = accountJump.prepare(destination, target.value);
+  try {
+    const failure = await router.push(path);
+    if (failure || router.currentRoute.value.path !== path) cancel();
+  } catch (error) {
+    cancel();
+    throw error;
+  }
 }
 
 onBeforeUnmount(() => {
