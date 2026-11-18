@@ -69,7 +69,11 @@
     ],
     "CAP-01": [
       "tests/e2e/capabilities.spec.mjs#disabled module direct routes never mount business pages",
-      "tests/e2e/capabilities.spec.mjs#menus follow deployment capabilities and discovery failure keeps entries"
+      "tests/e2e/capabilities.spec.mjs#menus follow deployment capabilities and discovery failure keeps entries",
+      "tests/e2e/layout-shell.spec.mjs#disabled module routes set the unavailable document title instead of exposing disabled module names"
+    ],
+    "I18N-06": [
+      "tests/e2e/layout-shell.spec.mjs#switching language preserves pending writes, original idempotency key, RTL direction and bundled header controls"
     ],
     "SESSION-AVAILABILITY-01": [
       "apps/web-antd/src/shared/session.test.ts#coalesces 25 failures, waits with bounded backoff and preserves the signed-in snapshot"

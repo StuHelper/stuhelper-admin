@@ -3,6 +3,7 @@ import { computed, useSlots } from 'vue';
 
 import { useRefresh } from '@vben/hooks';
 import { RotateCw } from '@vben/icons';
+import { $t } from '@vben/locales';
 import { preferences, usePreferences } from '@vben/preferences';
 import { useAccessStore } from '@vben/stores';
 
@@ -60,19 +61,18 @@ const rightSlots = computed(() => {
       index: REFERENCE_VALUE + 10,
       name: 'preferences',
     });
-    // 将偏好设置中的子功能分组到同一个按钮位置控制逻辑下
-    if (preferences.widget.themeToggle) {
-      list.push({
-        index: REFERENCE_VALUE + 20,
-        name: 'theme-toggle',
-      });
-    }
     if (preferences.widget.timezone) {
       list.push({
         index: REFERENCE_VALUE + 40,
         name: 'timezone',
       });
     }
+  }
+  if (preferences.widget.themeToggle) {
+    list.push({
+      index: REFERENCE_VALUE + 20,
+      name: 'theme-toggle',
+    });
   }
   if (preferences.widget.languageToggle) {
     list.push({ index: REFERENCE_VALUE + 30, name: 'language-toggle' });
@@ -153,7 +153,11 @@ function clearPreferencesAndLogout() {
   >
     <slot :name="slot.name">
       <template v-if="slot.name === 'refresh'">
-        <VbenIconButton class="my-0 mr-1 rounded-md" @click="refresh">
+        <VbenIconButton
+          :aria-label="$t('common.refresh')"
+          class="my-0 mr-1 rounded-md"
+          @click="refresh"
+        >
           <RotateCw class="size-4" />
         </VbenIconButton>
       </template>
