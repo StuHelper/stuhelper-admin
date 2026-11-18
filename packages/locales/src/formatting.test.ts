@@ -29,6 +29,8 @@ describe('localized presentation', () => {
     expect(west.calendarDate('2026-10-24')).toBe(east.calendarDate('2026-10-24'));
     expect(() => west.calendarDate('2026-02-30')).toThrow();
     expect(() => west.dateTime('2026-10-24T00:00:00')).toThrow();
+    expect(() => west.dateTime(null as unknown as string)).toThrow(RangeError);
+    expect(() => west.dateTime(undefined as unknown as string)).toThrow(RangeError);
     expect(() => createFormatters('en-US', 'Invalid/Zone')).toThrow();
   });
   it('applies Russian, Arabic and French CLDR plural rules', () => {

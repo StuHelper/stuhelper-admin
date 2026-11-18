@@ -1336,6 +1336,7 @@
     "title": "Horario de franjas",
     "intro": "Define para cada periodo el lunes de la primera semana, la zona horaria del centro y el inicio y fin de cada franja. Los horarios de los estudiantes y la exportación al calendario lo usan para convertir franjas en horas; sin él no se puede exportar el calendario.",
     "term": "Periodo",
+    "noTerms": "Aún no se han importado periodos para este centro.",
     "missing": "Este periodo aún no tiene horario. Los estudiantes podrán exportar el calendario cuando lo guardes.",
     "weekOne": "Lunes de la primera semana",
     "weekOneHint": "Elige el lunes de la primera semana lectiva.",

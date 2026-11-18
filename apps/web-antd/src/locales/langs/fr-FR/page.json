@@ -1336,6 +1336,7 @@
     "title": "Horaires des créneaux",
     "intro": "Définissez pour chaque semestre le lundi de la première semaine, le fuseau horaire de l’établissement et les horaires de chaque créneau. Les emplois du temps et les exports d’agenda s’en servent pour convertir les créneaux en heures ; sans eux, l’agenda ne peut pas être exporté.",
     "term": "Semestre",
+    "noTerms": "Aucun semestre n’a encore été importé pour cet établissement.",
     "missing": "Aucun horaire n’est encore défini pour ce semestre. Les étudiants pourront exporter leur agenda après l’enregistrement.",
     "weekOne": "Lundi de la première semaine",
     "weekOneHint": "Choisissez le lundi de la première semaine de cours.",

@@ -26,10 +26,12 @@
       "apps/web-antd/src/features/resources/api.test.ts#releases a known rejected mutation and clears private state even for non-JSON denial"
     ],
     "RES-ADMIN-01": [
-      "tests/e2e/resources.spec.mjs#category configuration preserves stable ids, fields and original-request retry"
+      "tests/e2e/resources.spec.mjs#category configuration preserves stable ids, fields and original-request retry",
+      "apps/web-antd/src/features/academic/ViewsReliability.test.ts#auto-advances past filtered resource tasks in ModerationView, renders null published_at & versionless drafts safely, recovers TimetableView empty/503 terms, surfaces OverviewView campus outage, polls decided ReviewView tasks, and validates CategoriesView fields"
     ],
     "RES-ADMIN-02": [
-      "tests/e2e/resources.spec.mjs#review reads the pending file and retries an unknown decision without duplication"
+      "tests/e2e/resources.spec.mjs#review reads the pending file and retries an unknown decision without duplication",
+      "apps/web-antd/src/features/academic/ViewsReliability.test.ts#auto-advances past filtered resource tasks in ModerationView, renders null published_at & versionless drafts safely, recovers TimetableView empty/503 terms, surfaces OverviewView campus outage, polls decided ReviewView tasks, and validates CategoriesView fields"
     ],
     "RES-ADMIN-03": [
       "tests/e2e/resources.spec.mjs#grant creation and revocation retain the subject and respect current permissions"

@@ -1336,6 +1336,7 @@
     "title": "Class periods",
     "intro": "Set the Monday of week one, the school time zone and the start and end of each period for a term. Student timetables and calendar exports use these to turn period numbers into times; a term without them cannot be exported.",
     "term": "Term",
+    "noTerms": "No terms have been imported for this school yet.",
     "missing": "No periods are set for this term yet. Students can export calendars once they are saved.",
     "weekOne": "Monday of week one",
     "weekOneHint": "Choose the Monday of the first teaching week.",
