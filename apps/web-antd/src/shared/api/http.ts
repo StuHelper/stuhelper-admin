@@ -49,29 +49,63 @@ export function queryString(values: Query = {}) {
 
 export const segment = (value: string) => encodeURIComponent(value);
 
-/** Read at most `limit` bytes so a broken or hostile response cannot exhaust memory. */
-export async function readLimited(
+async function readChunksLimited(
   response: Response,
   limit: number,
-): Promise<Uint8Array<ArrayBuffer>> {
-  if (!response.body) return new Uint8Array(0);
+  signal?: AbortSignal,
+): Promise<{ chunks: Uint8Array<ArrayBuffer>[]; length: number }> {
+  if (!response.body) return { chunks: [], length: 0 };
   const reader = response.body.getReader();
-  const chunks: Uint8Array[] = [];
+  if (signal?.aborted) {
+    void reader.cancel().catch(() => {});
+    try {
+      reader.releaseLock();
+    } catch {
+      // Cancellation is still settling.
+    }
+    throw new DOMException('aborted', 'AbortError');
+  }
+  const chunks: Uint8Array<ArrayBuffer>[] = [];
   let length = 0;
+  let onAbort: (() => void) | undefined;
+  const aborted = signal
+    ? new Promise<never>((_resolve, reject) => {
+        onAbort = () => {
+          reject(new DOMException('aborted', 'AbortError'));
+          void reader.cancel().catch(() => {});
+        };
+        signal.addEventListener('abort', onAbort, { once: true });
+      })
+    : undefined;
   try {
     for (;;) {
-      const { done, value } = await reader.read();
+      const { done, value } = await (aborted
+        ? Promise.race([reader.read(), aborted])
+        : reader.read());
+      if (signal?.aborted) throw new DOMException('aborted', 'AbortError');
       if (done) break;
       length += value.length;
       if (length > limit) {
         await reader.cancel();
         throw new ApiError('capacity_exceeded');
       }
-      chunks.push(value);
+      chunks.push(value as Uint8Array<ArrayBuffer>);
     }
   } finally {
-    reader.releaseLock();
+    if (signal && onAbort) signal.removeEventListener('abort', onAbort);
+    try {
+      reader.releaseLock();
+    } catch {
+      // Pending stream read after abort releases once cancellation settles.
+    }
   }
+  return { chunks, length };
+}
+
+function concatChunks(
+  chunks: Uint8Array<ArrayBuffer>[],
+  length: number,
+): Uint8Array<ArrayBuffer> {
   const result = new Uint8Array(length);
   let offset = 0;
   for (const chunk of chunks) {
@@ -79,6 +113,16 @@ export async function readLimited(
     offset += chunk.length;
   }
   return result;
+}
+
+/** Read at most `limit` bytes so a broken or hostile response cannot exhaust memory. */
+export async function readLimited(
+  response: Response,
+  limit: number,
+  signal?: AbortSignal,
+): Promise<Uint8Array<ArrayBuffer>> {
+  const { chunks, length } = await readChunksLimited(response, limit, signal);
+  return concatChunks(chunks, length);
 }
 
 function parseJson(bytes: Uint8Array): unknown {
@@ -91,22 +135,37 @@ export class Http {
     private readonly options: HttpOptions = {},
   ) {}
 
-  /** Download a bounded binary response. */
+  /** Download a bounded binary response without duplicating contiguous byte buffers. */
   async blob(
     path: string,
     limit: number,
     options: RequestOptions = {},
   ): Promise<Blob> {
-    const response = await this.send(path, {
-      timeout: 120_000,
-      redirect: 'follow',
-      ...options,
-      headers: { Accept: '*/*', ...options.headers },
-    });
-    const bytes = await readLimited(response, limit);
-    return new Blob([bytes], {
-      type: response.headers.get('Content-Type') ?? 'application/octet-stream',
-    });
+    if (!Number.isSafeInteger(limit) || limit < 1)
+      throw new ApiError('invalid_input');
+    return this.execute(
+      path,
+      {
+        timeout: 120_000,
+        redirect: 'follow',
+        ...options,
+        headers: { Accept: '*/*', ...options.headers },
+      },
+      async (response, signal, timedOut, write) => {
+        const { chunks } = await this.readBody(
+          response,
+          limit,
+          signal,
+          options.signal,
+          timedOut,
+          write,
+        );
+        return new Blob(chunks, {
+          type:
+            response.headers.get('Content-Type') ?? 'application/octet-stream',
+        });
+      },
+    );
   }
 
   /** Send a request and validate the JSON response against the contract. */
@@ -118,23 +177,48 @@ export class Http {
     const limit = options.maxJsonBytes ?? jsonLimit;
     if (!Number.isSafeInteger(limit) || limit < 1 || limit > 16 * 1024 * 1024)
       throw new ApiError('invalid_input');
-    const write = !readMethods.has((options.method ?? 'GET').toUpperCase());
-    const response = await this.send(path, options);
-    let value: unknown;
-    try {
-      value = parseJson(await readLimited(response, limit));
-    } catch {
-      throw new ApiError('incompatible', write, response.status);
-    }
-    try {
-      return validate(value);
-    } catch {
-      throw new ApiError('incompatible', write, response.status);
-    }
+    return this.execute(
+      path,
+      options,
+      async (response, signal, timedOut, write) => {
+        const { chunks, length } = await this.readBody(
+          response,
+          limit,
+          signal,
+          options.signal,
+          timedOut,
+          write,
+        );
+        let value: unknown;
+        try {
+          value = parseJson(concatChunks(chunks, length));
+        } catch {
+          throw new ApiError('incompatible', write, response.status);
+        }
+        try {
+          return validate(value);
+        } catch {
+          throw new ApiError('incompatible', write, response.status);
+        }
+      },
+    );
   }
 
   /** Send a request and return the successful response. Failures become ApiError. */
   async send(path: string, options: RequestOptions = {}): Promise<Response> {
+    return this.execute(path, options, async (response) => response);
+  }
+
+  private async execute<T>(
+    path: string,
+    options: RequestOptions,
+    consume: (
+      response: Response,
+      signal: AbortSignal,
+      timedOut: AbortSignal,
+      write: boolean,
+    ) => Promise<T>,
+  ): Promise<T> {
     if (!path.startsWith('/api/')) throw new ApiError('invalid_input');
     const method = (options.method ?? 'GET').toUpperCase();
     const write = !readMethods.has(method);
@@ -157,49 +241,90 @@ export class Http {
       body = JSON.stringify(options.body);
       headers['Content-Type'] = 'application/json';
     }
-    let response: Response;
     try {
-      // Call the transport as a plain function: native fetch rejects a foreign `this`.
-      const fetcher = this.fetcher;
-      response = await fetcher(path + queryString(options.query), {
-        method,
-        headers,
-        body,
-        signal,
-        credentials: 'same-origin',
-        redirect: options.redirect ?? 'error',
-      });
-    } catch {
+      let response: Response;
+      try {
+        // Call the transport as a plain function: native fetch rejects a foreign `this`.
+        const fetcher = this.fetcher;
+        response = await fetcher(path + queryString(options.query), {
+          method,
+          headers,
+          body,
+          signal,
+          credentials: 'same-origin',
+          redirect: options.redirect ?? 'error',
+        });
+      } catch {
+        if (options.signal?.aborted) throw new ApiError('cancelled', write);
+        throw new ApiError(timer.signal.aborted ? 'timeout' : 'network', write);
+      }
+      if (response.ok) {
+        return await consume(response, signal, timer.signal, write);
+      }
+      let problem: unknown = null;
+      try {
+        problem = parseJson(await readLimited(response, errorLimit, signal));
+      } catch {
+        // Non-JSON error pages never reach the user; the status decides the code.
+      }
+      const operation =
+        typeof problem === 'object' &&
+        problem !== null &&
+        'operation_id' in problem &&
+        typeof problem.operation_id === 'string' &&
+        /^[a-f0-9]{64}$/.test(problem.operation_id)
+          ? problem.operation_id
+          : undefined;
+      if (
+        response.status === 502 ||
+        response.status === 503 ||
+        response.status === 504
+      ) {
+        this.options.onUnavailable?.();
+      }
+      if (response.status === 401 || response.status === 403)
+        this.options.onDenied?.(response.status);
+      // A gateway or server failure without a recorded operation leaves a write's outcome unknown.
+      throw new ApiError(
+        serverCode(problem, response.status),
+        write && response.status >= 500 && !operation,
+        response.status,
+        operation,
+        problem,
+      );
+    } finally {
       clearTimeout(timeout);
-      if (options.signal?.aborted) throw new ApiError('cancelled', write);
-      throw new ApiError(timer.signal.aborted ? 'timeout' : 'network', write);
     }
-    clearTimeout(timeout);
-    if (response.ok) return response;
-    let problem: unknown = null;
+  }
+
+  private async readBody(
+    response: Response,
+    limit: number,
+    signal: AbortSignal,
+    callerSignal: AbortSignal | undefined,
+    timedOut: AbortSignal,
+    write: boolean,
+  ) {
     try {
-      problem = parseJson(await readLimited(response, errorLimit));
-    } catch {
-      // Non-JSON error pages never reach the user; the status decides the code.
+      return await readChunksLimited(response, limit, signal);
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw new ApiError(
+          error.code,
+          error.uncertain || write,
+          error.status ?? response.status,
+          error.operationId,
+        );
+      }
+      if (callerSignal?.aborted) {
+        throw new ApiError('cancelled', write, response.status);
+      }
+      throw new ApiError(
+        timedOut.aborted ? 'timeout' : 'network',
+        write,
+        response.status,
+      );
     }
-    const operation =
-      typeof problem === 'object' &&
-      problem !== null &&
-      'operation_id' in problem &&
-      typeof problem.operation_id === 'string' &&
-      /^[a-f0-9]{64}$/.test(problem.operation_id)
-        ? problem.operation_id
-        : undefined;
-    if (response.status === 503) this.options.onUnavailable?.();
-    if (response.status === 401 || response.status === 403)
-      this.options.onDenied?.(response.status);
-    // A gateway or server failure without a recorded operation leaves a write's outcome unknown.
-    throw new ApiError(
-      serverCode(problem, response.status),
-      write && response.status >= 500 && !operation,
-      response.status,
-      operation,
-    );
   }
 }
 

@@ -16,6 +16,7 @@ const aliases: Record<string, string> = {
   permission_denied: 'forbidden',
   dependency_unavailable: 'unavailable',
   identity_unavailable: 'identity',
+  revision_conflict: 'conflict',
 };
 
 const statusCodes: Record<number, string> = {
@@ -51,6 +52,8 @@ export class ApiError extends Error {
     readonly uncertain = false,
     readonly status?: number,
     readonly operationId?: string,
+    /** Parsed JSON error payload for typed contract recovery (never shown as raw text). */
+    readonly detail?: unknown,
   ) {
     super(code);
     this.name = 'ApiError';
