@@ -483,7 +483,9 @@
       "time_text": "Texto de horario",
       "aliases": "Otros nombres",
       "schedule_time": "Franjas estructuradas"
-    }
+    },
+    "changeFilter": "Filtrar por estado de cambio",
+    "changeCount": "{state}: {count}"
   },
   "resources": {
     "manageTitle": "Gestión de materiales",
@@ -873,7 +875,15 @@
       "replica_shortage": "Las copias válidas no alcanzan el objetivo.",
       "no_healthy_source": "No hay una fuente válida disponible.",
       "insufficient_eligible_capacity": "Faltan cuentas aptas o capacidad disponible."
-    }
+    },
+    "quotaUnit": "Unidad de capacidad",
+    "quotaUnits": {
+      "B": "Bytes exactos (B)",
+      "GB": "Gigabytes decimales (GB)",
+      "TB": "Terabytes decimales (TB)"
+    },
+    "quotaPreview": "Mínimo permitido: {min} (usado + reservado) · Convertido: {value}",
+    "quotaMinimumOnly": "Mínimo permitido: {min} (usado + reservado)"
   },
   "contribution": {
     "title": "Gestión de aportes de almacenamiento",
@@ -1793,7 +1803,8 @@
       "site_unit_missing": "Sin unidad en la página",
       "catalog_name_absent": "Nombre ausente en el catálogo",
       "ambiguous_site": "Páginas duplicadas"
-    }
+    },
+    "checkCatalog": "Revisar en el catálogo"
   },
   "closures": {
     "title": "Administración de cierres de cuenta",

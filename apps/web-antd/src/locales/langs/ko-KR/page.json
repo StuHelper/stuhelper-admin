@@ -483,7 +483,9 @@
       "time_text": "시간 설명",
       "aliases": "다른 이름",
       "schedule_time": "교시 정보"
-    }
+    },
+    "changeFilter": "변경 상태별 필터",
+    "changeCount": "{state} ({count}건)"
   },
   "resources": {
     "manageTitle": "자료 관리",
@@ -873,7 +875,15 @@
       "replica_shortage": "정상 복제본이 목표 수에 미달합니다.",
       "no_healthy_source": "정상적인 원본을 사용할 수 없습니다.",
       "insufficient_eligible_capacity": "조건에 맞는 계정 또는 용량이 부족합니다."
-    }
+    },
+    "quotaUnit": "용량 단위",
+    "quotaUnits": {
+      "B": "바이트 (B)",
+      "GB": "기가바이트 (GB)",
+      "TB": "테라바이트 (TB)"
+    },
+    "quotaPreview": "최소 허용치: {min}(사용 + 예약) · 환산값: {value}",
+    "quotaMinimumOnly": "최소 허용치: {min}(사용 + 예약)"
   },
   "contribution": {
     "title": "저장소 기여 관리",
@@ -1793,7 +1803,8 @@
       "site_unit_missing": "홈페이지에 소속 없음",
       "catalog_name_absent": "데이터에 같은 이름 없음",
       "ambiguous_site": "중복 홈페이지"
-    }
+    },
+    "checkCatalog": "디렉터리에서 확인"
   },
   "closures": {
     "title": "계정 해지 관리",

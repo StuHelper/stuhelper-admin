@@ -13,6 +13,7 @@ import {
   DescriptionsItem,
   Form,
   FormItem,
+  Select,
   Space,
   Table,
   Tag,
@@ -44,6 +45,7 @@ const school = useCampusId();
 const input = shallowRef<CatalogImport>();
 const preview = shallowRef<ImportPreview>();
 const result = shallowRef<ImportResult>();
+const stateFilter = ref('');
 const error = ref('');
 const previewing = ref(false);
 const fileInput = ref<HTMLInputElement>();
@@ -56,7 +58,11 @@ watch(school, () => {
   generation++;
   input.value = undefined;
   preview.value = undefined;
+  stateFilter.value = '';
   error.value = '';
+});
+watch(preview, () => {
+  stateFilter.value = '';
 });
 useLeaveGuard(() => (locked.value ? t('page.common.leaveUncertain') : ''));
 
@@ -148,6 +154,46 @@ const stateColor: Record<string, string> = {
   unlinked: 'orange',
   preserved: 'purple',
 };
+const changeStateLabel = (state: string) =>
+  te(`page.catalog.changeState.${state}`)
+    ? t(`page.catalog.changeState.${state}`)
+    : state;
+const stateCounts = computed(() => {
+  const counts: Record<string, number> = {};
+  for (const row of preview.value?.changes ?? []) {
+    counts[row.state] = (counts[row.state] ?? 0) + 1;
+  }
+  return counts;
+});
+const changeStates = computed(() => {
+  const ordered = ['new', 'updated', 'conflict', 'unlinked', 'preserved'];
+  const extras = Object.keys(stateCounts.value).filter(
+    (key) => !ordered.includes(key),
+  );
+  return [...ordered, ...extras].filter((key) => (stateCounts.value[key] ?? 0) > 0);
+});
+const changeFilterOptions = computed(() => [
+  {
+    value: '',
+    label: t('page.catalog.changeCount', {
+      state: t('page.common.all'),
+      count: format.value.number(preview.value?.changes.length ?? 0),
+    }),
+  },
+  ...changeStates.value.map((state) => ({
+    value: state,
+    label: t('page.catalog.changeCount', {
+      state: changeStateLabel(state),
+      count: format.value.number(stateCounts.value[state] ?? 0),
+    }),
+  })),
+]);
+const filteredChanges = computed(() => {
+  const changes = preview.value?.changes ?? [];
+  return stateFilter.value
+    ? changes.filter((item) => item.state === stateFilter.value)
+    : changes;
+});
 </script>
 
 <template>
@@ -242,9 +288,35 @@ const stateColor: Record<string, string> = {
               : t('page.catalog.previewInvalid')
           "
         />
+        <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <Form layout="inline">
+            <FormItem :label="t('page.catalog.changeFilter')">
+              <Select
+                v-model:value="stateFilter"
+                class="w-60 max-w-full"
+                :aria-label="t('page.catalog.changeFilter')"
+                :options="changeFilterOptions"
+              />
+            </FormItem>
+          </Form>
+          <Space wrap size="small">
+            <Tag
+              v-for="state in changeStates"
+              :key="state"
+              :color="stateColor[state]"
+            >
+              {{
+                t('page.catalog.changeCount', {
+                  state: changeStateLabel(state),
+                  count: format.number(stateCounts[state] ?? 0),
+                })
+              }}
+            </Tag>
+          </Space>
+        </div>
         <Table
           :columns="columns"
-          :data-source="preview.changes"
+          :data-source="filteredChanges"
           :pagination="{ pageSize: 50 }"
           :row-key="
             (row: ImportPreview['changes'][number]) => `${row.kind}:${row.id}`
