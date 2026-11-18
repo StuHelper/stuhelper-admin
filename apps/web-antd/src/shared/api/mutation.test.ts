@@ -69,4 +69,20 @@ describe('idempotent writes', () => {
     expect(() => snapshot({ when: new Date() })).toThrow();
     expect(() => snapshot({ n: Number.NaN })).toThrow();
   });
+
+  it('supports explicit maxItems for large batch imports while keeping 1000 as default (A-02)', async () => {
+    const batch = { items: Array.from({ length: 1500 }, (_, i) => i) };
+    expect(() => snapshot(batch)).toThrow();
+    expect(
+      (snapshot as (v: unknown, o?: { maxItems?: number }) => unknown)(batch, {
+        maxItems: 5000,
+      }),
+    ).toEqual(batch);
+    const mutation = new (Mutation as unknown as new (o?: {
+      maxItems?: number;
+    }) => Mutation)({ maxItems: 5000 });
+    await expect(
+      mutation.run('import', batch, async (frozen) => frozen.items.length),
+    ).resolves.toBe(1500);
+  });
 });
