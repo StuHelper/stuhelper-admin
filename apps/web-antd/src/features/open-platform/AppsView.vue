@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import type { Application, ReviewInput, Scope } from './api';
 
-import { computed, onMounted, reactive, ref, shallowRef } from 'vue';
+import { computed, onMounted, reactive, ref, shallowRef, watch } from 'vue';
 
 import { useI18n } from '@vben/locales';
 
-import { Button, Card, Checkbox, CheckboxGroup, Descriptions, DescriptionsItem, Drawer, Form, FormItem, InputNumber, Radio, RadioGroup, Segmented, Table, Tag, Textarea } from 'ant-design-vue';
+import { Alert, Button, Card, Checkbox, CheckboxGroup, Descriptions, DescriptionsItem, Drawer, Form, FormItem, InputNumber, Radio, RadioGroup, Segmented, Table, Tag, Textarea } from 'ant-design-vue';
 
 import { useMutation, usePaged } from '#/shared/composables/async';
 import { useLeaveGuard } from '#/shared/composables/leave';
 import { useFormat } from '#/shared/format';
+import { useSession } from '#/shared/session';
 import AdminPage from '#/shared/ui/AdminPage.vue';
 import LoadState from '#/shared/ui/LoadState.vue';
 import MutationAlert from '#/shared/ui/MutationAlert.vue';
@@ -25,37 +26,100 @@ type Filter = 'all' | Application['state'];
 const { t } = useI18n();
 const format = useFormat();
 const api = useOpenPlatformAdmin();
+const session = useSession();
 const apps = usePaged<Application>((after, signal) => api.apps(after, signal));
-onMounted(apps.reload);
 const filter = ref<Filter>('pending');
 const rows = computed(() => apps.items.value.filter((app) => filter.value === 'all' || app.state === filter.value));
+const maxAutoPages = 5;
+let autoPages = 0;
+
+async function reloadApps() {
+  autoPages = 0;
+  await apps.reload();
+}
+onMounted(() => void reloadApps());
+
+watch(filter, () => {
+  autoPages = 0;
+  if (apps.status.value === 'ready' && rows.value.length === 0 && apps.next.value) {
+    autoPages++;
+    void apps.loadMore();
+  }
+});
+
+watch(
+  [apps.status, () => rows.value.length, apps.next],
+  ([status, count, next]) => {
+    if (status === 'ready' && count === 0 && next && autoPages < maxAutoPages) {
+      autoPages++;
+      void apps.loadMore();
+    }
+  },
+);
+
 const stateColor: Record<Application['state'], string> = { pending: 'blue', changes_requested: 'orange', active: 'green', suspended: 'red' };
 
 const selected = shallowRef<Application>();
 const form = reactive({ decision: 'approve' as ReviewInput['decision'], scopes: [] as Scope[], grantDays: 180, tokenMinutes: 60, dailyQuota: 1000, note: '' });
 const baseline = ref('');
+const comparing = ref(false);
 const review = useMutation();
 const success = ref('');
+
+watch(session.state, (state, prev) => {
+  if (prev === 'member' && state === 'guest') {
+    selected.value = undefined;
+    comparing.value = false;
+    apps.clear();
+  }
+});
+
+watch([apps.error, review.error], ([loadErr, writeErr]) => {
+  if (
+    loadErr === 'forbidden' ||
+    loadErr === 'unauthenticated' ||
+    writeErr === 'forbidden' ||
+    writeErr === 'unauthenticated'
+  ) {
+    selected.value = undefined;
+    comparing.value = false;
+    apps.clear();
+  }
+});
+
 const dirty = computed(() => !!selected.value && JSON.stringify(form) !== baseline.value);
 const noteRequired = computed(() => form.decision !== 'approve');
 const valid = computed(() => (form.decision === 'approve' ? form.scopes.length > 0 : !!form.note.trim()));
-const decisions = computed<ReviewInput['decision'][]>(() => (selected.value?.state === 'active' ? ['approve', 'suspend'] : (selected.value?.state === 'suspended' ? ['approve'] : ['approve', 'changes_requested', 'suspend'])));
-useLeaveGuard(() => (review.uncertain.value ? t('page.common.leaveUncertain') : (dirty.value || review.busy.value ? t('page.common.leaveUnsaved') : '')));
+const decisions = computed<ReviewInput['decision'][]>(() => {
+  if (selected.value?.state === 'active') return ['approve', 'suspend'];
+  if (selected.value?.state === 'suspended') return ['approve'];
+  return ['approve', 'changes_requested', 'suspend'];
+});
+useLeaveGuard(() => {
+  if (review.uncertain.value) return t('page.common.leaveUncertain');
+  return dirty.value || review.busy.value ? t('page.common.leaveUnsaved') : '';
+});
 
-function open(app: Application) {
-  if (selected.value && dirty.value && !window.confirm(t('page.common.leaveUnsaved'))) return;
-  selected.value = app;
-  success.value = '';
-  // Start from what was approved before; a first review starts from the request.
+function appFormState(app: Application) {
   const approved = app.approved_scopes.length > 0 ? app.approved_scopes : app.requested_scopes;
-  Object.assign(form, {
-    decision: 'approve',
+  return {
+    decision: 'approve' as ReviewInput['decision'],
     scopes: approved.filter((scope) => app.requested_scopes.includes(scope)),
     grantDays: Math.round(app.policy.grant_seconds / 86_400) || 180,
     tokenMinutes: Math.round(app.policy.token_seconds / 60) || 60,
     dailyQuota: app.policy.daily_quota || 1000,
     note: '',
-  });
+  };
+}
+
+function open(app: Application) {
+  if (selected.value && dirty.value && !window.confirm(t('page.common.leaveUnsaved'))) return;
+  selected.value = app;
+  comparing.value = false;
+  success.value = '';
+  review.dismiss();
+  // Start from what was approved before; a first review starts from the request.
+  Object.assign(form, appFormState(app));
   baseline.value = JSON.stringify(form);
 }
 function close() {
@@ -83,14 +147,32 @@ async function retry() {
 function reviewed(app: Application) {
   apps.items.value = apps.items.value.map((item) => (item.id === app.id ? app : item));
   selected.value = app;
+  comparing.value = false;
   baseline.value = JSON.stringify(form);
   success.value = t(`page.openPlatform.reviewed.${app.state}`);
 }
 async function reloadCompare() {
-  await apps.reload();
+  await reloadApps();
   const current = apps.items.value.find((item) => item.id === selected.value?.id);
-  if (current) selected.value = current;
+  if (current) {
+    selected.value = current;
+    baseline.value = JSON.stringify(appFormState(current));
+  }
+  review.dismiss();
+  comparing.value = true;
 }
+const savedAppSummary = computed(() => {
+  const app = selected.value;
+  if (!app) return '';
+  const approvedText = app.approved_scopes.map((scope) => t(`page.openPlatform.scopes.${scope}`)).join(', ');
+  return [
+    t(`page.openPlatform.state.${app.state}`),
+    approvedText,
+    app.note,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+});
 const columns = computed(() => [
   { key: 'name', title: t('page.openPlatform.name') },
   { key: 'type', title: t('page.openPlatform.clientType') },
@@ -109,14 +191,18 @@ const columns = computed(() => [
         class="mb-4"
         :options="(['pending', 'changes_requested', 'active', 'suspended', 'all'] as const).map((value) => ({ value, label: value === 'all' ? t('page.common.all') : t(`page.openPlatform.state.${value}`) }))"
       />
-      <LoadState
-        v-if="rows.length === 0"
-        :status="apps.status.value"
-        :error="apps.error.value"
-        :empty="true"
-        :empty-text="t('page.openPlatform.empty')"
-        @retry="apps.reload"
-      />
+      <template v-if="rows.length === 0">
+        <LoadState
+          :status="apps.status.value"
+          :error="apps.error.value"
+          :empty="true"
+          :empty-text="t('page.openPlatform.empty')"
+          @retry="reloadApps"
+        />
+        <div v-if="apps.status.value === 'ready' && apps.next.value" class="mt-4 flex justify-center">
+          <Button :loading="apps.appending.value" @click="apps.loadMore">{{ t('page.common.loadMore') }}</Button>
+        </div>
+      </template>
       <template v-else>
         <Table :columns="columns" :data-source="rows" :pagination="false" row-key="id" size="middle" :scroll="{ x: 760 }">
           <template #bodyCell="{ column, record }">
@@ -143,6 +229,7 @@ const columns = computed(() => [
 
     <Drawer :open="!!selected" width="min(640px, 100vw)" :title="selected?.name" :mask-closable="false" destroy-on-close @close="close">
       <div v-if="selected" class="flex flex-col gap-4">
+        <Alert v-if="comparing" type="info" show-icon :message="t('page.common.compareNotice')" :description="savedAppSummary" />
         <Descriptions :column="1" size="small" bordered>
           <DescriptionsItem :label="t('page.openPlatform.clientId')"><code>{{ selected.id }}</code></DescriptionsItem>
           <DescriptionsItem :label="t('page.common.status')"><Tag :color="stateColor[selected.state]">{{ t(`page.openPlatform.state.${selected.state}`) }}</Tag></DescriptionsItem>

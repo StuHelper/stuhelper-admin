@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Action, Blacklist, GroupConfig, Hit, ManageCommand, Member, Report } from './api';
 
-import { computed, onMounted, reactive, ref, shallowRef } from 'vue';
+import { computed, reactive, ref, shallowRef, watch } from 'vue';
 import { RouterLink } from 'vue-router';
 
 import { useI18n } from '@vben/locales';
@@ -9,6 +9,7 @@ import { useI18n } from '@vben/locales';
 import { Alert, Button, Card, Form, FormItem, InputNumber, Modal, Select, TabPane, Tabs, Tag, Textarea } from 'ant-design-vue';
 
 import { useMutation } from '#/shared/composables/async';
+import { useLeaveGuard } from '#/shared/composables/leave';
 import { useFormat } from '#/shared/format';
 import AdminPage from '#/shared/ui/AdminPage.vue';
 import MutationAlert from '#/shared/ui/MutationAlert.vue';
@@ -28,14 +29,6 @@ const format = useFormat();
 const api = useGroupsAdmin();
 const label = (key: string, fallback: string) => (te(key) ? t(key) : fallback);
 const config = shallowRef<GroupConfig>();
-// The header names the group; the rules themselves load in their own tab.
-onMounted(async () => {
-  try {
-    config.value = await api.config(props.id);
-  } catch {
-    // Each tab reports its own loading failure.
-  }
-});
 const tab = ref('members');
 const panels = reactive<Record<string, undefined | { reload: () => Promise<void> }>>({});
 
@@ -80,11 +73,41 @@ const needsSeconds = new Set<Kind>(['extend', 'mute']);
 const draft = reactive({ open: false, target: '', kind: 'recheck' as Kind, text: '', minutes: 60 });
 const command = useMutation();
 const result = ref('');
+const locked = computed(() => command.busy.value || command.uncertain.value);
 const ready = computed(() => (!needsText.has(draft.kind) || !!draft.text.trim()) && (!needsSeconds.has(draft.kind) || draft.minutes > 0));
+useLeaveGuard(() => {
+  if (command.uncertain.value) return t('page.common.leaveUncertain');
+  return command.busy.value ? t('page.common.leaveUnsaved') : '';
+});
+
+// The header names the group; the rules themselves load in their own tab.
+let configSeq = 0;
+watch(
+  () => props.id,
+  async (id) => {
+    const seq = ++configSeq;
+    config.value = undefined;
+    draft.open = false;
+    command.dismiss();
+    result.value = '';
+    try {
+      const loaded = await api.config(id);
+      if (seq === configSeq) config.value = loaded;
+    } catch {
+      // Each tab reports its own loading failure.
+    }
+  },
+  { immediate: true },
+);
+
 function start(target: string, kind: Kind = 'recheck') {
+  if (locked.value) return;
   Object.assign(draft, { open: true, target, kind, text: '', minutes: 60 });
   command.dismiss();
   result.value = '';
+}
+function closeCommand() {
+  if (!locked.value) draft.open = false;
 }
 function body(): ManageCommand {
   const text = draft.text.trim();
@@ -137,7 +160,7 @@ function finish(state: string) {
     <Card :bordered="false">
       <Tabs v-model:active-key="tab">
         <TabPane key="members" :tab="t('page.groups.tabs.members')">
-          <ListPanel :ref="(el) => (panels.members = el as never)" :columns="memberColumns" :empty-text="t('page.groups.emptyMembers')" :loader="(cursor, signal) => api.members(id, cursor, signal)" :row-key="(row: Member) => row.owner">
+          <ListPanel :key="`${id}:members`" :ref="(el) => (panels.members = el as never)" :columns="memberColumns" :empty-text="t('page.groups.emptyMembers')" :loader="(cursor, signal) => api.members(id, cursor, signal)" :row-key="(row: Member) => row.owner">
             <template #cell="{ column, record }">
               <code v-if="column.key === 'owner'" class="break-all text-xs">{{ record.owner }}</code>
               <Tag v-else-if="column.key === 'state'">{{ label(`page.groups.memberStates.${record.state}`, record.state) }}</Tag>
@@ -148,13 +171,13 @@ function finish(state: string) {
                 <Tag v-if="isSet(record.muted_until)" color="orange">{{ t('page.groups.mutedUntil', { time: time(record.muted_until) }) }}</Tag>
                 <Tag v-if="!record.joined">{{ t('page.groups.notJoined') }}</Tag>
               </template>
-              <Button v-else-if="column.key === 'actions'" size="small" @click="start(record.owner)">{{ t('page.groups.manage') }}</Button>
+              <Button v-else-if="column.key === 'actions'" size="small" :disabled="locked" @click="start(record.owner)">{{ t('page.groups.manage') }}</Button>
             </template>
           </ListPanel>
         </TabPane>
         <TabPane key="actions" :tab="t('page.groups.tabs.actions')">
           <Alert class="mb-3" type="info" show-icon :message="t('page.groups.unknownHint')" />
-          <ListPanel :ref="(el) => (panels.actions = el as never)" :columns="actionColumns" :empty-text="t('page.groups.emptyActions')" :loader="(cursor, signal) => api.actions(id, cursor, signal)" :row-key="(row: Action) => row.id">
+          <ListPanel :key="`${id}:actions`" :ref="(el) => (panels.actions = el as never)" :columns="actionColumns" :empty-text="t('page.groups.emptyActions')" :loader="(cursor, signal) => api.actions(id, cursor, signal)" :row-key="(row: Action) => row.id">
             <template #cell="{ column, record }">
               <template v-if="column.key === 'created'">{{ time(record.created) }}</template>
               <template v-else-if="column.key === 'command'">{{ label(`page.groups.commands.${record.command.kind}`, record.command.kind) }} <code v-if="record.command.target" class="break-all text-xs">{{ record.command.target }}</code></template>
@@ -164,7 +187,7 @@ function finish(state: string) {
           </ListPanel>
         </TabPane>
         <TabPane key="reports" :tab="t('page.groups.tabs.reports')">
-          <ListPanel :columns="reportColumns" :empty-text="t('page.groups.emptyReports')" :loader="(cursor, signal) => api.reports(id, cursor, signal)" :row-key="(row: Report) => row.id">
+          <ListPanel :key="`${id}:reports`" :columns="reportColumns" :empty-text="t('page.groups.emptyReports')" :loader="(cursor, signal) => api.reports(id, cursor, signal)" :row-key="(row: Report) => row.id">
             <template #cell="{ column, record }">
               <template v-if="column.key === 'reason'">{{ record.reason }}</template>
               <code v-else-if="column.key === 'reporter'" class="break-all text-xs">{{ record.reporter }}</code>
@@ -174,28 +197,28 @@ function finish(state: string) {
           </ListPanel>
         </TabPane>
         <TabPane key="hits" :tab="t('page.groups.tabs.hits')">
-          <ListPanel :columns="hitColumns" :empty-text="t('page.groups.emptyHits')" :loader="(cursor, signal) => api.hits(id, cursor, signal)" :row-key="(row: Hit) => row.id">
+          <ListPanel :key="`${id}:hits`" :columns="hitColumns" :empty-text="t('page.groups.emptyHits')" :loader="(cursor, signal) => api.hits(id, cursor, signal)" :row-key="(row: Hit) => row.id">
             <template #cell="{ column, record }">
               <code v-if="column.key === 'owner'" class="break-all text-xs">{{ record.owner }}</code>
-              <template v-else-if="column.key === 'rules'">{{ format.list(record.rules) }}</template>
+              <template v-else-if="column.key === 'rules'">{{ format.list(record.rules.map((rule: string) => label(`page.groups.ruleKinds.${rule}`, rule))) }}</template>
               <Tag v-else-if="column.key === 'state'">{{ label(`page.groups.hitStates.${record.state}`, record.state) }}</Tag>
             </template>
           </ListPanel>
         </TabPane>
         <TabPane key="blacklist" :tab="t('page.groups.tabs.blacklist')">
-          <ListPanel :ref="(el) => (panels.blacklist = el as never)" :columns="blacklistColumns" :empty-text="t('page.groups.emptyBlacklist')" :loader="(cursor, signal) => api.blacklist(id, cursor, signal)" :row-key="(row: Blacklist) => row.id">
+          <ListPanel :key="`${id}:blacklist`" :ref="(el) => (panels.blacklist = el as never)" :columns="blacklistColumns" :empty-text="t('page.groups.emptyBlacklist')" :loader="(cursor, signal) => api.blacklist(id, cursor, signal)" :row-key="(row: Blacklist) => row.id">
             <template #cell="{ column, record }">
               <code v-if="column.key === 'id'" class="break-all text-xs">{{ record.id }}</code>
               <template v-else-if="column.key === 'reason'">{{ record.reason }}</template>
               <template v-else-if="column.key === 'until'">{{ record.permanent ? t('page.groups.permanent') : time(record.until) }}</template>
-              <Button v-else-if="column.key === 'actions'" size="small" @click="start(record.id, 'unblacklist')">{{ t('page.groups.commands.unblacklist') }}</Button>
+              <Button v-else-if="column.key === 'actions'" size="small" :disabled="locked" @click="start(record.id, 'unblacklist')">{{ t('page.groups.commands.unblacklist') }}</Button>
             </template>
           </ListPanel>
         </TabPane>
       </Tabs>
     </Card>
 
-    <Modal v-model:open="draft.open" :title="t('page.groups.commandTitle')" :footer="null" destroy-on-close>
+    <Modal :open="draft.open" :mask-closable="false" :closable="!locked" :keyboard="!locked" :title="t('page.groups.commandTitle')" :footer="null" destroy-on-close @cancel="closeCommand">
       <Form layout="vertical" @submit.prevent="send">
         <p class="text-sm">{{ t('page.groups.commandTarget') }} <code class="break-all text-xs">{{ draft.target }}</code></p>
         <FormItem :label="t('page.groups.command')" html-for="group-command-kind">

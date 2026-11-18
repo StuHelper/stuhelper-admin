@@ -1470,6 +1470,14 @@
       "compliant": "符合",
       "pending_profile": "待补充资料"
     },
+    "ruleKinds": {
+      "keyword": "敏感词",
+      "link": "拦截链接",
+      "frequency": "发言频率",
+      "repeat": "复读消息",
+      "card": "群名片",
+      "warning_limit": "警告上限"
+    },
     "states": {
       "pending": "等待执行",
       "executing": "执行中",

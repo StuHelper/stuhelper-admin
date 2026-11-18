@@ -50,18 +50,16 @@ const dictionaries = {
   'ar-EG': arEG,
 };
 const school = useCampusId();
-const scope = ref<'global' | 'school'>('school');
 const language = ref(locale.value);
 const form = ref<Presentation>();
 const current = shallowRef<Presentation>();
 const baseline = ref('');
 const success = ref('');
-const target = computed(() => (scope.value === 'global' ? '*' : school.value));
 const dirty = computed(
   () => !!form.value && JSON.stringify(form.value) !== baseline.value,
 );
 const locked = computed(() => save.busy.value || save.uncertain.value);
-const view = useAsync((signal) => api.presentation(target.value, signal));
+const view = useAsync((signal) => api.presentation(school.value, signal));
 
 function defaults(): Presentation['rating_texts'] {
   return Object.fromEntries(
@@ -82,46 +80,64 @@ function defaults(): Presentation['rating_texts'] {
   );
 }
 
-async function load(compare = false) {
-  await view.reload();
-  const value = view.data.value;
-  if (!value) return;
-  if (compare && form.value) {
-    // Keep the edits; adopt the current revision and show the saved values for comparison.
-    form.value.revision = value.configured?.revision ?? 0;
-    current.value = value.effective;
-    return;
-  }
-  form.value = {
+function buildPresentation(value: NonNullable<typeof view.data.value>): Presentation {
+  return {
     ...value.effective,
-    school_id: target.value,
+    school_id: school.value,
     revision: value.configured?.revision ?? 0,
     rating_texts:
       Object.keys(value.effective.rating_texts).length > 0
         ? structuredClone(value.effective.rating_texts)
         : defaults(),
   };
+}
+
+async function load(compare = false) {
+  await view.reload();
+  const value = view.data.value;
+  if (!value) return;
+  const serverPresentation = buildPresentation(value);
+  if (compare && form.value) {
+    // Keep the edits; adopt the current revision and show the saved values for comparison.
+    form.value.revision = serverPresentation.revision;
+    baseline.value = JSON.stringify(serverPresentation);
+    current.value = serverPresentation;
+    save.dismiss();
+    return;
+  }
+  form.value = serverPresentation;
   baseline.value = JSON.stringify(form.value);
   current.value = undefined;
+  save.dismiss();
 }
-watch(target, () => {
-  success.value = '';
-  if (target.value) void load();
-});
+watch(
+  school,
+  () => {
+    success.value = '';
+    if (school.value) void load();
+  },
+  { immediate: true },
+);
 useLeaveGuard(() => (dirty.value || locked.value ? t(save.uncertain.value ? 'page.common.leaveUncertain' : 'page.common.leaveUnsaved') : ''));
+
+const currentSummary = computed(() => {
+  if (!current.value) return '';
+  const rows = current.value.rating_texts[language.value] ?? [];
+  return rows.map((row) => row.join(' / ')).join(' · ');
+});
 
 async function submit() {
   if (!form.value) return;
   success.value = '';
   if (
-    await save.run(`presentation:${target.value}`, form.value, (value, key) =>
+    await save.run(`presentation:${school.value}`, form.value, (value, key) =>
       api.savePresentation(value, key),
     )
   )
-    saved();
+    await saved();
 }
 async function retry() {
-  if (await save.retry()) saved();
+  if (await save.retry()) await saved();
 }
 async function saved() {
   success.value = t('page.common.saved');
@@ -135,11 +151,8 @@ async function saved() {
     :description="t('page.moderation.presentationIntro')"
   >
     <div class="flex flex-col gap-4">
-      <Card :bordered="false">
-        <Form layout="inline" class="flex flex-wrap gap-y-3" />
-      </Card>
-      <CampusPending v-if="!target" @ready="school = $event" />
-      <Card v-if="target" :bordered="false">
+      <CampusPending v-if="!school" @ready="school = $event" />
+      <Card v-if="school" :bordered="false">
         <LoadState
           :status="view.status.value"
           :error="view.error.value"
@@ -149,9 +162,10 @@ async function saved() {
             <Alert
               v-if="current"
               class="mb-4"
-              type="warning"
+              type="info"
               show-icon
               :message="t('page.common.compareNotice')"
+              :description="currentSummary"
             />
             <FormItem :label="t('page.moderation.ratingLanguage')" html-for="presentationview-field-1">
               <Select

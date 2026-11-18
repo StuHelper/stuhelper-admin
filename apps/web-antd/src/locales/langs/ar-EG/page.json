@@ -1470,6 +1470,14 @@
       "compliant": "مطابق",
       "pending_profile": "بحاجة إلى بيانات الملف"
     },
+    "ruleKinds": {
+      "keyword": "كلمة مفتاحية",
+      "link": "رابط خارجي",
+      "frequency": "معدل الرسائل",
+      "repeat": "رسالة مكررة",
+      "card": "بطاقة المجموعة",
+      "warning_limit": "حد التحذيرات"
+    },
     "states": {
       "pending": "بالانتظار",
       "executing": "قيد التنفيذ",

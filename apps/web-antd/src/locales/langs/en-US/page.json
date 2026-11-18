@@ -1470,6 +1470,14 @@
       "compliant": "Compliant",
       "pending_profile": "Profile needed"
     },
+    "ruleKinds": {
+      "keyword": "Keyword",
+      "link": "External link",
+      "frequency": "Message rate",
+      "repeat": "Repeated message",
+      "card": "Group card",
+      "warning_limit": "Warning limit"
+    },
     "states": {
       "pending": "Waiting",
       "executing": "Running",
