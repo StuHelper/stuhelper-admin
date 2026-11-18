@@ -28,45 +28,67 @@ import { useAcademicAdmin } from './api';
 import { useCampusId } from './campus';
 import CampusPending from './CampusPending.vue';
 
-// Review mode and blocked terms per content kind, for one school or globally.
+// Review mode and blocked terms per content kind for the served school.
 const { t } = useI18n();
 const api = useAcademicAdmin();
 const save = useMutation();
 const school = useCampusId();
-const scope = ref<'global' | 'school'>('school');
 const kind = ref('course');
 const mode = ref<Policy['mode']>('published');
 const words = ref('');
 const baseline = ref('');
+const comparing = ref(false);
 const success = ref('');
-const target = computed(() => (scope.value === 'global' ? '*' : school.value));
 const form = () => JSON.stringify([mode.value, words.value]);
 const dirty = computed(
   () => baseline.value !== '' && baseline.value !== form(),
 );
 const locked = computed(() => save.busy.value || save.uncertain.value);
 const policy = useAsync((signal) =>
-  api.policy({ school_id: target.value, kind: kind.value }, signal),
+  api.policy({ school_id: school.value, kind: kind.value }, signal),
 );
 
 async function load(compare = false) {
   await policy.reload();
   const value = policy.data.value;
-  if (!value || compare) return;
+  if (!value) return;
+  if (compare) {
+    baseline.value = JSON.stringify([
+      value.effective.mode,
+      value.effective.blocked_terms.join('\n'),
+    ]);
+    save.dismiss();
+    comparing.value = true;
+    return;
+  }
+  comparing.value = false;
   mode.value = value.effective.mode;
   words.value = value.effective.blocked_terms.join('\n');
   baseline.value = form();
+  save.dismiss();
 }
-watch([target, kind], () => {
-  success.value = '';
-  if (target.value) void load();
-});
+watch(
+  [school, kind],
+  () => {
+    success.value = '';
+    comparing.value = false;
+    if (school.value) void load();
+  },
+  { immediate: true },
+);
 useLeaveGuard(() => (dirty.value || locked.value ? t(save.uncertain.value ? 'page.common.leaveUncertain' : 'page.common.leaveUnsaved') : ''));
+
+const savedPolicySummary = computed(() => {
+  const value = policy.data.value;
+  if (!value) return '';
+  const terms = value.effective.blocked_terms.join(', ');
+  return `${t(`page.moderation.policyModes.${value.effective.mode}`)}${terms ? ` · ${terms}` : ''}`;
+});
 
 async function submit() {
   success.value = '';
   const body: Policy = {
-    school_id: target.value,
+    school_id: school.value,
     kind: kind.value,
     mode: mode.value,
     blocked_terms: [
@@ -80,17 +102,18 @@ async function submit() {
     revision: policy.data.value?.configured?.revision ?? 0,
   };
   if (
-    await save.run(`policy:${target.value}:${kind.value}`, body, (value, key) =>
+    await save.run(`policy:${school.value}:${kind.value}`, body, (value, key) =>
       api.savePolicy(value, key),
     )
   )
-    saved();
+    await saved();
 }
 async function retry() {
-  if (await save.retry()) saved();
+  if (await save.retry()) await saved();
 }
 async function saved() {
   baseline.value = form();
+  comparing.value = false;
   success.value = t('page.common.saved');
   await load();
 }
@@ -120,8 +143,8 @@ id="policyview-field-1"
           </FormItem>
         </Form>
       </Card>
-      <CampusPending v-if="!target" @ready="school = $event" />
-      <Card v-if="target" :bordered="false">
+      <CampusPending v-if="!school" @ready="school = $event" />
+      <Card v-if="school" :bordered="false">
         <LoadState
           :status="policy.status.value"
           :error="policy.error.value"
@@ -133,6 +156,14 @@ id="policyview-field-1"
             class="max-w-2xl"
             @submit.prevent="submit"
           >
+            <Alert
+              v-if="comparing"
+              class="mb-4"
+              type="info"
+              show-icon
+              :message="t('page.common.compareNotice')"
+              :description="savedPolicySummary"
+            />
             <Alert
               class="mb-4"
               type="info"

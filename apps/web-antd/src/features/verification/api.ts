@@ -139,13 +139,15 @@ export class VerificationApi {
     return this.http.json('/api/v1/verification/capture', (value) => parseEntity('Material', value), { method: 'POST', bytes: image, headers: { 'X-Capture-Token': token }, timeout: 60_000 })
   }
 
-  async write<K extends Entity>(kind: K, path: string, input?: unknown, method = 'POST', signal?: AbortSignal): Promise<Schemas[K]> {
+  async write<K extends Entity>(kind: K, path: string, input?: unknown, method = 'POST', signal?: AbortSignal, idempotencyKey?: string): Promise<Schemas[K]> {
     const serialized = input === undefined ? '' : JSON.stringify(input)
     const print = await fingerprint(method, path, serialized)
-    let key = this.keys.get(print)
+    let key = idempotencyKey ?? this.keys.get(print)
     if (!key) {
       key = crypto.randomUUID()
       this.keys.set(print, key)
+    } else if (idempotencyKey) {
+      this.keys.set(print, idempotencyKey)
     }
     try {
       for (let attempt = 0; attempt < 12; attempt++) {

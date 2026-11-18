@@ -123,7 +123,8 @@
     "disabled": "This feature is not enabled.",
     "cooldown": "Too many attempts. Try again shortly.",
     "billing_already_accessible": "This user can already access the resource; no purchase is needed.",
-    "invalid_rule": "This combination of conditions is not valid. Adjust it and save again."
+    "invalid_rule": "This combination of conditions is not valid. Adjust it and save again.",
+    "import_conflict": "Catalog records changed after previewing; generate a new preview before confirming."
   },
   "session": {
     "signIn": "Sign in",
@@ -428,7 +429,43 @@
       "applied": "Applied"
     },
     "confirmImport": "Confirm import",
-    "imported": "Import complete: catalog objects {objects}, enrollments {enrollments}, manual corrections kept {preserved}."
+    "imported": "Import complete: catalog objects {objects}, enrollments {enrollments}, manual corrections kept {preserved}.",
+    "kinds": {
+      "school": "School record",
+      "department": "Academic department",
+      "category": "Course category",
+      "nature": "Course nature",
+      "term": "Academic term",
+      "course": "Course record",
+      "teacher": "Instructor profile",
+      "term_course": "Term offering",
+      "class": "Teaching class",
+      "assignment": "Teaching assignment",
+      "schedule": "Class schedule",
+      "enrollment": "Course enrollment"
+    },
+    "importFields": {
+      "name": "Display name",
+      "code": "Object code",
+      "department_id": "Department link",
+      "category_id": "Category link",
+      "nature_id": "Nature link",
+      "course_id": "Course link",
+      "term_id": "Term link",
+      "term_course_id": "Offering link",
+      "class_id": "Teaching class link",
+      "teacher_id": "Instructor link",
+      "credits": "Credit value",
+      "hours": "Class hours",
+      "english_name": "English title",
+      "former_codes": "Former codes",
+      "former_names": "Former names",
+      "biography": "Biography text",
+      "location": "Classroom location",
+      "time_text": "Schedule text",
+      "aliases": "Alternate names",
+      "schedule_time": "Structured periods"
+    }
   },
   "resources": {
     "manageTitle": "Resource management",
@@ -646,7 +683,8 @@
       "student": "Current student",
       "alumni": "Alumnus or alumna",
       "newcomer": "Temporary newcomer",
-      "unknown": "Not provided"
+      "unknown": "Not provided",
+      "teacher": "Instructor"
     },
     "states": {
       "in_progress": "In progress",
@@ -1204,6 +1242,15 @@
       "anyCategory": "All categories",
       "removeRule": "Remove rule",
       "addRule": "Add rule"
+    },
+    "ledgerKind": {
+      "reward": "Reward grant",
+      "reward_revoke": "Reward revocation",
+      "commerce_refund": "Order refund",
+      "membership_grant": "Granted membership",
+      "expired": "Points expiry",
+      "debt_repayment": "Debt offset",
+      "closure": "Account closure settlement"
     }
   },
   "access": {
@@ -1337,6 +1384,7 @@
     "title": "Class periods",
     "intro": "Set the Monday of week one, the school time zone and the start and end of each period for a term. Student timetables and calendar exports use these to turn period numbers into times; a term without them cannot be exported.",
     "term": "Term",
+    "noTerms": "No terms have been imported for this school yet.",
     "missing": "No periods are set for this term yet. Students can export calendars once they are saved.",
     "weekOne": "Monday of week one",
     "weekOneHint": "Choose the Monday of the first teaching week.",
@@ -1470,6 +1518,14 @@
       "noncompliant": "Violation",
       "compliant": "Compliant",
       "pending_profile": "Profile needed"
+    },
+    "ruleKinds": {
+      "keyword": "Keyword",
+      "link": "External link",
+      "frequency": "Message rate",
+      "repeat": "Repeated message",
+      "card": "Group card",
+      "warning_limit": "Warning limit"
     },
     "states": {
       "pending": "Waiting",

@@ -45,7 +45,7 @@ test('a school rule for buying resources is saved with the version read and leav
   await page.goto(`${base}/system/eligibility?lang=${info.project.metadata.locale}`);
   const purchase = page.getByRole('row').filter({ hasText: 'resources.purchase' });
   await expect(purchase.getByText(e.conditions.campus_eligibility, { exact: true })).toHaveCount(2);
-  await purchase.getByRole('button', { name: fill(e.edit.school, { action: 'resources.purchase' }), exact: true }).click();
+  await purchase.getByRole('button', { name: fill(e.edit.school, { action: e.actions.resources_purchase }), exact: true }).click();
   const drawer = page.locator('.ant-drawer-content');
   await expect(drawer.getByText(e.schoolHint, { exact: true })).toBeVisible();
   const save = drawer.getByRole('button', { name: all.common.save, exact: true });
@@ -65,7 +65,7 @@ test('an empty rule requires only sign-in and a stale version is rejected', asyn
   const all = catalogue(info); const e = all.eligibility; const state = await server(page);
   await page.goto(`${base}/system/eligibility?lang=${info.project.metadata.locale}`);
   const membership = page.getByRole('row').filter({ hasText: 'membership.purchase' });
-  await membership.getByRole('button', { name: fill(e.edit.site, { action: 'membership.purchase' }), exact: true }).click();
+  await membership.getByRole('button', { name: fill(e.edit.site, { action: e.actions.membership_purchase }), exact: true }).click();
   const drawer = page.locator('.ant-drawer-content');
   await drawer.getByRole('checkbox', { name: e.conditions.campus_eligibility, exact: true }).uncheck();
   await expect(drawer.getByText(e.onlySignIn, { exact: true })).toBeVisible();
@@ -81,6 +81,6 @@ test('a column the administrator may not read shows the refusal and keeps the ot
   await page.goto(`${base}/system/eligibility?lang=${info.project.metadata.locale}`);
   const purchase = page.getByRole('row').filter({ hasText: 'resources.purchase' });
   await expect(purchase.getByText(all.errors.forbidden, { exact: true })).toBeVisible();
-  await expect(purchase.getByRole('button', { name: fill(e.edit.school, { action: 'resources.purchase' }), exact: true })).toBeVisible();
-  await expect(purchase.getByRole('button', { name: fill(e.edit.site, { action: 'resources.purchase' }), exact: true })).toHaveCount(0);
+  await expect(purchase.getByRole('button', { name: fill(e.edit.school, { action: e.actions.resources_purchase }), exact: true })).toBeVisible();
+  await expect(purchase.getByRole('button', { name: fill(e.edit.site, { action: e.actions.resources_purchase }), exact: true })).toHaveCount(0);
 });

@@ -73,18 +73,24 @@ const isNew = ref(false);
 const form = reactive({ id: '', name: '', days: 30, enabled: true, points: undefined as number | undefined, ivory: '', version: 0 });
 const baseline = ref('');
 const write = useMutation();
+const planComparing = ref(false);
 const success = ref('');
 const locked = computed(() => write.busy.value || write.uncertain.value);
 const dirty = computed(() => editing.value && JSON.stringify(form) !== baseline.value);
 
+function planSnapshot(plan?: MembershipPlan) {
+  return plan
+    ? { id: plan.id, name: plan.name, days: Math.round(plan.valid_seconds / day), enabled: plan.enabled, points: plan.points ?? undefined, ivory: plan.ivory_minor ? minorText(plan.ivory_minor) : '', version: plan.version }
+    : { id: '', name: '', days: 30, enabled: true, points: undefined, ivory: '', version: 0 };
+}
+
 function edit(plan?: MembershipPlan) {
   editing.value = true;
   isNew.value = !plan;
+  planComparing.value = false;
   success.value = '';
   write.dismiss();
-  Object.assign(form, plan
-    ? { id: plan.id, name: plan.name, days: Math.round(plan.valid_seconds / day), enabled: plan.enabled, points: plan.points ?? undefined, ivory: plan.ivory_minor ? minorText(plan.ivory_minor) : '', version: plan.version }
-    : { id: '', name: '', days: 30, enabled: true, points: undefined, ivory: '', version: 0 });
+  Object.assign(form, planSnapshot(plan));
   baseline.value = JSON.stringify(form);
 }
 function close() {
@@ -103,8 +109,18 @@ function savedPlan(result: MembershipPlan) {
   if (!coverage.value.has(result.id)) coverage.value = new Map(coverage.value).set(result.id, null);
   form.version = result.version;
   isNew.value = false;
+  planComparing.value = false;
   baseline.value = JSON.stringify(form);
   success.value = t('page.common.saved');
+}
+async function reloadPlanCompare() {
+  await load();
+  if (status.value !== 'ready') return;
+  const latest = plans.value.find((plan) => plan.id === form.id);
+  if (latest) form.version = latest.version;
+  baseline.value = JSON.stringify(planSnapshot(latest));
+  write.dismiss();
+  planComparing.value = true;
 }
 
 // Stopping sales keeps the plan's terms and orders; memberships already bought keep their period.
@@ -125,6 +141,7 @@ const rows = ref<RuleRow[]>([]);
 const revision = ref(0);
 const coverBaseline = ref('');
 const cover = useMutation();
+const coverComparing = ref(false);
 const coverSuccess = ref('');
 const coverLocked = computed(() => cover.busy.value || cover.uncertain.value);
 const coverDirty = computed(() => !!covering.value && JSON.stringify(rows.value) !== coverBaseline.value);
@@ -135,6 +152,7 @@ const optionsError = ref('');
 
 async function openCoverage(plan: MembershipPlan) {
   covering.value = plan;
+  coverComparing.value = false;
   coverSuccess.value = '';
   cover.dismiss();
   const current = coverage.value.get(plan.id);
@@ -155,23 +173,45 @@ async function loadOptions() {
     optionsError.value = errorCode(error);
   }
 }
-// Folders are read level by level; at most 1000 are listed so a large tree stays bounded.
+// Folders are read level by level across pages with bounded concurrency; at most 1000 are listed.
 async function folderTree(school: string) {
   let budget = 1000;
+  const concurrency = 5;
   async function level(parent?: string): Promise<Node[]> {
-    const page = await resources.directories({ school_id: school, parent_id: parent, limit: 100 });
     const nodes: Node[] = [];
-    for (const item of page.items) {
-      if (budget-- <= 0) break;
-      nodes.push({ value: item.id, title: localName(item.names ?? {}, locale.value) || item.id });
-    }
-    for (const node of nodes) {
-      const children = budget > 0 ? await level(node.value) : [];
-      if (children.length > 0) node.children = children;
+    let after = '';
+    for (let pageIndex = 0; pageIndex < 20 && budget > 0; pageIndex++) {
+      const page = await resources.directories({
+        school_id: school,
+        parent_id: parent,
+        after: after || undefined,
+        limit: 100,
+      });
+      for (const item of page.items) {
+        if (budget <= 0) break;
+        budget--;
+        nodes.push({ value: item.id, title: localName(item.names ?? {}, locale.value) || item.id });
+      }
+      if (!page.next_cursor || page.next_cursor === after) break;
+      after = page.next_cursor;
     }
     return nodes;
   }
-  return level();
+  const roots = await level();
+  const queue = [...roots];
+  for (let index = 0; index < queue.length && budget > 0;) {
+    const batch = queue.slice(index, index + concurrency);
+    index += batch.length;
+    const children = await Promise.all(batch.map((node) => level(node.value)));
+    batch.forEach((parent, offset) => {
+      const list = children[offset];
+      if (list?.length) {
+        parent.children = list;
+        queue.push(...list);
+      }
+    });
+  }
+  return roots;
 }
 function addRule() {
   rows.value = [...rows.value, { school: campus.id.value }];
@@ -195,8 +235,21 @@ async function retryCoverage() {
 function savedCoverage(result: Coverage) {
   coverage.value = new Map(coverage.value).set(result.plan_id, result);
   revision.value = result.revision;
+  coverComparing.value = false;
   coverBaseline.value = JSON.stringify(rows.value);
   coverSuccess.value = t('page.common.saved');
+}
+async function reloadCoverageCompare() {
+  const plan = covering.value;
+  if (!plan) return;
+  await load();
+  if (status.value !== 'ready') return;
+  const current = coverage.value.get(plan.id);
+  const known = current && typeof current === 'object' ? current : undefined;
+  revision.value = known?.revision ?? 0;
+  coverBaseline.value = JSON.stringify((known?.rules ?? []).map((rule) => ({ school: rule.school_id, directory: rule.directory_id, category: rule.category_id })));
+  cover.dismiss();
+  coverComparing.value = true;
 }
 function closeCoverage() {
   if (!coverLocked.value) covering.value = undefined;
@@ -219,6 +272,12 @@ const coverageText = (plan: MembershipPlan) => {
   if (!value?.rules.length) return t('page.billing.memberships.noCoverage');
   return t('page.billing.memberships.ruleCount', { count: format.value.number(value.rules.length) });
 };
+const savedPlanSummary = computed(() => {
+  const current = plans.value.find((plan) => plan.id === form.id);
+  if (!current) return t('page.common.empty');
+  return `${current.name} · ${prices(current)} · ${t('page.billing.config.days', { days: format.value.number(Math.round(current.valid_seconds / day)) })}`;
+});
+const savedCoverageSummary = computed(() => (covering.value ? coverageText(covering.value) : ''));
 const columns = computed(() => [
   { key: 'id', title: t('page.billing.config.id') },
   { key: 'name', dataIndex: 'name', title: t('page.billing.memberships.name') },
@@ -260,6 +319,7 @@ const columns = computed(() => [
 
     <Drawer :open="editing" :width="560" :title="t(isNew ? 'page.billing.memberships.new' : 'page.billing.memberships.edit')" :mask-closable="false" destroy-on-close @close="close">
       <Form layout="vertical" @submit.prevent="save">
+        <Alert v-if="planComparing" class="mb-4" type="info" show-icon :message="t('page.common.compareNotice')" :description="savedPlanSummary" />
         <FormItem :label="t('page.billing.config.id')" required :extra="t('page.billing.memberships.idHint')" html-for="plan-id">
           <Input id="plan-id" v-model:value="form.id" :maxlength="128" :disabled="!isNew || locked" autocomplete="off" />
         </FormItem>
@@ -281,13 +341,14 @@ const columns = computed(() => [
         <MutationAlert :busy="write.busy.value" :error="write.error.value" :uncertain="write.uncertain.value" :success="success" @retry="async () => { const result = (await write.retry()) as MembershipPlan | undefined; if (result) savedPlan(result); }" />
         <div class="mt-4 flex gap-2">
           <Button type="primary" html-type="submit" :loading="write.busy.value" :disabled="!ready || !dirty || write.uncertain.value">{{ t('page.common.save') }}</Button>
-          <Button v-if="write.error.value === 'billing_conflict'" :disabled="locked" @click="load(); editing = false">{{ t('page.common.reloadCompare') }}</Button>
+          <Button v-if="write.error.value === 'billing_conflict'" :disabled="locked" @click="reloadPlanCompare">{{ t('page.common.reloadCompare') }}</Button>
         </div>
       </Form>
     </Drawer>
 
     <Drawer :open="!!covering" :width="640" :title="covering ? t('page.billing.memberships.coverageTitle', { name: covering.name }) : ''" :mask-closable="false" destroy-on-close @close="closeCoverage">
       <div v-if="covering" class="flex flex-col gap-3">
+        <Alert v-if="coverComparing" type="info" show-icon :message="t('page.common.compareNotice')" :description="savedCoverageSummary" />
         <p class="text-muted-foreground text-sm">{{ t('page.billing.memberships.coverageIntro') }}</p>
         <Alert v-if="optionsError" type="error" show-icon :message="errorText(optionsError)">
           <template #action><Button size="small" @click="loadOptions">{{ t('page.common.retry') }}</Button></template>
@@ -309,7 +370,7 @@ const columns = computed(() => [
         <MutationAlert :busy="cover.busy.value" :error="cover.error.value" :uncertain="cover.uncertain.value" :success="coverSuccess" @retry="retryCoverage" />
         <div class="flex gap-2">
           <Button type="primary" :loading="cover.busy.value" :disabled="!coverReady || !coverDirty || cover.uncertain.value" @click="saveCoverage">{{ t('page.common.save') }}</Button>
-          <Button v-if="cover.error.value === 'conflict'" :disabled="coverLocked" @click="load(); covering = undefined">{{ t('page.common.reloadCompare') }}</Button>
+          <Button v-if="cover.error.value === 'conflict'" :disabled="coverLocked" @click="reloadCoverageCompare">{{ t('page.common.reloadCompare') }}</Button>
         </div>
       </div>
     </Drawer>

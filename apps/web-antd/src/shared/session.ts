@@ -29,17 +29,36 @@ export function createSessionStore(fetcher: typeof fetch) {
   let pending: Promise<void> | undefined;
   let retryAt = 0;
   let failures = 0;
- let generation=0;
+  let generation = 0;
+  let waitTimer: ReturnType<typeof setTimeout> | undefined;
+  let cancelWait: (() => void) | undefined;
 
   async function load() {
- const current=generation;
+    const current = generation;
     const wait = retryAt - Date.now();
-    if (wait > 0) await new Promise<void>((resolve) => setTimeout(resolve, wait));
+    if (wait > 0) {
+      await new Promise<void>((resolve) => {
+        cancelWait = () => {
+          if (waitTimer !== undefined) {
+            clearTimeout(waitTimer);
+            waitTimer = undefined;
+          }
+          cancelWait = undefined;
+          resolve();
+        };
+        waitTimer = setTimeout(() => {
+          waitTimer = undefined;
+          cancelWait = undefined;
+          resolve();
+        }, wait);
+      });
+    }
+    if (current !== generation) return;
     try {
       const value = await http.json('/api/v1/auth/session', parseSession, {
         timeout: 10_000,
       });
-      if(current!==generation)return;
+      if (current !== generation) return;
       if (!value.authenticated) throw new ApiError('incompatible');
       session.value = value;
       state.value = 'member';
@@ -47,7 +66,7 @@ export function createSessionStore(fetcher: typeof fetch) {
       failures = 0;
       retryAt = 0;
     } catch (error) {
- if(current!==generation)return;
+      if (current !== generation) return;
       if (error instanceof ApiError && error.denied) {
         session.value = null;
         state.value = 'guest';
@@ -59,7 +78,14 @@ export function createSessionStore(fetcher: typeof fetch) {
         // Every business action is still authorized independently by the server.
         unavailable.value = true;
         state.value = session.value ? 'member' : 'error';
-        if (error instanceof ApiError && (error.status === 503 || error.code === 'network' || error.code === 'timeout')) {
+        if (
+          error instanceof ApiError &&
+          (error.status === 502 ||
+            error.status === 503 ||
+            error.status === 504 ||
+            error.code === 'network' ||
+            error.code === 'timeout')
+        ) {
           failures = Math.min(failures + 1, 4);
           retryAt = Date.now() + Math.min(1000 * 2 ** (failures - 1), 8000);
         }
@@ -68,18 +94,36 @@ export function createSessionStore(fetcher: typeof fetch) {
   }
 
   function reload() {
-    pending ??= load().finally(() => {
-      pending = undefined;
-    });
+    if (!pending) {
+      const run = load().finally(() => {
+        if (pending === run) pending = undefined;
+      });
+      pending = run;
+    }
     return pending;
   }
 
   /** A business API rejected the account; confirm whether the session ended. */
   function revalidate(serviceUnavailable = false) {
-    if (state.value === 'member' && (!serviceUnavailable || !unavailable.value)) void reload();
+    if (
+      state.value === 'member' &&
+      (!serviceUnavailable || !unavailable.value)
+    ) {
+      void reload();
+    }
   }
 
-  function invalidate(){generation++;session.value=null;state.value='guest';unavailable.value=false;failures=0;retryAt=0;}
+  function invalidate() {
+    generation++;
+    cancelWait?.();
+    pending = undefined;
+    session.value = null;
+    state.value = 'guest';
+    unavailable.value = false;
+    failures = 0;
+    retryAt = 0;
+  }
+
   function signIn() {
     const target = window.location.href.split('#')[0] ?? window.location.origin;
     window.location.assign(
@@ -103,14 +147,42 @@ export function createSessionStore(fetcher: typeof fetch) {
   }
 
   async function saveProfile(profile: ProfileUpdate, key: string) {
-    const saved = await http.json('/api/v1/profiles/me', parseProfile, {
-      method: 'PUT',
-      body: profile,
-      key,
-      timeout: 10_000,
-    });
-    if (session.value) session.value = { ...session.value, profile: saved };
-    return saved;
+    try {
+      const saved = await http.json('/api/v1/profiles/me', parseProfile, {
+        method: 'PUT',
+        body: profile,
+        key,
+        timeout: 10_000,
+      });
+      if (session.value) session.value = { ...session.value, profile: saved };
+      return saved;
+    } catch (error) {
+      if (
+        error instanceof ApiError &&
+        (error.status === 409 || error.code === 'conflict')
+      ) {
+        let updatedFromBody = false;
+        if (
+          typeof error.detail === 'object' &&
+          error.detail !== null &&
+          'current' in error.detail
+        ) {
+          try {
+            const current = parseProfile(error.detail.current);
+            if (session.value) {
+              session.value = { ...session.value, profile: current };
+              updatedFromBody = true;
+            }
+          } catch {
+            // Fall back to reloading the session snapshot.
+          }
+        }
+        if (!updatedFromBody) {
+          await reload();
+        }
+      }
+      throw error;
+    }
   }
 
   return {
@@ -140,5 +212,9 @@ export function useSession(): SessionStore {
 export function useHttp() {
   const fetcher = useHostFetch();
   const session = inject(sessionKey, undefined);
-  return new Http(fetcher, { onDenied: (status) => status===401 ? session?.invalidate() : session?.revalidate(), onUnavailable: () => session?.revalidate(true) });
+  return new Http(fetcher, {
+    onDenied: (status) =>
+      status === 401 ? session?.invalidate() : session?.revalidate(),
+    onUnavailable: () => session?.revalidate(true),
+  });
 }

@@ -64,7 +64,7 @@ authenticatedFetch 每次读取宿主当前凭据，保留取消信号、幂等�
 
 ## 契约与检查
 
-platform、storage 和 contribution 接口分别从提供方 OpenAPI 生成类型。contracts 中的 source.json 记录提供方提交、版本、摘要与映射，make check 验证存储生成结果。存储共享样例来自提供方，客户端校验时间、整数范围、分页上限和响应字段。
+全部 19 个业务与平台接口从提供方 OpenAPI 生成类型（`make generate`）。`contracts/*.source.json` 记录提供方提交、版本、摘要与映射，`make check` 校验 `platform`、`storage`、`contribution` 等契约摘要与生成结果。
 
 make check 执行八语言覆盖检查、类型检查、应用 lint、单元测试与生产构建。中文为默认语言，支持英文、法文、俄文、日文、韩文、西班牙文和阿拉伯文。金额、数字、日期与复数由统一格式接口处理，阿拉伯文布局使用 RTL。存储浏览器检查使用明确 HTTP 夹具覆盖八语言、桌面和移动布局、键盘确认、未知结果重试、分页及撤权清空。真实身份与供应商联调另行验收。
 

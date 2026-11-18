@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import type { Effective, Grant, Role, Scope } from './api';
 
-import { computed, onMounted, reactive, ref, shallowRef } from 'vue';
+import { computed, getCurrentInstance, inject, onMounted, reactive, ref, shallowRef, watch } from 'vue';
 
 import { useI18n } from '@vben/locales';
 
 import { Alert, Button, Card, Descriptions, DescriptionsItem, Drawer, Form, FormItem, Input, Modal, Select, Table, Tag, Textarea } from 'ant-design-vue';
 
-import { errorCode } from '#/shared/api/errors';
+import { ApiError, errorCode, isDeniedCode } from '#/shared/api/errors';
 import { useMutation } from '#/shared/composables/async';
 import { useLeaveGuard } from '#/shared/composables/leave';
+import { sessionKey } from '#/shared/session';
 import AdminPage from '#/shared/ui/AdminPage.vue';
 import LoadState from '#/shared/ui/LoadState.vue';
 import { useErrorText } from '#/shared/ui/messages';
@@ -26,6 +27,7 @@ import { anyScope, useAccessAdmin } from './api';
 const { t } = useI18n();
 const errorText = useErrorText();
 const api = useAccessAdmin();
+const session = getCurrentInstance() ? inject(sessionKey, undefined) : undefined;
 
 const templates = shallowRef<Role[]>([]);
 const status = ref<'error' | 'loading' | 'ready'>('loading');
@@ -37,6 +39,7 @@ async function loadTemplates() {
     status.value = 'ready';
   } catch (error) {
     loadError.value = errorCode(error);
+    if (error instanceof ApiError && error.denied) templates.value = [];
     status.value = 'error';
   }
 }
@@ -132,6 +135,31 @@ async function retryGrant() {
 const busy = computed(() => createWrite.busy.value || grantWrite.busy.value || revokeWrite.busy.value);
 const pending = computed(() => createWrite.uncertain.value || grantWrite.uncertain.value || revokeWrite.uncertain.value);
 useLeaveGuard(() => (pending.value ? t('page.common.leaveUncertain') : (busy.value || (creating.value && roleForm.reason.trim()) || grantForm.reason.trim() ? t('page.common.leaveUnsaved') : '')));
+
+function clearSensitive(code = '') {
+  effective.value = undefined;
+  shown.value = '';
+  revoking.value = undefined;
+  creating.value = false;
+  created.value = undefined;
+  templates.value = [];
+  createWrite.dismiss();
+  grantWrite.dismiss();
+  revokeWrite.dismiss();
+  if (code) {
+    lookupError.value = code;
+    loadError.value = code;
+    status.value = 'error';
+  }
+}
+
+watch(() => session?.state.value, (state) => {
+  if (state === 'guest') clearSensitive();
+});
+watch([() => createWrite.error.value, () => grantWrite.error.value, () => revokeWrite.error.value], (codes) => {
+  const denied = codes.find((code) => code && isDeniedCode(code));
+  if (denied) clearSensitive(denied);
+});
 const scopeText = (scope: Scope) => [`${t('page.access.school')}: ${scope.school}`, `${t('page.access.group')}: ${scope.group}`, `${t('page.access.module')}: ${scope.module}`].join(' · ');
 const isAny = (scope: Scope) => scope.school === anyScope.school && scope.group === anyScope.group && scope.module === anyScope.module;
 const templateColumns = computed(() => [
