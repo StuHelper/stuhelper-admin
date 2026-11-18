@@ -1517,6 +1517,14 @@
       "compliant": "적합",
       "pending_profile": "정보 보완 필요"
     },
+    "ruleKinds": {
+      "keyword": "키워드",
+      "link": "외부 링크",
+      "frequency": "발언 빈도",
+      "repeat": "반복 메시지",
+      "card": "그룹 명함",
+      "warning_limit": "경고 한도"
+    },
     "states": {
       "pending": "실행 대기",
       "executing": "실행 중",

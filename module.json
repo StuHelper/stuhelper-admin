@@ -49,7 +49,8 @@
       "tests/e2e/commerce.spec.mjs#stopping sales asks for confirmation and keeps the plan listed as not on sale"
     ],
     "WP-ADMIN-02": [
-      "tests/e2e/commerce.spec.mjs#coverage rules are saved with the revision that was read"
+      "tests/e2e/commerce.spec.mjs#coverage rules are saved with the revision that was read",
+      "apps/web-antd/src/features/billing/ConflictAndScale.test.ts#preserves drafts and shows server comparison on 409 conflict, paginates >100 folders in MembershipsView, auto-advances AppsView past filtered pages, localizes EligibilityView action names, and omits empty Card in PresentationView"
     ],
     "WP-ADMIN-03": [
       "tests/e2e/commerce.spec.mjs#an administrator grants a membership and refunds a resource unlock in full",

@@ -55,27 +55,34 @@ const isNew = ref(false);
 const form = reactive({ id: '', enabled: true, amounts: '', originalRefunds: true, amount: '', points: 0, validDays: 0, periodDays: 1, limit: 1, objectScoped: false, version: 0 });
 const baseline = ref('');
 const write = useMutation();
+const comparing = ref(false);
 const success = ref('');
 const locked = computed(() => write.busy.value || write.uncertain.value);
 const dirty = computed(() => !!editing.value && JSON.stringify(form) !== baseline.value);
 useLeaveGuard(() => (write.uncertain.value ? t('page.common.leaveUncertain') : (dirty.value || write.busy.value ? t('page.common.leaveUnsaved') : '')));
 
+function snapshotFor(kind: Kind, item?: Channel | Offer | Rule) {
+  const base = { id: '', enabled: true, amounts: '', originalRefunds: true, amount: '', points: 0, validDays: 0, periodDays: 1, limit: 1, objectScoped: false, version: 0 };
+  if (kind === 'channel' && item) {
+    const channel = item as Channel;
+    Object.assign(base, { id: channel.id, enabled: channel.enabled, amounts: channel.amounts_minor.map((value) => minorText(value)).join(', '), originalRefunds: channel.original_refunds });
+  } else if (kind === 'offer' && item) {
+    const offer = item as Offer;
+    Object.assign(base, { id: offer.id, enabled: offer.enabled, amount: minorText(offer.amount_minor), points: offer.points, validDays: offer.valid_seconds / day, version: offer.version });
+  } else if (kind === 'rule' && item) {
+    const rule = item as Rule;
+    Object.assign(base, { id: rule.id, enabled: rule.enabled, points: rule.points, validDays: rule.valid_seconds / day, periodDays: rule.period_seconds / day, limit: rule.limit, objectScoped: rule.object_scoped, version: rule.version });
+  }
+  return base;
+}
+
 function edit(kind: Kind, item?: Channel | Offer | Rule) {
   editing.value = kind;
   isNew.value = !item;
+  comparing.value = false;
   success.value = '';
   write.dismiss();
-  Object.assign(form, { id: '', enabled: true, amounts: '', originalRefunds: true, amount: '', points: 0, validDays: 0, periodDays: 1, limit: 1, objectScoped: false, version: 0 });
-  if (kind === 'channel' && item) {
-    const channel = item as Channel;
-    Object.assign(form, { id: channel.id, enabled: channel.enabled, amounts: channel.amounts_minor.map((value) => minorText(value)).join(', '), originalRefunds: channel.original_refunds });
-  } else if (kind === 'offer' && item) {
-    const offer = item as Offer;
-    Object.assign(form, { id: offer.id, enabled: offer.enabled, amount: minorText(offer.amount_minor), points: offer.points, validDays: offer.valid_seconds / day, version: offer.version });
-  } else if (kind === 'rule' && item) {
-    const rule = item as Rule;
-    Object.assign(form, { id: rule.id, enabled: rule.enabled, points: rule.points, validDays: rule.valid_seconds / day, periodDays: rule.period_seconds / day, limit: rule.limit, objectScoped: rule.object_scoped, version: rule.version });
-  }
+  Object.assign(form, snapshotFor(kind, item));
   baseline.value = JSON.stringify(form);
 }
 function close() {
@@ -126,9 +133,42 @@ function saved(kind: Kind, result: Channel | Offer | Rule) {
   else rules.value = replace(rules.value, result as Rule);
   if ('version' in result) form.version = result.version;
   isNew.value = false;
+  comparing.value = false;
   baseline.value = JSON.stringify(form);
   success.value = t('page.common.saved');
 }
+
+async function reloadCompare() {
+  const kind = editing.value;
+  if (!kind) return;
+  await load();
+  if (status.value !== 'ready') return;
+  let latest: Channel | Offer | Rule | undefined;
+  if (kind === 'channel') latest = channels.value.find((item) => item.id === form.id);
+  else if (kind === 'offer') latest = offers.value.find((item) => item.id === form.id);
+  else latest = rules.value.find((item) => item.id === form.id);
+  if (latest && 'version' in latest) form.version = latest.version;
+  baseline.value = JSON.stringify(snapshotFor(kind, latest));
+  write.dismiss();
+  comparing.value = true;
+}
+
+const savedSummary = computed(() => {
+  const kind = editing.value;
+  if (kind === 'channel') {
+    const current = channels.value.find((item) => item.id === form.id);
+    return current ? format.value.list(current.amounts_minor.map((value) => money.cny(value))) : t('page.common.empty');
+  }
+  if (kind === 'offer') {
+    const current = offers.value.find((item) => item.id === form.id);
+    return current ? `${money.ivory(current.amount_minor)} · ${money.points(current.points)} · ${days(current.valid_seconds)}` : t('page.common.empty');
+  }
+  if (kind === 'rule') {
+    const current = rules.value.find((item) => item.id === form.id);
+    return current ? `${money.points(current.points)} · ${t('page.billing.config.limitText', { limit: format.value.number(current.limit), period: days(current.period_seconds) })}` : t('page.common.empty');
+  }
+  return '';
+});
 
 const days = (seconds: number) => (seconds ? t('page.billing.config.days', { days: format.value.number(seconds / day, { maximumFractionDigits: 2 }) }) : t('page.billing.config.noExpiry'));
 const channelColumns = computed(() => [
@@ -208,6 +248,7 @@ const ruleColumns = computed(() => [
 
     <Drawer :open="!!editing" :width="560" :title="editing ? t(`page.billing.config.edit.${editing}`) : ''" :mask-closable="false" destroy-on-close @close="close">
       <Form v-if="editing" layout="vertical" @submit.prevent="save">
+        <Alert v-if="comparing" class="mb-4" type="info" show-icon :message="t('page.common.compareNotice')" :description="savedSummary" />
         <FormItem :label="t('page.billing.config.id')" required :extra="t('page.billing.config.idHint')" html-for="billing-config-id">
           <Input id="billing-config-id" v-model:value="form.id" :maxlength="128" :disabled="!isNew || locked" autocomplete="off" />
         </FormItem>
@@ -248,7 +289,7 @@ const ruleColumns = computed(() => [
         <MutationAlert :busy="write.busy.value" :error="write.error.value" :uncertain="write.uncertain.value" :success="success" @retry="retry" />
         <div class="mt-4 flex gap-2">
           <Button type="primary" html-type="submit" :loading="write.busy.value" :disabled="!ready || !dirty || write.uncertain.value">{{ t('page.common.save') }}</Button>
-          <Button v-if="write.error.value === 'billing_conflict'" :disabled="locked" @click="load(); editing = undefined">{{ t('page.common.reloadCompare') }}</Button>
+          <Button v-if="write.error.value === 'billing_conflict'" :disabled="locked" @click="reloadCompare">{{ t('page.common.reloadCompare') }}</Button>
         </div>
       </Form>
     </Drawer>

@@ -1517,6 +1517,14 @@
       "compliant": "Conforme",
       "pending_profile": "Falta información"
     },
+    "ruleKinds": {
+      "keyword": "Palabra clave",
+      "link": "Enlace externo",
+      "frequency": "Frecuencia de mensajes",
+      "repeat": "Mensaje repetido",
+      "card": "Tarjeta del grupo",
+      "warning_limit": "Límite de avisos"
+    },
     "states": {
       "pending": "En espera",
       "executing": "En ejecución",

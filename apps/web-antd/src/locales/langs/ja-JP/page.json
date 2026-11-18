@@ -1517,6 +1517,14 @@
       "compliant": "適合",
       "pending_profile": "情報補足待ち"
     },
+    "ruleKinds": {
+      "keyword": "キーワード",
+      "link": "外部リンク",
+      "frequency": "投稿頻度",
+      "repeat": "連投メッセージ",
+      "card": "グループ名刺",
+      "warning_limit": "警告上限"
+    },
     "states": {
       "pending": "実行待ち",
       "executing": "実行中",

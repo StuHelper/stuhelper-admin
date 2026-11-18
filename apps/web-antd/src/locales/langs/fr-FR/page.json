@@ -1517,6 +1517,14 @@
       "compliant": "Conforme",
       "pending_profile": "Profil à compléter"
     },
+    "ruleKinds": {
+      "keyword": "Mot-clé",
+      "link": "Lien externe",
+      "frequency": "Fréquence des messages",
+      "repeat": "Message répété",
+      "card": "Carte de groupe",
+      "warning_limit": "Seuil d’avertissement"
+    },
     "states": {
       "pending": "En file",
       "executing": "En cours",
