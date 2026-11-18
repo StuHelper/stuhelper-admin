@@ -7,6 +7,7 @@ import { useI18n } from '@vben/locales';
 
 import { Button, Form, FormItem, Input, Radio, RadioGroup, Textarea } from 'ant-design-vue';
 
+import { isDeniedCode } from '#/shared/api/errors';
 import { useMutation } from '#/shared/composables/async';
 import { useLeaveGuard } from '#/shared/composables/leave';
 import MutationAlert from '#/shared/ui/MutationAlert.vue';
@@ -19,7 +20,10 @@ import { useBillingAdmin } from './api';
  * verified with the channel. The verification evidence is cited by reference only.
  */
 const props = defineProps<{ order: Pick<Order, 'id'>; target: Target }>();
-const emit = defineEmits<{ done: [order: Order, action: PaymentReviewInput['action']] }>();
+const emit = defineEmits<{
+  denied: [code: string];
+  done: [order: Order, action: PaymentReviewInput['action']];
+}>();
 const { t } = useI18n();
 const api = useBillingAdmin();
 const form = reactive({ action: 'retry_query' as PaymentReviewInput['action'], reason: '', evidence: '' });
@@ -33,10 +37,12 @@ async function submit() {
   const body: PaymentReviewInput = { target: props.target, action: form.action, reason: form.reason.trim(), evidence_reference: form.evidence.trim() };
   const result = await write.run(`payment-review:${props.order.id}`, body, (value, key) => api.paymentReview(props.order.id, value, key));
   if (result) emit('done', result, body.action);
+  else if (isDeniedCode(write.error.value)) emit('denied', write.error.value);
 }
 async function retry() {
   const result = (await write.retry()) as Order | undefined;
   if (result) emit('done', result, form.action);
+  else if (isDeniedCode(write.error.value)) emit('denied', write.error.value);
 }
 </script>
 

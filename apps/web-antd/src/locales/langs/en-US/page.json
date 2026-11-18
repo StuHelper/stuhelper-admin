@@ -645,7 +645,8 @@
       "student": "Current student",
       "alumni": "Alumnus or alumna",
       "newcomer": "Temporary newcomer",
-      "unknown": "Not provided"
+      "unknown": "Not provided",
+      "teacher": "Instructor"
     },
     "states": {
       "in_progress": "In progress",
@@ -1203,6 +1204,15 @@
       "anyCategory": "All categories",
       "removeRule": "Remove rule",
       "addRule": "Add rule"
+    },
+    "ledgerKind": {
+      "reward": "Reward grant",
+      "reward_revoke": "Reward revocation",
+      "commerce_refund": "Order refund",
+      "membership_grant": "Granted membership",
+      "expired": "Points expiry",
+      "debt_repayment": "Debt offset",
+      "closure": "Account closure settlement"
     }
   },
   "access": {
