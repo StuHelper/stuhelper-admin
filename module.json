@@ -86,7 +86,8 @@
       "tests/e2e/layout-shell.spec.mjs#switching language preserves pending writes, original idempotency key, RTL direction and bundled header controls"
     ],
     "MOD-09": [
-      "tests/e2e/overview.spec.mjs#overview counts pending refunds, new feedback, student and teacher verifications beyond 25 history rows, and hides refused cards"
+      "tests/e2e/overview.spec.mjs#overview counts pending refunds, new feedback, student and teacher verifications beyond 25 history rows, and hides refused cards",
+      "tests/e2e/overview-workbench.spec.mjs#overview hides forbidden todos, retries transient failures, and toggles module health details"
     ],
     "SESSION-AVAILABILITY-01": [
       "apps/web-antd/src/shared/session.test.ts#coalesces 25 failures, waits with bounded backoff and preserves the signed-in snapshot"
@@ -103,12 +104,10 @@
       "apps/web-antd/src/features/sessions/SessionSettingsView.test.ts#sends Idempotency-Key, rejects revoke { success: false }, and retries uncertain writes with the original key"
     ],
     "AO-04": [
-      "apps/web-antd/src/features/verification/VerificationView.test.ts#recovers from initial access error, blocks javascript: suggestion links, assigns unique form IDs, wipes profile on 403, and locks uncertain writes",
-      "apps/web-antd/src/shared/api/errors.test.ts#marks HTTP 401/403 and module-prefixed auth error codes as denied while preserving exact code strings"
-    ],
-    "AO-04": [
       "tests/e2e/account-navigation.spec.mjs#lookup jumps to billing in memory without URL query params and remembers the recent issuer",
-      "tests/e2e/account-navigation.spec.mjs#refund details jump to QQ binding, roles and session logout according to enabled capabilities"
+      "tests/e2e/account-navigation.spec.mjs#refund details jump to QQ binding, roles and session logout according to enabled capabilities",
+      "tests/e2e/student-verification.spec.mjs#student verification reviews manual materials and clears private materials immediately on permission revocation",
+      "tests/e2e/student-verification.spec.mjs#student credential lookup loads profile scopes on demand and revokes with a note"
     ],
     "CM-19": [
       "tests/e2e/feedback.spec.mjs#feedback reply refresh cannot overwrite another operators note with a newer revision",
@@ -132,6 +131,18 @@
     "PC-07": [
       "tests/e2e/closures.spec.mjs#administrator inspects blocked and cooling closures and resumes cleanup idempotently",
       "apps/web-antd/src/features/closures/ClosuresView.test.ts#retries an uncertain closure process request with the original idempotency key and blocks navigation"
+    ],
+    "CM-09": [
+      "tests/e2e/moderation.spec.mjs#moderation policy saves with revision and presentation keeps drafts across rating languages and retries with the original key"
+    ],
+    "CM-12": [
+      "tests/e2e/moderation.spec.mjs#queue batch preview applies decisions per item and content view handles unpublished entries"
+    ],
+    "AO-02": [
+      "tests/e2e/catalog.spec.mjs#catalog paged search appends courses, preserves edits across conflict reload, and merges duplicates after preview"
+    ],
+    "AO-03": [
+      "tests/e2e/catalog.spec.mjs#catalog import previews normalized JSON and retries an uncertain confirmation with the original key"
     ]
   }
 }

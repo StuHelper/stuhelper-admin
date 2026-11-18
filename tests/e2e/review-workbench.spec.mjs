@@ -26,6 +26,14 @@ async function fits(page, info) {
   ).toBe(true);
 }
 
+async function scrollIntoViewport(button) {
+  // Expanding the history panel can move the button after the drawer first scrolls.
+  await expect(async () => {
+    await button.scrollIntoViewIfNeeded();
+    await expect(button).toBeInViewport({ timeout: 350 });
+  }).toPass({ timeout: 5000 });
+}
+
 test('resource review previews sandboxed PDFs, warns above 15 MiB, applies reason presets and advances across pages', async ({
   page,
 }, info) => {
@@ -283,9 +291,22 @@ test('moderation decision panel shows target course and term, highlights propose
   await expect(drawer.locator('del')).toHaveCount(0);
   await expect(drawer.getByText('Revision body #25', { exact: true })).toBeVisible();
 
-  await drawer
-    .getByRole('button', { name: all.moderation.olderVersions, exact: true })
-    .click();
+  const olderBtn = drawer.getByRole('button', {
+    name: all.moderation.olderVersions,
+    exact: true,
+  });
+  await scrollIntoViewport(olderBtn);
+  await Promise.all([
+    page.waitForResponse((response) => {
+      const url = new URL(response.url());
+      return (
+        url.pathname === '/api/v1/reviews/admin/entries/entry-1/history' &&
+        url.searchParams.get('before') === '6' &&
+        response.ok()
+      );
+    }),
+    olderBtn.click(),
+  ]);
   // Both newest (#25) and appended older (#4) revisions remain on screen.
   await expect(drawer.getByText('Revision body #25', { exact: true })).toBeVisible();
   await expect(drawer.getByText('Revision body #4', { exact: true })).toBeVisible();
@@ -293,7 +314,7 @@ test('moderation decision panel shows target course and term, highlights propose
     name: all.moderation.latestVersions,
     exact: true,
   });
-  await latestBtn.scrollIntoViewIfNeeded();
+  await scrollIntoViewport(latestBtn);
   await latestBtn.click();
   await expect(drawer.getByText('Revision body #4', { exact: true })).toHaveCount(0);
   await fits(page, info);

@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { createApp, defineComponent, h } from 'vue';
+import { createApp, defineComponent, h, nextTick } from 'vue';
 
 import { globalShareState } from '@vben/common-ui';
 
@@ -83,10 +83,10 @@ describe('layout and shell safeguards', () => {
     const app = createApp(Host);
     app.mount(container);
     try {
-      await vi.waitFor(() => {
-        expect(container.querySelectorAll('button')).toHaveLength(2);
-      });
+      await vi.dynamicImportSettled();
+      await nextTick();
       const buttons = container.querySelectorAll('button');
+      expect(buttons).toHaveLength(2);
       expect(buttons[0]?.getAttribute('aria-label')).toBe('custom-default');
       expect(buttons[1]?.getAttribute('aria-label')).toBe('custom-primary');
       expect(buttons[0]?.getAttribute('attrs')).toBeNull();
