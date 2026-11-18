@@ -37,6 +37,7 @@ import AdminPage from '#/shared/ui/AdminPage.vue';
 import LoadState from '#/shared/ui/LoadState.vue';
 import { useErrorText } from '#/shared/ui/messages';
 import MutationAlert from '#/shared/ui/MutationAlert.vue';
+import ReasonPresets from '#/shared/ui/ReasonPresets.vue';
 
 import { arrayCursor, pageSize, useAcademicAdmin } from './api';
 import { useCampusId } from './campus';
@@ -158,12 +159,18 @@ function move(step: number) {
 }
 // A decision may remove its row from the filter, so find the next row before reloading.
 async function decided(message: string) {
+  const current = selected.value?.taskId ?? selected.value?.entryId;
   const following = neighbour(1);
   lastResult.value = message;
   await rows.reload();
-  if (autoNext.value && following) {
+  if (!autoNext.value) return;
+  const fallback = visibleRows().find(
+    (row) => row.id !== current && ('submission' in row ? row.state === 'waiting' : true),
+  );
+  const nextTarget = following ?? (fallback ? targetOf(fallback) : undefined);
+  if (nextTarget) {
     panelDirty.value = false;
-    selected.value = following;
+    selected.value = nextTarget;
   }
 }
 function open(target: { entryId?: string; taskId?: string }) {
@@ -247,6 +254,10 @@ async function batchApplied(result: BatchPreview) {
 function label(key: string) {
   return te(key) ? t(key) : (key.split('.').at(-1) ?? '');
 }
+const presetKeys = ['approved', 'abuse', 'spam', 'privacy', 'unsubstantiated'] as const;
+const reasonPresets = computed(() =>
+  presetKeys.map((key) => ({ key, text: t(`page.moderation.presets.${key}`) })),
+);
 const stateOptions = computed(() =>
   (props.mode === 'queue'
     ? ['waiting', 'decided', 'applied', 'failed']
@@ -547,6 +558,12 @@ id="moderationview-field-5"
             />
           </FormItem>
           <FormItem :label="t('page.moderation.reason')" required html-for="moderationview-field-6">
+            <ReasonPresets
+              v-model="batchReason"
+              :presets="reasonPresets"
+              :disabled="batch.busy.value || batch.uncertain.value"
+              :max-length="2000"
+            />
             <Textarea
 id="moderationview-field-6"
               v-model:value="batchReason"

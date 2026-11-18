@@ -336,6 +336,14 @@ export class ResourcesApi {
     );
   }
 
+  reviewFile(version: string, size: number, signal?: AbortSignal) {
+    return this.http.blob(
+      `/api/v1/resources/review/${segment(version)}/file`,
+      Math.min(size, 15 * 1024 * 1024) + (4 << 20),
+      { signal },
+    );
+  }
+
   reviewVersion(version: string, signal?: AbortSignal) {
     return this.http.json(
       `/api/v1/resources/review/${segment(version)}`,
