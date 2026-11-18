@@ -1,7 +1,7 @@
 import { onScopeDispose, readonly, ref, type Ref, shallowRef } from 'vue';
 
 import { ApiError, errorCode } from '../api/errors';
-import { Mutation } from '../api/mutation';
+import { Mutation, type MutationOptions } from '../api/mutation';
 
 export type LoadStatus = 'error' | 'idle' | 'loading' | 'ready';
 
@@ -134,8 +134,8 @@ export interface ActionState {
  * Run user-initiated writes. Each instance owns one Mutation: after a lost
  * response only the original request can be retried, and the form stays locked.
  */
-export function useMutation() {
-  const mutation = new Mutation();
+export function useMutation(options?: MutationOptions) {
+  const mutation = new Mutation(options);
   const busy = ref(false);
   const error = ref('');
   const uncertain = ref(false);

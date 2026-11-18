@@ -1,12 +1,14 @@
 import type { InstanceCommand, InstanceHealth, JobFailure, Operation, Operations } from './api';
 
-import { onMounted, onScopeDispose, readonly, shallowRef } from 'vue';
+import { getCurrentInstance, inject, onMounted, onScopeDispose, readonly, shallowRef } from 'vue';
 
 import { useHostFetch } from '#/shared/api/transport';
+import { sessionKey } from '#/shared/session';
 
 import { storageAPI, StorageError } from './api';
 
 export function useStorage(api = storageAPI(useHostFetch())) {
+  const session = getCurrentInstance() ? inject(sessionKey, undefined) : undefined;
   const data = shallowRef<null | Operations>(null);
   const loading = shallowRef(false);
   const sending = shallowRef(false);
@@ -37,6 +39,7 @@ export function useStorage(api = storageAPI(useHostFetch())) {
     } catch (error_) {
       if (current !== controller || disposed) return;
       error.value = error_ instanceof StorageError ? error_.code : 'network';
+      if (error.value === 'unauthenticated') session?.invalidate();
     } finally { clearTimeout(timeout); if (current === controller) loading.value = false; }
   }
   function prepareInstance(instance: InstanceHealth, action: InstanceCommand['action'], limit?: number) {
@@ -69,6 +72,7 @@ export function useStorage(api = storageAPI(useHostFetch())) {
       error.value = failure.code;
       uncertain.value = failure.uncertain;
       if (!failure.uncertain) pending.value = null;
+      if (failure.code === 'unauthenticated') session?.invalidate();
       if (failure.code === 'unauthenticated' || failure.code === 'forbidden') {
         current?.abort(); current = undefined; data.value = null;
       }
