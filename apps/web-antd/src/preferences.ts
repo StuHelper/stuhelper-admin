@@ -17,6 +17,6 @@ export const overridesPreferences = defineOverridesPreferences({
   logo: { source: '/brand.png', sourceDark: '/brand.png' },
   copyright: { companyName: 'StuHelper', companySiteLink: '', date: '2026' },
   footer: { enable: true },
-  widget: { fullscreen: false, globalSearch: false, lockScreen: false, notification: false, sidebarToggle: true },
+  widget: { fullscreen: false, globalSearch: false, lockScreen: false, notification: false, refresh: false, sidebarToggle: true },
   shortcutKeys: { globalLockScreen: false, globalLogout: false },
 });
