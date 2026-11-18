@@ -35,7 +35,8 @@
     "lookup": "信息查询",
     "catalogTimetable": "学校作息",
     "qqGroups": "QQ 群管理",
-    "catalogTeacherSites": "教师官网刷新"
+    "catalogTeacherSites": "教师官网刷新",
+    "closures": "账号注销"
   },
   "common": {
     "all": "全部",
@@ -122,7 +123,8 @@
     "disabled": "该功能尚未启用。",
     "cooldown": "操作过于频繁，请稍后再试。",
     "billing_already_accessible": "该用户已经可以访问这份资料，无需购买。",
-    "invalid_rule": "资格条件组合无效，请调整后再保存。"
+    "invalid_rule": "资格条件组合无效，请调整后再保存。",
+    "import_conflict": "目录数据已在预览后发生变化，请重新生成预览后再确认导入。"
   },
   "session": {
     "signIn": "登录",
@@ -427,7 +429,43 @@
       "applied": "已执行"
     },
     "confirmImport": "确认导入",
-    "imported": "导入完成：目录对象 {objects}，选课记录 {enrollments}，保留人工更正 {preserved}。"
+    "imported": "导入完成：目录对象 {objects}，选课记录 {enrollments}，保留人工更正 {preserved}。",
+    "kinds": {
+      "school": "学校",
+      "department": "院系",
+      "category": "课程类别",
+      "nature": "课程性质",
+      "term": "学期",
+      "course": "课程",
+      "teacher": "教师",
+      "term_course": "学期开课",
+      "class": "教学班",
+      "assignment": "任课关联",
+      "schedule": "排课时间",
+      "enrollment": "选课记录"
+    },
+    "importFields": {
+      "name": "名称",
+      "code": "代码",
+      "department_id": "所属院系",
+      "category_id": "课程类别",
+      "nature_id": "课程性质",
+      "course_id": "关联课程",
+      "term_id": "所属学期",
+      "term_course_id": "所属开课",
+      "class_id": "所属教学班",
+      "teacher_id": "任课教师",
+      "credits": "学分",
+      "hours": "学时",
+      "english_name": "英文名称",
+      "former_codes": "曾用代码",
+      "former_names": "曾用名称",
+      "biography": "简介",
+      "location": "地点",
+      "time_text": "时间说明",
+      "aliases": "其他名称",
+      "schedule_time": "结构化节次"
+    }
   },
   "resources": {
     "manageTitle": "资料管理",
@@ -645,7 +683,8 @@
       "student": "在校学生",
       "alumni": "校友",
       "newcomer": "临时新生",
-      "unknown": "未提供"
+      "unknown": "未提供",
+      "teacher": "教师"
     },
     "states": {
       "in_progress": "填写中",
@@ -1203,6 +1242,15 @@
       "anyCategory": "全部分类",
       "removeRule": "删除规则",
       "addRule": "添加规则"
+    },
+    "ledgerKind": {
+      "reward": "奖励发放",
+      "reward_revoke": "奖励扣回",
+      "commerce_refund": "消费退款",
+      "membership_grant": "管理员授予会员",
+      "expired": "到期清零",
+      "debt_repayment": "待扣积分抵扣",
+      "closure": "注销结清"
     }
   },
   "access": {
@@ -1336,6 +1384,7 @@
     "title": "学校作息",
     "intro": "设置每个学期第一周的日期、学校时区和每节课的起止时间。学生课表和日历导出按这里把节次换算成具体时间；没有作息的学期无法导出日历。",
     "term": "学期",
+    "noTerms": "当前学校还没有导入学期。",
     "missing": "这个学期还没有设置作息。保存后学生即可导出日历。",
     "weekOne": "第一周周一",
     "weekOneHint": "选择第一教学周的周一。",
@@ -1469,6 +1518,14 @@
       "noncompliant": "不符合",
       "compliant": "符合",
       "pending_profile": "待补充资料"
+    },
+    "ruleKinds": {
+      "keyword": "敏感词",
+      "link": "拦截链接",
+      "frequency": "发言频率",
+      "repeat": "复读消息",
+      "card": "群名片",
+      "warning_limit": "警告上限"
     },
     "states": {
       "pending": "等待执行",
@@ -1695,6 +1752,61 @@
       "site_unit_missing": "官网缺单位",
       "catalog_name_absent": "数据库没有同名",
       "ambiguous_site": "官网有重复主页"
+    }
+  },
+  "closures": {
+    "title": "账号注销管理",
+    "intro": "查看本应用业务账号的注销申请、已完成步骤与阻塞原因。7 天冷静期结束后，管理员可对阻塞申请继续执行清理；共享 SSO 与其他应用不受影响。",
+    "detailTitle": "注销申请详情",
+    "empty": "当前条件下没有注销申请。",
+    "closureId": "申请编号",
+    "profileId": "业务档案编号",
+    "requestedAt": "申请时间",
+    "coolingEndsAt": "冷静期截止",
+    "completedAt": "完成时间",
+    "completedSteps": "清理步骤进度",
+    "stepDone": "已完成",
+    "stepPending": "待执行",
+    "skippedModules": "从未安装并跳过的模块",
+    "noSkipped": "无跳过模块",
+    "blocker": "阻塞原因",
+    "noBlocker": "无阻塞",
+    "blockerHint": "请先在对应模块确认资产或服务恢复正常，再点击继续执行注销。",
+    "pointsPolicy": "积分处理规则",
+    "coolingHint": "当前处于 7 天冷静期内（截止 {time}），申请人登录可撤销，届满后才可执行注销。",
+    "process": "继续执行注销",
+    "completedNotice": "账号注销已完成，公开内容已解除账号关联。",
+    "resumedNotice": "已触发继续处理，请核对最新步骤与阻塞状态。",
+    "states": {
+      "cooling": "冷静期中",
+      "awaiting_assets": "等待资产结清",
+      "processing": "清理执行中",
+      "closed": "已注销",
+      "cancelled": "已撤销"
+    },
+    "steps": {
+      "assets": "资产核对与清零",
+      "sessions": "撤销本地会话",
+      "authorizations": "撤回授权与绑定",
+      "content": "公开内容去关联与收藏清理"
+    },
+    "blockers": {
+      "assets_unavailable": "账务资产服务不可用",
+      "assets_pending": "仍有余额、退款或未决支付待结清",
+      "sessions_unavailable": "会话服务不可用",
+      "authorizations_unavailable": "授权或绑定服务不可用",
+      "content_unavailable": "内容或收藏服务不可用"
+    },
+    "modules": {
+      "billing": "账务",
+      "open-platform": "开放平台",
+      "reviews": "评价",
+      "resources": "学习资料",
+      "favorites": "收藏",
+      "qq-binding": "QQ 绑定"
+    },
+    "pointsPolicies": {
+      "forfeit_all_points_and_pending_deductions": "正式注销时清零全部积分与待扣记录，不兑换现金或 Ivory"
     }
   }
 }

@@ -17,7 +17,11 @@ import App from './app.vue';
 import { availableMenus } from './menus';
 import { router } from './router';
 import { hostFetchKey, sessionFetch } from './shared/api/transport';
-import { capabilitiesKey, createCapabilities } from './shared/capabilities';
+import {
+  capabilitiesKey,
+  createCapabilities,
+  routeCapability,
+} from './shared/capabilities';
 import { createSessionStore, sessionKey } from './shared/session';
 
 import './styles/theme.css';
@@ -75,12 +79,20 @@ async function bootstrap(namespace: string, fetcher: typeof fetch = sessionFetch
   app.use(MotionPlugin);
 
   // 动态更新标题
+  const pageTitle = useTitle();
   watchEffect(() => {
     if (preferences.app.dynamicTitle) {
-      const routeTitle = router.currentRoute.value.meta?.title;
-      const pageTitle =
+      const current = router.currentRoute.value;
+      const required = routeCapability(current.path);
+      const disabled =
+        !!required &&
+        capabilities.status.value !== 'loading' &&
+        !capabilities.has(required);
+      const routeTitle = disabled
+        ? 'page.framework.unavailable'
+        : current.meta?.title;
+      pageTitle.value =
         (routeTitle ? `${$t(routeTitle)} - ` : '') + preferences.app.name;
-      useTitle(pageTitle);
     }
   });
 

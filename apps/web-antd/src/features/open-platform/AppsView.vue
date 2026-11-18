@@ -1,17 +1,20 @@
 <script setup lang="ts">
 import type { Application, ReviewInput, Scope } from './api';
 
-import { computed, onMounted, reactive, ref, shallowRef } from 'vue';
+import { computed, onMounted, reactive, ref, shallowRef, watch } from 'vue';
 
 import { useI18n } from '@vben/locales';
 
-import { Button, Card, Checkbox, CheckboxGroup, Descriptions, DescriptionsItem, Drawer, Form, FormItem, InputNumber, Radio, RadioGroup, Segmented, Table, Tag, Textarea } from 'ant-design-vue';
+import { Alert, Button, Card, Checkbox, CheckboxGroup, Descriptions, DescriptionsItem, Drawer, Form, FormItem, InputNumber, Radio, RadioGroup, Segmented, Table, Tag, Textarea } from 'ant-design-vue';
 
-import { useMutation, usePaged } from '#/shared/composables/async';
+import { ApiError } from '#/shared/api/errors';
+import { useMutation, usePaged, useTask } from '#/shared/composables/async';
 import { useLeaveGuard } from '#/shared/composables/leave';
 import { useFormat } from '#/shared/format';
+import { useSession } from '#/shared/session';
 import AdminPage from '#/shared/ui/AdminPage.vue';
 import LoadState from '#/shared/ui/LoadState.vue';
+import { useErrorText } from '#/shared/ui/messages';
 import MutationAlert from '#/shared/ui/MutationAlert.vue';
 
 import { policyLimits, scopes, useOpenPlatformAdmin } from './api';
@@ -24,38 +27,104 @@ import { policyLimits, scopes, useOpenPlatformAdmin } from './api';
 type Filter = 'all' | Application['state'];
 const { t } = useI18n();
 const format = useFormat();
+const errorText = useErrorText();
+const comparison = useTask();
 const api = useOpenPlatformAdmin();
+const session = useSession();
 const apps = usePaged<Application>((after, signal) => api.apps(after, signal));
-onMounted(apps.reload);
 const filter = ref<Filter>('pending');
 const rows = computed(() => apps.items.value.filter((app) => filter.value === 'all' || app.state === filter.value));
+const maxAutoPages = 5;
+let autoPages = 0;
+
+async function reloadApps() {
+  autoPages = 0;
+  await apps.reload();
+}
+onMounted(() => void reloadApps());
+
+watch(filter, () => {
+  autoPages = 0;
+  if (apps.status.value === 'ready' && rows.value.length === 0 && apps.next.value) {
+    autoPages++;
+    void apps.loadMore();
+  }
+});
+
+watch(
+  [apps.status, () => rows.value.length, apps.next],
+  ([status, count, next]) => {
+    if (status === 'ready' && count === 0 && next && autoPages < maxAutoPages) {
+      autoPages++;
+      void apps.loadMore();
+    }
+  },
+);
+
 const stateColor: Record<Application['state'], string> = { pending: 'blue', changes_requested: 'orange', active: 'green', suspended: 'red' };
 
 const selected = shallowRef<Application>();
 const form = reactive({ decision: 'approve' as ReviewInput['decision'], scopes: [] as Scope[], grantDays: 180, tokenMinutes: 60, dailyQuota: 1000, note: '' });
 const baseline = ref('');
+const comparing = ref(false);
 const review = useMutation();
 const success = ref('');
+
+watch(session.state, (state, prev) => {
+  if (prev === 'member' && state === 'guest') {
+    selected.value = undefined;
+    comparing.value = false;
+    apps.clear();
+  }
+});
+
+watch([apps.error, review.error, comparison.error], ([loadErr, writeErr, compareErr]) => {
+  if (
+    compareErr === 'forbidden' || compareErr === 'unauthenticated' ||
+    loadErr === 'forbidden' ||
+    loadErr === 'unauthenticated' ||
+    writeErr === 'forbidden' ||
+    writeErr === 'unauthenticated'
+  ) {
+    selected.value = undefined;
+    comparing.value = false;
+    apps.clear();
+  }
+});
+
 const dirty = computed(() => !!selected.value && JSON.stringify(form) !== baseline.value);
 const noteRequired = computed(() => form.decision !== 'approve');
 const valid = computed(() => (form.decision === 'approve' ? form.scopes.length > 0 : !!form.note.trim()));
-const decisions = computed<ReviewInput['decision'][]>(() => (selected.value?.state === 'active' ? ['approve', 'suspend'] : (selected.value?.state === 'suspended' ? ['approve'] : ['approve', 'changes_requested', 'suspend'])));
-useLeaveGuard(() => (review.uncertain.value ? t('page.common.leaveUncertain') : (dirty.value || review.busy.value ? t('page.common.leaveUnsaved') : '')));
+const decisions = computed<ReviewInput['decision'][]>(() => {
+  if (selected.value?.state === 'active') return ['approve', 'suspend'];
+  if (selected.value?.state === 'suspended') return ['approve'];
+  return ['approve', 'changes_requested', 'suspend'];
+});
+useLeaveGuard(() => {
+  if (review.uncertain.value) return t('page.common.leaveUncertain');
+  return dirty.value || review.busy.value ? t('page.common.leaveUnsaved') : '';
+});
 
-function open(app: Application) {
-  if (selected.value && dirty.value && !window.confirm(t('page.common.leaveUnsaved'))) return;
-  selected.value = app;
-  success.value = '';
-  // Start from what was approved before; a first review starts from the request.
+function appFormState(app: Application) {
   const approved = app.approved_scopes.length > 0 ? app.approved_scopes : app.requested_scopes;
-  Object.assign(form, {
-    decision: 'approve',
+  return {
+    decision: 'approve' as ReviewInput['decision'],
     scopes: approved.filter((scope) => app.requested_scopes.includes(scope)),
     grantDays: Math.round(app.policy.grant_seconds / 86_400) || 180,
     tokenMinutes: Math.round(app.policy.token_seconds / 60) || 60,
     dailyQuota: app.policy.daily_quota || 1000,
     note: '',
-  });
+  };
+}
+
+function open(app: Application) {
+  if (selected.value && dirty.value && !window.confirm(t('page.common.leaveUnsaved'))) return;
+  selected.value = app;
+  comparing.value = false;
+  success.value = '';
+  review.dismiss();
+  // Start from what was approved before; a first review starts from the request.
+  Object.assign(form, appFormState(app));
   baseline.value = JSON.stringify(form);
 }
 function close() {
@@ -64,7 +133,7 @@ function close() {
 }
 async function submit() {
   const app = selected.value;
-  if (!app || !valid.value) return;
+  if (!app || !valid.value || comparison.busy.value || review.error.value === 'conflict') return;
   const body: ReviewInput = {
     revision: app.revision,
     decision: form.decision,
@@ -83,14 +152,49 @@ async function retry() {
 function reviewed(app: Application) {
   apps.items.value = apps.items.value.map((item) => (item.id === app.id ? app : item));
   selected.value = app;
+  comparing.value = false;
   baseline.value = JSON.stringify(form);
   success.value = t(`page.openPlatform.reviewed.${app.state}`);
 }
 async function reloadCompare() {
-  await apps.reload();
-  const current = apps.items.value.find((item) => item.id === selected.value?.id);
-  if (current) selected.value = current;
+  const original = selected.value;
+  if (!original) return;
+  const current = await comparison.run(async () => {
+    const seen = new Set<string>();
+    let after = '';
+    do {
+      seen.add(after);
+      const page = await api.apps(after);
+      if (selected.value !== original) return;
+      const match = page.items.find((item) => item.id === original.id);
+      if (match) return match;
+      after = page.next;
+      if (seen.has(after) && after) throw new ApiError('incompatible');
+    } while (after && seen.size < 100);
+    throw new ApiError(after ? 'capacity_exceeded' : 'not_found');
+  });
+  if (!current || selected.value !== original) return;
+  selected.value = current;
+  apps.items.value = apps.items.value.map((item) => item.id === current.id ? current : item);
+  baseline.value = JSON.stringify(appFormState(current));
+  review.dismiss();
+  comparing.value = true;
 }
+const savedAppSummary = computed(() => {
+  const app = selected.value;
+  if (!app) return '';
+  const approvedText = app.approved_scopes.map((scope) => t(`page.openPlatform.scopes.${scope}`)).join(', ');
+  return [
+    t(`page.openPlatform.state.${app.state}`),
+    approvedText,
+    `${t('page.openPlatform.grantDays')} ${format.value.number(app.policy.grant_seconds / 86_400)}`,
+    `${t('page.openPlatform.tokenMinutes')} ${format.value.number(app.policy.token_seconds / 60)}`,
+    `${t('page.openPlatform.dailyQuota')} ${format.value.number(app.policy.daily_quota)}`,
+    app.note,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+});
 const columns = computed(() => [
   { key: 'name', title: t('page.openPlatform.name') },
   { key: 'type', title: t('page.openPlatform.clientType') },
@@ -109,14 +213,18 @@ const columns = computed(() => [
         class="mb-4"
         :options="(['pending', 'changes_requested', 'active', 'suspended', 'all'] as const).map((value) => ({ value, label: value === 'all' ? t('page.common.all') : t(`page.openPlatform.state.${value}`) }))"
       />
-      <LoadState
-        v-if="rows.length === 0"
-        :status="apps.status.value"
-        :error="apps.error.value"
-        :empty="true"
-        :empty-text="t('page.openPlatform.empty')"
-        @retry="apps.reload"
-      />
+      <template v-if="rows.length === 0">
+        <LoadState
+          :status="apps.status.value"
+          :error="apps.error.value"
+          :empty="true"
+          :empty-text="t('page.openPlatform.empty')"
+          @retry="reloadApps"
+        />
+        <div v-if="apps.status.value === 'ready' && apps.next.value" class="mt-4 flex justify-center">
+          <Button :loading="apps.appending.value" @click="apps.loadMore">{{ t('page.common.loadMore') }}</Button>
+        </div>
+      </template>
       <template v-else>
         <Table :columns="columns" :data-source="rows" :pagination="false" row-key="id" size="middle" :scroll="{ x: 760 }">
           <template #bodyCell="{ column, record }">
@@ -143,6 +251,7 @@ const columns = computed(() => [
 
     <Drawer :open="!!selected" width="min(640px, 100vw)" :title="selected?.name" :mask-closable="false" destroy-on-close @close="close">
       <div v-if="selected" class="flex flex-col gap-4">
+        <Alert v-if="comparing" type="info" show-icon :message="t('page.common.compareNotice')" :description="savedAppSummary" />
         <Descriptions :column="1" size="small" bordered>
           <DescriptionsItem :label="t('page.openPlatform.clientId')"><code>{{ selected.id }}</code></DescriptionsItem>
           <DescriptionsItem :label="t('page.common.status')"><Tag :color="stateColor[selected.state]">{{ t(`page.openPlatform.state.${selected.state}`) }}</Tag></DescriptionsItem>
@@ -183,12 +292,13 @@ const columns = computed(() => [
           <FormItem :label="t(noteRequired ? 'page.openPlatform.noteRequired' : 'page.openPlatform.noteOptional')" :required="noteRequired" html-for="open-platform-note">
             <Textarea id="open-platform-note" v-model:value="form.note" :rows="3" :maxlength="1000" :disabled="review.busy.value || review.uncertain.value" />
           </FormItem>
+          <Alert v-if="review.error.value === 'conflict' && comparison.error.value" type="error" role="alert" :message="errorText(comparison.error.value)" />
           <MutationAlert :busy="review.busy.value" :error="review.error.value" :uncertain="review.uncertain.value" :success="success" @retry="retry" />
           <div class="mt-4 flex flex-wrap gap-2">
-            <Button type="primary" html-type="submit" :danger="form.decision === 'suspend'" :loading="review.busy.value" :disabled="!valid || review.uncertain.value">
+            <Button type="primary" html-type="submit" :danger="form.decision === 'suspend'" :loading="review.busy.value" :disabled="!valid || review.uncertain.value || review.error.value === 'conflict'">
               {{ t(`page.openPlatform.submit.${form.decision}`) }}
             </Button>
-            <Button v-if="review.error.value === 'conflict'" :disabled="review.busy.value" @click="reloadCompare">{{ t('page.common.reloadCompare') }}</Button>
+            <Button v-if="review.error.value === 'conflict'" :loading="comparison.busy.value" @click="reloadCompare">{{ t('page.common.reloadCompare') }}</Button>
           </div>
         </Form>
       </div>

@@ -72,6 +72,7 @@ async function viteMetadataPlugin(
 ): Promise<PluginOption | undefined> {
   const { author, description, homepage, license, version } =
     await readPackageJSON(root);
+  const resolvedVersion = process.env.VITE_APP_VERSION?.trim() || version;
 
   const buildTime = dateUtil().format('YYYY-MM-DD HH:mm:ss');
 
@@ -97,9 +98,9 @@ async function viteMetadataPlugin(
             devDependencies,
             homepage,
             license,
-            version,
+            version: resolvedVersion,
           }),
-          'import.meta.env.VITE_APP_VERSION': JSON.stringify(version),
+          'import.meta.env.VITE_APP_VERSION': JSON.stringify(resolvedVersion),
         },
       };
     },

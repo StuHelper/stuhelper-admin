@@ -9,8 +9,9 @@ import {
   SCROLL_FIXED_CLASS,
   useLayoutFooterStyle,
   useLayoutHeaderStyle,
+  useSimpleLocale,
 } from '@vben-core/composables';
-import { IconifyIcon } from '@vben-core/icons';
+import { MdiMenuClose, MdiMenuOpen } from '@vben-core/icons';
 import { VbenIconButton } from '@vben-core/shadcn-ui';
 import { ELEMENT_ID_MAIN_CONTENT } from '@vben-core/shared/constants';
 
@@ -30,6 +31,8 @@ interface Props extends VbenLayoutProps {}
 defineOptions({
   name: 'VbenLayout',
 });
+
+const { $t } = useSimpleLocale();
 
 const props = withDefaults(defineProps<Props>(), {
   contentCompact: 'wide',
@@ -573,11 +576,15 @@ const idMainContent = ELEMENT_ID_MAIN_CONTENT;
           <template #toggle-button>
             <VbenIconButton
               v-if="showHeaderToggleButton"
+              :aria-label="$t(showSidebar ? 'collapse' : 'expand')"
               class="my-0 me-1 rounded-md"
               @click="handleHeaderToggle"
             >
-              <IconifyIcon v-if="showSidebar" icon="ep:fold" />
-              <IconifyIcon v-else icon="ep:expand" />
+              <MdiMenuOpen
+                v-if="showSidebar"
+                class="size-4 rtl:rotate-180"
+              />
+              <MdiMenuClose v-else class="size-4 rtl:rotate-180" />
             </VbenIconButton>
           </template>
           <slot name="header"></slot>

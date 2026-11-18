@@ -22,7 +22,7 @@ const props = defineProps<{
 }>();
 const { t } = useI18n();
 const errorText = useErrorText();
-const rows = usePaged<T>(props.loader);
+const rows = usePaged<T>((cursor, signal) => props.loader(cursor, signal));
 onMounted(rows.reload);
 defineExpose({ reload: rows.reload });
 </script>

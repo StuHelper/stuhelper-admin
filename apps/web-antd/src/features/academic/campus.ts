@@ -1,55 +1,132 @@
 import type { CatalogObject } from './api';
 
-import { onMounted, ref } from 'vue';
+import type { SessionStore } from '#/shared/session';
 
-import { errorCode } from '#/shared/api/errors';
-import { ApiError } from '#/shared/api/errors';
+import { effectScope, onMounted, ref, type Ref, watch } from 'vue';
+
+import { ApiError, errorCode } from '#/shared/api/errors';
 import { useSession } from '#/shared/session';
 
 import { useAcademicAdmin } from './api';
 
 /** The backend session supplies the single community school configuration. */
-export function chooseCampus(schools: CatalogObject[], configured: string | undefined) {
+export function chooseCampus(
+  schools: CatalogObject[],
+  configured: string | undefined,
+) {
   const chosen = schools.find((row) => row.id === configured);
   if (!chosen) throw new ApiError('incompatible');
   return chosen;
 }
 
-const status = ref<'error' | 'idle' | 'loading' | 'ready'>('idle');
-const failure = ref('');
-const campusId = ref('');
-let pending: Promise<void> | undefined;
+type CampusStatus = 'error' | 'idle' | 'loading' | 'ready';
+
+interface CampusState {
+  campusId: Ref<string>;
+  failure: Ref<string>;
+  generation: number;
+  pending?: Promise<void>;
+  status: Ref<CampusStatus>;
+}
+
+const stores = new WeakMap<SessionStore, CampusState>();
+
+function getCampusState(session: SessionStore): CampusState {
+  const existing = stores.get(session);
+  if (existing) return existing;
+  const created: CampusState = {
+    campusId: ref(''),
+    failure: ref(''),
+    generation: 0,
+    status: ref<CampusStatus>('idle'),
+  };
+  const scope = effectScope(true);
+  scope.run(() => {
+    watch(
+      [session.state, () => session.session.value?.content_school_id],
+      ([nextState, nextSchool], [prevState, prevSchool]) => {
+        if (
+          (nextState === 'guest' && prevState !== 'guest') ||
+          (prevSchool && nextSchool && prevSchool !== nextSchool)
+        ) {
+          created.generation++;
+          created.pending = undefined;
+          created.campusId.value = '';
+          created.failure.value = '';
+          created.status.value = 'idle';
+        }
+      },
+      { flush: 'sync' },
+    );
+  });
+  stores.set(session, created);
+  return created;
+}
 
 export function useCampus() {
   const api = useAcademicAdmin();
   const session = useSession();
+  const state = getCampusState(session);
+
   function load() {
-    pending ??= (async () => {
-      status.value = 'loading';
-      failure.value = '';
-      try {
-        await session.reload();
-        campusId.value = chooseCampus(await api.options({ kind: 'school' }), session.session.value?.content_school_id).id;
-        status.value = 'ready';
-      } catch (error) {
-        failure.value = errorCode(error);
-        status.value = 'error';
-      } finally {
-        pending = undefined;
-      }
-    })();
-    return pending;
+    if (!state.pending) {
+      const current = state.generation;
+      const promise = (async () => {
+        state.status.value = 'loading';
+        state.failure.value = '';
+        try {
+          await session.reload();
+          if (current !== state.generation) return;
+          if (session.state.value === 'guest') {
+            state.campusId.value = '';
+            state.failure.value = 'unauthenticated';
+            state.status.value = 'error';
+            return;
+          }
+          const schools = await api.options({ kind: 'school' });
+          if (current !== state.generation) return;
+          state.campusId.value = chooseCampus(
+            schools,
+            session.session.value?.content_school_id,
+          ).id;
+          state.status.value = 'ready';
+        } catch (error) {
+          if (current !== state.generation) return;
+          state.campusId.value = '';
+          state.failure.value = errorCode(error);
+          state.status.value = 'error';
+        }
+      })();
+      const tracked = promise.finally(() => {
+        if (state.pending === tracked) state.pending = undefined;
+      });
+      state.pending = tracked;
+    }
+    return state.pending;
   }
-  return { failure, id: campusId, load, status };
+
+  return {
+    failure: state.failure,
+    id: state.campusId,
+    load,
+    status: state.status,
+  };
 }
 
 /**
  * The served university as a per-page value. It starts empty and fills after
- * mounting, so each page's existing watcher performs its first load.
+ * mounting, and resets automatically if the underlying session is invalidated.
  */
 export function useCampusId() {
   const campus = useCampus();
   const school = ref('');
+  watch(
+    campus.id,
+    (id) => {
+      if (school.value !== id) school.value = id;
+    },
+    { flush: 'sync' },
+  );
   onMounted(async () => {
     if (campus.status.value !== 'ready') await campus.load();
     school.value = campus.id.value;

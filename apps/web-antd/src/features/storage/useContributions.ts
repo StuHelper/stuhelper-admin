@@ -1,9 +1,11 @@
-import { onMounted, onScopeDispose, readonly, shallowRef } from 'vue';
+import { getCurrentInstance, inject, onMounted, onScopeDispose, readonly, shallowRef } from 'vue';
 
 import { type Candidates, contributionAPI, ContributionError, type Operation, type Page, type Policy, type Statistics } from '#/api/contribution';
 import { useHostFetch } from '#/shared/api/transport';
+import { sessionKey } from '#/shared/session';
 
 export function useContributions(admin = false, api = contributionAPI(useHostFetch())) {
+  const session = getCurrentInstance() ? inject(sessionKey, undefined) : undefined;
   const data = shallowRef<null | Page>(null);
   const options = shallowRef<Candidates | null>(null);
   const policy = shallowRef<null | Policy>(null);
@@ -34,7 +36,12 @@ export function useContributions(admin = false, api = contributionAPI(useHostFet
       const [page, candidates] = await Promise.all([api.list(controller.signal, after, admin), admin ? Promise.resolve(null) : api.options(controller.signal, candidatesAfter)]);
       if (controller.signal.aborted) throw new ContributionError('network');
       if (fresh()) { data.value = page; options.value = candidates; cursor = after; optionCursor = candidatesAfter; }
-    } catch (error_) { if (fresh()) error.value = error_ instanceof ContributionError ? error_.code : 'network'; }
+    } catch (error_) {
+      if (fresh()) {
+        error.value = error_ instanceof ContributionError ? error_.code : 'network';
+        if (error.value === 'unauthenticated') session?.invalidate();
+      }
+    }
     finally { await publicRead; clearTimeout(timeout); if (fresh()) loading.value = false; }
   }
   function prepare(operation: Operation) {
@@ -59,6 +66,7 @@ export function useContributions(admin = false, api = contributionAPI(useHostFet
       const failure = error_ instanceof ContributionError ? error_ : new ContributionError('network', true);
       error.value = failure.code; uncertain.value = failure.uncertain;
       if (!failure.uncertain) pending.value = null;
+      if (failure.code === 'unauthenticated') session?.invalidate();
       if (failure.code === 'unauthenticated' || failure.code === 'forbidden') { current?.abort(); current = undefined; data.value = null; options.value = null; }
     } finally { clearTimeout(timeout); sending.value = false; command = undefined; }
     if (refresh) await reload('', '');

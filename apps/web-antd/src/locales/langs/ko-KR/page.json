@@ -35,7 +35,8 @@
     "lookup": "정보 조회",
     "catalogTimetable": "교시 시간",
     "qqGroups": "QQ 그룹 관리",
-    "catalogTeacherSites": "교원 홈페이지"
+    "catalogTeacherSites": "교원 홈페이지",
+    "closures": "계정 해지"
   },
   "common": {
     "all": "전체",
@@ -122,7 +123,8 @@
     "disabled": "이 기능은 아직 사용할 수 없습니다.",
     "cooldown": "요청이 너무 잦습니다. 잠시 후 다시 시도하세요.",
     "billing_already_accessible": "이 사용자는 이미 자료에 접근할 수 있어 구매할 필요가 없습니다.",
-    "invalid_rule": "조건 조합이 올바르지 않습니다. 조정한 뒤 다시 저장하세요."
+    "invalid_rule": "조건 조합이 올바르지 않습니다. 조정한 뒤 다시 저장하세요.",
+    "import_conflict": "미리보기 이후 목록 데이터가 변경되었습니다. 다시 미리보기를 생성한 뒤 확정하세요."
   },
   "session": {
     "signIn": "로그인",
@@ -427,7 +429,43 @@
       "applied": "실행됨"
     },
     "confirmImport": "가져오기 확인",
-    "imported": "가져오기 완료: 목록 {objects}, 수강 {enrollments}, 유지된 수동 수정 {preserved}."
+    "imported": "가져오기 완료: 목록 {objects}, 수강 {enrollments}, 유지된 수동 수정 {preserved}.",
+    "kinds": {
+      "school": "학교",
+      "department": "학부·학과",
+      "category": "과목 분류",
+      "nature": "과목 성격",
+      "term": "학기",
+      "course": "과목",
+      "teacher": "교원",
+      "term_course": "학기 개설",
+      "class": "분반",
+      "assignment": "담당 배정",
+      "schedule": "강의 시간",
+      "enrollment": "수강 기록"
+    },
+    "importFields": {
+      "name": "이름",
+      "code": "코드",
+      "department_id": "소속 학과",
+      "category_id": "과목 분류",
+      "nature_id": "과목 성격",
+      "course_id": "연결 과목",
+      "term_id": "소속 학기",
+      "term_course_id": "소속 개설",
+      "class_id": "소속 분반",
+      "teacher_id": "담당 교원",
+      "credits": "학점",
+      "hours": "시수",
+      "english_name": "영문명",
+      "former_codes": "이전 코드",
+      "former_names": "이전 이름",
+      "biography": "소개",
+      "location": "장소",
+      "time_text": "시간 설명",
+      "aliases": "다른 이름",
+      "schedule_time": "교시 정보"
+    }
   },
   "resources": {
     "manageTitle": "자료 관리",
@@ -645,7 +683,8 @@
       "student": "재학생",
       "alumni": "동문",
       "newcomer": "임시 신입생",
-      "unknown": "제공되지 않음"
+      "unknown": "제공되지 않음",
+      "teacher": "교원"
     },
     "states": {
       "in_progress": "작성 중",
@@ -1203,6 +1242,15 @@
       "anyCategory": "모든 분류",
       "removeRule": "규칙 삭제",
       "addRule": "규칙 추가"
+    },
+    "ledgerKind": {
+      "reward": "보상 지급",
+      "reward_revoke": "보상 회수",
+      "commerce_refund": "주문 환불",
+      "membership_grant": "멤버십 부여",
+      "expired": "포인트 만료",
+      "debt_repayment": "미차감 포인트 상계",
+      "closure": "계정 해지 정산"
     }
   },
   "access": {
@@ -1336,6 +1384,7 @@
     "title": "교시 시간",
     "intro": "학기마다 첫째 주 월요일, 학교 시간대, 각 교시의 시작·종료 시간을 설정합니다. 학생 시간표와 캘린더 내보내기는 이 설정으로 교시를 시각으로 바꿉니다. 설정이 없는 학기는 캘린더를 내보낼 수 없습니다.",
     "term": "학기",
+    "noTerms": "이 학교에 아직 가져온 학기가 없습니다.",
     "missing": "이 학기의 교시 시간이 아직 없습니다. 저장하면 학생이 캘린더를 내보낼 수 있습니다.",
     "weekOne": "첫째 주 월요일",
     "weekOneHint": "첫 수업 주의 월요일을 선택하세요.",
@@ -1469,6 +1518,14 @@
       "noncompliant": "위반",
       "compliant": "적합",
       "pending_profile": "정보 보완 필요"
+    },
+    "ruleKinds": {
+      "keyword": "키워드",
+      "link": "외부 링크",
+      "frequency": "발언 빈도",
+      "repeat": "반복 메시지",
+      "card": "그룹 명함",
+      "warning_limit": "경고 한도"
     },
     "states": {
       "pending": "실행 대기",
@@ -1695,6 +1752,61 @@
       "site_unit_missing": "홈페이지에 소속 없음",
       "catalog_name_absent": "데이터에 같은 이름 없음",
       "ambiguous_site": "중복 홈페이지"
+    }
+  },
+  "closures": {
+    "title": "계정 해지 관리",
+    "intro": "앱 계정 해지 신청, 완료된 정리 단계 및 보류 사유를 확인합니다. 7일 숙려 기간이 지난 뒤 관리자가 보류된 처리를 재개할 수 있으며, 공용 SSO와 다른 앱은 변경되지 않습니다.",
+    "detailTitle": "해지 신청 상세",
+    "empty": "현재 조건에 해당하는 해지 신청이 없습니다.",
+    "closureId": "신청 ID",
+    "profileId": "프로필 ID",
+    "requestedAt": "신청 시각",
+    "coolingEndsAt": "숙려 기간 종료",
+    "completedAt": "완료 시각",
+    "completedSteps": "정리 단계 진행률",
+    "stepDone": "완료됨",
+    "stepPending": "대기 중",
+    "skippedModules": "미설치로 건너뛴 모듈",
+    "noSkipped": "건너뛴 모듈 없음",
+    "blocker": "보류 사유",
+    "noBlocker": "보류 없음",
+    "blockerHint": "자산 정산 완료 또는 하위 서비스 복구를 확인한 뒤 해지 처리를 재개하세요.",
+    "pointsPolicy": "포인트 처리 규칙",
+    "coolingHint": "7일 숙려 기간은 {time}에 종료됩니다. 종료 전에는 신청자가 직접 취소할 수 있습니다.",
+    "process": "해지 처리 계속 실행",
+    "completedNotice": "계정 해지가 완료되었으며 공개 콘텐츠의 계정 연결이 해제되었습니다.",
+    "resumedNotice": "해지 처리를 다시 시작했습니다. 업데이트된 단계와 보류 상태를 확인하세요.",
+    "states": {
+      "cooling": "숙려 기간 중",
+      "awaiting_assets": "자산 정산 대기",
+      "processing": "정리 진행 중",
+      "closed": "해지 완료",
+      "cancelled": "취소됨"
+    },
+    "steps": {
+      "assets": "자산 확인 및 포인트 소멸",
+      "sessions": "로컬 세션 해지",
+      "authorizations": "권한 승인 및 연동 해제",
+      "content": "공개 콘텐츠 연결 해제 및 즐겨찾기 삭제"
+    },
+    "blockers": {
+      "assets_unavailable": "청구 자산 서비스를 사용할 수 없음",
+      "assets_pending": "잔액, 환불 또는 미확정 결제가 남아 있음",
+      "sessions_unavailable": "세션 서비스를 사용할 수 없음",
+      "authorizations_unavailable": "권한 또는 연동 서비스를 사용할 수 없음",
+      "content_unavailable": "콘텐츠 또는 즐겨찾기 서비스를 사용할 수 없음"
+    },
+    "modules": {
+      "billing": "청구",
+      "open-platform": "오픈 플랫폼",
+      "reviews": "강의 평가",
+      "resources": "학습 자료",
+      "favorites": "즐겨찾기",
+      "qq-binding": "QQ 연동"
+    },
+    "pointsPolicies": {
+      "forfeit_all_points_and_pending_deductions": "최종 해지 시 모든 포인트와 차감 대기 내역이 현금이나 Ivory 전환 없이 소멸됩니다"
     }
   }
 }

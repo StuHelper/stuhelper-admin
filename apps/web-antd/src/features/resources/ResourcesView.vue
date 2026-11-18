@@ -33,7 +33,14 @@ const rows = usePaged(async (after, signal) => {
   return { items: page.items, next: page.next_cursor };
 });
 
-watch(school, () => void rows.reload());
+watch(
+  school,
+  () => {
+    if (!school.value) return;
+    void rows.reload();
+  },
+  { immediate: true },
+);
 
 const guard = () => !panelPending.value || window.confirm(t('page.common.leaveUnsaved'));
 useLeaveGuard(() => (panelPending.value ? t('page.common.leaveUnsaved') : ''));
@@ -75,7 +82,7 @@ const columns = computed(() => [
                 <Tag>{{ t(`page.resources.state.${record.state}`) }}</Tag>
                 <Tag v-if="record.proposal" color="orange">{{ t(`page.resources.versionState.${record.proposal.state}`) }}</Tag>
               </template>
-              <template v-else-if="column.key === 'created'">{{ format.dateTime((record.proposal ?? record.current)?.created_at ?? '') }}</template>
+              <template v-else-if="column.key === 'created'">{{ (record.proposal ?? record.current)?.created_at ? format.dateTime((record.proposal ?? record.current).created_at) : t('page.common.notProvided') }}</template>
               <template v-else-if="column.key === 'action'"><Button type="link" size="small" @click="selected = record.id">{{ t('page.common.manage') }}</Button></template>
             </template>
           </Table>

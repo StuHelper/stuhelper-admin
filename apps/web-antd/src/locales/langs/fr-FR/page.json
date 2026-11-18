@@ -35,7 +35,8 @@
     "lookup": "Recherche d’informations",
     "catalogTimetable": "Horaires des créneaux",
     "qqGroups": "Groupes QQ",
-    "catalogTeacherSites": "Pages des enseignants"
+    "catalogTeacherSites": "Pages des enseignants",
+    "closures": "Clôtures de compte"
   },
   "common": {
     "all": "Tous",
@@ -122,7 +123,8 @@
     "disabled": "Cette fonctionnalité n’est pas activée.",
     "cooldown": "Trop de tentatives. Réessayez dans un instant.",
     "billing_already_accessible": "Cet utilisateur a déjà accès à la ressource ; aucun achat n'est nécessaire.",
-    "invalid_rule": "Cette combinaison de conditions n'est pas valide. Modifiez-la puis enregistrez."
+    "invalid_rule": "Cette combinaison de conditions n'est pas valide. Modifiez-la puis enregistrez.",
+    "import_conflict": "Les données du catalogue ont changé depuis l’aperçu ; générez un nouvel aperçu avant de confirmer."
   },
   "session": {
     "signIn": "Se connecter",
@@ -427,7 +429,43 @@
       "applied": "Appliqué"
     },
     "confirmImport": "Confirmer l’import",
-    "imported": "Import terminé : objets {objects}, inscriptions {enrollments}, corrections conservées {preserved}."
+    "imported": "Import terminé : objets {objects}, inscriptions {enrollments}, corrections conservées {preserved}.",
+    "kinds": {
+      "school": "Établissement",
+      "department": "Département",
+      "category": "Catégorie de cours",
+      "nature": "Nature du cours",
+      "term": "Semestre",
+      "course": "Cours",
+      "teacher": "Enseignant",
+      "term_course": "Session de cours",
+      "class": "Groupe d’enseignement",
+      "assignment": "Affectation d’enseignement",
+      "schedule": "Horaire de cours",
+      "enrollment": "Inscription au cours"
+    },
+    "importFields": {
+      "name": "Intitulé",
+      "code": "Code d’objet",
+      "department_id": "Département rattaché",
+      "category_id": "Catégorie rattachée",
+      "nature_id": "Nature rattachée",
+      "course_id": "Cours associé",
+      "term_id": "Semestre associé",
+      "term_course_id": "Session associée",
+      "class_id": "Groupe associé",
+      "teacher_id": "Enseignant associé",
+      "credits": "Nombre de crédits",
+      "hours": "Volume horaire",
+      "english_name": "Intitulé anglais",
+      "former_codes": "Anciens codes",
+      "former_names": "Anciens intitulés",
+      "biography": "Présentation",
+      "location": "Salle",
+      "time_text": "Horaire textuel",
+      "aliases": "Autres noms",
+      "schedule_time": "Créneaux structurés"
+    }
   },
   "resources": {
     "manageTitle": "Gestion des ressources",
@@ -645,7 +683,8 @@
       "student": "Étudiant inscrit",
       "alumni": "Ancien étudiant",
       "newcomer": "Nouvel étudiant temporaire",
-      "unknown": "Non fourni"
+      "unknown": "Non fourni",
+      "teacher": "Enseignant"
     },
     "states": {
       "in_progress": "En cours",
@@ -1203,6 +1242,15 @@
       "anyCategory": "Toutes les catégories",
       "removeRule": "Supprimer la règle",
       "addRule": "Ajouter une règle"
+    },
+    "ledgerKind": {
+      "reward": "Octroi de récompense",
+      "reward_revoke": "Révocation de récompense",
+      "commerce_refund": "Remboursement de commande",
+      "membership_grant": "Abonnement accordé",
+      "expired": "Expiration de points",
+      "debt_repayment": "Compensation de dette",
+      "closure": "Clôture de compte"
     }
   },
   "access": {
@@ -1336,6 +1384,7 @@
     "title": "Horaires des créneaux",
     "intro": "Définissez pour chaque semestre le lundi de la première semaine, le fuseau horaire de l’établissement et les horaires de chaque créneau. Les emplois du temps et les exports d’agenda s’en servent pour convertir les créneaux en heures ; sans eux, l’agenda ne peut pas être exporté.",
     "term": "Semestre",
+    "noTerms": "Aucun semestre n’a encore été importé pour cet établissement.",
     "missing": "Aucun horaire n’est encore défini pour ce semestre. Les étudiants pourront exporter leur agenda après l’enregistrement.",
     "weekOne": "Lundi de la première semaine",
     "weekOneHint": "Choisissez le lundi de la première semaine de cours.",
@@ -1469,6 +1518,14 @@
       "noncompliant": "Infraction",
       "compliant": "Conforme",
       "pending_profile": "Profil à compléter"
+    },
+    "ruleKinds": {
+      "keyword": "Mot-clé",
+      "link": "Lien externe",
+      "frequency": "Fréquence des messages",
+      "repeat": "Message répété",
+      "card": "Carte de groupe",
+      "warning_limit": "Seuil d’avertissement"
     },
     "states": {
       "pending": "En file",
@@ -1695,6 +1752,61 @@
       "site_unit_missing": "Unité absente de la page",
       "catalog_name_absent": "Nom absent du catalogue",
       "ambiguous_site": "Pages en double"
+    }
+  },
+  "closures": {
+    "title": "Gestion des clôtures de compte",
+    "intro": "Consultez les demandes de clôture du compte applicatif, les étapes terminées et les blocages. Après le délai de réflexion de sept jours, un administrateur peut relancer le traitement ; le SSO partagé reste intact.",
+    "detailTitle": "Détail de la demande de clôture",
+    "empty": "Aucune demande de clôture pour ce filtre.",
+    "closureId": "Identifiant de clôture",
+    "profileId": "Identifiant du profil",
+    "requestedAt": "Demandée le",
+    "coolingEndsAt": "Fin du délai de réflexion",
+    "completedAt": "Terminée le",
+    "completedSteps": "Avancement du nettoyage",
+    "stepDone": "Terminée",
+    "stepPending": "En attente",
+    "skippedModules": "Modules jamais installés ignorés",
+    "noSkipped": "Aucun module ignoré",
+    "blocker": "Motif de blocage",
+    "noBlocker": "Aucun blocage",
+    "blockerHint": "Vérifiez le règlement des avoirs ou le rétablissement du service concerné avant de reprendre la clôture.",
+    "pointsPolicy": "Règle sur les points",
+    "coolingHint": "Le délai de réflexion de sept jours prend fin le {time}. Le demandeur peut encore annuler avant cette échéance.",
+    "process": "Reprendre la clôture",
+    "completedNotice": "La clôture du compte est terminée et les contenus publics sont dissociés.",
+    "resumedNotice": "Le traitement a repris ; vérifiez les étapes et le blocage mis à jour.",
+    "states": {
+      "cooling": "En réflexion",
+      "awaiting_assets": "Attente de règlement des avoirs",
+      "processing": "Nettoyage en cours",
+      "closed": "Clôturé",
+      "cancelled": "Annulé"
+    },
+    "steps": {
+      "assets": "Vérification des avoirs et remise à zéro des points",
+      "sessions": "Révocation des sessions locales",
+      "authorizations": "Retrait des autorisations et liaisons",
+      "content": "Dissociation des contenus et suppression des favoris"
+    },
+    "blockers": {
+      "assets_unavailable": "Service de facturation indisponible",
+      "assets_pending": "Solde restant, remboursement ou paiement en suspens",
+      "sessions_unavailable": "Service de sessions indisponible",
+      "authorizations_unavailable": "Service des autorisations ou liaisons indisponible",
+      "content_unavailable": "Service des contenus ou favoris indisponible"
+    },
+    "modules": {
+      "billing": "Facturation",
+      "open-platform": "Plateforme ouverte",
+      "reviews": "Évaluations",
+      "resources": "Ressources pédagogiques",
+      "favorites": "Favoris",
+      "qq-binding": "Liaison QQ"
+    },
+    "pointsPolicies": {
+      "forfeit_all_points_and_pending_deductions": "Effacer tous les points et déductions en attente lors de la clôture finale sans conversion en espèces ni en Ivory"
     }
   }
 }
