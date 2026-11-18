@@ -80,6 +80,9 @@
     "I18N-06": [
       "tests/e2e/layout-shell.spec.mjs#switching language preserves pending writes, original idempotency key, RTL direction and bundled header controls"
     ],
+    "MOD-09": [
+      "tests/e2e/overview.spec.mjs#overview counts pending refunds, new feedback, student and teacher verifications beyond 25 history rows, and hides refused cards"
+    ],
     "SESSION-AVAILABILITY-01": [
       "apps/web-antd/src/shared/session.test.ts#coalesces 25 failures, waits with bounded backoff and preserves the signed-in snapshot"
     ],

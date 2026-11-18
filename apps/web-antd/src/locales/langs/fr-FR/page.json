@@ -178,7 +178,11 @@
       "resources": "Ressources à examiner",
       "failed": "Tâches en échec",
       "verification": "Vérifications à examiner",
-      "storage": "Tâches de stockage bloquées"
+      "storage": "Tâches de stockage bloquées",
+      "refunds": "Remboursements en attente",
+      "feedback": "Nouveaux messages de retour",
+      "teacherVerification": "Vérifications enseignant en attente",
+      "openPlatform": "Applications tierces à examiner"
     },
     "todoUnknown": "Inconnu",
     "todoFailed": "Certains compteurs n’ont pas pu se charger.",

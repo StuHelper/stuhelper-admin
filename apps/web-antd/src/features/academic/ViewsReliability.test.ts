@@ -7,6 +7,7 @@ import OverviewView from '#/features/overview/OverviewView.vue';
 import CategoriesView from '#/features/resources/CategoriesView.vue';
 import ResourcesView from '#/features/resources/ResourcesView.vue';
 import ReviewView from '#/features/resources/ReviewView.vue';
+import { capabilitiesKey, createCapabilities } from '#/shared/capabilities';
 import { createSessionStore, sessionKey } from '#/shared/session';
 
 import ModerationView from './ModerationView.vue';
@@ -133,6 +134,7 @@ describe('PR 6 view reliability regressions (A-09, A-10, A-11, A-14, A-18, A-20)
     const fetcher: typeof fetch = async (input, init) => {
       const url = new URL(String(input), 'http://localhost');
       const path = url.pathname;
+      if (path === '/api/v1/system/capabilities') return Response.json({ api_version: 1, capabilities: [] });
       if (path === '/api/v1/auth/session') return Response.json(sessionPayload);
       if (path === '/api/v1/admin/modules') return Response.json([]);
       if (path === '/api/v1/storage/operations') {
@@ -307,6 +309,9 @@ describe('PR 6 view reliability regressions (A-09, A-10, A-11, A-14, A-18, A-20)
         };
       },
     });
+    const capabilities = createCapabilities(fetcher);
+    await capabilities.load();
+    app.provide(capabilitiesKey, capabilities);
     app.provide(sessionKey, store);
     app.mount(root);
     cleanups.push(() => {

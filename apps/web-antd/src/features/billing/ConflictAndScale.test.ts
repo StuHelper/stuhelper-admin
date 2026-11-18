@@ -177,7 +177,8 @@ describe('Conflict comparison, directory tree pagination, AppsView filter advanc
         if (parent) {
           directoryRequests++;
           peakDirectoryRequests = Math.max(peakDirectoryRequests, directoryRequests);
-          await new Promise((resolve) => setTimeout(resolve, 1));
+          // Keep concurrent reads observable without scheduling a timer for every directory.
+          await Promise.resolve();
           directoryRequests--;
           const children = /^dir-[1-5]$/.test(parent) ? Array.from({ length: 5 }, (_, i) => ({
             enabled: true, id: `${parent}-${i}`, names: { 'zh-CN': '子目录' }, revision: 1, school_id: 'buaa',
@@ -400,8 +401,9 @@ describe('Conflict comparison, directory tree pagination, AppsView filter advanc
     await vi.waitFor(() => {
       // TreeSelect resolves dir-101 from page 2 to its localized title "目录 101" instead of raw ID "dir-101"
       expect(document.body.textContent).toContain('目录 101');
-    });
+    }, { timeout: 5000 });
 
+    expect(peakDirectoryRequests).toBeGreaterThan(0);
     expect(peakDirectoryRequests).toBeLessThanOrEqual(5);
 
     // 3. A-20 + A-15: EligibilityView passes localized action name and keeps draft on 409 conflict

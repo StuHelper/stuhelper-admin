@@ -178,7 +178,11 @@
       "resources": "Recursos por revisar",
       "failed": "Tareas fallidas",
       "verification": "Verificaciones por revisar",
-      "storage": "Tareas de almacenamiento bloqueadas"
+      "storage": "Tareas de almacenamiento bloqueadas",
+      "refunds": "Reembolsos pendientes",
+      "feedback": "Nuevos correos de comentarios",
+      "teacherVerification": "Verificaciones docentes pendientes",
+      "openPlatform": "Aplicaciones pendientes de revisión"
     },
     "todoUnknown": "Desconocido",
     "todoFailed": "No se pudieron cargar algunos recuentos.",
