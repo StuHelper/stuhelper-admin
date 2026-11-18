@@ -65,12 +65,14 @@ test('overview counts pending refunds, new feedback, student and teacher verific
   await page.route('**/api/v1/moderation/tasks**', (route) =>
     route.fulfill({ json: [] }),
   );
-  await page.route('**/api/v1/moderation/feedback**', (route) =>
-    route.fulfill({
+  await page.route('**/api/v1/moderation/feedback**', (route) => {
+    const query = new URL(route.request().url()).searchParams;
+    if (Number(query.get('limit')) > 50) return route.fulfill({ status: 400, json: { code: 'invalid_input' } });
+    return route.fulfill({
       json: {
         items: [
           {
-            id: 'f-1',
+            id: query.get('after') || 'f-1',
             sender: 'stu@demo.edu',
             subject: 'Question',
             body: 'Body',
@@ -86,10 +88,10 @@ test('overview counts pending refunds, new feedback, student and teacher verific
             replies: [],
           },
         ],
-        next_cursor: '',
+        next_cursor: query.get('after') ? '' : 'f-2',
       },
-    }),
-  );
+    });
+  });
 
   // 30 approved history rows followed by 2 pending_review rows: limit=100 prevents false zero.
   const makeApp = (id, kind, state) => ({
@@ -147,16 +149,20 @@ test('overview counts pending refunds, new feedback, student and teacher verific
         items:
           state === 'submitted'
             ? [refundOrder('r-1', 'submitted'), refundOrder('r-2', 'submitted')]
-            : [refundOrder('r-3', 'awaiting_manual')],
+            : [refundOrder(state === 'needs_review' ? 'r-4' : 'r-3', state)],
         next: '',
       },
     });
   });
 
   // Open-platform returns 403 forbidden: card must hide without marking todos failed.
-  await page.route('**/api/v1/open-platform/admin/apps**', (route) =>
-    route.fulfill({ status: 403, json: { code: 'open_platform_forbidden' } }),
-  );
+  let denyApps = true;
+  let appPages = 0;
+  await page.route('**/api/v1/open-platform/admin/apps**', (route) => {
+    if (denyApps) return route.fulfill({ status: 403, json: { code: 'open_platform_forbidden' } });
+    appPages++;
+    return route.fulfill({ json: { items: [], next: `page-${appPages}` } });
+  });
 
   // Storage fails transiently on first attempt, then recovers on retry.
   let storageFail = true;
@@ -173,8 +179,8 @@ test('overview counts pending refunds, new feedback, student and teacher verific
   const cardOf = (label) =>
     page.locator('a').filter({ has: page.getByText(label, { exact: true }) });
 
-  await expect(cardOf(all.overview.todo.refunds)).toContainText(num(3));
-  await expect(cardOf(all.overview.todo.feedback)).toContainText(num(1));
+  await expect(cardOf(all.overview.todo.refunds)).toContainText(num(4));
+  await expect(cardOf(all.overview.todo.feedback)).toContainText(num(2));
   await expect(cardOf(all.overview.todo.verification)).toContainText(num(2));
   await expect(cardOf(all.overview.todo.teacherVerification)).toContainText(
     num(1),
@@ -190,6 +196,7 @@ test('overview counts pending refunds, new feedback, student and teacher verific
   await expect(cardOf(all.overview.todo.storage)).toContainText(
     all.overview.todoUnknown,
   );
+  denyApps = false;
   await page
     .getByRole('button', { name: all.overview.todoRetry, exact: true })
     .click();
@@ -199,5 +206,7 @@ test('overview counts pending refunds, new feedback, student and teacher verific
   await expect(cardOf(all.overview.todo.storage)).toContainText(
     num(storageExample.jobs.blocked),
   );
+  await expect(cardOf(all.overview.todo.openPlatform)).toContainText(all.overview.todoUnknown);
+  expect(appPages).toBe(5);
   await fits(page, info);
 });

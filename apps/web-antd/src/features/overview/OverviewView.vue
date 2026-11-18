@@ -75,51 +75,50 @@ const refused = (reason: unknown) =>
   (reason instanceof StorageError &&
     (reason.code === 'forbidden' || reason.code === 'unauthenticated'));
 
-async function countPendingVerifications(path: string, signal: AbortSignal) {
-  let pending = 0;
-  let after = '';
-  for (let page = 0; page < maxScanPages && pending < countLimit; page++) {
-    const result = await verification.list('Application', path, {
-      after: after || undefined,
-      limit: countLimit,
-      signal,
-    });
-    pending += result.items.filter((row) => row.state === 'pending_review').length;
-    if (!result.next || result.next === after) break;
-    after = result.next;
-  }
-  return pending;
-}
-
-async function countRefundState(state: string, signal: AbortSignal) {
+// Stop at the display threshold. A partial scan below it cannot give an exact count.
+async function countPages(load: (after: string) => Promise<{ count: number; next?: string }>) {
   let count = 0;
   let after = '';
-  for (let page = 0; page < 2 && count < countLimit; page++) {
-    const result = await billing.refunds(state, after, signal);
-    count += result.items.length;
-    if (!result.next || result.next === after) break;
+  const seen = new Set<string>();
+  for (let page = 0; page < maxScanPages; page++) {
+    const result = await load(after);
+    count += result.count;
+    if (!result.next || count >= countLimit) return count;
+    if (seen.has(result.next)) return undefined;
+    seen.add(result.next);
     after = result.next;
   }
-  return count;
+  return undefined;
 }
 
-async function countPendingApps(signal: AbortSignal) {
-  let pending = 0;
-  let after = '';
-  for (let page = 0; page < maxScanPages && pending < countLimit; page++) {
+function countPendingVerifications(path: string, signal: AbortSignal) {
+  return countPages(async (after) => {
+    const result = await verification.list('Application', path, {
+      after: after || undefined, limit: countLimit, signal,
+    });
+    return { count: result.items.filter((row) => row.state === 'pending_review').length, next: result.next };
+  });
+}
+
+function countRefundState(state: string, signal: AbortSignal) {
+  return countPages(async (after) => {
+    const result = await billing.refunds(state, after, signal);
+    return { count: result.items.length, next: result.next };
+  });
+}
+
+function countPendingApps(signal: AbortSignal) {
+  return countPages(async (after) => {
     const result = await openPlatform.apps(after, signal);
-    pending += result.items.filter((app) => app.state === 'pending').length;
-    if (!result.next || result.next === after) break;
-    after = result.next;
-  }
-  return pending;
+    return { count: result.items.filter((app) => app.state === 'pending').length, next: result.next };
+  });
 }
 
 const todos = useAsync(async (signal) => {
   const id = school.value;
   const tasks = (state: string, kind?: string) =>
     moderation.tasks({ school_id: id, state, content_kind: kind, limit: countLimit }, signal);
-  const sources: { icon: Component; key: string; load: () => Promise<number>; to: string }[] = [];
+  const sources: { icon: Component; key: string; load: () => Promise<number | undefined>; to: string }[] = [];
   if (id) {
     sources.push(
       {
@@ -149,13 +148,12 @@ const todos = useAsync(async (signal) => {
     key: 'feedback',
     to: '/moderation/feedback',
     icon: Mail,
-    load: async () => {
+    load: () => countPages(async (after) => {
       const page = await http.json('/api/v1/moderation/feedback', parseFeedbackPage, {
-        query: { state: 'new', limit: countLimit },
-        signal,
+        query: { after: after || undefined, state: 'new', limit: 50 }, signal,
       });
-      return countOf(page.items);
-    },
+      return { count: page.items.length, next: page.next_cursor };
+    }),
   });
   if (id) {
     sources.push(
@@ -187,11 +185,10 @@ const todos = useAsync(async (signal) => {
       to: '/billing/refunds',
       icon: Coins,
       load: async () => {
-        const [submitted, awaitingManual] = await Promise.all([
-          countRefundState('submitted', signal),
-          countRefundState('awaiting_manual', signal),
-        ]);
-        return submitted + awaitingManual;
+        const counts = await Promise.all(['submitted', 'awaiting_manual', 'needs_review']
+          .map((state) => countRefundState(state, signal)));
+        const known = counts.reduce<number>((sum, count) => sum + (count ?? 0), 0);
+        return known >= countLimit || !counts.includes(undefined) ? known : undefined;
       },
     });
   }
