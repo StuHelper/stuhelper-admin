@@ -122,7 +122,8 @@
     "disabled": "Esta función no está activada.",
     "cooldown": "Demasiados intentos. Vuelve a intentarlo en un momento.",
     "billing_already_accessible": "Este usuario ya puede acceder al recurso; no necesita comprarlo.",
-    "invalid_rule": "Esta combinación de condiciones no es válida. Ajústala y vuelve a guardar."
+    "invalid_rule": "Esta combinación de condiciones no es válida. Ajústala y vuelve a guardar.",
+    "import_conflict": "Los datos del catálogo cambiaron tras la vista previa; genera una nueva vista previa antes de confirmar."
   },
   "session": {
     "signIn": "Iniciar sesión",
@@ -427,7 +428,43 @@
       "applied": "Aplicado"
     },
     "confirmImport": "Confirmar importación",
-    "imported": "Importación completa: objetos {objects}, matrículas {enrollments}, correcciones conservadas {preserved}."
+    "imported": "Importación completa: objetos {objects}, matrículas {enrollments}, correcciones conservadas {preserved}.",
+    "kinds": {
+      "school": "Universidad",
+      "department": "Departamento",
+      "category": "Categoría del curso",
+      "nature": "Naturaleza del curso",
+      "term": "Semestre",
+      "course": "Asignatura",
+      "teacher": "Docente",
+      "term_course": "Oferta semestral",
+      "class": "Grupo docente",
+      "assignment": "Asignación docente",
+      "schedule": "Horario de clase",
+      "enrollment": "Matrícula"
+    },
+    "importFields": {
+      "name": "Nombre",
+      "code": "Código",
+      "department_id": "Departamento vinculado",
+      "category_id": "Categoría vinculada",
+      "nature_id": "Naturaleza vinculada",
+      "course_id": "Asignatura vinculada",
+      "term_id": "Semestre vinculado",
+      "term_course_id": "Oferta vinculada",
+      "class_id": "Grupo vinculado",
+      "teacher_id": "Docente vinculado",
+      "credits": "Créditos",
+      "hours": "Horas lectivas",
+      "english_name": "Nombre en inglés",
+      "former_codes": "Códigos anteriores",
+      "former_names": "Nombres anteriores",
+      "biography": "Biografía",
+      "location": "Aula",
+      "time_text": "Texto de horario",
+      "aliases": "Otros nombres",
+      "schedule_time": "Franjas estructuradas"
+    }
   },
   "resources": {
     "manageTitle": "Gestión de materiales",
@@ -645,7 +682,8 @@
       "student": "Estudiante actual",
       "alumni": "Graduado",
       "newcomer": "Nuevo estudiante temporal",
-      "unknown": "No proporcionado"
+      "unknown": "No proporcionado",
+      "teacher": "Docente"
     },
     "states": {
       "in_progress": "En curso",
@@ -1203,6 +1241,15 @@
       "anyCategory": "Todas las categorías",
       "removeRule": "Quitar regla",
       "addRule": "Añadir regla"
+    },
+    "ledgerKind": {
+      "reward": "Concesión de recompensa",
+      "reward_revoke": "Revocación de recompensa",
+      "commerce_refund": "Reembolso de pedido",
+      "membership_grant": "Membresía concedida",
+      "expired": "Vencimiento de puntos",
+      "debt_repayment": "Compensación de deuda",
+      "closure": "Liquidación por cierre de cuenta"
     }
   },
   "access": {

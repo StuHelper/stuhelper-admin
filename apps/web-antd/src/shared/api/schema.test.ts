@@ -42,7 +42,7 @@ describe('contract validation', () => {
       validates(value, { $ref: '#/components/schemas/Item' }, schemas),
     ).toBe(false);
   });
-  it('checks array bounds', () => {
+  it('checks array bounds and honors explicit schema or caller maxItems above 1000 (A-02)', () => {
     expect(
       validates(
         [1, 2],
@@ -50,6 +50,26 @@ describe('contract validation', () => {
         {},
       ),
     ).toBe(false);
+    const large = Array.from({ length: 1500 }, (_, i) => i);
+    expect(
+      validates(large, { type: 'array', items: { type: 'integer' } }, {}),
+    ).toBe(false);
+    expect(
+      validates(
+        large,
+        { type: 'array', maxItems: 2000, items: { type: 'integer' } },
+        {},
+      ),
+    ).toBe(true);
+    expect(
+      (validates as (...args: unknown[]) => boolean)(
+        large,
+        { type: 'array', items: { type: 'integer' } },
+        {},
+        0,
+        { maxItems: 2000 },
+      ),
+    ).toBe(true);
   });
   it('accepts null for a nullable reference and still checks a present value', () => {
     const set = {

@@ -8,6 +8,10 @@ import { ApiError } from './errors';
 type Schema = Record<string, unknown>;
 export type SchemaSet = Record<string, unknown>;
 
+export interface ValidationOptions {
+  maxItems?: number;
+}
+
 const maxDepth = 24;
 const maxItems = 1000;
 const dateTime =
@@ -57,6 +61,7 @@ export function validates(
   schema: unknown,
   schemas: SchemaSet,
   depth = 0,
+  options?: ValidationOptions,
 ): boolean {
   if (!record(schema) || depth > maxDepth) return false;
   if (typeof schema.$ref === 'string') {
@@ -64,19 +69,21 @@ export function validates(
     // nullable flag sits next to the reference, not inside the target.
     if (value === null && schema.nullable === true) return true;
     const target = schemas[schema.$ref.split('/').at(-1) ?? ''];
-    return validates(value, target, schemas, depth + 1);
+    return validates(value, target, schemas, depth + 1, options);
   }
   if (value === null) return schema.nullable === true;
   if (Array.isArray(schema.enum) && !schema.enum.includes(value)) return false;
   switch (schema.type) {
     case 'array': {
-      if (!Array.isArray(value) || value.length > maxItems) return false;
+      const arrayLimit =
+        typeof schema.maxItems === 'number'
+          ? schema.maxItems
+          : (options?.maxItems ?? maxItems);
+      if (!Array.isArray(value) || value.length > arrayLimit) return false;
       if (typeof schema.minItems === 'number' && value.length < schema.minItems)
         return false;
-      if (typeof schema.maxItems === 'number' && value.length > schema.maxItems)
-        return false;
       return value.every((item) =>
-        validates(item, schema.items, schemas, depth + 1),
+        validates(item, schema.items, schemas, depth + 1, options),
       );
     }
     case 'boolean': {
@@ -112,13 +119,20 @@ export function validates(
         return false;
       return keys.every((key) => {
         if (key in properties)
-          return validates(value[key], properties[key], schemas, depth + 1);
+          return validates(
+            value[key],
+            properties[key],
+            schemas,
+            depth + 1,
+            options,
+          );
         if (record(schema.additionalProperties))
           return validates(
             value[key],
             schema.additionalProperties,
             schemas,
             depth + 1,
+            options,
           );
         return schema.additionalProperties !== false;
       });
@@ -139,12 +153,14 @@ export function schemaOf<T>(
   schemas: SchemaSet,
   name: string,
   list = false,
+  options?: ValidationOptions,
 ): Validator<T> {
   const target = schemas[name];
   if (!record(target)) throw new Error(`Unknown contract schema: ${name}`);
   const shape = list ? { type: 'array', items: target } : target;
   return (value) => {
-    if (!validates(value, shape, schemas)) throw new ApiError('incompatible');
+    if (!validates(value, shape, schemas, 0, options))
+      throw new ApiError('incompatible');
     // The value matched the contract schema that the generated type is derived from.
     return value as T;
   };

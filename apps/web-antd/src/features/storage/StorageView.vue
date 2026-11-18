@@ -7,6 +7,7 @@ import { useI18n } from '@vben/locales';
 
 import { Alert, Button, Card, Form, FormItem, Input, Modal, Space, Statistic, Table, TabPane, Tabs, Tag } from 'ant-design-vue';
 
+import { useLeaveGuard } from '#/shared/composables/leave';
 import { useFormat } from '#/shared/format';
 import AdminPage from '#/shared/ui/AdminPage.vue';
 import { useErrorText } from '#/shared/ui/messages';
@@ -25,6 +26,7 @@ const { data, loading, sending, error, pending, uncertain, completed, reload, pr
 const limits = ref<Record<string, string>>({});
 const tab = ref('instances');
 const locked = computed(() => loading.value || sending.value || pending.value !== null);
+useLeaveGuard(() => (uncertain.value ? t('page.common.leaveUncertain') : (sending.value || pending.value !== null ? t('page.common.leaveUnsaved') : '')));
 const label = (key: string) => (te(key) ? t(key) : t('page.storage.unknown'));
 const confirmation = computed(() => (pending.value ? t('page.storage.confirmAction', { action: t(`page.storage.actions.${pending.value.kind === 'job' ? 'retry' : pending.value.body.action}`) }) : ''));
 // A quota may not drop below what is already used or reserved.
@@ -96,8 +98,8 @@ const failureColumns = computed(() => [
                     <Button v-if="instance.state !== 'revoked'" danger :disabled="locked" @click="prepareInstance(instance, 'revoke')">{{ t('page.storage.actions.revoke') }}</Button>
                   </Space>
                   <Form layout="vertical" class="mt-3" @submit.prevent="prepareInstance(instance, 'quota', quota(instance))">
-                    <FormItem :label="t('page.storage.quotaInput')" :extra="t('page.storage.quotaHint')" :validate-status="quota(instance) === undefined ? 'error' : undefined" class="mb-2" html-for="storageview-field-1">
-                      <Input id="storageview-field-1" v-model:value="limits[instance.id]" inputmode="numeric" :placeholder="String(instance.limit_bytes)" :disabled="locked" />
+                    <FormItem :label="t('page.storage.quotaInput')" :extra="t('page.storage.quotaHint')" :validate-status="quota(instance) === undefined ? 'error' : undefined" class="mb-2" :html-for="`storage-quota-${instance.id}`">
+                      <Input :id="`storage-quota-${instance.id}`" v-model:value="limits[instance.id]" inputmode="numeric" :placeholder="String(instance.limit_bytes)" :disabled="locked" />
                     </FormItem>
                     <Button html-type="submit" :disabled="locked || quota(instance) === undefined">{{ t('page.storage.actions.quota') }}</Button>
                   </Form>

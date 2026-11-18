@@ -1,16 +1,17 @@
 <script setup lang="ts">
 import type { AdminOrder, ManualInput, Order, Payee, ReviewInput } from './api';
 
-import { computed, onMounted, reactive, ref, shallowRef, watch } from 'vue';
+import { computed, getCurrentInstance, inject, onMounted, reactive, ref, shallowRef, watch } from 'vue';
 
 import { useI18n } from '@vben/locales';
 
 import { Alert, Button, Card, Checkbox, Descriptions, DescriptionsItem, Drawer, Form, FormItem, Input, Radio, RadioGroup, Segmented, Table, Tag, Textarea } from 'ant-design-vue';
 
-import { errorCode } from '#/shared/api/errors';
+import { ApiError, errorCode, isDeniedCode } from '#/shared/api/errors';
 import { useMutation, usePaged } from '#/shared/composables/async';
 import { useLeaveGuard } from '#/shared/composables/leave';
 import { useFormat } from '#/shared/format';
+import { sessionKey } from '#/shared/session';
 import AdminPage from '#/shared/ui/AdminPage.vue';
 import LoadState from '#/shared/ui/LoadState.vue';
 import { useErrorText } from '#/shared/ui/messages';
@@ -31,10 +32,12 @@ const format = useFormat();
 const money = useMoney();
 const api = useBillingAdmin();
 const errorText = useErrorText();
+const session = getCurrentInstance() ? inject(sessionKey, undefined) : undefined;
 const filter = ref<State>('submitted');
+const revokedError = ref('');
 const refunds = usePaged<AdminOrder>((after, signal) => api.refunds(filter.value, after, signal));
 onMounted(refunds.reload);
-watch(filter, () => void refunds.reload());
+watch(filter, () => { revokedError.value = ''; void refunds.reload(); });
 
 const selected = shallowRef<AdminOrder>();
 const reviewForm = reactive({ approve: true, manual: false, reason: '' });
@@ -80,10 +83,33 @@ async function showPayee() {
     payeeState.value = '';
   } catch (error) {
     const code = errorCode(error);
+    if (error instanceof ApiError && (error.status === 401 || code === 'unauthenticated' || code === 'billing_unauthenticated')) {
+      revokeAccess(code);
+      return;
+    }
     payeeState.value = code === 'billing_not_found' || code === 'not_found' ? 'missing' : '';
     if (!payeeState.value) payeeError.value = code;
   }
 }
+
+function revokeAccess(code = '') {
+  hidePayee();
+  selected.value = undefined;
+  write.dismiss();
+  refunds.clear();
+  if (code) revokedError.value = code;
+}
+
+watch(() => session?.state.value, (state) => {
+  if (state === 'guest') revokeAccess();
+});
+watch(refunds.error, (code) => {
+  if (code && isDeniedCode(code)) {
+    hidePayee();
+    selected.value = undefined;
+  }
+});
+
 // Rejecting needs a reason the user can read; a failed payout needs the cause.
 const reviewReady = computed(() => reviewForm.approve || !!reviewForm.reason.trim());
 const manualReady = computed(() => !!manualForm.channel.trim() && (manualForm.succeeded ? !!manualForm.reference.trim() : !!manualForm.reason.trim()));
@@ -91,21 +117,26 @@ const manualReady = computed(() => !!manualForm.channel.trim() && (manualForm.su
 async function submitReview() {
   const order = selected.value;
   if (!order || !reviewReady.value) return;
+  revokedError.value = '';
   const body: ReviewInput = { target: order.target, approve: reviewForm.approve, manual: reviewForm.approve && reviewForm.manual, reason: reviewForm.reason.trim() };
   const result = await write.run(`review:${order.id}`, body, (value, key) => api.review(order.id, value, key));
   if (result) done(order, result, reviewForm.approve ? 'approved' : 'rejected');
+  else if (isDeniedCode(write.error.value)) revokeAccess(write.error.value);
 }
 async function submitManual() {
   const order = selected.value;
   if (!order || !manualReady.value) return;
+  revokedError.value = '';
   const body: ManualInput = { target: order.target, succeeded: manualForm.succeeded, payment_channel: manualForm.channel.trim(), payment_reference: manualForm.succeeded ? manualForm.reference.trim() : '', reason: manualForm.reason.trim() };
   const result = await write.run(`manual:${order.id}`, body, (value, key) => api.manualResult(order.id, value, key));
   if (result) done(order, result, manualForm.succeeded ? 'paid' : 'payoutFailed');
+  else if (isDeniedCode(write.error.value)) revokeAccess(write.error.value);
 }
 async function retry() {
   const order = selected.value;
   const result = (await write.retry()) as Order | undefined;
   if (order && result) done(order, result, 'recorded');
+  else if (isDeniedCode(write.error.value)) revokeAccess(write.error.value);
 }
 function done(order: AdminOrder, result: Order, message: string) {
   const updated: AdminOrder = { ...result, target: order.target };
@@ -129,7 +160,8 @@ const columns = computed(() => [
   <AdminPage :title="t('page.billing.refunds.title')" :description="t('page.billing.refunds.intro')">
     <Card :bordered="false">
       <Segmented v-model:value="filter" class="mb-4 max-w-full overflow-x-auto" :options="refundStates.map((value) => ({ value, label: t(`page.billing.orderState.${value}`) }))" />
-      <LoadState v-if="refunds.items.value.length === 0" :status="refunds.status.value" :error="refunds.error.value" :empty="true" :empty-text="t('page.billing.refunds.empty')" @retry="refunds.reload" />
+      <Alert v-if="revokedError" class="mb-4" type="error" show-icon role="alert" :message="errorText(revokedError)" />
+      <LoadState v-if="refunds.items.value.length === 0" :status="refunds.status.value" :error="refunds.error.value" :empty="true" :empty-text="t('page.billing.refunds.empty')" @retry="() => { revokedError = ''; refunds.reload(); }" />
       <template v-else>
         <Table :columns="columns" :data-source="refunds.items.value" :pagination="false" row-key="id" size="middle" :scroll="{ x: 720 }">
           <template #bodyCell="{ column, record }">
@@ -210,7 +242,7 @@ const columns = computed(() => [
           <Button type="primary" html-type="submit" :loading="write.busy.value" :disabled="!manualReady || write.uncertain.value">{{ t('page.billing.refunds.record') }}</Button>
         </Form>
 
-        <PaymentReview v-else-if="selected.state === 'needs_review' && !success" :order="selected" :target="selected.target" @done="(result, action) => done(selected!, result, `review.${action}`)" />
+        <PaymentReview v-else-if="selected.state === 'needs_review' && !success" :order="selected" :target="selected.target" @done="(result, action) => done(selected!, result, `review.${action}`)" @denied="revokeAccess" />
 
         <MutationAlert :busy="write.busy.value" :error="write.error.value" :uncertain="write.uncertain.value" :success="success" @retry="retry" />
       </div>
