@@ -15,6 +15,7 @@
     "typecheck": "pnpm --filter @stuhelper/admin typecheck",
     "lint": "pnpm exec eslint apps/web-antd/src packages/locales/src/langs --max-warnings=0",
     "test": "vitest run",
+    "test:e2e": "playwright test --config playwright.config.mjs",
     "generate": "pnpm --dir scripts/contracts generate",
     "check": "pnpm run check:platform && pnpm run check:session && pnpm run check:verification && pnpm run check:resources && pnpm run check:academic && pnpm run check:i18n && pnpm run typecheck && pnpm run lint && pnpm test && pnpm run build",
     "postinstall": "pnpm -r --if-present run stub",

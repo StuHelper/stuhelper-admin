@@ -23,7 +23,7 @@ jobs:
     if: needs.changes.outputs.browser == 'true'
     name: Storage browser checks
     runs-on: ubuntu-26.04
-    timeout-minutes: 25
+    timeout-minutes: 30
     env:
       LEFTHOOK: '0'
     steps:
@@ -36,8 +36,9 @@ jobs:
       - name: Record source combination
         run: |
           git rev-parse HEAD >> "$GITHUB_STEP_SUMMARY"
+          cat contracts/platform.source.json >> "$GITHUB_STEP_SUMMARY"
           cat contracts/storage.source.json >> "$GITHUB_STEP_SUMMARY"
           cat contracts/contribution.source.json >> "$GITHUB_STEP_SUMMARY"
       - run: make build
       - uses: StuHelper/stuhelper-tooling/actions/chromium@v0.1.10
-      - run: make storage-browser
+      - run: make browser

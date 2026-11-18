@@ -70,7 +70,7 @@ make check 执行八语言覆盖检查、类型检查、应用 lint、单元测�
 
 contracts/platform.openapi.yaml 与生成类型来自 platform 仓库。scripts/contracts 独立固定接口生成工具使用的 TypeScript 5，不改变 Vben 应用的 TypeScript 6 工具链。
 
-`contracts/platform.source.json` 记录契约来源。课程、评价与审核的 OpenAPI 和生成类型同样记录来源、提交和摘要，并检查生成一致性。工作区检查核对来源提交及提供方兼容性。
+`contracts/platform.source.json` 记录契约来源与摘要，并纳入 `make check` 生成一致性校验。`make generate` 覆盖全部 19 套模块契约的生成类型，工作区检查核对来源提交及提供方兼容性。
 
 make check 执行八语言覆盖检查、类型检查、应用 lint、单元测试与生产构建。中文为默认语言，支持英文、法文、俄文、日文、韩文、西班牙文和阿拉伯文。金额、数字、日期与复数由统一格式接口处理，阿拉伯文布局使用 RTL。学生端和管理端的 352 项八语言桌面与移动浏览器检查在架构仓库维护，使用合成响应。真实登录与生产运行分别验收。
 
@@ -82,7 +82,7 @@ make check 执行八语言覆盖检查、类型检查、应用 lint、单元测�
 
 对象与失败任务分别按游标分页，每页最多 25 条。确认操作携带当前修订或代次与幂等键。网络失败或响应不确定时保留原请求，只能重试原请求；未登录或无权限立即清除已展示业务数据。容量等整数超出 JavaScript 安全整数范围时拒绝展示，避免静默舍入。
 
-运行 make build 后执行 make storage-browser。Playwright 固定为 1.64.1，以支持 Ubuntu 26.04，首次运行先执行 pnpm exec playwright install --with-deps chromium。浏览器夹具仅存在于 tests/e2e，不打包进应用，也不连接真实存储账号。
+运行 make build 后执行 make browser（支持 MODULE=catalog 按模块过滤，兼容 make storage-browser）。Playwright 固定为 1.64.1，首次运行执行 pnpm exec playwright install --with-deps chromium。浏览器夹具仅位于 tests/e2e。
 
 ## 存储贡献管理
 

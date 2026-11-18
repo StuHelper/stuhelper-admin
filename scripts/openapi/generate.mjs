@@ -13,7 +13,30 @@ const contracts = fs
   .filter((name) => /\.openapi\.(?:json|yaml)$/.test(name))
   .toSorted();
 
-assert.ok(contracts.length >= 19, `Expected at least 19 OpenAPI contracts, found ${contracts.length}`);
+const requiredContracts = [
+  'billing.openapi.json',
+  'catalog.openapi.json',
+  'contribution.openapi.json',
+  'favorites.openapi.json',
+  'groups.openapi.json',
+  'information-query.openapi.json',
+  'media.openapi.json',
+  'moderation.openapi.json',
+  'open-platform.openapi.json',
+  'platform-admin.openapi.json',
+  'platform-eligibility.openapi.json',
+  'platform.openapi.yaml',
+  'profiles.openapi.json',
+  'qq-binding.openapi.json',
+  'resources.openapi.json',
+  'reviews.openapi.json',
+  'session.openapi.json',
+  'storage.openapi.json',
+  'verification.openapi.yaml',
+];
+for (const file of requiredContracts) {
+  assert.ok(contracts.includes(file), `Missing OpenAPI contract: ${file}`);
+}
 
 for (const file of contracts) {
   const name = file.replace(/\.openapi\.(?:json|yaml)$/, '');

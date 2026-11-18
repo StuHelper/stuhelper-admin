@@ -40,11 +40,16 @@ test('translated operation, original-request retry, pagination and permission re
   const pause = page.getByRole('button', { name: m.actions.pause, exact: true });
   await pause.focus();
   await page.keyboard.press('Enter');
-  await expect(page.getByRole('dialog')).toBeVisible();
-  await page.getByRole('button', { name: c.confirm, exact: true }).click();
-  await expect(page.getByRole('dialog')).toContainText(c.uncertain);
-  await page.getByRole('button', { name: c.retryOriginal, exact: true }).click();
-  await expect(page.getByRole('dialog')).toHaveCount(0);
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.locator(':focus')).toHaveCount(1);
+  await Promise.all([
+    page.waitForEvent('requestfailed', (request) =>
+      request.method() === 'POST' && new URL(request.url()).pathname.startsWith('/api/v1/storage/operations/')),
+    dialog.getByRole('button', { name: c.confirm, exact: true }).click(),
+  ]);
+  await expect(dialog).toContainText(c.uncertain);
+  await dialog.getByRole('button', { name: c.retryOriginal, exact: true }).click();
+  await expect(dialog).toHaveCount(0);
   expect(requests).toHaveLength(2);
   expect(requests[1]).toEqual(requests[0]);
   await page.getByRole('tab', { name: m.objects, exact: true }).click();

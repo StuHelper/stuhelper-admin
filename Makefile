@@ -1,4 +1,4 @@
-.PHONY: setup check build dev generate
+.PHONY: setup check browser storage-browser build dev generate preview
 setup:
 	LEFTHOOK=0 pnpm install --frozen-lockfile
 	pnpm run setup
@@ -10,8 +10,10 @@ check:
 	pnpm --dir scripts/contracts check
 	pnpm check
 	pnpm exec stuhelper-check workflows
+browser:
+	pnpm exec playwright test --config playwright.config.mjs $(if $(MODULE),tests/e2e/$(MODULE).spec.mjs,$(SPEC)) $(ARGS)
 storage-browser:
-	pnpm exec playwright test --config playwright.storage.config.mjs
+	$(MAKE) browser
 build:
 	pnpm build
 dev:
