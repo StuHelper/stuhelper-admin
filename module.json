@@ -106,6 +106,10 @@
       "apps/web-antd/src/features/verification/VerificationView.test.ts#recovers from initial access error, blocks javascript: suggestion links, assigns unique form IDs, wipes profile on 403, and locks uncertain writes",
       "apps/web-antd/src/shared/api/errors.test.ts#marks HTTP 401/403 and module-prefixed auth error codes as denied while preserving exact code strings"
     ],
+    "AO-04": [
+      "tests/e2e/account-navigation.spec.mjs#lookup jumps to billing in memory without URL query params and remembers the recent issuer",
+      "tests/e2e/account-navigation.spec.mjs#refund details jump to QQ binding, roles and session logout according to enabled capabilities"
+    ],
     "CM-19": [
       "tests/e2e/feedback.spec.mjs#feedback reply refresh cannot overwrite another operators note with a newer revision",
       "tests/e2e/feedback.spec.mjs#feedback clears private mail after permission revocation",

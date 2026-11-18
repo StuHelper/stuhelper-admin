@@ -1860,5 +1860,15 @@
     "pointsPolicies": {
       "forfeit_all_points_and_pending_deductions": "Anular todos los puntos y deducciones pendientes al cerrar definitivamente sin conversión a efectivo ni Ivory"
     }
+  },
+  "accountJump": {
+    "copyAccount": "Copiar identificador de cuenta",
+    "copied": "Copiado",
+    "toBilling": "Cuenta de facturación",
+    "toQqBinding": "Vinculación QQ",
+    "toRoles": "Permisos de rol",
+    "toSessions": "Cierre de sesiones",
+    "prefilledHint": "Rellenado con la cuenta seleccionada; verifique y pulse buscar.",
+    "recentIssuerHint": "Se completó con el emisor consultado más recientemente en esta sesión."
   }
 }

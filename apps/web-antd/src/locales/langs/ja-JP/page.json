@@ -1860,5 +1860,15 @@
     "pointsPolicies": {
       "forfeit_all_points_and_pending_deductions": "最終閉鎖時にすべてのポイントと未精算控除を消去し、現金やIvoryへの換算は行いません"
     }
+  },
+  "accountJump": {
+    "copyAccount": "アカウント識別子をコピー",
+    "copied": "コピー済み",
+    "toBilling": "会計照会へ",
+    "toQqBinding": "QQ連携へ",
+    "toRoles": "ロール権限へ",
+    "toSessions": "セッション失効へ",
+    "prefilledHint": "選択したアカウントから入力欄を自動入力しました。確認して検索してください。",
+    "recentIssuerHint": "このセッションで直近に照会した発行者を自動入力しています。"
   }
 }
