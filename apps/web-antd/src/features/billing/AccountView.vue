@@ -1,16 +1,17 @@
 <script setup lang="ts">
 import type { Account, MembershipPlan, Order, PurchaseRefundInput, Rule, Target } from './api';
 
-import { computed, reactive, ref, shallowRef } from 'vue';
+import { computed, getCurrentInstance, inject, reactive, ref, shallowRef, watch } from 'vue';
 
 import { useI18n } from '@vben/locales';
 
 import { Alert, Button, Card, DatePicker, Descriptions, DescriptionsItem, Form, FormItem, Input, InputNumber, Modal, Radio, RadioGroup, Select, Table, TabPane, Tabs, Tag, Textarea } from 'ant-design-vue';
 
-import { errorCode } from '#/shared/api/errors';
+import { ApiError, errorCode, isDeniedCode } from '#/shared/api/errors';
 import { useMutation } from '#/shared/composables/async';
 import { useLeaveGuard } from '#/shared/composables/leave';
 import { useFormat } from '#/shared/format';
+import { sessionKey } from '#/shared/session';
 import AdminPage from '#/shared/ui/AdminPage.vue';
 import { useErrorText } from '#/shared/ui/messages';
 import MutationAlert from '#/shared/ui/MutationAlert.vue';
@@ -25,11 +26,12 @@ import PaymentReview from './PaymentReview.vue';
  * granting a reward by rule, revoking a reward and granting a membership.
  * Every read is audited by the server.
  */
-const { t } = useI18n();
+const { t, te } = useI18n();
 const format = useFormat();
 const money = useMoney();
 const errorText = useErrorText();
 const api = useBillingAdmin();
+const session = getCurrentInstance() ? inject(sessionKey, undefined) : undefined;
 
 const query = reactive({ issuer: '', subject: '' });
 const target = shallowRef<Target>();
@@ -50,8 +52,7 @@ async function lookup() {
     target.value = next;
     show(result, false, false);
   } catch (error) {
-    account.value = undefined;
-    loadError.value = errorCode(error);
+    clearAccount(errorCode(error));
   } finally {
     loading.value = false;
   }
@@ -81,6 +82,7 @@ async function more(kind: 'ledger' | 'orders') {
     }
   } catch (error) {
     loadError.value = errorCode(error);
+    if (error instanceof ApiError && error.denied) clearAccount(loadError.value);
   } finally {
     loading.value = false;
   }
@@ -89,6 +91,7 @@ async function refresh() {
   if (target.value) {
     const result = await api.account(target.value).catch((error: unknown) => {
       loadError.value = errorCode(error);
+      if (error instanceof ApiError && error.denied) clearAccount(loadError.value);
     });
     if (result) show(result, false, false);
   }
@@ -99,6 +102,27 @@ const write = useMutation();
 const success = ref('');
 const locked = computed(() => write.busy.value || write.uncertain.value);
 useLeaveGuard(() => (write.uncertain.value ? t('page.common.leaveUncertain') : (write.busy.value ? t('page.common.leaveUnsaved') : '')));
+
+function clearAccount(code = '') {
+  account.value = undefined;
+  target.value = undefined;
+  orders.value = [];
+  ledger.value = [];
+  cursors.orders = '';
+  cursors.ledger = '';
+  refunding.value = undefined;
+  reviewing.value = undefined;
+  commerce.value = undefined;
+  write.dismiss();
+  if (code) loadError.value = code;
+}
+
+watch(() => session?.state.value, (state) => {
+  if (state === 'guest') clearAccount();
+});
+watch(() => write.error.value, (code) => {
+  if (code && isDeniedCode(code)) clearAccount(code);
+});
 async function after(result: unknown, message: string) {
   if (result === undefined) return;
   success.value = message;
@@ -228,6 +252,7 @@ const ledgerColumns = computed(() => [
   { key: 'reference', title: t('page.billing.reference') },
 ]);
 const signed = (entry: Account['ledger']['items'][number]) => (entry.asset === 'points' ? money.points(entry.amount) : money.ivory(entry.amount));
+const ledgerKindText = (kind: string) => (te(`page.billing.ledgerKind.${kind}`) ? t(`page.billing.ledgerKind.${kind}`) : (te(`page.billing.kind.${kind}`) ? t(`page.billing.kind.${kind}`) : kind));
 </script>
 
 <template>
@@ -274,7 +299,7 @@ const signed = (entry: Account['ledger']['items'][number]) => (entry.asset === '
               <Table :columns="ledgerColumns" :data-source="ledger" :pagination="false" row-key="id" size="small" :scroll="{ x: 560 }" :locale="{ emptyText: t('page.common.empty') }">
                 <template #bodyCell="{ column, record }">
                   <template v-if="column.key === 'created'">{{ format.dateTime(record.created_at) }}</template>
-                  <template v-else-if="column.key === 'kind'"><code class="text-xs">{{ record.kind }}</code></template>
+                  <template v-else-if="column.key === 'kind'">{{ ledgerKindText(record.kind) }}</template>
                   <template v-else-if="column.key === 'amount'">{{ signed(record as Account['ledger']['items'][number]) }}</template>
                   <template v-else-if="column.key === 'reference'"><code class="break-all text-xs">{{ record.reference }}</code></template>
                 </template>
@@ -326,7 +351,7 @@ const signed = (entry: Account['ledger']['items'][number]) => (entry.asset === '
     </div>
 
     <Modal :open="!!reviewing" :title="t('page.billing.review.title')" :footer="null" :mask-closable="false" destroy-on-close @cancel="reviewing = undefined">
-      <PaymentReview v-if="reviewing && target" :order="reviewing" :target="target" @done="reviewed" />
+      <PaymentReview v-if="reviewing && target" :order="reviewing" :target="target" @done="reviewed" @denied="clearAccount" />
     </Modal>
 
     <Modal :open="!!refunding" :title="t('page.billing.accounts.refundPurchase')" :footer="null" :mask-closable="false" @cancel="!locked && (refunding = undefined)">
