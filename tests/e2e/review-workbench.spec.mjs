@@ -271,9 +271,12 @@ test('moderation decision panel shows target course and term, highlights propose
   // Both newest (#25) and appended older (#4) revisions remain on screen.
   await expect(drawer.getByText('Revision body #25', { exact: true })).toBeVisible();
   await expect(drawer.getByText('Revision body #4', { exact: true })).toBeVisible();
-  await drawer
-    .getByRole('button', { name: all.moderation.latestVersions, exact: true })
-    .click();
+  const latestBtn = drawer.getByRole('button', {
+    name: all.moderation.latestVersions,
+    exact: true,
+  });
+  await latestBtn.scrollIntoViewIfNeeded();
+  await latestBtn.click();
   await expect(drawer.getByText('Revision body #4', { exact: true })).toHaveCount(0);
   await fits(page, info);
 });

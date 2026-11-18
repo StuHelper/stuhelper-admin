@@ -765,7 +765,7 @@ defineExpose({ dirty, busy, uncertain });
                   v-if="versions.next.value"
                   size="small"
                   :loading="versions.appending.value"
-                  @click="versions.loadMore"
+                  @click="() => versions.loadMore()"
                 >
                   {{ t('page.moderation.olderVersions') }}
                 </Button>
@@ -773,7 +773,7 @@ defineExpose({ dirty, busy, uncertain });
                   v-if="versions.items.value.length > pageSize"
                   size="small"
                   :disabled="versions.status.value === 'loading'"
-                  @click="versions.reload"
+                  @click="() => versions.reload()"
                 >
                   {{ t('page.moderation.latestVersions') }}
                 </Button>
