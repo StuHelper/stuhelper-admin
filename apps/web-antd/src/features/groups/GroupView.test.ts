@@ -97,10 +97,13 @@ describe('GroupView route switching, uncertain write locking, and rule localizat
   it('reloads group header and panels when route param id changes, locks modal and leave guard on uncertain command, and localizes hit rules', async () => {
     const groupId = ref('g1');
     let failCommand = true;
+    const posts: Array<[string, null | string]> = [];
+    let resolved = false;
 
     const fetcher: typeof fetch = async (input, init) => {
       const path = new URL(String(input), 'http://localhost').pathname;
       if (init?.method === 'POST' && path.endsWith('/commands')) {
+        posts.push([path, new Headers(init.headers).get('Idempotency-Key')]);
         if (failCommand) {
           return new Response('gateway timeout', { status: 503 });
         }
@@ -126,6 +129,13 @@ describe('GroupView route switching, uncertain write locking, and rule localizat
           items: [makeMember('user-42'), makeMember('user-99')],
           next_cursor: '',
         });
+      }
+      if (path === '/api/v1/groups/g2/actions' && resolved) {
+        return Response.json({ items: [{
+          id: 'act-1', group: 'g2', actor: { issuer: 'issuer', subject: 'admin' },
+          capability: 'groups.read', command: { kind: 'recheck', target: 'user-42' },
+          state: 'succeeded', result: '', created: zero,
+        }], next_cursor: '' });
       }
       if (path.endsWith('/hits')) {
         return Response.json({
@@ -227,6 +237,23 @@ describe('GroupView route switching, uncertain write locking, and rule localizat
     await nextTick();
     expect(document.body.textContent).toContain('user-42');
 
+    groupId.value = 'g1';
+    await vi.waitFor(() => expect(root.textContent).toContain('Algorithms Q&A'));
+    const modalButton = (key: string) =>
+      [...document.querySelectorAll<HTMLButtonElement>('.ant-modal button')].find((b) => b.textContent?.includes(key));
     failCommand = false;
+    expect(modalButton('page.common.retryOriginal')).toBeTruthy();
+    modalButton('page.common.retryOriginal')!.click();
+    await vi.waitFor(() => expect(document.body.textContent).toContain('page.groups.states.unknown'));
+    expect(posts).toHaveLength(2);
+    expect(posts[0]?.[0]).toBe('/api/v1/groups/g2/commands');
+    expect(posts[0]?.[1]).toBeTruthy();
+    expect(posts[1]).toEqual(posts[0]);
+    expect(manageButtons()[0]?.disabled).toBe(true);
+    expect(leaveGuardFn?.()).toBe('blocked');
+    resolved = true;
+    modalButton('page.common.refresh')!.click();
+    await vi.waitFor(() => expect(manageButtons()[0]?.disabled).toBe(false));
+    expect(posts).toHaveLength(2);
   }, 20_000);
 });

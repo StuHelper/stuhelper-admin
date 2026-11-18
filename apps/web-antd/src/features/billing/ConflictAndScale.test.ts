@@ -90,6 +90,10 @@ describe('Conflict comparison, directory tree pagination, AppsView filter advanc
     let offerPoints = 100;
     let eligVersion = '7';
     let bindingRev = 2;
+    let denyInspection = false;
+    let directoryRequests = 0;
+    let peakDirectoryRequests = 0;
+    const appReviews: number[] = [];
 
     const fetcher: typeof fetch = async (input, init) => {
       const url = new URL(String(input), 'http://localhost');
@@ -170,7 +174,16 @@ describe('Conflict comparison, directory tree pagination, AppsView filter advanc
       if (path === '/api/v1/resources/directories') {
         const parent = url.searchParams.get('parent_id') ?? '';
         const after = url.searchParams.get('after') ?? '';
-        if (parent) return Response.json({ items: [], next_cursor: '' });
+        if (parent) {
+          directoryRequests++;
+          peakDirectoryRequests = Math.max(peakDirectoryRequests, directoryRequests);
+          await new Promise((resolve) => setTimeout(resolve, 1));
+          directoryRequests--;
+          const children = /^dir-[1-5]$/.test(parent) ? Array.from({ length: 5 }, (_, i) => ({
+            enabled: true, id: `${parent}-${i}`, names: { 'zh-CN': '子目录' }, revision: 1, school_id: 'buaa',
+          })) : [];
+          return Response.json({ items: children, next_cursor: '' });
+        }
         if (!after) {
           return Response.json({
             items: Array.from({ length: 100 }, (_, i) => ({
@@ -211,6 +224,7 @@ describe('Conflict comparison, directory tree pagination, AppsView filter advanc
 
       // QQ Binding
       if (path === '/api/v1/qq-binding/admin/accounts/acc-1') {
+        if (denyInspection) return Response.json({ code: 'forbidden' }, { status: 403 });
         return Response.json({
           complete: true,
           connect: { bound: true, revision: bindingRev },
@@ -228,6 +242,10 @@ describe('Conflict comparison, directory tree pagination, AppsView filter advanc
       }
 
       // Open Platform Apps
+      if (path === '/api/v1/open-platform/admin/apps/a2/review') {
+        appReviews.push(JSON.parse(String(init?.body)).revision);
+        return Response.json({ code: 'conflict' }, { status: 409 });
+      }
       if (path === '/api/v1/open-platform/admin/apps') {
         const after = url.searchParams.get('after') ?? '';
         const makeApp = (id: string, name: string, state: string) => ({
@@ -252,7 +270,10 @@ describe('Conflict comparison, directory tree pagination, AppsView filter advanc
           });
         }
         return Response.json({
-          items: [makeApp('a2', 'Pending Two', 'pending')],
+          items: [{ ...makeApp('a2', 'Pending Two', 'pending'),
+            revision: appReviews.length > 0 ? 3 : 1,
+            policy: { grant_seconds: 172_800, token_seconds: 1800, daily_quota: 777 },
+          }],
         });
       }
 
@@ -381,6 +402,8 @@ describe('Conflict comparison, directory tree pagination, AppsView filter advanc
       expect(document.body.textContent).toContain('目录 101');
     });
 
+    expect(peakDirectoryRequests).toBeLessThanOrEqual(5);
+
     // 3. A-20 + A-15: EligibilityView passes localized action name and keeps draft on 409 conflict
     view.value = 'eligibility';
     await vi.waitFor(() => {
@@ -404,6 +427,22 @@ describe('Conflict comparison, directory tree pagination, AppsView filter advanc
     await vi.waitFor(() => {
       expect(root.textContent).toContain('Pending Two');
     });
+
+    const button = (where: ParentNode, key: string) =>
+      [...where.querySelectorAll<HTMLButtonElement>('button')].find((item) => item.textContent?.includes(key));
+    button(root, 'page.openPlatform.review')!.click();
+    await vi.waitFor(() => expect(button(document.body, 'page.openPlatform.submit.approve')).toBeTruthy());
+    button(document.body, 'page.openPlatform.submit.approve')!.click();
+    await vi.waitFor(() => expect(button(document.body, 'page.common.reloadCompare')).toBeTruthy());
+    button(document.body, 'page.common.reloadCompare')!.click();
+    await vi.waitFor(() => {
+      const summary = document.querySelector('.ant-drawer .ant-alert-description');
+      expect(summary?.textContent).toContain('page.openPlatform.grantDays');
+      expect(summary?.textContent).toContain('page.openPlatform.tokenMinutes');
+      expect(summary?.textContent).toContain('777');
+    });
+    button(document.body, 'page.openPlatform.submit.approve')!.click();
+    await vi.waitFor(() => expect(appReviews).toEqual([1, 3]));
 
     // 5. A-15: BindingView keeps release modal & reason on 409 qq_binding_revision_conflict
     view.value = 'binding';
@@ -454,6 +493,12 @@ describe('Conflict comparison, directory tree pagination, AppsView filter advanc
       ).toBe('Wrong account');
       expect(document.body.textContent).toContain('page.common.compareNotice');
     });
+
+    confirmReleaseBtn?.click();
+    await vi.waitFor(() => expect(button(document.body, 'page.common.reloadCompare')).toBeTruthy());
+    denyInspection = true;
+    button(document.body, 'page.common.reloadCompare')!.click();
+    await vi.waitFor(() => expect(root.textContent).not.toContain('28******56'));
 
     // 6. A-20: PresentationView does not render an empty Card before the main Card
     view.value = 'presentation';

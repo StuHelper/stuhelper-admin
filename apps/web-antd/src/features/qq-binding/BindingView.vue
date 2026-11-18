@@ -32,18 +32,23 @@ const success = ref('');
 const status = shallowRef<Status>();
 const loading = ref(false);
 const lookupError = ref('');
+let requestVersion = 0;
 async function lookup() {
   const key = owner.value.trim();
   if (!key || loading.value) return;
+  const version = ++requestVersion;
+  shown.value = '';
   loading.value = true;
   lookupError.value = '';
   status.value = undefined;
   success.value = '';
   try {
-    status.value = await api.inspect(key);
+    const current = await api.inspect(key);
+    if (version !== requestVersion) return;
+    status.value = current;
     shown.value = key;
   } catch (error) {
-    lookupError.value = errorCode(error);
+    if (version === requestVersion) lookupError.value = errorCode(error);
   } finally {
     loading.value = false;
   }
@@ -54,21 +59,19 @@ const reason = ref('');
 const comparing = ref(false);
 const release = useMutation();
 const locked = computed(() => release.busy.value || release.uncertain.value);
+function clearInspection() {
+  requestVersion++;
+  status.value = undefined;
+  shown.value = '';
+  releasing.value = undefined;
+  comparing.value = false;
+  reason.value = '';
+}
 watch(session.state, (state, prev) => {
-  if (prev === 'member' && state === 'guest') {
-    status.value = undefined;
-    shown.value = '';
-    releasing.value = undefined;
-    comparing.value = false;
-  }
+  if (prev === 'member' && state === 'guest') clearInspection();
 });
 watch(release.error, (code) => {
-  if (code === 'forbidden' || code === 'unauthenticated') {
-    status.value = undefined;
-    shown.value = '';
-    releasing.value = undefined;
-    comparing.value = false;
-  }
+  if (code === 'forbidden' || code === 'unauthenticated') clearInspection();
 });
 useLeaveGuard(() => (release.uncertain.value ? t('page.common.leaveUncertain') : ((releasing.value && reason.value) || release.busy.value ? t('page.common.leaveUnsaved') : '')));
 function startRelease(part: Part) {
@@ -99,13 +102,19 @@ function released(part: Part, result: Status) {
 }
 async function reloadCompare() {
   if (!shown.value) return;
+  const version = ++requestVersion;
   try {
-    status.value = await api.inspect(shown.value);
+    const refreshed = await api.inspect(shown.value);
+    if (version !== requestVersion) return;
+    status.value = refreshed;
     release.dismiss();
     comparing.value = true;
   } catch (error) {
-    lookupError.value = errorCode(error);
-    releasing.value = undefined;
+    if (version !== requestVersion) return;
+    const code = errorCode(error);
+    lookupError.value = code;
+    if (code === 'forbidden' || code === 'unauthenticated') clearInspection();
+    else releasing.value = undefined;
   }
 }
 const savedPartSummary = computed(() => {

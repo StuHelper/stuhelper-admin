@@ -195,19 +195,23 @@ async function folderTree(school: string) {
       if (!page.next_cursor || page.next_cursor === after) break;
       after = page.next_cursor;
     }
-    for (let i = 0; i < nodes.length && budget > 0; i += concurrency) {
-      const batch = nodes.slice(i, i + concurrency);
-      const childLists = await Promise.all(
-        batch.map((node) => (budget > 0 ? level(node.value) : Promise.resolve([]))),
-      );
-      batch.forEach((node, index) => {
-        const children = childLists[index];
-        if (children && children.length > 0) node.children = children;
-      });
-    }
     return nodes;
   }
-  return level();
+  const roots = await level();
+  const queue = [...roots];
+  for (let index = 0; index < queue.length && budget > 0;) {
+    const batch = queue.slice(index, index + concurrency);
+    index += batch.length;
+    const children = await Promise.all(batch.map((node) => level(node.value)));
+    batch.forEach((parent, offset) => {
+      const list = children[offset];
+      if (list?.length) {
+        parent.children = list;
+        queue.push(...list);
+      }
+    });
+  }
+  return roots;
 }
 function addRule() {
   rows.value = [...rows.value, { school: campus.id.value }];

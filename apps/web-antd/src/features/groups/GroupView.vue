@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Action, Blacklist, GroupConfig, Hit, ManageCommand, Member, Report } from './api';
+import type { Action, Blacklist, CommandResult, GroupConfig, Hit, ManageCommand, Member, Report } from './api';
 
 import { computed, reactive, ref, shallowRef, watch } from 'vue';
 import { RouterLink } from 'vue-router';
@@ -8,10 +8,12 @@ import { useI18n } from '@vben/locales';
 
 import { Alert, Button, Card, Form, FormItem, InputNumber, Modal, Select, TabPane, Tabs, Tag, Textarea } from 'ant-design-vue';
 
-import { useMutation } from '#/shared/composables/async';
+import { ApiError } from '#/shared/api/errors';
+import { useMutation, useTask } from '#/shared/composables/async';
 import { useLeaveGuard } from '#/shared/composables/leave';
 import { useFormat } from '#/shared/format';
 import AdminPage from '#/shared/ui/AdminPage.vue';
+import { useErrorText } from '#/shared/ui/messages';
 import MutationAlert from '#/shared/ui/MutationAlert.vue';
 
 import { isSet, useGroupsAdmin } from './api';
@@ -70,13 +72,16 @@ type Kind = ManageCommand['kind'];
 const memberKinds: Kind[] = ['recheck', 'extend', 'exempt', 'warn', 'mute', 'unmute', 'kick', 'blacklist'];
 const needsText = new Set<Kind>(['blacklist', 'exempt', 'extend', 'warn']);
 const needsSeconds = new Set<Kind>(['extend', 'mute']);
-const draft = reactive({ open: false, target: '', kind: 'recheck' as Kind, text: '', minutes: 60 });
+const draft = reactive({ open: false, group: '', target: '', kind: 'recheck' as Kind, text: '', minutes: 60 });
 const command = useMutation();
 const result = ref('');
-const locked = computed(() => command.busy.value || command.uncertain.value);
+const unknownAction = shallowRef<CommandResult>();
+const lookup = useTask();
+const errorText = useErrorText();
+const locked = computed(() => command.busy.value || command.uncertain.value || !!unknownAction.value);
 const ready = computed(() => (!needsText.has(draft.kind) || !!draft.text.trim()) && (!needsSeconds.has(draft.kind) || draft.minutes > 0));
 useLeaveGuard(() => {
-  if (command.uncertain.value) return t('page.common.leaveUncertain');
+  if (command.uncertain.value || unknownAction.value) return t('page.common.leaveUncertain');
   return command.busy.value ? t('page.common.leaveUnsaved') : '';
 });
 
@@ -87,9 +92,11 @@ watch(
   async (id) => {
     const seq = ++configSeq;
     config.value = undefined;
-    draft.open = false;
-    command.dismiss();
-    result.value = '';
+    if (!locked.value) {
+      draft.open = false;
+      command.dismiss();
+      result.value = '';
+    }
     try {
       const loaded = await api.config(id);
       if (seq === configSeq) config.value = loaded;
@@ -102,7 +109,7 @@ watch(
 
 function start(target: string, kind: Kind = 'recheck') {
   if (locked.value) return;
-  Object.assign(draft, { open: true, target, kind, text: '', minutes: 60 });
+  Object.assign(draft, { open: true, group: props.id, target, kind, text: '', minutes: 60 });
   command.dismiss();
   result.value = '';
 }
@@ -135,15 +142,41 @@ function body(): ManageCommand {
   }
 }
 async function send() {
-  if (!ready.value) return;
-  const value = await command.run(`group-command:${props.id}:${draft.target}`, body(), (payload, key) => api.command(props.id, payload, key));
-  if (value) finish(value.state);
+  if (!ready.value || locked.value || result.value) return;
+  const group = draft.group;
+  const value = await command.run(`group-command:${group}:${draft.target}`, body(), (payload, key) => api.command(group, payload, key));
+  if (value) finish(value);
 }
 async function retry() {
-  const value = (await command.retry()) as undefined | { state: string };
-  if (value) finish(value.state);
+  // This Mutation is used only with GroupsAdmin.command.
+  const value = await command.retry() as CommandResult | undefined;
+  if (value) finish(value);
 }
-function finish(state: string) {
+async function refreshAction() {
+  const action = unknownAction.value;
+  if (!action) return;
+  const current = await lookup.run(async () => {
+    const seen = new Set<string>();
+    let cursor = '';
+    do {
+      seen.add(cursor);
+      const page = await api.actions(draft.group, cursor);
+      const found = page.items.find((item) => item.id === action.id);
+      if (found) return found;
+      cursor = page.next;
+      if (cursor && seen.has(cursor)) throw new ApiError('incompatible');
+    } while (cursor && seen.size < 20);
+    throw new ApiError(cursor ? 'capacity_exceeded' : 'not_found');
+  });
+  if (!current) return;
+  // Only a terminal state confirms the outcome of an action reported as unknown.
+  if (['cancelled', 'failed', 'succeeded'].includes(current.state)) {
+    finish({ ...action, state: current.state });
+  }
+}
+function finish(value: CommandResult) {
+  const state = value.state;
+  unknownAction.value = state === 'unknown' ? value : undefined;
   result.value = t('page.groups.commandSent', { state: label(`page.groups.states.${state}`, state) });
   void panels.members?.reload();
   void panels.actions?.reload();
@@ -220,18 +253,22 @@ function finish(state: string) {
 
     <Modal :open="draft.open" :mask-closable="false" :closable="!locked" :keyboard="!locked" :title="t('page.groups.commandTitle')" :footer="null" destroy-on-close @cancel="closeCommand">
       <Form layout="vertical" @submit.prevent="send">
-        <p class="text-sm">{{ t('page.groups.commandTarget') }} <code class="break-all text-xs">{{ draft.target }}</code></p>
+        <p class="text-sm">{{ t('page.groups.commandTarget') }} <code class="break-all text-xs"><template v-if="draft.group !== id">{{ draft.group }} / </template>{{ draft.target }}</code></p>
         <FormItem :label="t('page.groups.command')" html-for="group-command-kind">
-          <Select id="group-command-kind" v-model:value="draft.kind" :disabled="command.busy.value || command.uncertain.value" :options="(draft.kind === 'unblacklist' ? ['unblacklist'] : memberKinds).map((value) => ({ value, label: t(`page.groups.commands.${value}`) }))" />
+          <Select id="group-command-kind" v-model:value="draft.kind" :disabled="locked" :options="(draft.kind === 'unblacklist' ? ['unblacklist'] : memberKinds).map((value) => ({ value, label: t(`page.groups.commands.${value}`) }))" />
         </FormItem>
         <p class="text-muted-foreground text-xs">{{ t(`page.groups.commandHints.${draft.kind}`) }}</p>
         <FormItem v-if="needsSeconds.has(draft.kind) || draft.kind === 'blacklist'" :label="t(draft.kind === 'blacklist' ? 'page.groups.blacklistMinutes' : 'page.groups.minutes')" html-for="group-command-minutes">
-          <InputNumber id="group-command-minutes" v-model:value="draft.minutes" :min="draft.kind === 'blacklist' ? 0 : 1" :max="draft.kind === 'mute' ? 43200 : 525600" class="w-full" :disabled="command.busy.value || command.uncertain.value" />
+          <InputNumber id="group-command-minutes" v-model:value="draft.minutes" :min="draft.kind === 'blacklist' ? 0 : 1" :max="draft.kind === 'mute' ? 43200 : 525600" class="w-full" :disabled="locked" />
         </FormItem>
         <FormItem v-if="!['recheck', 'unmute', 'unblacklist'].includes(draft.kind)" :label="t('page.groups.reason')" :required="needsText.has(draft.kind)" html-for="group-command-text">
-          <Textarea id="group-command-text" v-model:value="draft.text" :rows="2" :maxlength="1000" :disabled="command.busy.value || command.uncertain.value" />
+          <Textarea id="group-command-text" v-model:value="draft.text" :rows="2" :maxlength="1000" :disabled="locked" />
         </FormItem>
         <MutationAlert :busy="command.busy.value" :error="command.error.value" :uncertain="command.uncertain.value" :success="result" @retry="retry" />
+        <template v-if="unknownAction">
+          <Alert v-if="lookup.error.value" type="error" role="alert" :message="errorText(lookup.error.value)" />
+          <Button :loading="lookup.busy.value" @click="refreshAction">{{ t('page.common.refresh') }}</Button>
+        </template>
         <Button class="mt-3" type="primary" html-type="submit" :danger="['kick', 'blacklist'].includes(draft.kind)" :loading="command.busy.value" :disabled="!ready || command.uncertain.value || !!result">{{ t('page.groups.send') }}</Button>
       </Form>
     </Modal>

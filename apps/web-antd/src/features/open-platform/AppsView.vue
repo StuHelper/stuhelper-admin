@@ -7,12 +7,14 @@ import { useI18n } from '@vben/locales';
 
 import { Alert, Button, Card, Checkbox, CheckboxGroup, Descriptions, DescriptionsItem, Drawer, Form, FormItem, InputNumber, Radio, RadioGroup, Segmented, Table, Tag, Textarea } from 'ant-design-vue';
 
-import { useMutation, usePaged } from '#/shared/composables/async';
+import { ApiError } from '#/shared/api/errors';
+import { useMutation, usePaged, useTask } from '#/shared/composables/async';
 import { useLeaveGuard } from '#/shared/composables/leave';
 import { useFormat } from '#/shared/format';
 import { useSession } from '#/shared/session';
 import AdminPage from '#/shared/ui/AdminPage.vue';
 import LoadState from '#/shared/ui/LoadState.vue';
+import { useErrorText } from '#/shared/ui/messages';
 import MutationAlert from '#/shared/ui/MutationAlert.vue';
 
 import { policyLimits, scopes, useOpenPlatformAdmin } from './api';
@@ -25,6 +27,8 @@ import { policyLimits, scopes, useOpenPlatformAdmin } from './api';
 type Filter = 'all' | Application['state'];
 const { t } = useI18n();
 const format = useFormat();
+const errorText = useErrorText();
+const comparison = useTask();
 const api = useOpenPlatformAdmin();
 const session = useSession();
 const apps = usePaged<Application>((after, signal) => api.apps(after, signal));
@@ -74,8 +78,9 @@ watch(session.state, (state, prev) => {
   }
 });
 
-watch([apps.error, review.error], ([loadErr, writeErr]) => {
+watch([apps.error, review.error, comparison.error], ([loadErr, writeErr, compareErr]) => {
   if (
+    compareErr === 'forbidden' || compareErr === 'unauthenticated' ||
     loadErr === 'forbidden' ||
     loadErr === 'unauthenticated' ||
     writeErr === 'forbidden' ||
@@ -128,7 +133,7 @@ function close() {
 }
 async function submit() {
   const app = selected.value;
-  if (!app || !valid.value) return;
+  if (!app || !valid.value || comparison.busy.value || review.error.value === 'conflict') return;
   const body: ReviewInput = {
     revision: app.revision,
     decision: form.decision,
@@ -152,12 +157,26 @@ function reviewed(app: Application) {
   success.value = t(`page.openPlatform.reviewed.${app.state}`);
 }
 async function reloadCompare() {
-  await reloadApps();
-  const current = apps.items.value.find((item) => item.id === selected.value?.id);
-  if (current) {
-    selected.value = current;
-    baseline.value = JSON.stringify(appFormState(current));
-  }
+  const original = selected.value;
+  if (!original) return;
+  const current = await comparison.run(async () => {
+    const seen = new Set<string>();
+    let after = '';
+    do {
+      seen.add(after);
+      const page = await api.apps(after);
+      if (selected.value !== original) return;
+      const match = page.items.find((item) => item.id === original.id);
+      if (match) return match;
+      after = page.next;
+      if (seen.has(after) && after) throw new ApiError('incompatible');
+    } while (after && seen.size < 100);
+    throw new ApiError(after ? 'capacity_exceeded' : 'not_found');
+  });
+  if (!current || selected.value !== original) return;
+  selected.value = current;
+  apps.items.value = apps.items.value.map((item) => item.id === current.id ? current : item);
+  baseline.value = JSON.stringify(appFormState(current));
   review.dismiss();
   comparing.value = true;
 }
@@ -168,6 +187,9 @@ const savedAppSummary = computed(() => {
   return [
     t(`page.openPlatform.state.${app.state}`),
     approvedText,
+    `${t('page.openPlatform.grantDays')} ${format.value.number(app.policy.grant_seconds / 86_400)}`,
+    `${t('page.openPlatform.tokenMinutes')} ${format.value.number(app.policy.token_seconds / 60)}`,
+    `${t('page.openPlatform.dailyQuota')} ${format.value.number(app.policy.daily_quota)}`,
     app.note,
   ]
     .filter(Boolean)
@@ -270,12 +292,13 @@ const columns = computed(() => [
           <FormItem :label="t(noteRequired ? 'page.openPlatform.noteRequired' : 'page.openPlatform.noteOptional')" :required="noteRequired" html-for="open-platform-note">
             <Textarea id="open-platform-note" v-model:value="form.note" :rows="3" :maxlength="1000" :disabled="review.busy.value || review.uncertain.value" />
           </FormItem>
+          <Alert v-if="review.error.value === 'conflict' && comparison.error.value" type="error" role="alert" :message="errorText(comparison.error.value)" />
           <MutationAlert :busy="review.busy.value" :error="review.error.value" :uncertain="review.uncertain.value" :success="success" @retry="retry" />
           <div class="mt-4 flex flex-wrap gap-2">
-            <Button type="primary" html-type="submit" :danger="form.decision === 'suspend'" :loading="review.busy.value" :disabled="!valid || review.uncertain.value">
+            <Button type="primary" html-type="submit" :danger="form.decision === 'suspend'" :loading="review.busy.value" :disabled="!valid || review.uncertain.value || review.error.value === 'conflict'">
               {{ t(`page.openPlatform.submit.${form.decision}`) }}
             </Button>
-            <Button v-if="review.error.value === 'conflict'" :disabled="review.busy.value" @click="reloadCompare">{{ t('page.common.reloadCompare') }}</Button>
+            <Button v-if="review.error.value === 'conflict'" :loading="comparison.busy.value" @click="reloadCompare">{{ t('page.common.reloadCompare') }}</Button>
           </div>
         </Form>
       </div>
