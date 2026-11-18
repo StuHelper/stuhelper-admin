@@ -372,7 +372,21 @@
     },
     "autoNext": "Open next after deciding",
     "previous": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "target": "Target item",
+    "term": "Academic term",
+    "proposedEdit": "Author proposed text changes",
+    "showDiff": "Highlight changes",
+    "showPlain": "Show proposed text only",
+    "latestVersions": "Back to latest versions",
+    "presetsLabel": "Quick reason templates",
+    "presets": {
+      "approved": "Meets community guidelines and is approved.",
+      "abuse": "Contains personal attacks or inappropriate language.",
+      "spam": "Contains promotional spam or off-topic content.",
+      "privacy": "Discloses private personal or sensitive information.",
+      "unsubstantiated": "Insufficient evidence of a policy violation."
+    }
   },
   "catalog": {
     "title": "Course and teacher records",
@@ -596,6 +610,22 @@
       "points": "Points price",
       "ivory": "Ivory price",
       "save": "Save price"
+    },
+    "previewFile": "Preview file inline",
+    "hidePreview": "Hide preview",
+    "previewTooLarge": "File exceeds the 15 MB inline preview limit; download it to inspect.",
+    "previewUnsupported": "Inline preview is unavailable for this format; download the file instead.",
+    "rotateLeft": "Rotate left",
+    "rotateRight": "Rotate right",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "resetView": "Reset view",
+    "presets": {
+      "approved": "File is readable and origin metadata is verified.",
+      "copyright": "Missing clear source or license statement; please supplement.",
+      "corrupted": "File is corrupted, incomplete or illegible; please re-upload.",
+      "duplicate": "An identical resource already exists in this directory.",
+      "mismatch": "File content does not match the stated title, course or category."
     }
   },
   "verification": {
@@ -770,6 +800,13 @@
       "self_reported": "User supplied",
       "legacy_credential": "Historical verification",
       "synthetic": "Synthetic test data"
+    },
+    "presets": {
+      "blurry": "Document photo is blurry or occluded; please upload a clear original photo.",
+      "unregistered": "Missing valid current-term registration page or stamp; please supplement.",
+      "mismatch": "Submitted name, ID or department does not match the document.",
+      "wrongType": "Uploaded document type is not accepted for this school.",
+      "teacherProof": "Missing valid employment or teaching proof; please supplement."
     }
   },
   "storage": {

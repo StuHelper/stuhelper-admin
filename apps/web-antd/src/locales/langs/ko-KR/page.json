@@ -372,7 +372,21 @@
     },
     "autoNext": "처리 후 다음으로",
     "previous": "이전",
-    "next": "다음"
+    "next": "다음",
+    "target": "평가 대상",
+    "term": "개설 학기",
+    "proposedEdit": "작성자 수정 요청 본문 비교",
+    "showDiff": "변경 부분 강조",
+    "showPlain": "수정 본문만 보기",
+    "latestVersions": "최신 버전으로 돌아가기",
+    "presetsLabel": "자주 쓰는 사유 템플릿",
+    "presets": {
+      "approved": "커뮤니티 운영 기준에 부합하여 승인합니다.",
+      "abuse": "인신공격이나 부적절한 표현이 포함되어 있습니다.",
+      "spam": "광고성 홍보 또는 주제와 무관한 도배 내용입니다.",
+      "privacy": "비공개 개인정보나 민감한 정보가 노출되어 있습니다.",
+      "unsubstantiated": "규정 위반을 확인할 수 있는 근거가 부족합니다."
+    }
   },
   "catalog": {
     "title": "강의 및 교수 정보 관리",
@@ -596,6 +610,22 @@
       "points": "포인트 가격",
       "ivory": "Ivory 가격",
       "save": "가격 저장"
+    },
+    "previewFile": "파일 내장 미리보기",
+    "hidePreview": "미리보기 닫기",
+    "previewTooLarge": "파일이 15MB 미리보기 한도를 초과하므로 직접 다운로드하여 확인하세요.",
+    "previewUnsupported": "이 형식은 내장 미리보기를 지원하지 않습니다. 다운로드하여 확인하세요.",
+    "rotateLeft": "왼쪽으로 회전",
+    "rotateRight": "오른쪽으로 회전",
+    "zoomIn": "확대",
+    "zoomOut": "축소",
+    "resetView": "보기 초기화",
+    "presets": {
+      "approved": "파일 상태와 출처 및 분류를 확인하여 승인합니다.",
+      "copyright": "출처 또는 라이선스 표기가 누락되었습니다. 보완 후 다시 제출해 주세요.",
+      "corrupted": "파일이 손상되었거나 식별하기 어렵습니다. 다시 업로드해 주세요.",
+      "duplicate": "동일한 자료가 이미 해당 디렉터리에 등록되어 있습니다.",
+      "mismatch": "파일의 실제 내용이 제목, 과목 또는 분류와 일치하지 않습니다."
     }
   },
   "verification": {
@@ -770,6 +800,13 @@
       "self_reported": "사용자 입력",
       "legacy_credential": "기존 인증 정보",
       "synthetic": "합성 테스트 정보"
+    },
+    "presets": {
+      "blurry": "증빙 사진이 흐리거나 주요 정보가 가려져 있습니다. 선명한 원본을 다시 제출해 주세요.",
+      "unregistered": "이번 학기 유효한 등록 확인 페이지나 직인이 없습니다. 보완 제출해 주세요.",
+      "mismatch": "입력한 이름, 학번 또는 소속이 증빙 서류와 일치하지 않습니다.",
+      "wrongType": "업로드한 서류 유형은 해당 학교의 인정 대상이 아닙니다.",
+      "teacherProof": "재직 또는 강의 담당을 확인할 수 있는 증빙이 부족합니다. 보완 제출해 주세요."
     }
   },
   "storage": {

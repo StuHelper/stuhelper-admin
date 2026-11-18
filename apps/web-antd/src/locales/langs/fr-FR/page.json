@@ -372,7 +372,21 @@
     },
     "autoNext": "Ouvrir le suivant après décision",
     "previous": "Précédent",
-    "next": "Suivant"
+    "next": "Suivant",
+    "target": "Objet évalué",
+    "term": "Semestre universitaire",
+    "proposedEdit": "Modifications proposées par l’auteur",
+    "showDiff": "Surligner les écarts",
+    "showPlain": "Afficher uniquement le nouveau texte",
+    "latestVersions": "Revenir aux versions récentes",
+    "presetsLabel": "Modèles de motifs fréquents",
+    "presets": {
+      "approved": "Conforme aux règles de la communauté, publication validée.",
+      "abuse": "Contient des attaques personnelles ou des propos inappropriés.",
+      "spam": "Contient de la publicité ou du contenu hors sujet.",
+      "privacy": "Divulgue des données personnelles ou sensibles non publiques.",
+      "unsubstantiated": "Signalement non étayé, aucune infraction constatée."
+    }
   },
   "catalog": {
     "title": "Gestion des cours et enseignants",
@@ -596,6 +610,22 @@
       "points": "Prix en points",
       "ivory": "Prix en Ivory",
       "save": "Enregistrer le prix"
+    },
+    "previewFile": "Aperçu intégré du fichier",
+    "hidePreview": "Masquer l’aperçu",
+    "previewTooLarge": "Le fichier dépasse la limite d’aperçu intégré de 15 Mo ; veuillez le télécharger.",
+    "previewUnsupported": "Ce format ne prend pas en charge l’aperçu intégré ; téléchargez le fichier.",
+    "rotateLeft": "Pivoter à gauche",
+    "rotateRight": "Pivoter à droite",
+    "zoomIn": "Agrandir",
+    "zoomOut": "Réduire",
+    "resetView": "Réinitialiser la vue",
+    "presets": {
+      "approved": "Fichier lisible, source et catégorie vérifiées.",
+      "copyright": "Mention de source ou de licence manquante ; veuillez compléter.",
+      "corrupted": "Fichier endommagé, incomplet ou illisible ; veuillez le téléverser à nouveau.",
+      "duplicate": "Une ressource identique existe déjà dans ce dossier.",
+      "mismatch": "Le contenu du fichier ne correspond pas au titre, au cours ou à la catégorie."
     }
   },
   "verification": {
@@ -770,6 +800,13 @@
       "self_reported": "Saisi par l’utilisateur",
       "legacy_credential": "Vérification historique",
       "synthetic": "Données de test synthétiques"
+    },
+    "presets": {
+      "blurry": "La photo du justificatif est floue ou masquée ; veuillez fournir une image nette.",
+      "unregistered": "Page d’inscription ou cachet du semestre en cours manquant ; veuillez compléter.",
+      "mismatch": "Le nom, le numéro ou le département saisi ne correspond pas au justificatif.",
+      "wrongType": "Ce type de justificatif n’est pas accepté pour cet établissement.",
+      "teacherProof": "Justificatif d’emploi ou d’enseignement manquant ; veuillez compléter."
     }
   },
   "storage": {

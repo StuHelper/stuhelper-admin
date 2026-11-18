@@ -1,7 +1,7 @@
 import type { components } from '#/api/verification.gen'
 
 import { ApiError, isUncertain } from '#/shared/api/errors'
-import { type Http, readLimited, segment } from '#/shared/api/http'
+import { type Http, readLimited, saveBlob, segment } from '#/shared/api/http'
 import { useHttp } from '#/shared/session'
 
 export type Schemas = components['schemas']
@@ -113,6 +113,18 @@ export class VerificationApi {
     return true
   }
 
+  async downloadMaterial(applicationId: string, id: string, size?: number) {
+    if (size === undefined) {
+      const page = await this.list('Material', `/api/v1/verification/applications/${segment(applicationId)}/materials`, { limit: 100 })
+      const material = page.items.find((item) => item.id === id && item.application_id === applicationId)
+      if (!material) throw new ApiError('not_found')
+      size = material.size
+    }
+    const blob = await this.material(id, undefined, size)
+    const extension = blob.type === 'application/pdf' ? 'pdf' : (blob.type === 'image/png' ? 'png' : 'jpg')
+    saveBlob(blob, `${id}.${extension}`)
+  }
+
   async get<K extends Entity>(kind: K, path: string, signal?: AbortSignal): Promise<Schemas[K]> {
     return this.http.json(path, (value) => parseEntity(kind, value), { signal, timeout: 25_000 })
   }
@@ -128,8 +140,9 @@ export class VerificationApi {
     return { items, next: items.length === limit && last && 'id' in last ? String(last.id) : '' }
   }
 
-  async material(id: string, signal?: AbortSignal): Promise<Blob> {
-    const blob = await this.http.blob(`/api/v1/verification/materials/${segment(id)}`, 16 << 20, { signal })
+  async material(id: string, signal?: AbortSignal, limit = 16 << 20): Promise<Blob> {
+    if (!count(limit)) throw new ApiError('incompatible')
+    const blob = await this.http.blob(`/api/v1/verification/materials/${segment(id)}`, limit, { signal })
     if (!['application/pdf', 'image/jpeg', 'image/png'].includes(blob.type)) throw new ApiError('incompatible')
     return blob
   }
