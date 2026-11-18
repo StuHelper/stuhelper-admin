@@ -122,7 +122,8 @@
     "disabled": "هذه الميزة غير مفعّلة.",
     "cooldown": "محاولات كثيرة جدًا. حاول مرة أخرى بعد قليل.",
     "billing_already_accessible": "يمكن لهذا المستخدم الوصول إلى المورد بالفعل، ولا حاجة إلى الشراء.",
-    "invalid_rule": "مجموعة الشروط هذه غير صالحة. عدّلها ثم احفظ مرة أخرى."
+    "invalid_rule": "مجموعة الشروط هذه غير صالحة. عدّلها ثم احفظ مرة أخرى.",
+    "import_conflict": "تغيّرت بيانات الدليل بعد المعاينة؛ أنشئ معاينة جديدة قبل التأكيد."
   },
   "session": {
     "signIn": "تسجيل الدخول",
@@ -427,7 +428,43 @@
       "applied": "نُفذ"
     },
     "confirmImport": "تأكيد الاستيراد",
-    "imported": "اكتمل الاستيراد: الكائنات {objects}، التسجيلات {enrollments}، التصحيحات المحفوظة {preserved}."
+    "imported": "اكتمل الاستيراد: الكائنات {objects}، التسجيلات {enrollments}، التصحيحات المحفوظة {preserved}.",
+    "kinds": {
+      "school": "الجامعة",
+      "department": "القسم",
+      "category": "فئة المقرر",
+      "nature": "طبيعة المقرر",
+      "term": "الفصل الدراسي",
+      "course": "المقرر",
+      "teacher": "عضو هيئة التدريس",
+      "term_course": "طرح فصلي",
+      "class": "الشعبة الدراسية",
+      "assignment": "إسناد تدريسي",
+      "schedule": "جدول المحاضرات",
+      "enrollment": "سجل التسجيل"
+    },
+    "importFields": {
+      "name": "الاسم",
+      "code": "الرمز",
+      "department_id": "القسم التابع",
+      "category_id": "فئة المقرر",
+      "nature_id": "طبيعة المقرر",
+      "course_id": "المقرر المرتبط",
+      "term_id": "الفصل المرتبط",
+      "term_course_id": "الطرح المرتبط",
+      "class_id": "الشعبة المرتبطة",
+      "teacher_id": "المدرّس المرتبط",
+      "credits": "الساعات المعتمدة",
+      "hours": "الساعات الدراسية",
+      "english_name": "الاسم الإنجليزي",
+      "former_codes": "الرموز السابقة",
+      "former_names": "الأسماء السابقة",
+      "biography": "النبذة",
+      "location": "القاعة",
+      "time_text": "نص الموعد",
+      "aliases": "أسماء أخرى",
+      "schedule_time": "الفترات المنظمة"
+    }
   },
   "resources": {
     "manageTitle": "إدارة المواد",
@@ -645,7 +682,8 @@
       "student": "طالب حالي",
       "alumni": "خريج",
       "newcomer": "طالب جديد بصفة مؤقتة",
-      "unknown": "غير مقدم"
+      "unknown": "غير مقدم",
+      "teacher": "عضو هيئة تدريس"
     },
     "states": {
       "in_progress": "قيد الإعداد",
@@ -1203,6 +1241,15 @@
       "anyCategory": "كل التصنيفات",
       "removeRule": "حذف القاعدة",
       "addRule": "إضافة قاعدة"
+    },
+    "ledgerKind": {
+      "reward": "منح مكافأة",
+      "reward_revoke": "استرداد مكافأة",
+      "commerce_refund": "استرداد طلب",
+      "membership_grant": "عضوية ممنوحة",
+      "expired": "انتهاء صلاحية النقاط",
+      "debt_repayment": "تسوية النقاط المستحقة",
+      "closure": "تصفية إغلاق الحساب"
     }
   },
   "access": {
@@ -1470,6 +1517,14 @@
       "noncompliant": "مخالفة",
       "compliant": "مطابق",
       "pending_profile": "بحاجة إلى بيانات الملف"
+    },
+    "ruleKinds": {
+      "keyword": "كلمة مفتاحية",
+      "link": "رابط خارجي",
+      "frequency": "معدل الرسائل",
+      "repeat": "رسالة مكررة",
+      "card": "بطاقة المجموعة",
+      "warning_limit": "حد التحذيرات"
     },
     "states": {
       "pending": "بالانتظار",

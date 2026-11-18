@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import type { Audit, AuditPage, AuditQuery } from './api';
 
-import { computed, onMounted, reactive, ref, shallowRef } from 'vue';
+import { computed, getCurrentInstance, inject, onMounted, reactive, ref, shallowRef, watch } from 'vue';
 
 import { useI18n } from '@vben/locales';
 
 import { Alert, Button, Card, DatePicker, Form, FormItem, Input, Select, Table, Tag } from 'ant-design-vue';
 
-import { errorCode } from '#/shared/api/errors';
+import { ApiError, errorCode } from '#/shared/api/errors';
 import { useFormat } from '#/shared/format';
+import { sessionKey } from '#/shared/session';
 import AdminPage from '#/shared/ui/AdminPage.vue';
 import LoadState from '#/shared/ui/LoadState.vue';
 import { useErrorText } from '#/shared/ui/messages';
@@ -24,6 +25,7 @@ const { t, te } = useI18n();
 const format = useFormat();
 const api = useAccessAdmin();
 const errorText = useErrorText();
+const session = getCurrentInstance() ? inject(sessionKey, undefined) : undefined;
 const sources = ['platform', 'catalog', 'reviews', 'moderation', 'resources', 'verification', 'billing', 'qq-binding', 'open-platform', 'storage'];
 
 const filter = reactive({ sources: [] as string[], actor: '', target: '', action: '', from: undefined as string | undefined, until: undefined as string | undefined });
@@ -48,6 +50,8 @@ async function search() {
     status.value = 'ready';
   } catch (error) {
     loadError.value = errorCode(error);
+    items.value = [];
+    page.value = undefined;
     status.value = 'error';
   }
 }
@@ -61,10 +65,21 @@ async function more() {
     items.value = [...items.value, ...page.value.items];
   } catch (error) {
     loadError.value = errorCode(error);
+    if (error instanceof ApiError && error.denied) {
+      items.value = [];
+      page.value = undefined;
+      status.value = 'error';
+    }
   } finally {
     appending.value = false;
   }
 }
+watch(() => session?.state.value, (state) => {
+  if (state === 'guest') {
+    items.value = [];
+    page.value = undefined;
+  }
+});
 onMounted(search);
 
 const resultColor: Record<string, string> = { success: 'green', denied: 'orange', failed: 'red', unknown: 'default' };

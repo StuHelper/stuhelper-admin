@@ -122,7 +122,8 @@
     "disabled": "Cette fonctionnalité n’est pas activée.",
     "cooldown": "Trop de tentatives. Réessayez dans un instant.",
     "billing_already_accessible": "Cet utilisateur a déjà accès à la ressource ; aucun achat n'est nécessaire.",
-    "invalid_rule": "Cette combinaison de conditions n'est pas valide. Modifiez-la puis enregistrez."
+    "invalid_rule": "Cette combinaison de conditions n'est pas valide. Modifiez-la puis enregistrez.",
+    "import_conflict": "Les données du catalogue ont changé depuis l’aperçu ; générez un nouvel aperçu avant de confirmer."
   },
   "session": {
     "signIn": "Se connecter",
@@ -427,7 +428,43 @@
       "applied": "Appliqué"
     },
     "confirmImport": "Confirmer l’import",
-    "imported": "Import terminé : objets {objects}, inscriptions {enrollments}, corrections conservées {preserved}."
+    "imported": "Import terminé : objets {objects}, inscriptions {enrollments}, corrections conservées {preserved}.",
+    "kinds": {
+      "school": "Établissement",
+      "department": "Département",
+      "category": "Catégorie de cours",
+      "nature": "Nature du cours",
+      "term": "Semestre",
+      "course": "Cours",
+      "teacher": "Enseignant",
+      "term_course": "Session de cours",
+      "class": "Groupe d’enseignement",
+      "assignment": "Affectation d’enseignement",
+      "schedule": "Horaire de cours",
+      "enrollment": "Inscription au cours"
+    },
+    "importFields": {
+      "name": "Intitulé",
+      "code": "Code d’objet",
+      "department_id": "Département rattaché",
+      "category_id": "Catégorie rattachée",
+      "nature_id": "Nature rattachée",
+      "course_id": "Cours associé",
+      "term_id": "Semestre associé",
+      "term_course_id": "Session associée",
+      "class_id": "Groupe associé",
+      "teacher_id": "Enseignant associé",
+      "credits": "Nombre de crédits",
+      "hours": "Volume horaire",
+      "english_name": "Intitulé anglais",
+      "former_codes": "Anciens codes",
+      "former_names": "Anciens intitulés",
+      "biography": "Présentation",
+      "location": "Salle",
+      "time_text": "Horaire textuel",
+      "aliases": "Autres noms",
+      "schedule_time": "Créneaux structurés"
+    }
   },
   "resources": {
     "manageTitle": "Gestion des ressources",
@@ -645,7 +682,8 @@
       "student": "Étudiant inscrit",
       "alumni": "Ancien étudiant",
       "newcomer": "Nouvel étudiant temporaire",
-      "unknown": "Non fourni"
+      "unknown": "Non fourni",
+      "teacher": "Enseignant"
     },
     "states": {
       "in_progress": "En cours",
@@ -1203,6 +1241,15 @@
       "anyCategory": "Toutes les catégories",
       "removeRule": "Supprimer la règle",
       "addRule": "Ajouter une règle"
+    },
+    "ledgerKind": {
+      "reward": "Octroi de récompense",
+      "reward_revoke": "Révocation de récompense",
+      "commerce_refund": "Remboursement de commande",
+      "membership_grant": "Abonnement accordé",
+      "expired": "Expiration de points",
+      "debt_repayment": "Compensation de dette",
+      "closure": "Clôture de compte"
     }
   },
   "access": {
@@ -1470,6 +1517,14 @@
       "noncompliant": "Infraction",
       "compliant": "Conforme",
       "pending_profile": "Profil à compléter"
+    },
+    "ruleKinds": {
+      "keyword": "Mot-clé",
+      "link": "Lien externe",
+      "frequency": "Fréquence des messages",
+      "repeat": "Message répété",
+      "card": "Carte de groupe",
+      "warning_limit": "Seuil d’avertissement"
     },
     "states": {
       "pending": "En file",

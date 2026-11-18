@@ -122,7 +122,8 @@
     "disabled": "この機能はまだ有効になっていません。",
     "cooldown": "操作が多すぎます。しばらくしてから再試行してください。",
     "billing_already_accessible": "この利用者はすでに資料にアクセスできるため、購入は不要です。",
-    "invalid_rule": "条件の組み合わせが無効です。調整してから保存してください。"
+    "invalid_rule": "条件の組み合わせが無効です。調整してから保存してください。",
+    "import_conflict": "プレビュー後にカタログデータが変更されました。再度プレビューを作成してから確定してください。"
   },
   "session": {
     "signIn": "ログイン",
@@ -427,7 +428,43 @@
       "applied": "適用済み"
     },
     "confirmImport": "インポートを確定",
-    "imported": "取り込み完了：目録 {objects}、履修 {enrollments}、保持した手動修正 {preserved}。"
+    "imported": "取り込み完了：目録 {objects}、履修 {enrollments}、保持した手動修正 {preserved}。",
+    "kinds": {
+      "school": "大学",
+      "department": "学部・学科",
+      "category": "科目区分",
+      "nature": "科目種別",
+      "term": "学期",
+      "course": "科目",
+      "teacher": "教員",
+      "term_course": "学期開講",
+      "class": "クラス",
+      "assignment": "担当割当",
+      "schedule": "時間割",
+      "enrollment": "履修記録"
+    },
+    "importFields": {
+      "name": "名称",
+      "code": "コード",
+      "department_id": "所属学部",
+      "category_id": "科目区分",
+      "nature_id": "科目種別",
+      "course_id": "対象科目",
+      "term_id": "対象学期",
+      "term_course_id": "対象開講",
+      "class_id": "対象クラス",
+      "teacher_id": "担当教員",
+      "credits": "単位数",
+      "hours": "時間数",
+      "english_name": "英語名称",
+      "former_codes": "旧コード",
+      "former_names": "旧名称",
+      "biography": "紹介",
+      "location": "教室",
+      "time_text": "時間表記",
+      "aliases": "別名",
+      "schedule_time": "時限データ"
+    }
   },
   "resources": {
     "manageTitle": "資料管理",
@@ -645,7 +682,8 @@
       "student": "在学生",
       "alumni": "卒業生",
       "newcomer": "新入生の仮資格",
-      "unknown": "未提供"
+      "unknown": "未提供",
+      "teacher": "教員"
     },
     "states": {
       "in_progress": "入力中",
@@ -1203,6 +1241,15 @@
       "anyCategory": "すべての分類",
       "removeRule": "ルールを削除",
       "addRule": "ルールを追加"
+    },
+    "ledgerKind": {
+      "reward": "報酬付与",
+      "reward_revoke": "報酬回収",
+      "commerce_refund": "注文の返金",
+      "membership_grant": "会員資格の付与",
+      "expired": "ポイント失効",
+      "debt_repayment": "未控除ポイントの相殺",
+      "closure": "退会精算"
     }
   },
   "access": {
@@ -1470,6 +1517,14 @@
       "noncompliant": "違反",
       "compliant": "適合",
       "pending_profile": "情報補足待ち"
+    },
+    "ruleKinds": {
+      "keyword": "キーワード",
+      "link": "外部リンク",
+      "frequency": "投稿頻度",
+      "repeat": "連投メッセージ",
+      "card": "グループ名刺",
+      "warning_limit": "警告上限"
     },
     "states": {
       "pending": "実行待ち",

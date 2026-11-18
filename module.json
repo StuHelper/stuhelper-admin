@@ -37,7 +37,8 @@
       "tests/e2e/resources.spec.mjs#grant creation and revocation retain the subject and respect current permissions"
     ],
     "RES-ADMIN-04": [
-      "tests/e2e/resources.spec.mjs#directory editing saves revision and configured names"
+      "tests/e2e/resources.spec.mjs#directory editing saves revision and configured names",
+      "apps/web-antd/src/features/academic/CatalogScale.test.ts#resolves directory course names via batch lookup and searches >1000 merge targets without 10-page options() failure"
     ],
     "RES-CLIENT-07": [
       "apps/web-antd/src/features/resources/api.test.ts#requests safe reuse and never sends bytes for reused or still pending content"
@@ -50,7 +51,8 @@
       "tests/e2e/commerce.spec.mjs#stopping sales asks for confirmation and keeps the plan listed as not on sale"
     ],
     "WP-ADMIN-02": [
-      "tests/e2e/commerce.spec.mjs#coverage rules are saved with the revision that was read"
+      "tests/e2e/commerce.spec.mjs#coverage rules are saved with the revision that was read",
+      "apps/web-antd/src/features/billing/ConflictAndScale.test.ts#preserves drafts and shows server comparison on 409 conflict, paginates >100 folders in MembershipsView, auto-advances AppsView past filtered pages, localizes EligibilityView action names, and omits empty Card in PresentationView"
     ],
     "WP-ADMIN-03": [
       "tests/e2e/commerce.spec.mjs#an administrator grants a membership and refunds a resource unlock in full",
@@ -58,7 +60,8 @@
     ],
     "WP-ADMIN-04": [
       "tests/e2e/commerce.spec.mjs#payee details are read only on request and a missing record is stated",
-      "tests/e2e/commerce.spec.mjs#a refund without payee details says so"
+      "tests/e2e/commerce.spec.mjs#a refund without payee details says so",
+      "tests/e2e/commerce.spec.mjs#payee details and refund queue clear immediately when permission is revoked"
     ],
     "AE-ADMIN-01": [
       "tests/e2e/eligibility.spec.mjs#a school rule for buying resources is saved with the version read and leaves downloads unchanged"
@@ -71,7 +74,11 @@
     ],
     "CAP-01": [
       "tests/e2e/capabilities.spec.mjs#disabled module direct routes never mount business pages",
-      "tests/e2e/capabilities.spec.mjs#menus follow deployment capabilities and discovery failure keeps entries"
+      "tests/e2e/capabilities.spec.mjs#menus follow deployment capabilities and discovery failure keeps entries",
+      "tests/e2e/layout-shell.spec.mjs#disabled module routes set the unavailable document title instead of exposing disabled module names"
+    ],
+    "I18N-06": [
+      "tests/e2e/layout-shell.spec.mjs#switching language preserves pending writes, original idempotency key, RTL direction and bundled header controls"
     ],
     "SESSION-AVAILABILITY-01": [
       "apps/web-antd/src/shared/session.test.ts#coalesces 25 failures, waits with bounded backoff and preserves the signed-in snapshot"
@@ -79,11 +86,17 @@
     "SESSION-AVAILABILITY-02": [
       "apps/web-antd/src/shared/session.test.ts#the retry component backs off and leaves an in-progress form mounted",
       "apps/web-antd/src/shared/session.test.ts#clears the snapshot after an explicit rejection even after an outage",
-      "apps/web-antd/src/shared/session.test.ts#does not restore a session when an in-flight check completes after a 401"
+      "apps/web-antd/src/shared/session.test.ts#does not restore a session when an in-flight check completes after a 401",
+      "apps/web-antd/src/shared/session.test.ts#cancels a pending backoff wait on invalidate so the next reload checks immediately, and backs off on 502/504"
     ],
     "SESSION-MANAGEMENT-01": [
       "tests/e2e/session-policy.spec.mjs#session settings preserve edits on conflict and revoke only the confirmed subject",
-      "tests/e2e/session-policy.spec.mjs#session settings show a retryable outage without losing input"
+      "tests/e2e/session-policy.spec.mjs#session settings show a retryable outage without losing input",
+      "apps/web-antd/src/features/sessions/SessionSettingsView.test.ts#sends Idempotency-Key, rejects revoke { success: false }, and retries uncertain writes with the original key"
+    ],
+    "AO-04": [
+      "apps/web-antd/src/features/verification/VerificationView.test.ts#recovers from initial access error, blocks javascript: suggestion links, assigns unique form IDs, wipes profile on 403, and locks uncertain writes",
+      "apps/web-antd/src/shared/api/errors.test.ts#marks HTTP 401/403 and module-prefixed auth error codes as denied while preserving exact code strings"
     ],
     "CM-19": [
       "tests/e2e/feedback.spec.mjs#feedback reply refresh cannot overwrite another operators note with a newer revision",

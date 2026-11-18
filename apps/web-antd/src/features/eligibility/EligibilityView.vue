@@ -55,15 +55,18 @@ onMounted(load);
 // elsewhere meanwhile is rejected and the table is read again.
 const editing = shallowRef<{ action: Action; rule: Rule; scope: 'school' | 'site' }>();
 const chosen = ref<Condition[]>([]);
+const comparing = ref(false);
 const write = useMutation();
 const success = ref('');
 const locked = computed(() => write.busy.value || write.uncertain.value);
 const dirty = computed(() => !!editing.value && chosen.value.toSorted().join(',') !== editing.value.rule.conditions.toSorted().join(','));
+const actionLabel = (action: Action) => t(`page.eligibility.actions.${action.replaceAll('.', '_')}`);
 useLeaveGuard(() => (write.uncertain.value ? t('page.common.leaveUncertain') : (dirty.value || write.busy.value ? t('page.common.leaveUnsaved') : '')));
 
 function edit(action: Action, scope: 'school' | 'site', rule: Rule) {
   editing.value = { action, scope, rule };
   chosen.value = [...rule.conditions];
+  comparing.value = false;
   success.value = '';
   write.dismiss();
 }
@@ -89,9 +92,28 @@ async function retry() {
 async function saved(result: Rule) {
   const current = editing.value;
   if (current) editing.value = { ...current, rule: result };
+  comparing.value = false;
   success.value = t('page.common.saved');
   await load();
 }
+async function reloadCompare() {
+  const current = editing.value;
+  if (!current) return;
+  await load();
+  if (status.value !== 'ready') return;
+  const row = rows.value.find((item) => item.action === current.action);
+  const latest = row ? ruleOf(row, current.scope) : undefined;
+  if (latest) editing.value = { ...current, rule: latest };
+  write.dismiss();
+  comparing.value = true;
+}
+const savedRuleSummary = computed(() => {
+  const current = editing.value;
+  if (!current) return '';
+  return current.rule.conditions.length > 0
+    ? current.rule.conditions.map((condition) => t(`page.eligibility.conditions.${condition}`)).join(' · ')
+    : t('page.eligibility.signedIn');
+});
 
 const columns = computed(() => [
   { key: 'action', title: t('page.eligibility.action') },
@@ -124,7 +146,7 @@ const failureOf = (row: Row, scope: Scope) => (typeof row[scope] === 'string' ? 
             <div v-if="ruleOf(record as Row, column.key)" class="flex flex-wrap items-center gap-1">
               <Tag v-for="condition in ruleOf(record as Row, column.key)!.conditions" :key="condition">{{ t(`page.eligibility.conditions.${condition}`) }}</Tag>
               <span v-if="ruleOf(record as Row, column.key)!.conditions.length === 0" class="text-muted-foreground text-sm">{{ t('page.eligibility.signedIn') }}</span>
-              <Button type="link" size="small" :aria-label="t(`page.eligibility.edit.${column.key}`, { action: record.action })" @click="edit(record.action, column.key, ruleOf(record as Row, column.key)!)">{{ t('page.common.edit') }}</Button>
+              <Button type="link" size="small" :aria-label="t(`page.eligibility.edit.${column.key}`, { action: actionLabel(record.action) })" @click="edit(record.action, column.key, ruleOf(record as Row, column.key)!)">{{ t('page.common.edit') }}</Button>
             </div>
             <span v-else class="text-sm text-red-600">{{ errorText(failureOf(record as Row, column.key)) }}</span>
           </template>
@@ -132,8 +154,9 @@ const failureOf = (row: Row, scope: Scope) => (typeof row[scope] === 'string' ? 
       </Table>
     </Card>
 
-    <Drawer :open="!!editing" :width="560" :title="editing ? t(`page.eligibility.edit.${editing.scope}`, { action: editing.action }) : ''" :mask-closable="false" destroy-on-close @close="close">
+    <Drawer :open="!!editing" :width="560" :title="editing ? t(`page.eligibility.edit.${editing.scope}`, { action: actionLabel(editing.action) }) : ''" :mask-closable="false" destroy-on-close @close="close">
       <div v-if="editing" class="flex flex-col gap-3">
+        <Alert v-if="comparing" type="info" show-icon :message="t('page.common.compareNotice')" :description="savedRuleSummary" />
         <Alert type="info" show-icon :message="t(editing.scope === 'site' ? 'page.eligibility.siteHint' : 'page.eligibility.schoolHint')" />
         <fieldset class="flex flex-col gap-2">
           <legend class="mb-1 text-sm">{{ t('page.eligibility.required') }}</legend>
@@ -145,7 +168,7 @@ const failureOf = (row: Row, scope: Scope) => (typeof row[scope] === 'string' ? 
         <MutationAlert :busy="write.busy.value" :error="write.error.value" :uncertain="write.uncertain.value" :success="success" @retry="retry" />
         <div class="flex gap-2">
           <Button type="primary" :loading="write.busy.value" :disabled="!dirty || write.uncertain.value" @click="save">{{ t('page.common.save') }}</Button>
-          <Button v-if="write.error.value === 'conflict'" :disabled="locked" @click="load(); editing = undefined">{{ t('page.common.reloadCompare') }}</Button>
+          <Button v-if="write.error.value === 'conflict'" :disabled="locked" @click="reloadCompare">{{ t('page.common.reloadCompare') }}</Button>
         </div>
       </div>
     </Drawer>

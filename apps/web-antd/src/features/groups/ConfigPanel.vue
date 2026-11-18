@@ -29,6 +29,7 @@ const save = useMutation();
 const status = ref<'error' | 'loading' | 'ready'>('loading');
 const loadError = ref('');
 const saved = shallowRef<GroupConfig>();
+const comparing = ref(false);
 const success = ref('');
 const password = ref('');
 const autoActions = ['warn', 'recall', 'mute', 'kick', 'blacklist'] as const;
@@ -40,6 +41,7 @@ const day = 86_400;
 
 function fill(value: GroupConfig) {
   saved.value = value;
+  comparing.value = false;
   const { grace_seconds, reminder_seconds, retention_seconds, id: _id, number: _number, password_set: _set, revision: _revision, school: _school, ...rest } = value;
   Object.assign(form, structuredClone(rest), { grace_hours: grace_seconds / hour, reminder_hours: reminder_seconds / hour, retention_days: retention_seconds / day });
   password.value = '';
@@ -49,8 +51,12 @@ async function load(keepDraft = false) {
   loadError.value = '';
   try {
     const value = await api.config(props.group);
-    if (keepDraft) saved.value = value;
-    else fill(value);
+    if (keepDraft) {
+      saved.value = value;
+      comparing.value = true;
+    } else {
+      fill(value);
+    }
     save.dismiss();
     status.value = 'ready';
   } catch (error) {
@@ -110,6 +116,18 @@ function done(result: GroupConfig) {
   success.value = t('page.groups.config.saved');
   emit('saved', result);
 }
+const savedSummary = computed(() => {
+  const current = saved.value;
+  if (!current) return '';
+  return [
+    current.name,
+    t(`page.groups.config.modes.${current.mode}`),
+    `${t('page.groups.config.graceHours')}: ${current.grace_seconds / hour}`,
+    current.welcome,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+});
 </script>
 
 <template>
@@ -117,6 +135,7 @@ function done(result: GroupConfig) {
     <span></span>
   </LoadState>
   <Form v-else layout="vertical" @submit.prevent="submit">
+    <Alert v-if="comparing && saved" class="mb-4" type="info" show-icon :message="t('page.common.compareNotice')" :description="savedSummary" />
     <div class="grid gap-x-4 md:grid-cols-2">
       <FormItem :label="t('page.groups.name')" required html-for="group-name"><Input id="group-name" v-model:value="form.name" :maxlength="128" :disabled="locked" /></FormItem>
       <FormItem :label="t('page.groups.bot')" html-for="group-bot"><Switch id="group-bot" v-model:checked="form.bot_enabled" :disabled="locked" /></FormItem>
