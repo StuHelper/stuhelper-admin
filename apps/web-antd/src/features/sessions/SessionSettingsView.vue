@@ -14,6 +14,7 @@ import { useI18n } from '@vben/locales';
 
 import { Alert, Button, Card, Checkbox, Form, FormItem, Input } from 'ant-design-vue';
 
+import { useAccountJump } from '#/shared/account-jump';
 import { ApiError, isDeniedCode } from '#/shared/api/errors';
 import { schemaOf } from '#/shared/api/schema';
 import { useAsync, useMutation } from '#/shared/composables/async';
@@ -26,6 +27,7 @@ import contract from '../../../../../contracts/session.openapi.json';
 
 const { t } = useI18n();
 const http = useHttp();
+const accountJump = useAccountJump();
 const errorText = useErrorText();
 const session = getCurrentInstance()
   ? inject(sessionKey, undefined)
@@ -46,6 +48,7 @@ const grace = ref(30);
 const version = ref(0);
 const subject = ref('');
 const confirmed = ref(false);
+const prefilled = ref(false);
 // Confirmation belongs to the exact account the administrator checked.
 watch(
   subject,
@@ -137,6 +140,7 @@ async function save() {
 
 async function revoke() {
   if (locked.value || !confirmed.value || !subject.value.trim()) return;
+  prefilled.value = false;
   policyLoad.clear();
   message.value = '';
   pendingKind = 'revoke';
@@ -177,7 +181,15 @@ async function retryWrite() {
   }
 }
 
-onMounted(load);
+onMounted(() => {
+  const jumped = accountJump.consume('sessions');
+  if (jumped) {
+    subject.value = jumped.subject;
+    confirmed.value = false;
+    prefilled.value = true;
+  }
+  void load();
+});
 </script>
 
 <template>
@@ -237,6 +249,7 @@ onMounted(load);
         </Form>
       </Card>
       <Card :bordered="false" :title="t('page.sessionPolicy.forceTitle')">
+        <Alert v-if="prefilled" class="mb-4" type="info" show-icon :message="t('page.accountJump.prefilledHint')" />
         <Form layout="vertical" @submit.prevent="revoke">
           <FormItem :label="t('page.sessionPolicy.subject')" required html-for="session-subject">
             <Input

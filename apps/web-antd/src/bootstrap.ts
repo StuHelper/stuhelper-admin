@@ -20,6 +20,7 @@ import {
 } from './features/academic/catalogJump';
 import { availableMenus } from './menus';
 import { router } from './router';
+import { accountJumpKey, createAccountJumpStore } from './shared/account-jump';
 import { hostFetchKey, sessionFetch } from './shared/api/transport';
 import {
   capabilitiesKey,
@@ -51,15 +52,20 @@ async function bootstrap(namespace: string, fetcher: typeof fetch = sessionFetch
   app.provide(capabilitiesKey, capabilities);
   void capabilities.load();
   const session = createSessionStore(fetcher);
+  const accountJump = createAccountJumpStore();
   const catalogJump = createCatalogJumpStore();
   app
     .provide(hostFetchKey, fetcher)
     .provide(sessionKey, session)
+    .provide(accountJumpKey, accountJump)
     .provide(catalogJumpKey, catalogJump);
   watch(
     () => session.state.value,
     (next, previous) => {
-      if (previous === 'member' && next === 'guest') catalogJump.clear();
+      if (previous === 'member' && next === 'guest') {
+        accountJump.clear();
+        catalogJump.clear();
+      }
     },
   );
   void session.reload();

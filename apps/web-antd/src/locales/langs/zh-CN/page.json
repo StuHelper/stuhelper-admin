@@ -1860,5 +1860,15 @@
     "pointsPolicies": {
       "forfeit_all_points_and_pending_deductions": "正式注销时清零全部积分与待扣记录，不兑换现金或 Ivory"
     }
+  },
+  "accountJump": {
+    "copyAccount": "复制账号标识",
+    "copied": "已复制",
+    "toBilling": "查账务",
+    "toQqBinding": "查 QQ 绑定",
+    "toRoles": "查角色授权",
+    "toSessions": "去会话下线",
+    "prefilledHint": "已按上一步选择的账号预填查询条件，核对后点击查询。",
+    "recentIssuerHint": "已自动填入本次会话最近查询的签发方。"
   }
 }

@@ -1860,5 +1860,15 @@
     "pointsPolicies": {
       "forfeit_all_points_and_pending_deductions": "최종 해지 시 모든 포인트와 차감 대기 내역이 현금이나 Ivory 전환 없이 소멸됩니다"
     }
+  },
+  "accountJump": {
+    "copyAccount": "계정 식별자 복사",
+    "copied": "복사됨",
+    "toBilling": "계정 청구 조회",
+    "toQqBinding": "QQ 연동 조회",
+    "toRoles": "역할 권한 조회",
+    "toSessions": "세션 강제 로그아웃",
+    "prefilledHint": "선택한 계정 정보로 입력란을 미리 채웠습니다. 확인 후 조회하세요.",
+    "recentIssuerHint": "현재 세션에서 최근 조회한 발급자를 자동으로 채웠습니다."
   }
 }

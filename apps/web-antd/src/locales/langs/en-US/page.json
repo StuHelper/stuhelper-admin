@@ -1860,5 +1860,15 @@
     "pointsPolicies": {
       "forfeit_all_points_and_pending_deductions": "Clear all points and pending deductions on final closure without cash or Ivory conversion"
     }
+  },
+  "accountJump": {
+    "copyAccount": "Copy account identifier",
+    "copied": "Copied",
+    "toBilling": "Billing account",
+    "toQqBinding": "QQ binding",
+    "toRoles": "Role grants",
+    "toSessions": "Session logout",
+    "prefilledHint": "Prefilled from the selected account; verify and submit to query.",
+    "recentIssuerHint": "Defaulted to the most recently queried issuer in this session."
   }
 }

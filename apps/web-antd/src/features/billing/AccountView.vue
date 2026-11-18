@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import type { Account, MembershipPlan, Order, PurchaseRefundInput, Rule, Target } from './api';
 
-import { computed, getCurrentInstance, inject, reactive, ref, shallowRef, watch } from 'vue';
+import { computed, getCurrentInstance, inject, onMounted, reactive, ref, shallowRef, watch } from 'vue';
 
 import { useI18n } from '@vben/locales';
 
 import { Alert, Button, Card, DatePicker, Descriptions, DescriptionsItem, Form, FormItem, Input, InputNumber, Modal, Radio, RadioGroup, Select, Table, TabPane, Tabs, Tag, Textarea } from 'ant-design-vue';
 
+import { useAccountJump } from '#/shared/account-jump';
 import { ApiError, errorCode, isDeniedCode } from '#/shared/api/errors';
 import { useMutation } from '#/shared/composables/async';
 import { useLeaveGuard } from '#/shared/composables/leave';
@@ -31,9 +32,12 @@ const format = useFormat();
 const money = useMoney();
 const errorText = useErrorText();
 const api = useBillingAdmin();
+const accountJump = useAccountJump();
 const session = getCurrentInstance() ? inject(sessionKey, undefined) : undefined;
 
 const query = reactive({ issuer: '', subject: '' });
+const prefilled = ref(false);
+const usedRecentIssuer = ref(false);
 const target = shallowRef<Target>();
 const account = shallowRef<Account>();
 const orders = ref<Order[]>([]);
@@ -42,6 +46,20 @@ const cursors = reactive({ orders: '', ledger: '' });
 const loading = ref(false);
 const loadError = ref('');
 
+onMounted(() => {
+  const jumped = accountJump.consume('billing');
+  if (jumped) {
+    query.issuer = jumped.issuer || accountJump.recentIssuer.value;
+    query.subject = jumped.subject;
+    prefilled.value = true;
+    return;
+  }
+  if (accountJump.recentIssuer.value) {
+    query.issuer = accountJump.recentIssuer.value;
+    usedRecentIssuer.value = true;
+  }
+});
+
 async function lookup() {
   const next = { issuer: query.issuer.trim(), subject: query.subject.trim() };
   if (!next.issuer || !next.subject || loading.value) return;
@@ -49,6 +67,9 @@ async function lookup() {
   loadError.value = '';
   try {
     const result = await api.account(next);
+    accountJump.rememberIssuer(next.issuer);
+    prefilled.value = false;
+    usedRecentIssuer.value = false;
     target.value = next;
     show(result, false, false);
   } catch (error) {
@@ -259,6 +280,8 @@ const ledgerKindText = (kind: string) => (te(`page.billing.ledgerKind.${kind}`) 
   <AdminPage :title="t('page.billing.accounts.title')" :description="t('page.billing.accounts.intro')">
     <div class="flex flex-col gap-4">
       <Card :bordered="false">
+        <Alert v-if="prefilled" class="mb-4" type="info" show-icon closable :message="t('page.accountJump.prefilledHint')" @close="prefilled = false" />
+        <p v-else-if="usedRecentIssuer" class="text-muted-foreground mb-3 text-xs">{{ t('page.accountJump.recentIssuerHint') }}</p>
         <Form layout="vertical" class="max-w-2xl" @submit.prevent="lookup">
           <FormItem :label="t('page.billing.issuer')" html-for="billing-issuer"><Input id="billing-issuer" v-model:value="query.issuer" :maxlength="512" autocomplete="off" /></FormItem>
           <FormItem :label="t('page.billing.subject')" :extra="t('page.billing.accounts.subjectHint')" html-for="billing-subject"><Input id="billing-subject" v-model:value="query.subject" :maxlength="512" autocomplete="off" /></FormItem>

@@ -13,6 +13,7 @@ import { useMutation, usePaged } from '#/shared/composables/async';
 import { useLeaveGuard } from '#/shared/composables/leave';
 import { useFormat } from '#/shared/format';
 import { sessionKey } from '#/shared/session';
+import AccountJumpBar from '#/shared/ui/AccountJumpBar.vue';
 import AdminPage from '#/shared/ui/AdminPage.vue';
 import LoadState from '#/shared/ui/LoadState.vue';
 import { useErrorText } from '#/shared/ui/messages';
@@ -206,7 +207,12 @@ const columns = computed(() => [
           <DescriptionsItem :label="t('page.common.status')"><Tag :color="stateColor[selected.state]">{{ t(`page.billing.orderState.${selected.state}`) }}</Tag></DescriptionsItem>
           <DescriptionsItem :label="t('page.billing.amount')">{{ money.order(selected) }}</DescriptionsItem>
           <DescriptionsItem :label="t('page.billing.issuer')"><code class="break-all">{{ selected.target.issuer }}</code></DescriptionsItem>
-          <DescriptionsItem :label="t('page.billing.subject')"><code class="break-all">{{ selected.target.subject }}</code></DescriptionsItem>
+          <DescriptionsItem :label="t('page.billing.subject')">
+            <div class="flex flex-col gap-1.5">
+              <code class="break-all">{{ selected.target.subject }}</code>
+              <AccountJumpBar :issuer="selected.target.issuer" :subject="selected.target.subject" />
+            </div>
+          </DescriptionsItem>
           <DescriptionsItem :label="t('page.billing.reference')"><code class="break-all">{{ selected.reference || t('page.common.notProvided') }}</code></DescriptionsItem>
           <DescriptionsItem :label="t('page.billing.channel')">{{ selected.channel || t('page.common.notProvided') }}</DescriptionsItem>
           <DescriptionsItem :label="t('page.common.reason')">{{ selected.reason || t('page.common.notProvided') }}</DescriptionsItem>
