@@ -166,10 +166,6 @@ const versions = usePaged(async (before, signal) => {
 function versionSegments(index: number, versionBody: string) {
   const older = versions.items.value[index + 1]?.input.body;
   if (older !== undefined) return diffText(older, versionBody);
-  const current = entry.value?.input.body;
-  if (current !== undefined && current !== versionBody) {
-    return diffText(versionBody, current);
-  }
   return [];
 }
 

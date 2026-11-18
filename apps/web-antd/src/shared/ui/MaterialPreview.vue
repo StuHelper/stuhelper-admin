@@ -63,15 +63,17 @@ function reset() {
         show-icon
         :message="t('page.resources.previewTooLarge')"
       />
-      <a
-        v-if="url"
-        :href="url"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="break-all text-xs underline"
-      >
-        {{ label }}
-      </a>
+      <slot name="download">
+        <a
+          v-if="url"
+          :href="url"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="break-all text-xs underline"
+        >
+          {{ label }}
+        </a>
+      </slot>
     </template>
     <template v-else-if="isImage && url">
       <Space wrap size="small">

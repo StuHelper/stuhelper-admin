@@ -54,7 +54,9 @@ const autoNext = ref(true);
 const previewOpen = ref(false);
 const previewUrl = ref('');
 
+let selectionVersion = 0;
 function clearPreview() {
+  selectionVersion++;
   if (previewUrl.value) URL.revokeObjectURL(previewUrl.value);
   previewUrl.value = '';
   previewOpen.value = false;
@@ -85,16 +87,23 @@ useLeaveGuard(() => (busy.value || reason.value ? t(deciding.uncertain.value ? '
 async function open(task: Task) {
   if (busy.value) return;
   clearPreview();
+  const selection = selectionVersion;
+  entry.value = undefined;
   deciding.dismiss();
   retrying.dismiss();
   openError.value = '';
   success.value = '';
   try {
-    selected.value = await moderation.task(task.id);
-    entry.value = await api.reviewVersion(versionId.value);
+    const current = await moderation.task(task.id);
+    if (selection !== selectionVersion) return;
+    selected.value = current;
+    const detail = await api.reviewVersion(versionId.value);
+    if (selection !== selectionVersion) return;
+    entry.value = detail;
     action.value = entry.value.proposal ? 'publish' : 'hide';
     reason.value = '';
   } catch (error) {
+    if (selection !== selectionVersion) return;
     openError.value = errorCode(error);
     entry.value = undefined;
   }
@@ -115,8 +124,9 @@ async function togglePreview() {
   const id = version.value?.id;
   if (!file || !id || !previewable.value || previewTooLarge.value) return;
   if (!previewUrl.value) {
+    const selection = selectionVersion;
     const blob = await previewLoad.run(() => api.reviewFile(id, file.size));
-    if (!blob) return;
+    if (!blob || selection !== selectionVersion || version.value?.id !== id) return;
     previewUrl.value = URL.createObjectURL(blob);
   }
   previewOpen.value = true;

@@ -34,7 +34,7 @@ interface Picture {
   size?: number;
   tooLarge?: boolean;
   type: string;
-  url: string;
+  url?: string;
 }
 
 const inlinePreviewLimit = 15 * 1024 * 1024;
@@ -119,18 +119,17 @@ async function loadReviewTarget(row: Application) {
   const images: Picture[] = [];
   try {
     for (const materialId of submitted.material_ids) {
-      const directUrl = `/api/v1/verification/materials/${encodeURIComponent(materialId)}`;
       try {
         const blob = await api.material(materialId);
         if (blob.size > inlinePreviewLimit) {
-          images.push({ id: materialId, size: blob.size, tooLarge: true, type: blob.type, url: directUrl });
+          images.push({ id: materialId, size: blob.size, tooLarge: true, type: blob.type });
         } else {
           const objectUrl = URL.createObjectURL(blob);
           images.push({ id: materialId, objectUrl, size: blob.size, type: blob.type, url: objectUrl });
         }
       } catch (error_) {
-        if (errorCode(error_) === 'response_too_large') {
-          images.push({ id: materialId, tooLarge: true, type: 'application/pdf', url: directUrl });
+        if (errorCode(error_) === 'capacity_exceeded') {
+          images.push({ id: materialId, tooLarge: true, type: 'application/pdf' });
         } else {
           throw error_;
         }
@@ -150,6 +149,10 @@ async function loadReviewTarget(row: Application) {
   teacherIds.value = [];
   teacherOptions.value = [];
   void searchTeachers(submitted.name);
+}
+async function downloadMaterial(id: string, size?: number) {
+  const application = reviewing.value;
+  if (application) await action(() => api.downloadMaterial(application.id, id, size));
 }
 function neighbour(step: number) {
   const rows = visibleApplications.value;
@@ -197,19 +200,25 @@ async function review(decision: Schemas['TeacherReviewInput']['decision']) {
     const body: Schemas['TeacherReviewInput'] = { decision, note: note.value.trim(), revision: row.revision, teacher_ids: decision === 'approve' ? teacherIds.value : [], ...(decision === 'approve' ? { expires_at: expiry.value ?? null } : {}) };
     await api.write('Application', `/api/v1/admin/verification/applications/${encodeURIComponent(row.id)}/teacher-review`, body);
     applications.value = applications.value.filter((item) => item.id !== row.id);
-    let nextRow = autoNext.value ? following : undefined;
-    if (autoNext.value && !nextRow && cursor.value) {
-      const page = await api.list('Application', `/api/v1/admin/verification/schools/${encodeURIComponent(schoolId.value)}/teacher-applications`);
-      applications.value = page.items;
-      cursor.value = page.next;
-      nextRow = visibleApplications.value.find((item) => item.id !== row.id && item.state === 'pending_review') ?? visibleApplications.value.find((item) => item.id !== row.id);
-    }
-    if (nextRow) {
-      await loadReviewTarget(nextRow);
-      return;
-    }
     reviewing.value = undefined;
     clearPictures();
+    note.value = '';
+    try {
+      let nextRow = autoNext.value ? following : undefined;
+      if (autoNext.value && !nextRow && cursor.value) {
+        const page = await api.list('Application', `/api/v1/admin/verification/schools/${encodeURIComponent(schoolId.value)}/teacher-applications`);
+        applications.value = page.items;
+        cursor.value = page.next;
+        nextRow = visibleApplications.value.find((item) => item.id !== row.id && item.state === 'pending_review') ?? visibleApplications.value.find((item) => item.id !== row.id);
+      }
+      if (nextRow) {
+        await loadReviewTarget(nextRow);
+        return;
+      }
+    } catch (error_) {
+      // The write succeeded. The list remains available to reopen the next application.
+      error.value = errorCode(error_);
+    }
   }, t(`page.teacherVerification.done.${decision}`));
 }
 
@@ -361,7 +370,11 @@ function chooseSchool(school: School) {
             :size="picture.size"
             :too-large="picture.tooLarge"
             :url="picture.url"
-          />
+          >
+            <template #download>
+              <Button :loading="busy" @click="downloadMaterial(picture.id, picture.size)">{{ t('page.resources.downloadFile') }}</Button>
+            </template>
+          </MaterialPreview>
         </div>
         <Form layout="vertical">
           <FormItem :label="t('page.teacherVerification.profiles')" :extra="t('page.teacherVerification.profilesHint')" html-for="teacher-profiles">

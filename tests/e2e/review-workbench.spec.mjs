@@ -41,6 +41,9 @@ test('resource review previews sandboxed PDFs, warns above 15 MiB, applies reaso
     },
   };
   let decidedFirst = false;
+  let deliverFile;
+  const delayedFile = new Promise(resolve => { deliverFile = resolve; });
+  let waitingForFile = false;
   await routes(page, s);
   await page.route('**/api/v1/moderation/**', async (route) => {
     const req = route.request();
@@ -68,6 +71,8 @@ test('resource review previews sandboxed PDFs, warns above 15 MiB, applies reaso
   await page.route('**/api/v1/resources/review/**', async (route) => {
     const url = new URL(route.request().url());
     if (url.pathname.endsWith('/file')) {
+      waitingForFile = true;
+      await delayedFile;
       return route.fulfill({
         body: Buffer.from('%PDF-1.4\n%EOF\n'),
         contentType: 'application/pdf',
@@ -107,6 +112,17 @@ test('resource review previews sandboxed PDFs, warns above 15 MiB, applies reaso
   await drawer
     .getByRole('button', { name: all.resources.previewFile, exact: true })
     .click();
+  await expect.poll(() => waitingForFile).toBe(true);
+  await drawer.locator('.ant-drawer-close').click();
+  await page.getByRole('button', { name: all.common.open, exact: true }).click();
+  await expect(drawer.getByText('Sandboxed PDF', { exact: true })).toBeVisible();
+  const received = page.waitForResponse(response => response.url().endsWith('/file'));
+  deliverFile();
+  const response = await received;
+  await response.finished();
+  await expect(drawer.getByRole('button', { name: all.resources.previewFile, exact: true })).not.toHaveClass(/ant-btn-loading/);
+  await expect(drawer.locator('iframe')).toHaveCount(0);
+  await drawer.getByRole('button', { name: all.resources.previewFile, exact: true }).click();
   const frame = drawer.locator('iframe[sandbox=""]');
   await expect(frame).toBeVisible();
 
@@ -258,13 +274,15 @@ test('moderation decision panel shows target course and term, highlights propose
   await expect(drawer.locator('del').first()).toContainText('fast');
   await expect(drawer.locator('ins').first()).toContainText('balanced');
 
+  await drawer.getByText(all.moderation.versions, { exact: true }).click();
+  await expect(drawer.locator('article').last()).toContainText('Revision body #6');
+  await expect(drawer.locator('article').last().locator('del, ins')).toHaveCount(0);
   await drawer
     .getByRole('button', { name: all.moderation.showPlain, exact: true })
-    .click();
+    .first().click();
   await expect(drawer.locator('del')).toHaveCount(0);
-
-  await drawer.getByText(all.moderation.versions, { exact: true }).click();
   await expect(drawer.getByText('Revision body #25', { exact: true })).toBeVisible();
+
   await drawer
     .getByRole('button', { name: all.moderation.olderVersions, exact: true })
     .click();
@@ -319,9 +337,13 @@ test('student verification filters by status in page state, previews materials, 
   const apps = [
     appRow('a1', 'pending_review'),
     appRow('a2', 'pending_review'),
-    appRow('a3', 'approved'),
+    appRow('a3', 'pending_review'),
+    appRow('a4', 'approved'),
   ];
 
+  let failNextRead = true;
+  const reviewed = [];
+  const downloads = [];
   await page.route('**/api/v1/**verification/**', async (route) => {
     const req = route.request();
     const path = new URL(req.url()).pathname;
@@ -337,9 +359,13 @@ test('student verification filters by status in page state, previews materials, 
       }
       if (path.endsWith('/form')) {
         const isSecond = path.includes('/a2/');
+        if (isSecond && failNextRead) {
+          failNextRead = false;
+          return route.fulfill({ status: 503, json: { code: 'unavailable' } });
+        }
         return route.fulfill({
           json: {
-            student_id: isSecond ? '20260002' : '20260001',
+            student_id: `2026000${path.split('/').at(-2).slice(1)}`,
             name: isSecond ? 'Bob' : 'Alice',
             department: 'CS',
             email: 'stu@demo.edu',
@@ -359,17 +385,25 @@ test('student verification filters by status in page state, previews materials, 
               size: pixel.length,
               created_at: '2026-11-01T00:00:00Z',
             },
+            { id: 'm2', application_id: 'a1', content_type: 'application/pdf',
+              size: 16 * 1024 * 1024, created_at: '2026-11-01T00:00:00Z' },
           ],
         });
+      }
+      if (path === '/api/v1/verification/materials/m2') {
+        downloads.push(req.resourceType());
+        return route.fulfill({ body: '%PDF-1.4 sample', contentType: 'application/pdf' });
       }
       if (path === '/api/v1/verification/materials/m1') {
         return route.fulfill({ body: pixel, contentType: 'image/png' });
       }
       return route.fulfill({ status: 404, json: { code: 'not_found' } });
     }
+    const applicationId = path.split('/').at(-2);
+    reviewed.push(applicationId);
     const body = req.postDataJSON();
     return route.fulfill({
-      json: { ...appRow('a1', 'supplement_required'), revision: 2, review_note: body.note },
+      json: { ...appRow(applicationId, 'supplement_required'), revision: 2, review_note: body.note },
     });
   });
 
@@ -396,6 +430,11 @@ test('student verification filters by status in page state, previews materials, 
     .click();
   const drawer = page.locator('.ant-drawer-content');
   await expect(drawer.getByText('20260001', { exact: true })).toBeVisible();
+  expect(downloads).toEqual([]);
+  const download = page.waitForEvent('download');
+  await drawer.getByRole('button', { name: all.resources.downloadFile, exact: true }).click();
+  await download;
+  expect(downloads).toEqual(['fetch']);
   await drawer
     .getByRole('button', { name: all.resources.rotateRight, exact: true })
     .click();
@@ -405,7 +444,15 @@ test('student verification filters by status in page state, previews materials, 
   await drawer
     .getByRole('button', { name: all.verification.supplement, exact: true })
     .click();
-  // Continuous review opens the second pending application immediately.
+  // The first decision remains successful when the next application's read fails.
+  await expect(drawer).not.toBeVisible();
+  await expect(page.getByText(all.common.saved, { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: all.verification.review, exact: true }).first().click();
   await expect(drawer.getByText('20260002', { exact: true })).toBeVisible();
+  expect(reviewed).toEqual(['a1']);
+  await drawer.getByRole('button', { name: all.verification.presets.blurry, exact: true }).click();
+  await drawer.getByRole('button', { name: all.verification.supplement, exact: true }).click();
+  await expect(drawer.getByText('20260003', { exact: true })).toBeVisible();
+  expect(reviewed).toEqual(['a1', 'a2']);
   await fits(page, info);
 });

@@ -31,7 +31,7 @@ interface PreviewItem {
   size?: number;
   tooLarge?: boolean;
   type: string;
-  url: string;
+  url?: string;
 }
 
 const inlinePreviewLimit = 15 * 1024 * 1024;
@@ -167,22 +167,21 @@ async function loadReviewTarget(row: Application) {
   const items: PreviewItem[] = [];
   try {
     for (const material of materials.items) {
-      const directUrl = `/api/v1/verification/materials/${encodeURIComponent(material.id)}`;
       if (material.size > inlinePreviewLimit) {
-        items.push({ id: material.id, size: material.size, tooLarge: true, type: material.content_type, url: directUrl });
+        items.push({ id: material.id, size: material.size, tooLarge: true, type: material.content_type });
         continue;
       }
       try {
         const blob = await api.material(material.id);
         if (blob.size > inlinePreviewLimit) {
-          items.push({ id: material.id, size: blob.size, tooLarge: true, type: blob.type, url: directUrl });
+          items.push({ id: material.id, size: blob.size, tooLarge: true, type: blob.type });
         } else {
           const objectUrl = URL.createObjectURL(blob);
           items.push({ id: material.id, objectUrl, size: blob.size, type: blob.type, url: objectUrl });
         }
       } catch (error_) {
-        if (errorCode(error_) === 'response_too_large') {
-          items.push({ id: material.id, size: material.size, tooLarge: true, type: material.content_type, url: directUrl });
+        if (errorCode(error_) === 'capacity_exceeded') {
+          items.push({ id: material.id, size: material.size, tooLarge: true, type: material.content_type });
         } else {
           throw error_;
         }
@@ -201,6 +200,10 @@ async function loadReviewTarget(row: Application) {
   expiry.value = undefined;
 }
 
+async function downloadMaterial(id: string, size?: number) {
+  const application = reviewing.value;
+  if (application) await action(() => api.downloadMaterial(application.id, id, size));
+}
 function neighbour(step: number) {
   const rows = visibleApplications.value;
   const index = rows.findIndex((item) => item.id === reviewing.value?.id);
@@ -228,19 +231,25 @@ async function review(decision: Schemas['ReviewInput']['decision']) {
     const body: Schemas['ReviewInput'] = { decision, note: note.value, revision: row.revision, ...(decision === 'approve' && expiry.value ? { expires_at: expiry.value } : {}) };
     await api.write('Application', `/api/v1/admin/verification/applications/${encodeURIComponent(row.id)}/review`, body);
     applications.value = applications.value.filter((item) => item.id !== row.id);
-    let nextRow = autoNext.value ? following : undefined;
-    if (autoNext.value && !nextRow && cursor.value) {
-      const page = await api.list('Application', `/api/v1/admin/verification/schools/${encodeURIComponent(schoolId.value)}/applications`);
-      applications.value = page.items;
-      cursor.value = page.next;
-      nextRow = visibleApplications.value.find((item) => item.id !== row.id && item.state === 'pending_review') ?? visibleApplications.value.find((item) => item.id !== row.id);
-    }
-    if (nextRow) {
-      await loadReviewTarget(nextRow);
-      return;
-    }
     reviewing.value = undefined;
     clearPictures();
+    note.value = '';
+    try {
+      let nextRow = autoNext.value ? following : undefined;
+      if (autoNext.value && !nextRow && cursor.value) {
+        const page = await api.list('Application', `/api/v1/admin/verification/schools/${encodeURIComponent(schoolId.value)}/applications`);
+        applications.value = page.items;
+        cursor.value = page.next;
+        nextRow = visibleApplications.value.find((item) => item.id !== row.id && item.state === 'pending_review') ?? visibleApplications.value.find((item) => item.id !== row.id);
+      }
+      if (nextRow) {
+        await loadReviewTarget(nextRow);
+        return;
+      }
+    } catch (error_) {
+      // The write succeeded. The list remains available to reopen the next application.
+      error.value = errorCode(error_);
+    }
   }, t('page.common.saved'));
 }
 
@@ -519,7 +528,11 @@ function chooseSchool(school: School) {
             :size="picture.size"
             :too-large="picture.tooLarge"
             :url="picture.url"
-          />
+          >
+            <template #download>
+              <Button :loading="busy" @click="downloadMaterial(picture.id, picture.size)">{{ t('page.resources.downloadFile') }}</Button>
+            </template>
+          </MaterialPreview>
         </div>
         <Form layout="vertical">
           <FormItem :label="t('page.verification.note')" html-for="verificationview-field-13">
