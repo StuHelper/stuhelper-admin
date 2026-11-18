@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import { computed, nextTick } from 'vue';
 
+import { $t } from '@vben/locales';
+
 import { VbenButton } from '@vben-core/shadcn-ui';
 
 interface Props {
@@ -84,7 +86,7 @@ function toggleTheme(event: MouseEvent) {
 
 <template>
   <VbenButton
-    :aria-label="theme"
+    :aria-label="$t(`preferences.theme.${theme}`)"
     :class="[`is-${theme}`]"
     aria-live="polite"
     class="theme-toggle cursor-pointer border-none bg-none hover:animate-[shrink_0.3s_ease-in-out]"
