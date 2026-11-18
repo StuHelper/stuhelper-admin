@@ -99,6 +99,25 @@
     "TEACHER-SITES-02": [
       "apps/web-antd/src/features/academic/TeacherSitesView.test.ts#starts one incremental refresh with an idempotency key and reports a running refresh",
       "apps/web-antd/src/features/academic/TeacherSitesView.test.ts#disables both refresh buttons while a run is queued or running"
+    ],
+    "MOD-09": [
+      "tests/e2e/overview-workbench.spec.mjs#overview hides forbidden todos, retries transient failures, and toggles module health details"
+    ],
+    "CM-09": [
+      "tests/e2e/moderation.spec.mjs#moderation policy saves with revision and presentation keeps drafts across rating languages and retries with the original key"
+    ],
+    "CM-12": [
+      "tests/e2e/moderation.spec.mjs#queue batch preview applies decisions per item and content view handles unpublished entries"
+    ],
+    "AO-02": [
+      "tests/e2e/catalog.spec.mjs#catalog paged search appends courses, preserves edits across conflict reload, and merges duplicates after preview"
+    ],
+    "AO-03": [
+      "tests/e2e/catalog.spec.mjs#catalog import previews normalized JSON and retries an uncertain confirmation with the original key"
+    ],
+    "AO-04": [
+      "tests/e2e/student-verification.spec.mjs#student verification reviews manual materials and clears private materials immediately on permission revocation",
+      "tests/e2e/student-verification.spec.mjs#student credential lookup loads profile scopes on demand and revokes with a note"
     ]
   }
 }

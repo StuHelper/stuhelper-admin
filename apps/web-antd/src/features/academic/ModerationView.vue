@@ -449,7 +449,9 @@ id="moderationview-field-3"
 </template>
               <template v-else-if="column.key === 'published'">
 {{
-                format.dateTime(record.published_at)
+                record.published_at
+                  ? format.dateTime(record.published_at)
+                  : t('page.common.notProvided')
               }}
 </template>
               <template v-else-if="column.key === 'action'">

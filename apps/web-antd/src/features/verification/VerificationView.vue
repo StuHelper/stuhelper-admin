@@ -7,7 +7,7 @@ import { useI18n } from '@vben/locales';
 
 import { Alert, Button, Card, Checkbox, CheckboxGroup, DatePicker, Descriptions, DescriptionsItem, Drawer, Form, FormItem, Image, Input, InputNumber, Result, Space, Switch, Table, TabPane, Tabs, Tag, Textarea } from 'ant-design-vue';
 
-import { errorCode } from '#/shared/api/errors';
+import { ApiError, errorCode } from '#/shared/api/errors';
 import { useFormat } from '#/shared/format';
 import AdminPage from '#/shared/ui/AdminPage.vue';
 import { useErrorText } from '#/shared/ui/messages';
@@ -59,6 +59,18 @@ function clearPictures() {
   for (const picture of pictures.value) URL.revokeObjectURL(picture.url);
   pictures.value = [];
 }
+function clearSensitive() {
+  applications.value = [];
+  removals.value = [];
+  jobs.value = [];
+  suggestions.value = [];
+  cursor.value = '';
+  reviewing.value = undefined;
+  manual.value = undefined;
+  credential.value = undefined;
+  studentProfile.value = undefined;
+  clearPictures();
+}
 
 async function action(work: () => Promise<void>, done = '') {
   if (busy.value) return;
@@ -69,7 +81,16 @@ async function action(work: () => Promise<void>, done = '') {
     await work();
     notice.value = done;
   } catch (error_) {
-    error.value = errorCode(error_);
+    const code = errorCode(error_);
+    error.value = code;
+    if (
+      (error_ instanceof ApiError &&
+        (error_.denied || error_.status === 401 || error_.status === 403)) ||
+      code === 'forbidden' ||
+      code === 'unauthenticated'
+    ) {
+      clearSensitive();
+    }
   } finally {
     busy.value = false;
   }
