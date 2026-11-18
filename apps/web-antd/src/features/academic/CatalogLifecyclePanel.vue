@@ -31,7 +31,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  applied: [result: CatalogObject];
+  applied: [result: CatalogObject, message: 'page.catalog.merged' | 'page.common.saved'];
   denied: [];
   state: [busy: boolean, uncertain: boolean, dirty: boolean];
 }>();
@@ -47,7 +47,6 @@ const reason = ref('');
 const plan = shallowRef<MergePreview>();
 const planError = ref('');
 const intent = ref<'merge' | 'state'>('merge');
-const success = ref('');
 
 const busy = computed(
   () => !!props.externalBusy || lifecycle.busy.value || lifecycle.uncertain.value,
@@ -105,7 +104,6 @@ async function previewMerge() {
 
 async function apply(action: 'merge' | 'state') {
   const object = props.entry;
-  success.value = '';
   intent.value = action;
   const result =
     action === 'merge'
@@ -134,10 +132,7 @@ async function retryLifecycle() {
 function done(result: CatalogObject) {
   reason.value = '';
   plan.value = undefined;
-  success.value = t(
-    intent.value === 'merge' ? 'page.catalog.merged' : 'page.common.saved',
-  );
-  emit('applied', result);
+  emit('applied', result, intent.value === 'merge' ? 'page.catalog.merged' : 'page.common.saved');
 }
 </script>
 
@@ -211,7 +206,6 @@ function done(result: CatalogObject) {
       :busy="lifecycle.busy.value"
       :error="lifecycle.error.value"
       :uncertain="lifecycle.uncertain.value"
-      :success="success"
       @retry="retryLifecycle"
     />
     <Space class="mt-4" wrap>

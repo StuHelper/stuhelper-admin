@@ -32,6 +32,12 @@ test('session settings preserve edits on conflict and revoke only the confirmed 
   await expect(interval).toHaveValue('15');
   await expect(page.locator('#session-grace')).toHaveValue('0');
   expect(writes).toEqual([{ interval_minutes: 15, grace_minutes: 0, expected_version: 1 }]);
+  // A fresh read clears the previous write error and adopts the current policy.
+  await page.getByRole('alert').getByRole('button').click();
+  await expect(page.getByRole('alert')).toHaveCount(0);
+  await expect(interval).toHaveValue('30');
+  await interval.fill('15');
+  await page.locator('#session-grace').fill('0');
   conflict = false;
   await page.locator('form').first().locator('button[type="submit"]').click();
   const text=JSON.parse(fs.readFileSync(`apps/web-antd/src/locales/langs/${info.project.metadata.locale}/page.json`,'utf8')).sessionPolicy;

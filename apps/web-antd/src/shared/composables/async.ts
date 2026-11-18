@@ -7,10 +7,10 @@ export type LoadStatus = 'error' | 'idle' | 'loading' | 'ready';
 
 export interface AsyncOptions {
   /** Invoked when a request fails due to authentication or authorization loss (401/403). */
-  onDenied?: () => void;
+  onDenied?: (cause: ApiError) => void;
 }
 
-export function isDeniedError(error: unknown): boolean {
+export function isDeniedError(error: unknown): error is ApiError {
   return (
     error instanceof ApiError &&
     (error.denied || error.status === 401 || error.status === 403)
@@ -45,7 +45,7 @@ export function useAsync<T>(
     } catch (error_) {
       if (current !== controller) return;
       error.value = errorCode(error_);
-      if (isDeniedError(error_)) options?.onDenied?.();
+      if (isDeniedError(error_)) options?.onDenied?.(error_);
       status.value = 'error';
     }
   }
@@ -113,7 +113,7 @@ export function usePaged<T>(
       if (isDeniedError(error_)) {
         items.value = [];
         next.value = '';
-        options?.onDenied?.();
+        options?.onDenied?.(error_);
       }
       status.value = 'error';
     } finally {
@@ -167,7 +167,7 @@ export function useMutation(options?: AsyncOptions) {
       return await work();
     } catch (error_) {
       error.value = errorCode(error_);
-      if (isDeniedError(error_)) options?.onDenied?.();
+      if (isDeniedError(error_)) options?.onDenied?.(error_);
       return undefined;
     } finally {
       busy.value = false;
@@ -204,7 +204,7 @@ export function useTask(options?: AsyncOptions) {
       return await work();
     } catch (error_) {
       error.value = errorCode(error_);
-      if (isDeniedError(error_)) options?.onDenied?.();
+      if (isDeniedError(error_)) options?.onDenied?.(error_);
       return undefined;
     } finally {
       busy.value = false;

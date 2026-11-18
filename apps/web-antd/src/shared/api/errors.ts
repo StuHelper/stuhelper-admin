@@ -28,10 +28,21 @@ const statusCodes: Record<number, string> = {
   429: 'rate_limited',
 };
 
+const deniedCodePattern =
+  /^(?:.+_)?(?:unauthenticated|authentication_required|forbidden|permission_denied)$/;
+
+export function isDeniedCode(code: string) {
+  return deniedCodePattern.test(code);
+}
+
 export class ApiError extends Error {
   /** The current account lost access, so pages clear private data. */
   get denied() {
-    return this.code === 'unauthenticated' || this.code === 'forbidden';
+    return (
+      this.status === 401 ||
+      this.status === 403 ||
+      isDeniedCode(this.code)
+    );
   }
 
   constructor(

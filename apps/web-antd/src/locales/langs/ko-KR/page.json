@@ -645,7 +645,8 @@
       "student": "재학생",
       "alumni": "동문",
       "newcomer": "임시 신입생",
-      "unknown": "제공되지 않음"
+      "unknown": "제공되지 않음",
+      "teacher": "교원"
     },
     "states": {
       "in_progress": "작성 중",
@@ -1203,6 +1204,15 @@
       "anyCategory": "모든 분류",
       "removeRule": "규칙 삭제",
       "addRule": "규칙 추가"
+    },
+    "ledgerKind": {
+      "reward": "보상 지급",
+      "reward_revoke": "보상 회수",
+      "commerce_refund": "주문 환불",
+      "membership_grant": "멤버십 부여",
+      "expired": "포인트 만료",
+      "debt_repayment": "미차감 포인트 상계",
+      "closure": "계정 해지 정산"
     }
   },
   "access": {

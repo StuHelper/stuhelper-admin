@@ -645,7 +645,8 @@
       "student": "在校学生",
       "alumni": "校友",
       "newcomer": "临时新生",
-      "unknown": "未提供"
+      "unknown": "未提供",
+      "teacher": "教师"
     },
     "states": {
       "in_progress": "填写中",
@@ -1203,6 +1204,15 @@
       "anyCategory": "全部分类",
       "removeRule": "删除规则",
       "addRule": "添加规则"
+    },
+    "ledgerKind": {
+      "reward": "奖励发放",
+      "reward_revoke": "奖励扣回",
+      "commerce_refund": "消费退款",
+      "membership_grant": "管理员授予会员",
+      "expired": "到期清零",
+      "debt_repayment": "待扣积分抵扣",
+      "closure": "注销结清"
     }
   },
   "access": {

@@ -1,15 +1,24 @@
 <script setup lang="ts">
 import type { components } from '#/api/session.gen';
 
-import { computed, onMounted, ref, watch } from 'vue';
+import {
+  computed,
+  getCurrentInstance,
+  inject,
+  onMounted,
+  ref,
+  watch,
+} from 'vue';
 
 import { useI18n } from '@vben/locales';
 
 import { Alert, Button, Card, Checkbox, Form, FormItem, Input } from 'ant-design-vue';
 
+import { ApiError, isDeniedCode } from '#/shared/api/errors';
 import { schemaOf } from '#/shared/api/schema';
-import { useAsync, useTask } from '#/shared/composables/async';
-import { useHttp } from '#/shared/session';
+import { useAsync, useMutation } from '#/shared/composables/async';
+import { useLeaveGuard } from '#/shared/composables/leave';
+import { sessionKey, useHttp } from '#/shared/session';
 import AdminPage from '#/shared/ui/AdminPage.vue';
 import { useErrorText } from '#/shared/ui/messages';
 
@@ -18,36 +27,67 @@ import contract from '../../../../../contracts/session.openapi.json';
 const { t } = useI18n();
 const http = useHttp();
 const errorText = useErrorText();
-const parsePolicy = schemaOf<components['schemas']['SessionPolicy']>(contract.components.schemas, 'SessionPolicy');
+const session = getCurrentInstance()
+  ? inject(sessionKey, undefined)
+  : undefined;
+const write = useMutation();
+
+const parsePolicy = schemaOf<components['schemas']['SessionPolicy']>(
+  contract.components.schemas,
+  'SessionPolicy',
+);
+const parseResult = schemaOf<components['schemas']['SessionMutationResult']>(
+  contract.components.schemas,
+  'SessionMutationResult',
+);
+
 const interval = ref(30);
 const grace = ref(30);
 const version = ref(0);
 const subject = ref('');
 const confirmed = ref(false);
-const message = ref('');
-
-function clearDeniedState() {
-  version.value = 0;
-  subject.value = '';
-  confirmed.value = false;
-  message.value = '';
-}
-
 // Confirmation belongs to the exact account the administrator checked.
-watch(subject, () => { confirmed.value = false; }, { flush: 'sync' });
+watch(
+  subject,
+  () => {
+    if (!write.uncertain.value) confirmed.value = false;
+  },
+  { flush: 'sync' },
+);
 
 const policyLoad = useAsync(
   (signal) => http.json('/api/v1/admin/session-policy', parsePolicy, { signal }),
-  { onDenied: clearDeniedState },
+  { onDenied: clearSensitive },
 );
-const saving = useTask({ onDenied: clearDeniedState });
-const revoking = useTask({ onDenied: clearDeniedState });
+const message = ref('');
+let pendingKind: 'revoke' | 'save' | undefined;
 
-const busy = computed(() => policyLoad.status.value === 'loading' || saving.busy.value || revoking.busy.value);
-const activeError = computed(() => saving.error.value || revoking.error.value || policyLoad.error.value);
+const busy = computed(() => policyLoad.status.value === 'loading' || write.busy.value);
+const locked = computed(() => busy.value || write.uncertain.value);
+const activeError = computed(() => write.error.value || policyLoad.error.value);
+
+useLeaveGuard(() => {
+  if (write.uncertain.value) return t('page.common.leaveUncertain');
+  return busy.value ? t('page.common.leaveUnsaved') : '';
+});
+
+function clearSensitive() {
+  version.value = 0;
+  subject.value = '';
+  message.value = '';
+  confirmed.value = false;
+}
+
+watch(
+  () => session?.state.value,
+  (state) => {
+    if (state === 'guest') clearSensitive();
+  },
+);
 
 async function load() {
-  if (busy.value) return;
+  if (locked.value) return;
+  write.dismiss();
   message.value = '';
   await policyLoad.reload();
   const policy = policyLoad.data.value;
@@ -58,34 +98,82 @@ async function load() {
   }
 }
 
-async function save() {
-  if (busy.value || !version.value) return;
-  message.value = '';
-  const body: components['schemas']['SessionPolicyUpdate'] = {
-    interval_minutes: Number(interval.value),
-    grace_minutes: Number(grace.value),
-    expected_version: version.value,
-  };
-  const policy = await saving.run(() =>
-    http.json('/api/v1/admin/session-policy', parsePolicy, { method: 'PUT', body }),
-  );
-  if (policy) {
+function applyOutcome(kind: 'revoke' | 'save', result: unknown) {
+  if (kind === 'save') {
+    const policy = result as components['schemas']['SessionPolicy'];
     version.value = policy.version;
     message.value = 'saved';
+    return;
+  }
+  message.value = 'revoked';
+  confirmed.value = false;
+}
+
+async function save() {
+  if (locked.value || !version.value) return;
+  policyLoad.clear();
+  message.value = '';
+  pendingKind = 'save';
+  const body: components['schemas']['SessionPolicyUpdate'] = {
+    interval_minutes: interval.value,
+    grace_minutes: grace.value,
+    expected_version: version.value,
+  };
+  const policy = await write.run('session-policy', body, (frozen, key) =>
+    http.json('/api/v1/admin/session-policy', parsePolicy, {
+      method: 'PUT',
+      body: frozen,
+      key,
+    }),
+  );
+  if (policy) {
+    pendingKind = undefined;
+    applyOutcome('save', policy);
+  } else if (!write.uncertain.value) {
+    pendingKind = undefined;
+    if (isDeniedCode(write.error.value)) clearSensitive();
   }
 }
 
 async function revoke() {
-  if (busy.value || !confirmed.value || !subject.value.trim()) return;
+  if (locked.value || !confirmed.value || !subject.value.trim()) return;
+  policyLoad.clear();
   message.value = '';
-  const body: components['schemas']['ForceLogout'] = { subject: subject.value.trim() };
-  const ok = await revoking.run(async () => {
-    await http.send('/api/v1/admin/sessions/revoke', { method: 'POST', body });
-    return true;
-  });
-  if (ok) {
-    message.value = 'revoked';
-    confirmed.value = false;
+  pendingKind = 'revoke';
+  const body: components['schemas']['ForceLogout'] = {
+    subject: subject.value.trim(),
+  };
+  const outcome = await write.run(
+    `session-revoke:${body.subject}`,
+    body,
+    async (frozen, key) => {
+      const res = await http.json(
+        '/api/v1/admin/sessions/revoke',
+        parseResult,
+        { method: 'POST', body: frozen, key },
+      );
+      if (!res.success) throw new ApiError('unavailable');
+      return res;
+    },
+  );
+  if (outcome) {
+    pendingKind = undefined;
+    applyOutcome('revoke', outcome);
+  } else if (!write.uncertain.value) {
+    pendingKind = undefined;
+    if (isDeniedCode(write.error.value)) clearSensitive();
+  }
+}
+
+async function retryWrite() {
+  const kind = pendingKind;
+  const outcome = await write.retry();
+  if (outcome && kind) {
+    pendingKind = undefined;
+    applyOutcome(kind, outcome);
+  } else if (!write.uncertain.value) {
+    pendingKind = undefined;
+    if (isDeniedCode(write.error.value)) clearSensitive();
   }
 }
 
@@ -97,14 +185,21 @@ onMounted(load);
     <div class="flex max-w-2xl flex-col gap-4" :aria-busy="busy">
       <p v-if="busy" role="status">{{ t('page.sessionPolicy.loading') }}</p>
       <Alert
-        v-if="activeError"
+        v-if="write.uncertain.value" type="warning" show-icon role="alert" :message="t('page.common.uncertain')"
+      >
+        <template #action>
+          <Button size="small" :disabled="busy" @click="retryWrite">{{ t('page.common.retryOriginal') }}</Button>
+        </template>
+      </Alert>
+      <Alert
+        v-else-if="activeError"
         type="error"
         show-icon
         role="alert"
         :message="activeError === 'session_policy_conflict' ? t('page.sessionPolicy.conflict') : errorText(activeError)"
       >
         <template #action>
-          <Button size="small" :disabled="busy" @click="load">{{ t('page.sessionPolicy.reload') }}</Button>
+          <Button size="small" :disabled="locked" @click="load">{{ t('page.sessionPolicy.reload') }}</Button>
         </template>
       </Alert>
       <Alert v-if="message && !busy" type="success" role="status" :message="t(`page.sessionPolicy.${message}`)" />
@@ -119,7 +214,7 @@ onMounted(load);
               max="240"
               step="1"
               required
-              :disabled="busy || !version"
+              :disabled="locked || !version"
               @update:value="(val) => { interval = Number(val); }"
             />
           </FormItem>
@@ -132,11 +227,11 @@ onMounted(load);
               max="240"
               step="1"
               required
-              :disabled="busy || !version"
+              :disabled="locked || !version"
               @update:value="(val) => { grace = Number(val); }"
             />
           </FormItem>
-          <Button type="primary" html-type="submit" :loading="saving.busy.value" :disabled="busy || !version">
+          <Button type="primary" html-type="submit" :loading="write.busy.value && pendingKind === 'save'" :disabled="locked || !version">
             {{ t('page.sessionPolicy.save') }}
           </Button>
         </Form>
@@ -149,17 +244,17 @@ onMounted(load);
               v-model:value="subject"
               :maxlength="256"
               required
-              :disabled="busy || !version"
+              :disabled="locked || !version"
               autocomplete="off"
               dir="ltr"
             />
           </FormItem>
           <FormItem>
-            <Checkbox v-model:checked="confirmed" :disabled="busy || !version">
+            <Checkbox v-model:checked="confirmed" :disabled="locked || !version">
               {{ t('page.sessionPolicy.confirm') }}
             </Checkbox>
           </FormItem>
-          <Button danger html-type="submit" :loading="revoking.busy.value" :disabled="busy || !version || !confirmed || !subject.trim()">
+          <Button danger html-type="submit" :loading="write.busy.value && pendingKind === 'revoke'" :disabled="locked || !version || !confirmed || !subject.trim()">
             {{ t('page.sessionPolicy.force') }}
           </Button>
         </Form>

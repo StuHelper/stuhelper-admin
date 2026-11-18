@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Audit, AuditPage, AuditQuery } from './api';
 
-import { computed, onMounted, reactive, shallowRef } from 'vue';
+import { computed, inject, onMounted, reactive, shallowRef, watch } from 'vue';
 
 import { useI18n } from '@vben/locales';
 
@@ -9,6 +9,7 @@ import { Alert, Button, Card, DatePicker, Form, FormItem, Input, Select, Table, 
 
 import { usePaged } from '#/shared/composables/async';
 import { useFormat } from '#/shared/format';
+import { sessionKey } from '#/shared/session';
 import AdminPage from '#/shared/ui/AdminPage.vue';
 import LoadState from '#/shared/ui/LoadState.vue';
 import { useErrorText } from '#/shared/ui/messages';
@@ -22,6 +23,7 @@ import { useAccessAdmin } from './api';
  */
 const { t, te } = useI18n();
 const format = useFormat();
+const session = inject(sessionKey, undefined);
 const api = useAccessAdmin();
 const errorText = useErrorText();
 const sources = ['platform', 'catalog', 'reviews', 'moderation', 'resources', 'verification', 'billing', 'qq-binding', 'open-platform', 'storage'];
@@ -39,7 +41,7 @@ const records = usePaged<Audit>(
   async (cursor, signal) => {
     // The cursor is bound to the filters and the viewer's current authorization; each page is checked again.
     const page = await api.operations(applied, cursor, signal);
-    latestPage.value = page;
+    if (!signal.aborted) latestPage.value = page;
     return { items: page.items, next: page.next_cursor };
   },
   {
@@ -54,6 +56,12 @@ function search() {
   latestPage.value = undefined;
   void records.reload();
 }
+watch(() => session?.state.value, (state) => {
+  if (state === 'guest') {
+    records.clear();
+    latestPage.value = undefined;
+  }
+});
 onMounted(search);
 
 const resultColor: Record<string, string> = { success: 'green', denied: 'orange', failed: 'red', unknown: 'default' };

@@ -7,6 +7,7 @@ import { useI18n } from '@vben/locales';
 
 import { Alert, Button, Card, Descriptions, DescriptionsItem, Modal, Space, Tag } from 'ant-design-vue';
 
+import { useLeaveGuard } from '#/shared/composables/leave';
 import { useFormat } from '#/shared/format';
 import AdminPage from '#/shared/ui/AdminPage.vue';
 import { useErrorText } from '#/shared/ui/messages';
@@ -23,6 +24,7 @@ const { data, loading, sending, error, pending, uncertain, completed, reload, pr
 const label = (key: string) => (te(key) ? t(key) : t('page.contribution.unknown'));
 const desired: Record<Contribution['desired_state'], string> = { active: 'resume', paused: 'pause', exiting: 'exit', revoked: 'revoke' };
 const locked = computed(() => loading.value || sending.value || !!pending.value);
+useLeaveGuard(() => (uncertain.value ? t('page.common.leaveUncertain') : (sending.value || !!pending.value ? t('page.common.leaveUnsaved') : '')));
 function retry(item: Contribution) {
   prepare({ kind: 'retry', id: item.id, key: crypto.randomUUID(), body: { revision: item.revision } });
 }

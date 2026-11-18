@@ -242,3 +242,23 @@ test('an unpriced resource is priced from the manage panel', async ({ page }, in
   await expect(page.getByText(p.hint, { exact: true })).toBeVisible();
   expect(state.writes).toEqual([{ method: 'PUT', path: '/admin/resource-prices/resource', key: expect.any(String), body: { resource_id: 'resource', points: 80, ivory_minor: null } }]);
 });
+
+test('payee details and refund queue clear immediately when permission is revoked', async ({ page }, info) => {
+  const all = catalogue(info); const r = all.billing.refunds;
+  await server(page, { payee: { method: 'bank', name: 'Li Hua', account: '6222 0000 1111' } });
+  await page.route('**/api/v1/billing/admin/refunds/r1/manual-result', (route) => route.fulfill({ status: 403, json: { code: 'billing_forbidden' } }));
+  await page.goto(`${base}/billing/refunds?lang=${info.project.metadata.locale}`);
+  await page.locator('.ant-segmented').getByText(all.billing.orderState.awaiting_manual, { exact: true }).click();
+  await page.getByRole('button', { name: r.handle, exact: true }).click();
+  const drawer = page.locator('.ant-drawer-content');
+  await drawer.getByRole('button', { name: r.showPayee, exact: true }).click();
+  await expect(drawer.getByText('Li Hua', { exact: true })).toBeVisible();
+  await expect(drawer.getByText('6222 0000 1111', { exact: true })).toBeVisible();
+  await drawer.getByLabel(r.paymentChannel).fill('bank-a-corporate');
+  await drawer.getByLabel(r.paymentReference).fill('bank-999');
+  await drawer.getByRole('button', { name: r.record, exact: true }).click();
+  await expect(page.getByRole('alert')).toContainText(all.errors.billing_forbidden);
+  await expect(page.getByText('Li Hua', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('6222 0000 1111', { exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: r.handle, exact: true })).toHaveCount(0);
+});

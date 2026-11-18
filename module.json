@@ -56,7 +56,8 @@
     ],
     "WP-ADMIN-04": [
       "tests/e2e/commerce.spec.mjs#payee details are read only on request and a missing record is stated",
-      "tests/e2e/commerce.spec.mjs#a refund without payee details says so"
+      "tests/e2e/commerce.spec.mjs#a refund without payee details says so",
+      "tests/e2e/commerce.spec.mjs#payee details and refund queue clear immediately when permission is revoked"
     ],
     "AE-ADMIN-01": [
       "tests/e2e/eligibility.spec.mjs#a school rule for buying resources is saved with the version read and leaves downloads unchanged",
@@ -82,7 +83,12 @@
     ],
     "SESSION-MANAGEMENT-01": [
       "tests/e2e/session-policy.spec.mjs#session settings preserve edits on conflict and revoke only the confirmed subject",
-      "tests/e2e/session-policy.spec.mjs#session settings show a retryable outage without losing input"
+      "tests/e2e/session-policy.spec.mjs#session settings show a retryable outage without losing input",
+      "apps/web-antd/src/features/sessions/SessionSettingsView.test.ts#sends Idempotency-Key, rejects revoke { success: false }, and retries uncertain writes with the original key"
+    ],
+    "AO-04": [
+      "apps/web-antd/src/features/verification/VerificationView.test.ts#recovers from initial access error, blocks javascript: suggestion links, assigns unique form IDs, wipes profile on 403, and locks uncertain writes",
+      "apps/web-antd/src/shared/api/errors.test.ts#marks HTTP 401/403 and module-prefixed auth error codes as denied while preserving exact code strings"
     ],
     "CM-19": [
       "tests/e2e/feedback.spec.mjs#feedback reply refresh cannot overwrite another operators note with a newer revision",

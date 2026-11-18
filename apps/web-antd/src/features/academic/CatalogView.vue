@@ -6,6 +6,7 @@ import { computed, reactive, ref, watch } from 'vue';
 import { useI18n } from '@vben/locales';
 
 import {
+  Alert,
   Button,
   Card,
   Descriptions,
@@ -49,6 +50,7 @@ const school = useCampusId();
 const kind = ref<'course' | 'teacher'>('course');
 const query = ref('');
 const selectedId = ref('');
+const lifecycleNotice = ref('');
 const tab = ref<'edit' | 'lifecycle'>('edit');
 
 const editState = reactive({ busy: false, dirty: false, uncertain: false });
@@ -62,8 +64,15 @@ const busy = computed(
   () => editState.busy || lifecycleState.busy || uncertain.value,
 );
 
+watch(() => lifecycleState.busy, (working) => {
+  if (working) lifecycleNotice.value = '';
+});
+
 function clearSelection() {
   selectedId.value = '';
+  lifecycleNotice.value = '';
+  comparison.clear();
+  selected.clear();
   Object.assign(editState, { busy: false, dirty: false, uncertain: false });
   Object.assign(lifecycleState, { busy: false, dirty: false, uncertain: false });
 }
@@ -101,14 +110,20 @@ const options = useAsync(async (signal) => {
   };
 });
 
-const selected = useAsync(
-  async (signal) => {
-    const data = await api.summary(selectedId.value, signal);
-    if (data.object.school_id !== school.value) throw new ApiError('forbidden');
-    return data;
-  },
-  { onDenied: clearSelection },
-);
+async function loadSelected(signal: AbortSignal) {
+  const summary = await api.summary(selectedId.value, signal);
+  if (summary.object.school_id !== school.value) throw new ApiError('forbidden');
+  return summary;
+}
+const selected = useAsync(loadSelected, { onDenied: clearSelection });
+const comparison = useAsync(loadSelected, { onDenied: clearSelection });
+
+async function refreshSelection() {
+  const id = selectedId.value;
+  await comparison.reload();
+  const latest = comparison.data.value;
+  if (latest && id === selectedId.value && latest.object.id === id) selected.data.value = latest;
+}
 
 const targets = useAsync(async (signal) =>
   selected.data.value
@@ -151,7 +166,13 @@ useLeaveGuard(() =>
 );
 
 async function open(id: string, compare = false) {
+  if (compare && entry.value?.id === id) {
+    await refreshSelection();
+    return;
+  }
   if (!compare && selectedId.value && !canLeave()) return;
+  comparison.clear();
+  lifecycleNotice.value = '';
   selectedId.value = id;
   await selected.reload();
   if (!selected.data.value) return;
@@ -171,8 +192,9 @@ async function onSaved() {
   void rows.reload();
 }
 
-async function onApplied(result: CatalogObject) {
+async function onApplied(result: CatalogObject, message: string) {
   await open(result.id, true);
+  if (selectedId.value === result.id) lifecycleNotice.value = message;
   void rows.reload();
 }
 
@@ -303,6 +325,7 @@ const columns = computed(() => [
       destroy-on-close
       @close="close"
     >
+      <Alert v-if="lifecycleNotice" type="success" role="status" :message="t(lifecycleNotice)" />
       <LoadState
         :status="selected.status.value"
         :error="selected.error.value"
@@ -344,18 +367,19 @@ const columns = computed(() => [
               :tab="t('page.catalog.correct')"
               :disabled="lifecycleState.dirty"
             >
+              <Alert v-if="comparison.error.value" type="error" role="alert" :message="errorText(comparison.error.value)" />
               <CatalogEditForm
                 :entry="entry"
                 :departments="options.data.value?.departments"
                 :categories="options.data.value?.categories"
                 :natures="options.data.value?.natures"
-                :external-busy="lifecycleState.busy || lifecycleState.uncertain"
+                :external-busy="lifecycleState.busy || lifecycleState.uncertain || comparison.status.value === 'loading'"
                 @state="
                   (b, u, d) =>
                     Object.assign(editState, { busy: b, uncertain: u, dirty: d })
                 "
                 @saved="onSaved"
-                @reload-compare="open(selectedId, true)"
+                @reload-compare="refreshSelection"
                 @denied="clearSelection"
               />
             </TabPane>

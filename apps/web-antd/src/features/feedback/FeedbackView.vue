@@ -42,7 +42,7 @@ const stateColor: Record<Feedback['state'], string> = { new: 'blue', processing:
 // A details refresh must not silently upgrade the revision of an existing draft.
 const editBase = ref({ revision: 0, state: 'new', note: '' });
 
-function clearPrivate() {
+function clearDetail() {
   selected.value = undefined;
   note.value = '';
   body.value = '';
@@ -58,8 +58,12 @@ const messages = usePaged<Feedback>(
     });
     return { items: page.items, next: page.next_cursor };
   },
-  { onDenied: clearPrivate },
+  { onDenied: clearDetail },
 );
+function clearPrivate() {
+  messages.clear();
+  clearDetail();
+}
 const opening = useTask({ onDenied: clearPrivate });
 const downloading = useTask({ onDenied: clearPrivate });
 const updateWrite = useMutation({ onDenied: clearPrivate });
