@@ -236,7 +236,7 @@ describe('SessionControls nickname editing (A-12)', () => {
       const modal = root.querySelector<HTMLElement>('[data-modal="true"]');
       expect(modal?.dataset.maskClosable).toBe('false');
       const input = root.querySelector('input') as HTMLInputElement;
-      expect(input.maxLength).toBe(20);
+      expect(input.hasAttribute('maxlength')).toBe(false);
 
       const okButton = () =>
         root.querySelector('[data-action="ok"]') as HTMLButtonElement;
@@ -247,8 +247,13 @@ describe('SessionControls nickname editing (A-12)', () => {
       await nextTick();
       expect(okButton().disabled).toBe(true);
 
-      // Over 20 code points disables confirmation
-      input.value = 'a'.repeat(21);
+      // A supplementary character uses two UTF-16 units but counts as one code point.
+      input.value = '😀'.repeat(20);
+      input.dispatchEvent(new Event('input'));
+      await nextTick();
+      expect(okButton().disabled).toBe(false);
+
+      input.value += '😀';
       input.dispatchEvent(new Event('input'));
       await nextTick();
       expect(okButton().disabled).toBe(true);

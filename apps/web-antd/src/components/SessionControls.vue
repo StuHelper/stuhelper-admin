@@ -162,7 +162,6 @@ function choose({ key }: { key: number | string }) {
           <Input
             id="session-nickname"
             v-model:value="nickname"
-            :maxlength="20"
             :disabled="locked"
           />
         </FormItem>
