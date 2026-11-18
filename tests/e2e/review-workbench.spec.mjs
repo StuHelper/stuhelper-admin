@@ -283,9 +283,23 @@ test('moderation decision panel shows target course and term, highlights propose
   await expect(drawer.locator('del')).toHaveCount(0);
   await expect(drawer.getByText('Revision body #25', { exact: true })).toBeVisible();
 
-  await drawer
-    .getByRole('button', { name: all.moderation.olderVersions, exact: true })
-    .click();
+  const olderBtn = drawer.getByRole('button', {
+    name: all.moderation.olderVersions,
+    exact: true,
+  });
+  await olderBtn.scrollIntoViewIfNeeded();
+  await expect(olderBtn).toBeInViewport();
+  await Promise.all([
+    page.waitForResponse((response) => {
+      const url = new URL(response.url());
+      return (
+        url.pathname === '/api/v1/reviews/admin/entries/entry-1/history' &&
+        url.searchParams.get('before') === '6' &&
+        response.ok()
+      );
+    }),
+    olderBtn.click(),
+  ]);
   // Both newest (#25) and appended older (#4) revisions remain on screen.
   await expect(drawer.getByText('Revision body #25', { exact: true })).toBeVisible();
   await expect(drawer.getByText('Revision body #4', { exact: true })).toBeVisible();
