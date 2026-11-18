@@ -76,11 +76,18 @@ useLeaveGuard(() => {
   return '';
 });
 
-function clearPrivate() {
-  closures.clear();
+let accessVersion = 0;
+function clearDetail() {
+  accessVersion++;
+  loadingDetail.value = false;
   selected.value = undefined;
   detailError.value = '';
   success.value = '';
+}
+
+function clearPrivate() {
+  closures.clear();
+  clearDetail();
 }
 
 function isDenied(error: unknown) {
@@ -101,9 +108,7 @@ watch(
   () => closures.error.value,
   (code) => {
     if (code === 'forbidden' || code === 'unauthenticated') {
-      selected.value = undefined;
-      detailError.value = '';
-      success.value = '';
+      clearDetail();
     }
   },
 );
@@ -118,11 +123,14 @@ async function open(row: Closure) {
   write.dismiss();
   selected.value = row;
   loadingDetail.value = true;
+  const version = accessVersion;
   try {
     const fresh = await api.get(row.id);
+    if (version !== accessVersion) return;
     nowMs.value = props.now();
     syncRow(fresh);
   } catch (error) {
+    if (version !== accessVersion) return;
     if (isDenied(error)) {
       clearPrivate();
       await closures.reload();
@@ -130,7 +138,7 @@ async function open(row: Closure) {
     }
     detailError.value = errorCode(error);
   } finally {
-    loadingDetail.value = false;
+    if (version === accessVersion) loadingDetail.value = false;
   }
 }
 
@@ -166,11 +174,13 @@ async function resume() {
   if (!current || !canProcessClosure(current, props.now())) return;
   success.value = '';
   detailError.value = '';
+  const version = accessVersion;
   const result = await write.run(
     `closure-process:${current.id}`,
     { closure_id: current.id },
     (_body, key) => api.process(current.id, key),
   );
+  if (version !== accessVersion) return;
   if (result) settled(result);
   else if (
     write.error.value === 'forbidden' ||
@@ -182,7 +192,9 @@ async function resume() {
 }
 
 async function retryResume() {
+  const version = accessVersion;
   const result = (await write.retry()) as Closure | undefined;
+  if (version !== accessVersion) return;
   if (result) settled(result);
   else if (
     write.error.value === 'forbidden' ||

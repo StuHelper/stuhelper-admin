@@ -204,6 +204,33 @@ describe('Account closures administration', () => {
     expect(root.textContent).toContain('00000000-0000-4000-8000-000000000099');
   });
 
+  it('discards delayed detail after a list refresh loses access', async () => {
+    let finishDetail!: (row: Closure) => void;
+    let refuseList!: (error: ApiError) => void;
+    const detail = new Promise<Closure>((resolve) => { finishDetail = resolve; });
+    const list = new Promise<{ items: Closure[] }>((_resolve, reject) => { refuseList = reject; });
+    let refreshing = false;
+    mock.json.mockImplementation(async (path: string) => {
+      if (path.endsWith(blockedClosure().id)) return refreshing ? detail : blockedClosure();
+      return refreshing ? list : { items: [blockedClosure()] };
+    });
+    const { root } = await mountView();
+    const buttons = (key: string) => [...document.querySelectorAll('button')]
+      .filter((button) => button.textContent?.includes(key));
+    buttons('page.common.open')[0]!.click();
+    await settle();
+    refreshing = true;
+    const [listButton, detailButton] = buttons('page.common.refresh');
+    listButton!.click();
+    detailButton!.click();
+    refuseList(new ApiError('forbidden', false, 403));
+    await settle();
+    finishDetail(blockedClosure());
+    await settle();
+    expect(root.textContent).not.toContain(blockedClosure().profile_id);
+    expect(document.body.textContent).not.toContain('page.closures.blockers.content_unavailable');
+  });
+
   it('clears listed closures and open detail when permission is revoked', async () => {
     let denied = false;
     mock.json.mockImplementation(async (path: string) => {
