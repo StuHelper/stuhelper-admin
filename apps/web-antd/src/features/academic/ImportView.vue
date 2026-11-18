@@ -39,7 +39,7 @@ const { t, te } = useI18n();
 const format = useFormat();
 const errorText = useErrorText();
 const api = useAcademicAdmin();
-const confirm = useMutation();
+const confirm = useMutation({ maxItems: 50_000 });
 const school = useCampusId();
 const input = shallowRef<CatalogImport>();
 const preview = shallowRef<ImportPreview>();
@@ -104,7 +104,14 @@ async function apply() {
     (value, key) => api.confirmImport(value, key),
   );
   if (saved) done(saved);
-  else if (confirm.error.value === 'conflict') preview.value = undefined;
+  else if (
+    confirm.error.value === 'conflict' ||
+    confirm.error.value === 'import_conflict'
+  ) {
+    error.value = confirm.error.value;
+    confirm.dismiss();
+    preview.value = undefined;
+  }
 }
 async function retry() {
   const saved = await confirm.retry();
@@ -120,10 +127,20 @@ function done(saved: ImportResult) {
 
 const columns = computed(() => [
   { dataIndex: 'id', key: 'id', title: t('page.catalog.recordId') },
-  { dataIndex: 'kind', key: 'kind', title: t('page.catalog.kind') },
+  { key: 'kind', title: t('page.catalog.kind') },
   { key: 'state', title: t('page.common.status') },
   { key: 'fields', title: t('page.catalog.changedFields') },
 ]);
+const kindLabel = (kind: string) =>
+  te(`page.catalog.kinds.${kind}`) ? t(`page.catalog.kinds.${kind}`) : kind;
+const fieldsLabel = (fields: string[]) =>
+  format.value.list(
+    fields.map((field) =>
+      te(`page.catalog.importFields.${field}`)
+        ? t(`page.catalog.importFields.${field}`)
+        : field,
+    ),
+  );
 const stateColor: Record<string, string> = {
   new: 'green',
   updated: 'blue',
@@ -236,7 +253,10 @@ const stateColor: Record<string, string> = {
           :scroll="{ x: 640 }"
         >
           <template #bodyCell="{ column, record }">
-            <template v-if="column.key === 'state'">
+            <template v-if="column.key === 'kind'">
+              {{ kindLabel(record.kind) }}
+            </template>
+            <template v-else-if="column.key === 'state'">
 <Tag :color="stateColor[record.state]">
 {{
                 te(`page.catalog.changeState.${record.state}`)
@@ -247,7 +267,7 @@ const stateColor: Record<string, string> = {
 </template>
             <template v-else-if="column.key === 'fields'">
 {{
-              record.fields.join(', ')
+              fieldsLabel(record.fields)
             }}
 </template>
           </template>

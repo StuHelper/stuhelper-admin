@@ -122,7 +122,8 @@
     "disabled": "该功能尚未启用。",
     "cooldown": "操作过于频繁，请稍后再试。",
     "billing_already_accessible": "该用户已经可以访问这份资料，无需购买。",
-    "invalid_rule": "资格条件组合无效，请调整后再保存。"
+    "invalid_rule": "资格条件组合无效，请调整后再保存。",
+    "import_conflict": "目录数据已在预览后发生变化，请重新生成预览后再确认导入。"
   },
   "session": {
     "signIn": "登录",
@@ -427,7 +428,43 @@
       "applied": "已执行"
     },
     "confirmImport": "确认导入",
-    "imported": "导入完成：目录对象 {objects}，选课记录 {enrollments}，保留人工更正 {preserved}。"
+    "imported": "导入完成：目录对象 {objects}，选课记录 {enrollments}，保留人工更正 {preserved}。",
+    "kinds": {
+      "school": "学校",
+      "department": "院系",
+      "category": "课程类别",
+      "nature": "课程性质",
+      "term": "学期",
+      "course": "课程",
+      "teacher": "教师",
+      "term_course": "学期开课",
+      "class": "教学班",
+      "assignment": "任课关联",
+      "schedule": "排课时间",
+      "enrollment": "选课记录"
+    },
+    "importFields": {
+      "name": "名称",
+      "code": "代码",
+      "department_id": "所属院系",
+      "category_id": "课程类别",
+      "nature_id": "课程性质",
+      "course_id": "关联课程",
+      "term_id": "所属学期",
+      "term_course_id": "所属开课",
+      "class_id": "所属教学班",
+      "teacher_id": "任课教师",
+      "credits": "学分",
+      "hours": "学时",
+      "english_name": "英文名称",
+      "former_codes": "曾用代码",
+      "former_names": "曾用名称",
+      "biography": "简介",
+      "location": "地点",
+      "time_text": "时间说明",
+      "aliases": "其他名称",
+      "schedule_time": "结构化节次"
+    }
   },
   "resources": {
     "manageTitle": "资料管理",

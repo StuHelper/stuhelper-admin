@@ -45,6 +45,7 @@ import MutationAlert from '#/shared/ui/MutationAlert.vue';
 import { pageSize, useAcademicAdmin } from './api';
 import { useCampusId } from './campus';
 import CampusPending from './CampusPending.vue';
+import CatalogObjectSelect from './CatalogObjectSelect.vue';
 
 /**
  * Catalog maintenance: correct courses and teachers, merge duplicates and
@@ -125,25 +126,19 @@ const selected = useAsync(async (signal) => {
   if (data.object.school_id !== school.value) throw new ApiError('forbidden');
   return data;
 });
-const targets = useAsync(async (signal) =>
-  selected.data.value
-    ? api.options(
-        { kind: selected.data.value.object.kind, school_id: school.value },
-        signal,
-      )
-    : [],
-);
 const entry = computed(() => selected.data.value?.object);
-const targetObject = computed(() =>
-  targets.data.value?.find((item) => item.id === target.value),
-);
+const targetObject = shallowRef<CatalogObject>();
 
-watch([school, kind], () => {
-  selectedId.value = '';
-  if (!school.value) return;
-  void options.reload();
-  void rows.reload();
-});
+watch(
+  [school, kind],
+  () => {
+    selectedId.value = '';
+    if (!school.value) return;
+    void options.reload();
+    void rows.reload();
+  },
+  { immediate: true },
+);
 watch([target, reason], () => {
   plan.value = undefined;
 });
@@ -179,6 +174,13 @@ async function open(id: string, compare = false) {
   if (!compare && selectedId.value && !canLeave()) return;
   selectedId.value = id;
   success.value = '';
+  correcting.dismiss();
+  lifecycle.dismiss();
+  planError.value = '';
+  if (!compare) {
+    plan.value = undefined;
+    targetObject.value = undefined;
+  }
   await selected.reload();
   const object = selected.data.value?.object;
   if (!object) return;
@@ -187,7 +189,6 @@ async function open(id: string, compare = false) {
     tab.value = 'edit';
     target.value = '';
     reason.value = '';
-    void targets.reload();
   }
 }
 function close() {
@@ -618,18 +619,18 @@ id="catalogview-field-7"
               />
               <Form layout="vertical">
                 <FormItem :label="t('page.catalog.mergeTarget')" html-for="catalogview-field-8">
-                  <Select
-id="catalogview-field-8"
-                    v-model:value="target"
+                  <CatalogObjectSelect
+                    input-id="catalogview-field-8"
+                    :model-value="target"
+                    :school-id="school"
+                    :kind="entry?.kind === 'teacher' ? 'teacher' : 'course'"
+                    :exclude-id="entry?.id"
                     :disabled="busy"
-                    show-search
-                    option-filter-prop="label"
-                    :options="[
-                      { value: '', label: t('page.common.choose') },
-                      ...(targets.data.value ?? [])
-                        .filter((item) => item.id !== entry?.id)
-                        .map((item) => ({ value: item.id, label: item.name })),
-                    ]"
+                    :placeholder="t('page.common.choose')"
+                    admin
+                    include-inactive
+                    @update:model-value="target = $event ?? ''"
+                    @select-object="targetObject = $event"
                   />
                 </FormItem>
                 <FormItem :label="t('page.catalog.reason')" required html-for="catalogview-field-9">

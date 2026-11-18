@@ -35,7 +35,8 @@
       "tests/e2e/resources.spec.mjs#grant creation and revocation retain the subject and respect current permissions"
     ],
     "RES-ADMIN-04": [
-      "tests/e2e/resources.spec.mjs#directory editing saves revision and configured names"
+      "tests/e2e/resources.spec.mjs#directory editing saves revision and configured names",
+      "apps/web-antd/src/features/academic/CatalogScale.test.ts#resolves directory course names via batch lookup and searches >1000 merge targets without 10-page options() failure"
     ],
     "RES-CLIENT-07": [
       "apps/web-antd/src/features/resources/api.test.ts#requests safe reuse and never sends bytes for reused or still pending content"
