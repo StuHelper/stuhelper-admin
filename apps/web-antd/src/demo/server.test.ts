@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
+import billingContract from '../../../../contracts/billing.openapi.json';
+import informationQueryContract from '../../../../contracts/information-query.openapi.json';
 import moderationContract from '../../../../contracts/moderation.openapi.json';
+import openPlatformContract from '../../../../contracts/open-platform.openapi.json';
 import resourcesContract from '../../../../contracts/resources.openapi.json';
 import reviewsContract from '../../../../contracts/reviews.openapi.json';
 import { parseCapabilities, parseModules } from '../features/overview/api';
@@ -76,6 +79,25 @@ describe('demo server contract alignment', () => {
     const file = await call(`/api/v1/resources/review/${versionId}/file`);
     expect(file.status).toBe(200);
     expect(file.response.headers.get('Content-Type')).toBe('application/pdf');
+  });
+
+  it('keeps the published version of a reported resource', async () => {
+    const detail = await call('/api/v1/resources/review/x4-v1');
+    const resource = await detail.response.json();
+    expect(parseResource(resource)).toMatchObject({ current: { id: 'x4-v1', state: 'published' } });
+    expect(resource).not.toHaveProperty('proposal');
+  });
+
+  it('serves the empty lists at the contract routes', async () => {
+    const audit = await call('/api/v1/information-query/audit/query', 'POST', {});
+    expect(audit.status).toBe(200);
+    expect(schemaOf(informationQueryContract.components.schemas, 'AuditPage')(await audit.response.json())).toEqual({ items: [], next_cursor: '' });
+    const plans = await call('/api/v1/billing/admin/membership-plans');
+    expect(plans.status).toBe(200);
+    expect(schemaOf(billingContract.components.schemas, 'MembershipPlan', true)(await plans.response.json())).toEqual([]);
+    const apps = await call('/api/v1/open-platform/admin/apps');
+    expect(apps.status).toBe(200);
+    expect(schemaOf(openPlatformContract.components.schemas, 'Applications')(await apps.response.json())).toEqual({ items: [] });
   });
 
   it('returns contract-valid policy save and review attribution preview responses', async () => {

@@ -126,33 +126,24 @@ async function body(init?: RequestInit) {
 }
 
 function reviewResource(p: string) {
+  const raw = decodeURIComponent(p.split('/')[3] ?? '').replace(/^resource:/, '');
+  const versionId = raw.includes(':') ? raw.split(':')[1]! : raw;
+  const row = d.resources.find(
+    (item) => item.proposal?.id === versionId || item.current?.id === versionId || item.id === versionId,
+  );
+  if (!row) return nope('not_found', 404);
   if (p.endsWith('/file')) {
     return new Response('%PDF-1.4\n%%EOF\n', {
       status: 200,
       headers: { 'Content-Type': 'application/pdf' },
     });
   }
-  const raw = decodeURIComponent(p.split('/')[3] ?? '').replace(/^resource:/, '');
-  const versionId = raw.includes(':') ? raw.split(':')[1]! : raw;
-  const resourceId = versionId.replace(/-v\d+$/, '');
-  const row =
-    d.resources.find(
-      (r) =>
-        r.id === resourceId ||
-        r.proposal?.id === versionId ||
-        r.current?.id === versionId,
-    ) ?? d.resources[0]!;
-  const baseVersion = row.proposal ?? row.current;
   return json({
     id: row.id,
     revision: row.revision,
     state: row.state,
     ...(row.current ? { current: row.current } : {}),
-    proposal: {
-      ...baseVersion,
-      id: versionId || baseVersion.id,
-      state: 'pending',
-    },
+    ...(row.proposal ? { proposal: { ...row.proposal, state: 'pending' } } : {}),
     download_allowed: false,
     access_reason: 'allowed',
     owned: Boolean(row.owned),
@@ -422,9 +413,9 @@ export async function handleDemoRequest(
   }
 
   if (p === '/open-platform/admin/apps' && method === 'GET') {
-    return json({ items: [], next_cursor: '' });
+    return json({ items: [] });
   }
-  if (p === '/information-query/audit' && method === 'GET') {
+  if (p === '/information-query/audit/query' && method === 'POST') {
     return json({ items: [], next_cursor: '' });
   }
 
@@ -644,7 +635,7 @@ function billingRoute(p: string, method: string, u: URL) {
         next: '',
       });
     }
-    if (path === '/plans') return json({ items: [], next: '' });
+    if (path === '/membership-plans') return json([]);
     if (path === '/channels') {
       return json({
         items: [
