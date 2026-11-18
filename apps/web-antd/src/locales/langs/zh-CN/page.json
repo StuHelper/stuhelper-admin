@@ -483,7 +483,9 @@
       "time_text": "时间说明",
       "aliases": "其他名称",
       "schedule_time": "结构化节次"
-    }
+    },
+    "changeFilter": "变更状态筛选",
+    "changeCount": "{state}（{count}）"
   },
   "resources": {
     "manageTitle": "资料管理",
@@ -873,7 +875,15 @@
       "replica_shortage": "健康副本尚未达到目标。",
       "no_healthy_source": "没有可用的健康来源。",
       "insufficient_eligible_capacity": "合规账号或可用容量不足。"
-    }
+    },
+    "quotaUnit": "容量单位",
+    "quotaUnits": {
+      "B": "字节 (B)",
+      "GB": "十亿字节 (GB)",
+      "TB": "万亿字节 (TB)"
+    },
+    "quotaPreview": "最低允许：{min}（已用 + 预占） · 换算结果：{value}",
+    "quotaMinimumOnly": "最低允许：{min}（已用 + 预占）"
   },
   "contribution": {
     "title": "存储贡献管理",
@@ -1793,7 +1803,8 @@
       "site_unit_missing": "官网缺单位",
       "catalog_name_absent": "数据库没有同名",
       "ambiguous_site": "官网有重复主页"
-    }
+    },
+    "checkCatalog": "去目录核对"
   },
   "closures": {
     "title": "账号注销管理",

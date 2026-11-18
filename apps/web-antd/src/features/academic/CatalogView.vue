@@ -35,6 +35,7 @@ import { pageSize, useAcademicAdmin } from './api';
 import { useCampusId } from './campus';
 import CampusPending from './CampusPending.vue';
 import CatalogEditForm from './CatalogEditForm.vue';
+import { useCatalogJump } from './catalogJump';
 import CatalogLifecyclePanel from './CatalogLifecyclePanel.vue';
 
 /**
@@ -46,9 +47,11 @@ const { t } = useI18n();
 const format = useFormat();
 const errorText = useErrorText();
 const api = useAcademicAdmin();
+const catalogJump = useCatalogJump();
 const school = useCampusId();
-const kind = ref<'course' | 'teacher'>('course');
-const query = ref('');
+const initialJump = catalogJump.consume();
+const kind = ref<'course' | 'teacher'>(initialJump?.kind ?? 'course');
+const query = ref(initialJump?.query ?? '');
 const selectedId = ref('');
 const lifecycleNotice = ref('');
 const tab = ref<'edit' | 'lifecycle'>('edit');

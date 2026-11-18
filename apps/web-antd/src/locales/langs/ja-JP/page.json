@@ -483,7 +483,9 @@
       "time_text": "時間表記",
       "aliases": "別名",
       "schedule_time": "時限データ"
-    }
+    },
+    "changeFilter": "変更状態で絞り込み",
+    "changeCount": "{state}（{count}件）"
   },
   "resources": {
     "manageTitle": "資料管理",
@@ -873,7 +875,15 @@
       "replica_shortage": "正常な複製が目標数に達していません。",
       "no_healthy_source": "正常な取得元がありません。",
       "insufficient_eligible_capacity": "条件を満たすアカウントまたは容量が不足しています。"
-    }
+    },
+    "quotaUnit": "容量単位",
+    "quotaUnits": {
+      "B": "バイト (B)",
+      "GB": "ギガバイト (GB)",
+      "TB": "テラバイト (TB)"
+    },
+    "quotaPreview": "下限：{min}（使用済み + 予約済み） · 換算値：{value}",
+    "quotaMinimumOnly": "下限：{min}（使用済み + 予約済み）"
   },
   "contribution": {
     "title": "ストレージ提供の管理",
@@ -1793,7 +1803,8 @@
       "site_unit_missing": "ページに所属がない",
       "catalog_name_absent": "データに同名がいない",
       "ambiguous_site": "重複したページ"
-    }
+    },
+    "checkCatalog": "ディレクトリで確認"
   },
   "closures": {
     "title": "アカウント閉鎖管理",
