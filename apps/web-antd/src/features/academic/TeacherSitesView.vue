@@ -20,8 +20,7 @@ import {
   Tag,
 } from 'ant-design-vue';
 
-import { ApiError, errorCode } from '#/shared/api/errors';
-import { useAsync, useMutation } from '#/shared/composables/async';
+import { useAsync, useMutation, usePaged } from '#/shared/composables/async';
 import { useFormat } from '#/shared/format';
 import AdminPage from '#/shared/ui/AdminPage.vue';
 import { useErrorText } from '#/shared/ui/messages';
@@ -43,28 +42,34 @@ const format = useFormat();
 const errorText = useErrorText();
 const api = useAcademicAdmin();
 const school = useCampusId();
-const start = useMutation();
 
-const status = useAsync((signal) =>
-  school.value
-    ? api.teacherRefresh(school.value, signal)
-    : Promise.resolve(undefined),
-);
 // reload() clears data while a request is in flight; keep the last answer so the
 // page does not flicker and a loading gap is not mistaken for a finished run.
-const known = shallowRef<typeof status.data.value>();
+const known = shallowRef<Awaited<ReturnType<typeof api.teacherRefresh>>>();
+const status = useAsync(
+  (signal) =>
+    school.value
+      ? api.teacherRefresh(school.value, signal)
+      : Promise.resolve(undefined),
+  {
+    onDenied: () => {
+      known.value = undefined;
+    },
+  },
+);
 watch(
   () => status.data.value,
   (value) => {
     if (value) known.value = value;
   },
 );
-watch(
-  () => status.status.value,
-  (value) => {
-    if (value === 'error' && ['forbidden', 'unauthenticated'].includes(status.error.value)) known.value = undefined;
+
+const start = useMutation({
+  onDenied: () => {
+    known.value = undefined;
   },
-);
+});
+
 const latest = computed(() => known.value?.latest ?? undefined);
 const active = computed(
   () => latest.value?.status === 'queued' || latest.value?.status === 'running',
@@ -76,9 +81,15 @@ watch(
   () => [active.value, known.value, status.status.value] as const,
   () => {
     clearTimeout(timer);
-    const retryable = status.status.value === 'ready' ||
-      status.status.value === 'error' && ['network', 'rate_limited', 'timeout', 'unavailable'].includes(status.error.value);
-    if (active.value && retryable) timer = setTimeout(() => void status.reload(), 5000);
+    const retryable =
+      status.status.value === 'ready' ||
+      (status.status.value === 'error' &&
+        ['network', 'rate_limited', 'timeout', 'unavailable'].includes(
+          status.error.value,
+        ));
+    if (active.value && retryable) {
+      timer = setTimeout(() => void status.reload(), 5000);
+    }
   },
 );
 onBeforeUnmount(() => clearTimeout(timer));
@@ -99,65 +110,55 @@ async function retry() {
 
 // Unmatched homepages, filtered by reason and loaded page by page.
 const reason = ref('');
-const rows = shallowRef<UnmatchedTeacherSite[]>([]);
-const next = ref('');
 const reasonCounts = shallowRef<Record<string, number>>({});
 const total = ref(0);
 const observedAt = ref<null | string>(null);
-const listError = ref('');
-const loading = ref(false);
-let generation = 0;
-async function load(more = false) {
-  if (!school.value) return;
-  const current = ++generation;
-  loading.value = true;
-  listError.value = '';
-  try {
-    const page = await api.unmatchedTeacherSites(school.value, {
-      reason: reason.value || undefined,
-      limit: 50,
-      after: more ? next.value : undefined,
-    });
-    if (current !== generation) return;
-    rows.value = more ? [...rows.value, ...page.items] : page.items;
-    next.value = page.next;
+
+const unmatched = usePaged<UnmatchedTeacherSite>(
+  async (after, signal) => {
+    if (!school.value) return { items: [], next: '' };
+    const page = await api.unmatchedTeacherSites(
+      school.value,
+      {
+        reason: reason.value || undefined,
+        limit: 50,
+        after: after || undefined,
+      },
+      signal,
+    );
     total.value = page.total;
     observedAt.value = page.observed_at;
     reasonCounts.value = page.reason_counts as Record<string, number>;
-  } catch (error_) {
-    if (current !== generation) return;
-    listError.value = errorCode(error_);
-    // Without read permission the names and units already shown must go too.
-    if (error_ instanceof ApiError && error_.denied) {
-      rows.value = [];
-      next.value = '';
+    return { items: page.items, next: page.next };
+  },
+  {
+    onDenied: () => {
       total.value = 0;
       observedAt.value = null;
       reasonCounts.value = {};
-    }
-  } finally {
-    if (current === generation) loading.value = false;
-  }
-}
+    },
+  },
+);
+
 watch(
   school,
   () => {
     known.value = undefined;
     void status.reload();
-    void load();
+    void unmatched.reload();
   },
   { immediate: true },
 );
-watch(reason, () => void load());
+watch(reason, () => void unmatched.reload());
 // When a run reaches a final state, the unmatched list may have changed, so read
 // it again. Only received answers count; the loading gap between polls does not.
 let seen: string | undefined;
-watch(latest, (run) => {
-  if (!run) return;
+watch(latest, (runItem) => {
+  if (!runItem) return;
   const before = seen;
-  seen = `${run.id}:${run.status}`;
-  const finished = run.status !== 'queued' && run.status !== 'running';
-  if (before && before !== seen && finished) void load();
+  seen = `${runItem.id}:${runItem.status}`;
+  const finished = runItem.status !== 'queued' && runItem.status !== 'running';
+  if (before && before !== seen && finished) void unmatched.reload();
 });
 
 const reasons = [
@@ -359,17 +360,17 @@ const dash = '—';
           }}
         </p>
         <Alert
-          v-if="listError"
+          v-if="unmatched.error.value"
           class="mb-4"
           type="error"
           show-icon
           role="alert"
-          :message="errorText(listError)"
+          :message="errorText(unmatched.error.value)"
         />
         <Table
           :columns="columns"
-          :data-source="rows"
-          :loading="loading"
+          :data-source="unmatched.items.value"
+          :loading="unmatched.status.value === 'loading' && !unmatched.appending.value"
           :pagination="false"
           :row-key="(row: UnmatchedTeacherSite) => row.site_id"
           size="small"
@@ -385,10 +386,10 @@ const dash = '—';
           </template>
         </Table>
         <Button
-          v-if="next"
+          v-if="unmatched.next.value"
           class="mt-4"
-          :loading="loading"
-          @click="load(true)"
+          :loading="unmatched.appending.value"
+          @click="unmatched.loadMore"
         >
           {{ t('page.common.loadMore') }}
         </Button>

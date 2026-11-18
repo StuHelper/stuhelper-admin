@@ -5,7 +5,8 @@ import { computed, getCurrentInstance, inject, onMounted, reactive, ref, shallow
 
 import { useI18n } from '@vben/locales';
 
-import { Alert, Button, Card, Checkbox, Descriptions, DescriptionsItem, Drawer, Form, FormItem, Input, Radio, RadioGroup, Segmented, Table, Tag, Textarea } from 'ant-design-vue';
+import { useMediaQuery } from '@vueuse/core';
+import { Alert, Button, Card, Checkbox, Descriptions, DescriptionsItem, Drawer, Form, FormItem, Input, Radio, RadioGroup, Segmented, Select, Table, Tag, Textarea } from 'ant-design-vue';
 
 import { ApiError, errorCode, isDeniedCode } from '#/shared/api/errors';
 import { useMutation, usePaged } from '#/shared/composables/async';
@@ -35,14 +36,22 @@ const errorText = useErrorText();
 const session = getCurrentInstance() ? inject(sessionKey, undefined) : undefined;
 const filter = ref<State>('submitted');
 const revokedError = ref('');
-const refunds = usePaged<AdminOrder>((after, signal) => api.refunds(filter.value, after, signal));
+const compactFilter = useMediaQuery('(max-width: 767px)');
+const stateOptions = computed(() =>
+  refundStates.map((value) => ({ value, label: t(`page.billing.orderState.${value}`) })),
+);
+function clearDenied() {
+  selected.value = undefined;
+  hidePayee();
+}
+const refunds = usePaged<AdminOrder>((after, signal) => api.refunds(filter.value, after, signal), { onDenied: clearDenied });
 onMounted(refunds.reload);
 watch(filter, () => { revokedError.value = ''; void refunds.reload(); });
 
 const selected = shallowRef<AdminOrder>();
 const reviewForm = reactive({ approve: true, manual: false, reason: '' });
 const manualForm = reactive({ succeeded: true, channel: '', reference: '', reason: '' });
-const write = useMutation();
+const write = useMutation({ onDenied: clearDenied });
 const success = ref('');
 const dirty = computed(() => !!selected.value && (!!reviewForm.reason.trim() || !!manualForm.channel.trim() || !!manualForm.reference.trim() || !!manualForm.reason.trim()));
 useLeaveGuard(() => (write.uncertain.value ? t('page.common.leaveUncertain') : (dirty.value || write.busy.value ? t('page.common.leaveUnsaved') : '')));
@@ -159,7 +168,19 @@ const columns = computed(() => [
 <template>
   <AdminPage :title="t('page.billing.refunds.title')" :description="t('page.billing.refunds.intro')">
     <Card :bordered="false">
-      <Segmented v-model:value="filter" class="mb-4 max-w-full overflow-x-auto" :options="refundStates.map((value) => ({ value, label: t(`page.billing.orderState.${value}`) }))" />
+      <Select
+        v-if="compactFilter"
+        v-model:value="filter"
+        class="mb-4 w-full"
+        :aria-label="t('page.common.status')"
+        :options="stateOptions"
+      />
+      <Segmented
+        v-else
+        v-model:value="filter"
+        class="mb-4 max-w-full overflow-x-auto"
+        :options="stateOptions"
+      />
       <Alert v-if="revokedError" class="mb-4" type="error" show-icon role="alert" :message="errorText(revokedError)" />
       <LoadState v-if="refunds.items.value.length === 0" :status="refunds.status.value" :error="refunds.error.value" :empty="true" :empty-text="t('page.billing.refunds.empty')" @retry="() => { revokedError = ''; refunds.reload(); }" />
       <template v-else>

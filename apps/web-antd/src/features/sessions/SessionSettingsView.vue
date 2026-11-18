@@ -12,9 +12,11 @@ import {
 
 import { useI18n } from '@vben/locales';
 
-import { ApiError, errorCode, isDeniedCode } from '#/shared/api/errors';
+import { Alert, Button, Card, Checkbox, Form, FormItem, Input } from 'ant-design-vue';
+
+import { ApiError, isDeniedCode } from '#/shared/api/errors';
 import { schemaOf } from '#/shared/api/schema';
-import { useMutation } from '#/shared/composables/async';
+import { useAsync, useMutation } from '#/shared/composables/async';
 import { useLeaveGuard } from '#/shared/composables/leave';
 import { sessionKey, useHttp } from '#/shared/session';
 import AdminPage from '#/shared/ui/AdminPage.vue';
@@ -53,14 +55,16 @@ watch(
   { flush: 'sync' },
 );
 
-const loading = ref(false);
-const loadError = ref('');
+const policyLoad = useAsync(
+  (signal) => http.json('/api/v1/admin/session-policy', parsePolicy, { signal }),
+  { onDenied: clearSensitive },
+);
 const message = ref('');
 let pendingKind: 'revoke' | 'save' | undefined;
 
-const busy = computed(() => loading.value || write.busy.value);
+const busy = computed(() => policyLoad.status.value === 'loading' || write.busy.value);
 const locked = computed(() => busy.value || write.uncertain.value);
-const activeError = computed(() => write.error.value || loadError.value);
+const activeError = computed(() => write.error.value || policyLoad.error.value);
 
 useLeaveGuard(() => {
   if (write.uncertain.value) return t('page.common.leaveUncertain');
@@ -69,6 +73,8 @@ useLeaveGuard(() => {
 
 function clearSensitive() {
   version.value = 0;
+  subject.value = '';
+  message.value = '';
   confirmed.value = false;
 }
 
@@ -81,20 +87,14 @@ watch(
 
 async function load() {
   if (locked.value) return;
-  loading.value = true;
-  loadError.value = '';
   write.dismiss();
   message.value = '';
-  try {
-    const policy = await http.json('/api/v1/admin/session-policy', parsePolicy);
+  await policyLoad.reload();
+  const policy = policyLoad.data.value;
+  if (policy) {
     interval.value = policy.interval_minutes;
     grace.value = policy.grace_minutes;
     version.value = policy.version;
-  } catch (error_) {
-    loadError.value = errorCode(error_);
-    if (error_ instanceof ApiError && error_.denied) clearSensitive();
-  } finally {
-    loading.value = false;
   }
 }
 
@@ -111,7 +111,7 @@ function applyOutcome(kind: 'revoke' | 'save', result: unknown) {
 
 async function save() {
   if (locked.value || !version.value) return;
-  loadError.value = '';
+  policyLoad.clear();
   message.value = '';
   pendingKind = 'save';
   const body: components['schemas']['SessionPolicyUpdate'] = {
@@ -137,7 +137,7 @@ async function save() {
 
 async function revoke() {
   if (locked.value || !confirmed.value || !subject.value.trim()) return;
-  loadError.value = '';
+  policyLoad.clear();
   message.value = '';
   pendingKind = 'revoke';
   const body: components['schemas']['ForceLogout'] = {
@@ -181,119 +181,84 @@ onMounted(load);
 </script>
 
 <template>
-  <AdminPage
-    :title="t('page.sessionPolicy.title')"
-    :description="t('page.sessionPolicy.description')"
-  >
-    <div class="flex max-w-2xl flex-col gap-5" :aria-busy="busy">
+  <AdminPage :title="t('page.sessionPolicy.title')" :description="t('page.sessionPolicy.description')">
+    <div class="flex max-w-2xl flex-col gap-4" :aria-busy="busy">
       <p v-if="busy" role="status">{{ t('page.sessionPolicy.loading') }}</p>
-      <div v-if="write.uncertain.value" role="alert" class="text-destructive">
-        {{ t('page.common.uncertain') }}
-        <button
-          type="button"
-          class="ms-3 underline"
-          :disabled="busy"
-          @click="retryWrite"
-        >
-          {{ t('page.common.retryOriginal') }}
-        </button>
-      </div>
-      <div v-else-if="activeError" role="alert" class="text-destructive">
-        {{
-          activeError === 'session_policy_conflict'
-            ? t('page.sessionPolicy.conflict')
-            : errorText(activeError)
-        }}
-        <button
-          type="button"
-          class="ms-3 underline"
-          :disabled="locked"
-          @click="load"
-        >
-          {{ t('page.sessionPolicy.reload') }}
-        </button>
-      </div>
-      <p v-if="message" role="status">
-        {{ t(`page.sessionPolicy.${message}`) }}
-      </p>
-      <form
-        class="bg-card flex flex-col gap-4 rounded-lg border p-5"
-        @submit.prevent="save"
+      <Alert
+        v-if="write.uncertain.value" type="warning" show-icon role="alert" :message="t('page.common.uncertain')"
       >
-        <label for="session-review" class="flex flex-col gap-2">
-          {{ t('page.sessionPolicy.interval') }}
-          <input
-            id="session-review"
-            v-model.number="interval"
-            class="bg-background rounded border p-2"
-            type="number"
-            min="5"
-            max="240"
-            step="1"
-            required
-            :disabled="locked || !version"
-          />
-        </label>
-        <label for="session-grace" class="flex flex-col gap-2">
-          {{ t('page.sessionPolicy.grace') }}
-          <input
-            id="session-grace"
-            v-model.number="grace"
-            class="bg-background rounded border p-2"
-            type="number"
-            min="0"
-            max="240"
-            step="1"
-            required
-            :disabled="locked || !version"
-          />
-        </label>
-        <button
-          type="submit"
-          class="bg-primary text-primary-foreground rounded px-4 py-2 disabled:opacity-50"
-          :disabled="locked || !version"
-        >
-          {{ t('page.sessionPolicy.save') }}
-        </button>
-      </form>
-      <form
-        class="bg-card flex flex-col gap-4 rounded-lg border p-5"
-        @submit.prevent="revoke"
+        <template #action>
+          <Button size="small" :disabled="busy" @click="retryWrite">{{ t('page.common.retryOriginal') }}</Button>
+        </template>
+      </Alert>
+      <Alert
+        v-else-if="activeError"
+        type="error"
+        show-icon
+        role="alert"
+        :message="activeError === 'session_policy_conflict' ? t('page.sessionPolicy.conflict') : errorText(activeError)"
       >
-        <h2 class="text-lg font-semibold">
-          {{ t('page.sessionPolicy.forceTitle') }}
-        </h2>
-        <label for="session-subject" class="flex flex-col gap-2">
-          {{ t('page.sessionPolicy.subject') }}
-          <input
-            id="session-subject"
-            v-model="subject"
-            class="bg-background min-w-0 rounded border p-2"
-            type="text"
-            maxlength="256"
-            required
-            :disabled="locked || !version"
-            autocomplete="off"
-            dir="ltr"
-          />
-        </label>
-        <label class="flex items-start gap-2">
-          <input
-            v-model="confirmed"
-            type="checkbox"
-            required
-            :disabled="locked || !version"
-          />
-          {{ t('page.sessionPolicy.confirm') }}
-        </label>
-        <button
-          type="submit"
-          class="rounded border px-4 py-2 disabled:opacity-50"
-          :disabled="locked || !version || !confirmed"
-        >
-          {{ t('page.sessionPolicy.force') }}
-        </button>
-      </form>
+        <template #action>
+          <Button size="small" :disabled="locked" @click="load">{{ t('page.sessionPolicy.reload') }}</Button>
+        </template>
+      </Alert>
+      <Alert v-if="message && !busy" type="success" role="status" :message="t(`page.sessionPolicy.${message}`)" />
+      <Card :bordered="false">
+        <Form layout="vertical" @submit.prevent="save">
+          <FormItem :label="t('page.sessionPolicy.interval')" required html-for="session-review">
+            <Input
+              id="session-review"
+              :value="String(interval)"
+              type="number"
+              min="5"
+              max="240"
+              step="1"
+              required
+              :disabled="locked || !version"
+              @update:value="(val) => { interval = Number(val); }"
+            />
+          </FormItem>
+          <FormItem :label="t('page.sessionPolicy.grace')" required html-for="session-grace">
+            <Input
+              id="session-grace"
+              :value="String(grace)"
+              type="number"
+              min="0"
+              max="240"
+              step="1"
+              required
+              :disabled="locked || !version"
+              @update:value="(val) => { grace = Number(val); }"
+            />
+          </FormItem>
+          <Button type="primary" html-type="submit" :loading="write.busy.value && pendingKind === 'save'" :disabled="locked || !version">
+            {{ t('page.sessionPolicy.save') }}
+          </Button>
+        </Form>
+      </Card>
+      <Card :bordered="false" :title="t('page.sessionPolicy.forceTitle')">
+        <Form layout="vertical" @submit.prevent="revoke">
+          <FormItem :label="t('page.sessionPolicy.subject')" required html-for="session-subject">
+            <Input
+              id="session-subject"
+              v-model:value="subject"
+              :maxlength="256"
+              required
+              :disabled="locked || !version"
+              autocomplete="off"
+              dir="ltr"
+            />
+          </FormItem>
+          <FormItem>
+            <Checkbox v-model:checked="confirmed" :disabled="locked || !version">
+              {{ t('page.sessionPolicy.confirm') }}
+            </Checkbox>
+          </FormItem>
+          <Button danger html-type="submit" :loading="write.busy.value && pendingKind === 'revoke'" :disabled="locked || !version || !confirmed || !subject.trim()">
+            {{ t('page.sessionPolicy.force') }}
+          </Button>
+        </Form>
+      </Card>
     </div>
   </AdminPage>
 </template>

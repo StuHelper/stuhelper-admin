@@ -5,11 +5,26 @@ import { Mutation, type MutationOptions } from '../api/mutation';
 
 export type LoadStatus = 'error' | 'idle' | 'loading' | 'ready';
 
+export interface AsyncOptions {
+  /** Invoked when a request fails due to authentication or authorization loss (401/403). */
+  onDenied?: (cause: ApiError) => void;
+}
+
+export function isDeniedError(error: unknown): error is ApiError {
+  return (
+    error instanceof ApiError &&
+    (error.denied || error.status === 401 || error.status === 403)
+  );
+}
+
 /**
  * Load one value. A new load cancels the previous one, and both a new load and
  * a failure clear the old value so revoked data never stays on screen.
  */
-export function useAsync<T>(loader: (signal: AbortSignal) => Promise<T>) {
+export function useAsync<T>(
+  loader: (signal: AbortSignal) => Promise<T>,
+  options?: AsyncOptions,
+) {
   const data = shallowRef<T>();
   const status = ref<LoadStatus>('idle');
   const error = ref('');
@@ -30,6 +45,7 @@ export function useAsync<T>(loader: (signal: AbortSignal) => Promise<T>) {
     } catch (error_) {
       if (current !== controller) return;
       error.value = errorCode(error_);
+      if (isDeniedError(error_)) options?.onDenied?.(error_);
       status.value = 'error';
     }
   }
@@ -59,10 +75,12 @@ export interface PageResult<T> {
 
 /**
  * Cursor pagination that appends pages. Reloading starts again from the first
- * page; a failed "load more" keeps the rows that were already shown.
+ * page; a failed "load more" keeps the rows that were already shown unless
+ * access was revoked.
  */
 export function usePaged<T>(
   loader: (cursor: string, signal: AbortSignal) => Promise<PageResult<T>>,
+  options?: AsyncOptions,
 ) {
   const items = shallowRef<T[]>([]);
   const next = ref('');
@@ -92,9 +110,10 @@ export function usePaged<T>(
     } catch (error_) {
       if (current !== controller) return;
       error.value = errorCode(error_);
-      if (error_ instanceof ApiError && error_.denied) {
+      if (isDeniedError(error_)) {
         items.value = [];
         next.value = '';
+        options?.onDenied?.(error_);
       }
       status.value = 'error';
     } finally {
@@ -134,7 +153,7 @@ export interface ActionState {
  * Run user-initiated writes. Each instance owns one Mutation: after a lost
  * response only the original request can be retried, and the form stays locked.
  */
-export function useMutation(options?: MutationOptions) {
+export function useMutation(options?: AsyncOptions & MutationOptions) {
   const mutation = new Mutation(options);
   const busy = ref(false);
   const error = ref('');
@@ -148,6 +167,7 @@ export function useMutation(options?: MutationOptions) {
       return await work();
     } catch (error_) {
       error.value = errorCode(error_);
+      if (isDeniedError(error_)) options?.onDenied?.(error_);
       return undefined;
     } finally {
       busy.value = false;
@@ -173,7 +193,7 @@ export function useMutation(options?: MutationOptions) {
 }
 
 /** Track a non-idempotent read-only task such as a download. */
-export function useTask() {
+export function useTask(options?: AsyncOptions) {
   const busy = ref(false);
   const error = ref('');
   async function run<R>(work: () => Promise<R>): Promise<R | undefined> {
@@ -184,6 +204,7 @@ export function useTask() {
       return await work();
     } catch (error_) {
       error.value = errorCode(error_);
+      if (isDeniedError(error_)) options?.onDenied?.(error_);
       return undefined;
     } finally {
       busy.value = false;
