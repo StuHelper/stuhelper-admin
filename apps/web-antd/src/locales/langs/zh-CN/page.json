@@ -35,7 +35,8 @@
     "lookup": "信息查询",
     "catalogTimetable": "学校作息",
     "qqGroups": "QQ 群管理",
-    "catalogTeacherSites": "教师官网刷新"
+    "catalogTeacherSites": "教师官网刷新",
+    "closures": "账号注销"
   },
   "common": {
     "all": "全部",
@@ -1751,6 +1752,61 @@
       "site_unit_missing": "官网缺单位",
       "catalog_name_absent": "数据库没有同名",
       "ambiguous_site": "官网有重复主页"
+    }
+  },
+  "closures": {
+    "title": "账号注销管理",
+    "intro": "查看本应用业务账号的注销申请、已完成步骤与阻塞原因。7 天冷静期结束后，管理员可对阻塞申请继续执行清理；共享 SSO 与其他应用不受影响。",
+    "detailTitle": "注销申请详情",
+    "empty": "当前条件下没有注销申请。",
+    "closureId": "申请编号",
+    "profileId": "业务档案编号",
+    "requestedAt": "申请时间",
+    "coolingEndsAt": "冷静期截止",
+    "completedAt": "完成时间",
+    "completedSteps": "清理步骤进度",
+    "stepDone": "已完成",
+    "stepPending": "待执行",
+    "skippedModules": "从未安装并跳过的模块",
+    "noSkipped": "无跳过模块",
+    "blocker": "阻塞原因",
+    "noBlocker": "无阻塞",
+    "blockerHint": "请先在对应模块确认资产或服务恢复正常，再点击继续执行注销。",
+    "pointsPolicy": "积分处理规则",
+    "coolingHint": "当前处于 7 天冷静期内（截止 {time}），申请人登录可撤销，届满后才可执行注销。",
+    "process": "继续执行注销",
+    "completedNotice": "账号注销已完成，公开内容已解除账号关联。",
+    "resumedNotice": "已触发继续处理，请核对最新步骤与阻塞状态。",
+    "states": {
+      "cooling": "冷静期中",
+      "awaiting_assets": "等待资产结清",
+      "processing": "清理执行中",
+      "closed": "已注销",
+      "cancelled": "已撤销"
+    },
+    "steps": {
+      "assets": "资产核对与清零",
+      "sessions": "撤销本地会话",
+      "authorizations": "撤回授权与绑定",
+      "content": "公开内容去关联与收藏清理"
+    },
+    "blockers": {
+      "assets_unavailable": "账务资产服务不可用",
+      "assets_pending": "仍有余额、退款或未决支付待结清",
+      "sessions_unavailable": "会话服务不可用",
+      "authorizations_unavailable": "授权或绑定服务不可用",
+      "content_unavailable": "内容或收藏服务不可用"
+    },
+    "modules": {
+      "billing": "账务",
+      "open-platform": "开放平台",
+      "reviews": "评价",
+      "resources": "学习资料",
+      "favorites": "收藏",
+      "qq-binding": "QQ 绑定"
+    },
+    "pointsPolicies": {
+      "forfeit_all_points_and_pending_deductions": "正式注销时清零全部积分与待扣记录，不兑换现金或 Ivory"
     }
   }
 }

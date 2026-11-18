@@ -114,6 +114,10 @@
     "TEACHER-SITES-02": [
       "apps/web-antd/src/features/academic/TeacherSitesView.test.ts#starts one incremental refresh with an idempotency key and reports a running refresh",
       "apps/web-antd/src/features/academic/TeacherSitesView.test.ts#disables both refresh buttons while a run is queued or running"
+    ],
+    "PC-07": [
+      "tests/e2e/closures.spec.mjs#administrator inspects blocked and cooling closures and resumes cleanup idempotently",
+      "apps/web-antd/src/features/closures/ClosuresView.test.ts#retries an uncertain closure process request with the original idempotency key and blocks navigation"
     ]
   }
 }

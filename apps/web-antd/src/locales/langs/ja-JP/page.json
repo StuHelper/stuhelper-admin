@@ -35,7 +35,8 @@
     "lookup": "情報照会",
     "catalogTimetable": "時限設定",
     "qqGroups": "QQ グループ管理",
-    "catalogTeacherSites": "教員ページ更新"
+    "catalogTeacherSites": "教員ページ更新",
+    "closures": "アカウント閉鎖"
   },
   "common": {
     "all": "すべて",
@@ -1751,6 +1752,61 @@
       "site_unit_missing": "ページに所属がない",
       "catalog_name_absent": "データに同名がいない",
       "ambiguous_site": "重複したページ"
+    }
+  },
+  "closures": {
+    "title": "アカウント閉鎖管理",
+    "intro": "本アプリのアカウント閉鎖申請、完了済みステップ、保留理由を確認します。7日間のクーリング期間終了後、管理者は保留中の処理を再開できます（共有SSOや他アプリには影響しません）。",
+    "detailTitle": "閉鎖申請の詳細",
+    "empty": "条件に一致する閉鎖申請はありません。",
+    "closureId": "申請ID",
+    "profileId": "プロフィールID",
+    "requestedAt": "申請日時",
+    "coolingEndsAt": "クーリング期間終了",
+    "completedAt": "完了日時",
+    "completedSteps": "整理ステップの進捗",
+    "stepDone": "完了",
+    "stepPending": "未実行",
+    "skippedModules": "未導入のため省略されたモジュール",
+    "noSkipped": "省略なし",
+    "blocker": "保留理由",
+    "noBlocker": "保留なし",
+    "blockerHint": "資産精算や関連サービスの復旧を確認してから、閉鎖処理を再開してください。",
+    "pointsPolicy": "ポイント処理方針",
+    "coolingHint": "7日間のクーリング期間は {time} に終了します。期限前は申請者自身が取り消せます。",
+    "process": "閉鎖処理を再開",
+    "completedNotice": "アカウント閉鎖が完了し、公開コンテンツとの紐付けを解除しました。",
+    "resumedNotice": "閉鎖処理を再開しました。最新の進捗と保留状態を確認してください。",
+    "states": {
+      "cooling": "クーリング期間中",
+      "awaiting_assets": "資産精算待ち",
+      "processing": "整理実行中",
+      "closed": "閉鎖済み",
+      "cancelled": "取消済み"
+    },
+    "steps": {
+      "assets": "資産確認とポイント消去",
+      "sessions": "ローカルセッション失効",
+      "authorizations": "認可および連携の解除",
+      "content": "公開コンテンツの非関連化とブックマーク削除"
+    },
+    "blockers": {
+      "assets_unavailable": "会計資産サービスが利用不可",
+      "assets_pending": "残高・返金・未確定決済が未完了",
+      "sessions_unavailable": "セッションサービスが利用不可",
+      "authorizations_unavailable": "認可または連携サービスが利用不可",
+      "content_unavailable": "コンテンツまたはお気に入りサービスが利用不可"
+    },
+    "modules": {
+      "billing": "会計",
+      "open-platform": "オープンプラットフォーム",
+      "reviews": "講義評価",
+      "resources": "学習資料",
+      "favorites": "お気に入り",
+      "qq-binding": "QQ連携"
+    },
+    "pointsPolicies": {
+      "forfeit_all_points_and_pending_deductions": "最終閉鎖時にすべてのポイントと未精算控除を消去し、現金やIvoryへの換算は行いません"
     }
   }
 }

@@ -35,7 +35,8 @@
     "lookup": "Recherche d’informations",
     "catalogTimetable": "Horaires des créneaux",
     "qqGroups": "Groupes QQ",
-    "catalogTeacherSites": "Pages des enseignants"
+    "catalogTeacherSites": "Pages des enseignants",
+    "closures": "Clôtures de compte"
   },
   "common": {
     "all": "Tous",
@@ -1751,6 +1752,61 @@
       "site_unit_missing": "Unité absente de la page",
       "catalog_name_absent": "Nom absent du catalogue",
       "ambiguous_site": "Pages en double"
+    }
+  },
+  "closures": {
+    "title": "Gestion des clôtures de compte",
+    "intro": "Consultez les demandes de clôture du compte applicatif, les étapes terminées et les blocages. Après le délai de réflexion de sept jours, un administrateur peut relancer le traitement ; le SSO partagé reste intact.",
+    "detailTitle": "Détail de la demande de clôture",
+    "empty": "Aucune demande de clôture pour ce filtre.",
+    "closureId": "Identifiant de clôture",
+    "profileId": "Identifiant du profil",
+    "requestedAt": "Demandée le",
+    "coolingEndsAt": "Fin du délai de réflexion",
+    "completedAt": "Terminée le",
+    "completedSteps": "Avancement du nettoyage",
+    "stepDone": "Terminée",
+    "stepPending": "En attente",
+    "skippedModules": "Modules jamais installés ignorés",
+    "noSkipped": "Aucun module ignoré",
+    "blocker": "Motif de blocage",
+    "noBlocker": "Aucun blocage",
+    "blockerHint": "Vérifiez le règlement des avoirs ou le rétablissement du service concerné avant de reprendre la clôture.",
+    "pointsPolicy": "Règle sur les points",
+    "coolingHint": "Le délai de réflexion de sept jours prend fin le {time}. Le demandeur peut encore annuler avant cette échéance.",
+    "process": "Reprendre la clôture",
+    "completedNotice": "La clôture du compte est terminée et les contenus publics sont dissociés.",
+    "resumedNotice": "Le traitement a repris ; vérifiez les étapes et le blocage mis à jour.",
+    "states": {
+      "cooling": "En réflexion",
+      "awaiting_assets": "Attente de règlement des avoirs",
+      "processing": "Nettoyage en cours",
+      "closed": "Clôturé",
+      "cancelled": "Annulé"
+    },
+    "steps": {
+      "assets": "Vérification des avoirs et remise à zéro des points",
+      "sessions": "Révocation des sessions locales",
+      "authorizations": "Retrait des autorisations et liaisons",
+      "content": "Dissociation des contenus et suppression des favoris"
+    },
+    "blockers": {
+      "assets_unavailable": "Service de facturation indisponible",
+      "assets_pending": "Solde restant, remboursement ou paiement en suspens",
+      "sessions_unavailable": "Service de sessions indisponible",
+      "authorizations_unavailable": "Service des autorisations ou liaisons indisponible",
+      "content_unavailable": "Service des contenus ou favoris indisponible"
+    },
+    "modules": {
+      "billing": "Facturation",
+      "open-platform": "Plateforme ouverte",
+      "reviews": "Évaluations",
+      "resources": "Ressources pédagogiques",
+      "favorites": "Favoris",
+      "qq-binding": "Liaison QQ"
+    },
+    "pointsPolicies": {
+      "forfeit_all_points_and_pending_deductions": "Effacer tous les points et déductions en attente lors de la clôture finale sans conversion en espèces ni en Ivory"
     }
   }
 }
