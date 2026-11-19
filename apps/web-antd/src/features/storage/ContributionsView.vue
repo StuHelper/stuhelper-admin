@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { Contribution } from '#/api/contribution';
+import type { Contribution as ContributionData } from '#/api/contribution';
 
-import { computed } from 'vue';
+import { computed, type DeepReadonly } from 'vue';
 
 import { useI18n } from '@vben/locales';
 
@@ -17,6 +17,8 @@ import { useContributions } from './useContributions';
 // Contributions of all users within scope, without credentials. Administrators
 // can only retry a blocked original request; they cannot change a user's
 // consent, term, quota or revocation.
+type Contribution = DeepReadonly<ContributionData>;
+
 const { t, te } = useI18n();
 const format = useFormat();
 const errorText = useErrorText();
