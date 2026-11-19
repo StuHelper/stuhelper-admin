@@ -13,6 +13,7 @@ import { useAsync, useMutation, usePaged } from '#/shared/composables/async';
 import { useFormat } from '#/shared/format';
 import LoadState from '#/shared/ui/LoadState.vue';
 import MutationAlert from '#/shared/ui/MutationAlert.vue';
+import { stateColor } from '#/shared/ui/state-color';
 
 import { localName, useResourcesApi } from './api';
 
@@ -102,7 +103,7 @@ function granted() {
       <Descriptions :column="{ xs: 1, sm: 2 }" size="small" bordered>
         <DescriptionsItem :label="t('page.resources.title')" :span="2">{{ version.metadata.title }}</DescriptionsItem>
         <DescriptionsItem :label="t('page.resources.category')">{{ localName(version.category.names, locale) }}</DescriptionsItem>
-        <DescriptionsItem :label="t('page.common.status')"><Tag>{{ t(`page.resources.state.${resource.state}`) }}</Tag></DescriptionsItem>
+        <DescriptionsItem :label="t('page.common.status')"><Tag :color="stateColor(resource.state)">{{ t(`page.resources.state.${resource.state}`) }}</Tag></DescriptionsItem>
         <DescriptionsItem :label="t('page.resources.access')">{{ t(`page.resources.accessLevel.${version.metadata.access}`) }}</DescriptionsItem>
         <DescriptionsItem :label="t('page.resources.origin')">{{ t(`page.resources.originKind.${version.metadata.origin.kind}`) }}</DescriptionsItem>
         <DescriptionsItem v-if="version.file" :label="t('page.resources.file')" :span="2">{{ version.file.filename }} · {{ format.bytes(version.file.size) }}</DescriptionsItem>

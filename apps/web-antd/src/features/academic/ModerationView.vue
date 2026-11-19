@@ -38,6 +38,7 @@ import LoadState from '#/shared/ui/LoadState.vue';
 import { useErrorText } from '#/shared/ui/messages';
 import MutationAlert from '#/shared/ui/MutationAlert.vue';
 import ReasonPresets from '#/shared/ui/ReasonPresets.vue';
+import { stateColor } from '#/shared/ui/state-color';
 
 import { arrayCursor, pageSize, useAcademicAdmin } from './api';
 import { useCampusId } from './campus';
@@ -269,7 +270,7 @@ const stateOptions = computed(() =>
 );
 const taskColumns = computed(() => [
   { key: 'kind', title: t('page.moderation.taskType') },
-  { key: 'reason', title: t('page.moderation.reason'), ellipsis: true },
+  { key: 'reason', title: t('page.moderation.submissionNote'), ellipsis: true },
   { key: 'state', title: t('page.common.status') },
   { key: 'updated', title: t('page.common.updatedAt') },
   { key: 'action', title: t('page.common.operation') },
@@ -429,12 +430,12 @@ id="moderationview-field-3"
               <template v-else-if="column.key === 'reason'">
 {{
                 record.submission.reason === 'content_review'
-                  ? t('page.moderation.contentReview')
+                  ? t('page.moderation.ruleReview')
                   : record.submission.reason
               }}
 </template>
               <template v-else-if="column.key === 'state'">
-<Tag>
+<Tag :color="stateColor(record.state)">
 {{
                   label(`page.moderation.taskState.${record.state}`)
                 }}
@@ -478,7 +479,7 @@ id="moderationview-field-3"
               }}
 </template>
               <template v-else-if="column.key === 'state'">
-<Tag>{{ label(`page.moderation.state.${record.state}`) }}</Tag><Tag v-if="record.featured" color="green">
+<Tag :color="stateColor(record.state)">{{ label(`page.moderation.state.${record.state}`) }}</Tag><Tag v-if="record.featured" color="green">
 {{
                   t('page.moderation.featured')
                 }}

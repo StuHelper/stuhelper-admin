@@ -55,6 +55,7 @@ import MaterialPreview from '#/shared/ui/MaterialPreview.vue';
 import { useErrorText } from '#/shared/ui/messages';
 import MutationAlert from '#/shared/ui/MutationAlert.vue';
 import ReasonPresets from '#/shared/ui/ReasonPresets.vue';
+import { stateColor } from '#/shared/ui/state-color';
 
 import { useVerification } from './api';
 import SchoolSelect from './SchoolSelect.vue';
@@ -572,7 +573,7 @@ function chooseSchool(school: School) {
             >
               <template #bodyCell="{ column, record }">
                 <template v-if="column.key === 'state'">
-                  <Tag>{{ t(`page.verification.states.${record.state}`) }}</Tag>
+                  <Tag :color="stateColor(record.state)">{{ t(`page.verification.states.${record.state}`) }}</Tag>
                 </template>
                 <template v-else-if="column.key === 'created'">
                   {{ format.dateTime(record.created_at) }}

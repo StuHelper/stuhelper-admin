@@ -16,6 +16,7 @@ import { sessionKey } from '#/shared/session';
 import AdminPage from '#/shared/ui/AdminPage.vue';
 import { useErrorText } from '#/shared/ui/messages';
 import MutationAlert from '#/shared/ui/MutationAlert.vue';
+import { stateColor } from '#/shared/ui/state-color';
 
 import { minorText, parseMinor, purchaseRefundReasons, useBillingAdmin } from './api';
 import { useMoney } from './money';
@@ -308,7 +309,7 @@ const ledgerKindText = (kind: string) => (te(`page.billing.ledgerKind.${kind}`) 
                   <template v-if="column.key === 'created'">{{ format.dateTime(record.created_at) }}</template>
                   <template v-else-if="column.key === 'kind'">{{ t(`page.billing.kind.${record.kind}`) }}</template>
                   <template v-else-if="column.key === 'amount'">{{ money.order(record as Order) }}</template>
-                  <template v-else-if="column.key === 'state'"><Tag>{{ t(`page.billing.orderState.${record.state}`) }}</Tag></template>
+                  <template v-else-if="column.key === 'state'"><Tag :color="stateColor(record.state)">{{ t(`page.billing.orderState.${record.state}`) }}</Tag></template>
                   <template v-else-if="column.key === 'action'">
                     <Button v-if="record.kind === 'purchase' && record.state === 'succeeded'" type="link" size="small" :disabled="locked" @click="refunding = record as Order">{{ t('page.billing.accounts.refundPurchase') }}</Button>
                     <Button v-else-if="(record.kind === 'resource_unlock' || record.kind === 'membership') && (record.state === 'fulfilled' || record.state === 'succeeded') && fullAmount(record as Order) > 0" type="link" size="small" :disabled="locked" @click="openCommerce(record as Order)">{{ t('page.billing.accounts.refundCommerce') }}</Button>

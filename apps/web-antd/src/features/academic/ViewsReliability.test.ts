@@ -323,7 +323,7 @@ describe('PR 6 view reliability regressions (A-09, A-10, A-11, A-14, A-18, A-20)
 
     // A-09: ModerationView queue auto-advances past 20 filtered resource tasks to reach t-21
     await vi.waitFor(() => {
-      expect(root.textContent).toContain('page.moderation.contentReview');
+      expect(root.textContent).toContain('page.moderation.ruleReview');
     });
 
     // A-10 (1): ModerationView content renders published_at: null as notProvided, never 1970
