@@ -42,7 +42,7 @@ make dev
 
 框架首页不展示业务数据。/storage 和 /storage/contributions 页面只在受保护的服务端 API 返回成功后显示脱敏账本。未登录或权限不足时展示明确错误并清空旧数据，不使用本地角色、演示账号或手工 token 绕过服务端授权。
 
-请求复用同源认证传输。宿主可通过 bootstrap(namespace, authenticatedFetch) 注入当前认证请求；存储、托管和贡献页面共用该传输。默认入口使用同源 fetch，未认证时显示未登录或不可用。实际网页登录和 Next SSO 另行集成。
+请求复用同源认证传输。宿主可通过 bootstrap(namespace, authenticatedFetch) 注入当前认证请求；存储、托管和贡献页面共用该传输。默认入口使用同源 fetch，未认证时显示未登录或不可用。正式登录使用独立 Casdoor SSO。
 
 authenticatedFetch 每次读取宿主当前凭据，保留取消信号、幂等键和同源限制。页面不缓存令牌。hostTransport.test.ts 验证托管与贡献请求使用同一宿主传输、凭据轮换和认证失效后的私有数据清空。
 
@@ -76,7 +76,7 @@ contracts/platform.openapi.yaml 与生成类型来自 platform 仓库。scripts/
 
 make check 执行八语言覆盖检查、类型检查、应用 lint、单元测试与生产构建。中文为默认语言，支持英文、法文、俄文、日文、韩文、西班牙文和阿拉伯文。金额、数字、日期与复数由统一格式接口处理，阿拉伯文布局使用 RTL。学生端和管理端的 352 项八语言桌面与移动浏览器检查在架构仓库维护，使用合成响应。真实登录与生产运行分别验收。
 
-架构与业务规格见 [StuHelper Next](https://github.com/StuHelper/stuhelper-next)。
+架构与业务规格见 [StuHelper](https://github.com/StuHelper/stuhelper)。
 
 ## 存储运营管理
 
