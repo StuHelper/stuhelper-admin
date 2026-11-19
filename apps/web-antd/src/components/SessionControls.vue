@@ -100,7 +100,7 @@ function choose({ key }: { key: number | string }) {
 </script>
 
 <template>
-  <div class="me-2 flex items-center gap-2">
+  <div class="me-4 flex items-center gap-2">
     <template v-if="session.state.value === 'member' && session.session.value">
       <Dropdown :trigger="['click']">
         <Button type="text">
@@ -137,9 +137,6 @@ function choose({ key }: { key: number | string }) {
         {{ t('page.common.retry') }}
       </Button>
     </span>
-    <a href="mailto:feedback@stuhelper.com" class="text-xs underline">
-      {{ t('page.feedback.title') }}
-    </a>
     <SessionNotice />
     <Modal
       :open="editing"

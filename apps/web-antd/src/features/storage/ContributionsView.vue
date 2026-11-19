@@ -12,6 +12,7 @@ import { useFormat } from '#/shared/format';
 import AdminPage from '#/shared/ui/AdminPage.vue';
 import { useErrorText } from '#/shared/ui/messages';
 
+import { adapterName } from './quota';
 import { useContributions } from './useContributions';
 
 // Contributions of all users within scope, without credentials. Administrators
@@ -51,7 +52,7 @@ function retry(item: Contribution) {
         <Card v-if="data.items.length === 0" :bordered="false"><p class="text-muted-foreground">{{ t('page.common.empty') }}</p></Card>
         <div class="grid gap-4 xl:grid-cols-2">
           <Card v-for="item in data.items" :key="item.id" :bordered="false">
-            <template #title><bdi>{{ item.adapter }}</bdi></template>
+            <template #title><bdi>{{ adapterName(item.adapter) }}</bdi></template>
             <template #extra><Tag :color="item.state === 'active' ? 'green' : item.state === 'blocked' ? 'red' : 'orange'">{{ label(`page.contribution.states.${item.state}`) }}</Tag></template>
             <article>
               <p class="text-muted-foreground mb-3 break-all font-mono text-xs"><bdi>{{ item.id }}</bdi></p>

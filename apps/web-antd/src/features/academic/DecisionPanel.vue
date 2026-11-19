@@ -35,6 +35,7 @@ import { useFormat } from '#/shared/format';
 import LoadState from '#/shared/ui/LoadState.vue';
 import MutationAlert from '#/shared/ui/MutationAlert.vue';
 import ReasonPresets from '#/shared/ui/ReasonPresets.vue';
+import { stateColor } from '#/shared/ui/state-color';
 
 import { dimensions, pageSize, useAcademicAdmin } from './api';
 import { diffText } from './textDiff';
@@ -378,7 +379,7 @@ defineExpose({ dirty, busy, uncertain });
             {{ termLabel }}
           </DescriptionsItem>
           <DescriptionsItem :label="t('page.common.status')">
-            <Tag>{{ label(`page.moderation.state.${entry.state}`) }}</Tag>
+            <Tag :color="stateColor(entry.state)">{{ label(`page.moderation.state.${entry.state}`) }}</Tag>
             <Tag v-if="entry.featured" color="green">
               {{ t('page.moderation.featured') }}
             </Tag>

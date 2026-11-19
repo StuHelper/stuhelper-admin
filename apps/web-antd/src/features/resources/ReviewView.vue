@@ -18,6 +18,7 @@ import MaterialPreview from '#/shared/ui/MaterialPreview.vue';
 import { useErrorText } from '#/shared/ui/messages';
 import MutationAlert from '#/shared/ui/MutationAlert.vue';
 import ReasonPresets from '#/shared/ui/ReasonPresets.vue';
+import { stateColor } from '#/shared/ui/state-color';
 
 import { arrayCursor, useAcademicAdmin } from '../academic/api';
 import { useCampusId } from '../academic/campus';
@@ -224,7 +225,7 @@ function save() {
 
 const columns = computed(() => [
   { key: 'kind', title: t('page.moderation.taskType') },
-  { key: 'reason', title: t('page.common.reason'), ellipsis: true },
+  { key: 'reason', title: t('page.moderation.submissionNote'), ellipsis: true },
   { key: 'state', title: t('page.common.status') },
   { key: 'updated', title: t('page.common.updatedAt') },
   { key: 'action', title: t('page.common.operation') },
@@ -253,8 +254,8 @@ const columns = computed(() => [
           <Table :columns="columns" :data-source="tasks.items.value" :pagination="false" row-key="id" size="middle" :scroll="{ x: 640 }">
             <template #bodyCell="{ column, record }">
               <template v-if="column.key === 'kind'">{{ label(`page.moderation.taskKind.${record.submission.kind}`) }}</template>
-              <template v-else-if="column.key === 'reason'">{{ record.submission.reason === 'content_review' ? t('page.moderation.contentReview') : record.submission.reason }}</template>
-              <template v-else-if="column.key === 'state'"><Tag>{{ label(`page.moderation.taskState.${record.state}`) }}</Tag></template>
+              <template v-else-if="column.key === 'reason'">{{ record.submission.reason === 'content_review' ? t('page.moderation.ruleReview') : record.submission.reason }}</template>
+              <template v-else-if="column.key === 'state'"><Tag :color="stateColor(record.state)">{{ label(`page.moderation.taskState.${record.state}`) }}</Tag></template>
               <template v-else-if="column.key === 'updated'">{{ format.dateTime(record.updated_at) }}</template>
               <template v-else-if="column.key === 'action'"><Button type="link" size="small" :disabled="busy" @click="open(record as Task)">{{ t('page.common.open') }}</Button></template>
             </template>
@@ -281,7 +282,7 @@ const columns = computed(() => [
           <DescriptionsItem v-for="field in version.category.fields" :key="field.key" :label="localName(field.names, locale)">{{ attributeText(field, version.metadata.attributes[field.key], locale) || t('page.common.notProvided') }}</DescriptionsItem>
           <DescriptionsItem :label="t('page.resources.origin')">{{ t(`page.resources.originKind.${version.metadata.origin.kind}`) }}<template v-if="version.metadata.origin.source"> · {{ version.metadata.origin.source }}</template></DescriptionsItem>
           <DescriptionsItem v-if="version.metadata.origin.license" :label="t('page.resources.license')">{{ version.metadata.origin.license }}</DescriptionsItem>
-          <DescriptionsItem :label="t('page.resources.versionLabel')"><Tag>{{ t(`page.resources.versionState.${version.state}`) }}</Tag></DescriptionsItem>
+          <DescriptionsItem :label="t('page.resources.versionLabel')"><Tag :color="stateColor(version.state)">{{ t(`page.resources.versionState.${version.state}`) }}</Tag></DescriptionsItem>
           <DescriptionsItem v-if="version.file" :label="t('page.resources.file')">{{ version.file.filename }} · {{ format.bytes(version.file.size) }}</DescriptionsItem>
         </Descriptions>
         <Alert v-if="selected.submission.reason !== 'content_review' || selected.submission.evidence.length > 0" type="info" :message="label(`page.moderation.taskKind.${selected.submission.kind}`)">
@@ -293,7 +294,7 @@ const columns = computed(() => [
         <Space wrap>
           <Button v-if="version.file && previewable && !previewTooLarge" :loading="previewLoad.busy.value" @click="togglePreview">{{ t(previewOpen ? 'page.resources.hidePreview' : 'page.resources.previewFile') }}</Button>
           <Button v-if="version.file" :loading="download.busy.value" @click="save">{{ t('page.resources.downloadFile') }}</Button>
-          <Tag>{{ label(`page.moderation.taskState.${selected.state}`) }}</Tag>
+          <Tag :color="stateColor(selected.state)">{{ label(`page.moderation.taskState.${selected.state}`) }}</Tag>
           <span v-if="selected.decision" class="text-sm">{{ t('page.moderation.decisionNote', { reason: selected.decision.reason }) }}</span>
         </Space>
         <MaterialPreview
