@@ -59,6 +59,7 @@ import MaterialPreview from '#/shared/ui/MaterialPreview.vue';
 import { useErrorText } from '#/shared/ui/messages';
 import MutationAlert from '#/shared/ui/MutationAlert.vue';
 import ReasonPresets from '#/shared/ui/ReasonPresets.vue';
+import { stateColor } from '#/shared/ui/state-color';
 import { safeExternalUrl } from '#/shared/url';
 
 import { methods, useVerification } from './api';
@@ -772,7 +773,7 @@ function chooseSchool(school: School) {
                   {{ label(`page.verification.kinds.${record.kind}`) }}
                 </template>
                 <template v-else-if="column.key === 'state'">
-                  <Tag>{{ label(`page.verification.states.${record.state}`) }}</Tag>
+                  <Tag :color="stateColor(record.state)">{{ label(`page.verification.states.${record.state}`) }}</Tag>
                 </template>
                 <template v-else-if="column.key === 'updated'">
                   {{ format.dateTime(record.updated_at) }}
@@ -883,7 +884,7 @@ function chooseSchool(school: School) {
                   {{ credential.student_display }}
                 </DescriptionsItem>
                 <DescriptionsItem :label="t('page.common.status')">
-                  <Tag>{{ label(`page.verification.states.${credential.state}`) }}</Tag>
+                  <Tag :color="stateColor(credential.state)">{{ label(`page.verification.states.${credential.state}`) }}</Tag>
                 </DescriptionsItem>
                 <DescriptionsItem :label="t('page.verification.study')">
                   {{ label(`page.verification.stages.${credential.stage}`) }} ·
@@ -1180,7 +1181,7 @@ function chooseSchool(school: School) {
               </a>
               <span v-else class="break-all">{{ row.website }}</span>
               <p class="mt-2">
-                <Tag>{{ label(`page.verification.states.${row.state}`) }}</Tag>
+                <Tag :color="stateColor(row.state)">{{ label(`page.verification.states.${row.state}`) }}</Tag>
                 <span v-if="row.note" class="ms-2 text-sm">{{ row.note }}</span>
               </p>
               <template v-if="row.state === 'pending'">

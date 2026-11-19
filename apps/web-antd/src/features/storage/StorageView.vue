@@ -12,6 +12,7 @@ import { useLeaveGuard } from '#/shared/composables/leave';
 import { useFormat } from '#/shared/format';
 import AdminPage from '#/shared/ui/AdminPage.vue';
 import { useErrorText } from '#/shared/ui/messages';
+import { stateColor } from '#/shared/ui/state-color';
 
 import { defaultQuotaUnit, formatQuotaPlaceholder, parseQuotaBytes } from './quota';
 import { useStorage } from './useStorage';
@@ -144,7 +145,7 @@ const failureColumns = computed(() => [
               <Table :columns="objectColumns" :data-source="[...data.objects]" :pagination="false" row-key="id" size="middle" :scroll="{ x: 640 }" :locale="{ emptyText: t('page.common.empty') }">
                 <template #bodyCell="{ column, record }">
                   <template v-if="column.key === 'id'"><bdi class="break-all font-mono text-xs">{{ record.id }}</bdi></template>
-                  <template v-else-if="column.key === 'state'"><Tag>{{ label(`page.storage.states.${record.state}`) }}</Tag></template>
+                  <template v-else-if="column.key === 'state'"><Tag :color="stateColor(record.state)">{{ label(`page.storage.states.${record.state}`) }}</Tag></template>
                   <template v-else-if="column.key === 'replicas'">{{ t('page.storage.replicas', { healthy: format.number(record.healthy), desired: format.number(record.desired), missing: format.number(record.missing) }) }}</template>
                   <template v-else-if="column.key === 'reason'">{{ record.reason && te(`page.storage.reasons.${record.reason}`) ? t(`page.storage.reasons.${record.reason}`) : '' }}</template>
                 </template>

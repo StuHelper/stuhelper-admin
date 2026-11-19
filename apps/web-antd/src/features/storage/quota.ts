@@ -58,3 +58,6 @@ export function parseQuotaBytes(
   const bytes = BigInt(whole) * scale + BigInt(padded || '0');
   return bytes <= BigInt(Number.MAX_SAFE_INTEGER) ? Number(bytes) : undefined;
 }
+
+/** Display name of a storage adapter; unknown adapters show their identifier. */
+export const adapterName = (id: string) => (id === 'bhpan' ? 'BHpan' : id);
