@@ -143,6 +143,7 @@ describe('PR 6 view reliability regressions (A-09, A-10, A-11, A-14, A-18, A-20)
           failures_next_cursor: '',
           generated_at: '2026-11-18T00:00:00Z',
           instances: [],
+          object_totals: { pending: 0, ready: 0, degraded: 0, unavailable: 0, deleting: 0 },
           jobs: { blocked: 3, pending: 0, running: 0 },
           next_cursor: '',
           objects: [],
@@ -209,6 +210,7 @@ describe('PR 6 view reliability regressions (A-09, A-10, A-11, A-14, A-18, A-20)
       }
       if (path === '/api/v1/resources/manage') {
         return Response.json({
+          total: 1,
           items: [
             {
               access_reason: 'allowed',

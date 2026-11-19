@@ -1,13 +1,13 @@
 {
   "repository": "StuHelper/stuhelper-platform",
-  "revision": "1b232d46d0e186916af435dbebfcc63854317097",
-  "version": "0.3.0",
+  "revision": "c0863bf91ff1e43160d4eff0f49ef6b3b8971c65",
+  "version": "0.4.0",
   "files": {
     "contracts/admin.openapi.json": "contracts/platform-admin.openapi.json",
     "sdk/admin.gen.ts": "apps/web-antd/src/api/platform-admin.gen.ts"
   },
   "sha256": {
-    "contracts/platform-admin.openapi.json": "fb1341d51222bf2a38e05a6a03d75bb5a17719735abdb3a43849f5edbd1d7196",
-    "apps/web-antd/src/api/platform-admin.gen.ts": "ac1ffc43a4556ca0ff008ae28d906cbe9ba7de7b90ef0112db614cabf86601e5"
+    "contracts/platform-admin.openapi.json": "0baf06b8297c483b51aae3362f36acef48477b2e2d08669a37c6c7a059594e5a",
+    "apps/web-antd/src/api/platform-admin.gen.ts": "18bb67305ffbcf563dc39d94fae67cbc908f2cdd5a45917ea26b67aed8fbf423"
   }
 }

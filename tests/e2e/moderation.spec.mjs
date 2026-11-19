@@ -319,3 +319,53 @@ test('moderation policy saves with revision and presentation keeps drafts across
     'Custom level 1',
   );
 });
+
+test('a moderator rejects the selected follow-up without deciding its sibling or the original review', async ({ page }, info) => {
+  await schoolSession(page);
+  await mockCatalogSchool(page);
+  const messages = catalogue(info);
+  const entry = makeEntry('post', {
+    state: 'published',
+    appends: ['first', 'second'].map(id => ({ id, body: `Follow-up ${id}`, state: 'published', review_requested: true, created_at: '2026-11-19T00:00:00Z' })),
+  });
+  const tasks = entry.appends.map(item => {
+    const task = makeTask(`task-${item.id}`, entry.id);
+    return { ...task, submission: { ...task.submission, append_id: item.id, kind: 'review', reason: `Review ${item.id}` } };
+  });
+  const decisions = [];
+  await page.route('**/api/v1/moderation/tasks**', route => {
+    const request = route.request();
+    const path = new URL(request.url()).pathname;
+    const task = tasks.find(row => path.includes(`/${row.id}`));
+    if (task && path.endsWith('/decisions')) {
+      const { decision } = request.postDataJSON();
+      decisions.push(decision);
+      task.state = 'applied';
+      return route.fulfill({ json: { ...task, decision } });
+    }
+    return route.fulfill({ json: task ?? tasks });
+  });
+  await page.route('**/api/v1/reviews/admin/entries/post**', route => {
+    const url = new URL(route.request().url());
+    if (url.pathname.endsWith('/history')) return route.fulfill({ json: [] });
+    expect(url.searchParams.get('include_appends')).toBe('true');
+    return route.fulfill({ json: entry });
+  });
+  await page.goto(`${base}/moderation/queue?lang=${info.project.metadata.locale}`);
+  await page.getByRole('row').filter({ hasText: 'Review second' }).getByRole('button', { name: messages.common.open }).click();
+  const drawer = page.locator('.ant-drawer-content:visible');
+  await expect(drawer.getByText('Follow-up second', { exact: true })).toBeVisible();
+  await expect(drawer.getByText('Follow-up first', { exact: true })).toHaveCount(0);
+  const selector = drawer.locator('.ant-select').filter({ has: page.locator('#decisionpanel-field-1') });
+  await selector.locator('.ant-select-selector').click();
+  const option = page.locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden)').getByTitle(messages.moderation.actions.reject_append, { exact: true });
+  await expect(option).toBeVisible();
+  await selector.getByRole('combobox').press('ArrowDown');
+  await selector.getByRole('combobox').press('Enter');
+  await expect(selector).toContainText(messages.moderation.actions.reject_append);
+  await drawer.locator('#decisionpanel-field-4').fill('Remove only this follow-up.');
+  await drawer.locator('button[type="submit"]').click();
+  await expect.poll(() => decisions.length).toBe(1);
+  expect(decisions[0]).toMatchObject({ object_id: entry.id, append_id: 'second', action: 'reject_append' });
+  expect(tasks[0].state).toBe('waiting');
+});

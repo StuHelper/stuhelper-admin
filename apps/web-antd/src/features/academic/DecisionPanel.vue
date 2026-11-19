@@ -191,8 +191,9 @@ async function load(preserve = false) {
 const actions = computed<Decision['action'][]>(() => {
   const current = entry.value;
   if (!current) return [];
+  if (task.value?.submission.append_id) return ['approve_append', 'reject_append'];
   const values: Decision['action'][] = [];
-  if (current.state === 'pending') values.push('publish');
+  if (current.state === 'pending' || current.review_requested) values.push('publish');
   if (current.state === 'published')
     values.push('hide', current.featured ? 'unfeature' : 'feature');
   if (current.state === 'hidden' || current.state === 'deleted')
@@ -279,6 +280,7 @@ async function decide() {
   const decision: Decision = {
     id: '',
     object_id: current.id,
+    ...(open.submission.append_id ? { append_id: open.submission.append_id } : {}),
     revision: current.revision,
     action: chosen,
     signed: signed.value,
@@ -417,6 +419,10 @@ defineExpose({ dirty, busy, uncertain });
             {{ entry.input.title }}
           </h3>
           <p class="whitespace-pre-wrap">{{ entry.input.body }}</p>
+          <section v-if="task?.submission.append_id" class="mt-4">
+            <h4>{{ t('page.moderation.appendForReview') }}</h4>
+            <p class="whitespace-pre-wrap">{{ entry.appends?.find(item => item.id === task?.submission.append_id)?.body }}</p>
+          </section>
           <div
             v-if="entry.input.kind === 'course'"
             class="mt-3 flex flex-wrap gap-2"

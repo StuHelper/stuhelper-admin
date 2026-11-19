@@ -149,7 +149,7 @@ export class AcademicAdminApi {
     return this.http.json(
       `/api/v1/reviews/admin/entries/${segment(id)}`,
       parse.entry,
-      { signal },
+      { query: { include_appends: true, include_moderation_details: true }, signal },
     );
   }
 

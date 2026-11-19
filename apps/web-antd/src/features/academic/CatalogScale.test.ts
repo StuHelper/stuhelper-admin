@@ -124,7 +124,7 @@ describe('CatalogView and DirectoriesView >1000 courses scale (A-06)', () => {
       if (path === '/api/v1/catalog/admin/objects/course-1/summary') {
         return Response.json({
           categories: [],
-          course_count: 0,
+          courses: [], teachers: [], course_count: 0,
           department: null,
           natures: [],
           object: makeCourse('course-1', '课程 1'),

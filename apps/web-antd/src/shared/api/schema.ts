@@ -73,6 +73,10 @@ export function validates(
   }
   if (value === null) return schema.nullable === true;
   if (Array.isArray(schema.enum) && !schema.enum.includes(value)) return false;
+  if (Array.isArray(schema.allOf) && !schema.allOf.every(part => validates(value, part, schemas, depth + 1, options))) return false;
+  if (Array.isArray(schema.oneOf) && schema.oneOf.filter(part => validates(value, part, schemas, depth + 1, options)).length !== 1) return false;
+  if (Array.isArray(schema.anyOf) && !schema.anyOf.some(part => validates(value, part, schemas, depth + 1, options))) return false;
+  if (schema.type === undefined && (schema.allOf || schema.oneOf || schema.anyOf)) return true;
   switch (schema.type) {
     case 'array': {
       const arrayLimit =

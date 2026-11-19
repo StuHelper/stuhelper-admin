@@ -309,7 +309,9 @@
       "dismiss": "Clore la demande sans modifier le contenu",
       "feature": "Marquer comme contenu de qualité",
       "unfeature": "Retirer la distinction",
-      "reassign": "Corriger l’attribution"
+      "reassign": "Corriger l’attribution",
+      "approve_append": "Approuver le complément",
+      "reject_append": "Rejeter le complément"
     },
     "actionHint": {
       "publish": "Le contenu est validé et publié.",
@@ -321,7 +323,9 @@
       "dismiss": "Clôt la demande ou le signalement sans modifier le contenu.",
       "feature": "Met l’entrée en avant ; les récompenses relèvent du module de facturation.",
       "unfeature": "Retire la mise en avant ; indiquez le motif.",
-      "reassign": "Corrige l’attribution d’après l’inscription la plus récente ; vérifiez avant d’enregistrer."
+      "reassign": "Corrige l’attribution d’après l’inscription la plus récente ; vérifiez avant d’enregistrer.",
+      "approve_append": "Publier ce complément.",
+      "reject_append": "Retirer ce complément et conserver l’avis initial."
     },
     "ratings": {
       "recommendation": {
@@ -386,7 +390,8 @@
       "spam": "Contient de la publicité ou du contenu hors sujet.",
       "privacy": "Divulgue des données personnelles ou sensibles non publiques.",
       "unsubstantiated": "Signalement non étayé, aucune infraction constatée."
-    }
+    },
+    "appendForReview": "Complément à examiner"
   },
   "catalog": {
     "title": "Gestion des cours et enseignants",
@@ -740,7 +745,8 @@
       "failed": "Non terminé",
       "running": "Traitement en cours",
       "manual": "Action administrative requise",
-      "done": "Terminé"
+      "done": "Terminé",
+      "cancelled": "Retirée"
     },
     "materialTypes": {
       "student_card": "Carte étudiante ou universitaire",
@@ -809,7 +815,9 @@
       "mismatch": "Le nom, le numéro ou le département saisi ne correspond pas au justificatif.",
       "wrongType": "Ce type de justificatif n’est pas accepté pour cet établissement.",
       "teacherProof": "Justificatif d’emploi ou d’enseignement manquant ; veuillez compléter."
-    }
+    },
+    "teacherEnabled": "Activer la vérification des enseignants",
+    "teacherMaterials": "Types de justificatifs des enseignants"
   },
   "storage": {
     "title": "Gestion du stockage",
@@ -954,7 +962,8 @@
       "result_unknown": "Le résultat distant est inconnu. Seul le dossier dédié initial peut être vérifié.",
       "conflict": "Le compte est déjà enregistré ou les données ont changé. Actualisez et vérifiez.",
       "attempts_exhausted": "La limite de tentatives est atteinte. Un administrateur doit intervenir.",
-      "credentials_required": "Aucun identifiant récupérable n’a été enregistré. Soumettez-les à nouveau."
+      "credentials_required": "Aucun identifiant récupérable n’a été enregistré. Soumettez-les à nouveau.",
+      "interactive_verification_required": "Terminez la vérification interactive du service de stockage, puis réessayez."
     }
   },
   "openPlatform": {
