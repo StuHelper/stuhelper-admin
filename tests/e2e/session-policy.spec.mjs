@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 
 import { schoolSession } from '../school-session-fixture.mjs';
@@ -7,10 +8,25 @@ test.beforeEach(async ({page})=>{await schoolSession(page)});
 const base = 'http://127.0.0.1:18786';
 
 test('session settings preserve edits on conflict and revoke only the confirmed subject', async ({ page }, info) => {
+  const sessionId = randomUUID();
+  const csrf = randomUUID();
+  await page.context().addCookies([
+    { url: base, name: 'stuhelper_session', value: sessionId, httpOnly: true },
+    { url: base, name: 'stuhelper_csrf', value: csrf },
+  ]);
+  async function checkSession(request) {
+    const headers = await request.allHeaders();
+    expect(headers.cookie?.split('; ').includes(`stuhelper_session=${sessionId}`)).toBe(true);
+    if (request.method() !== 'GET') {
+      expect(headers.origin).toBe(base);
+      expect(headers['x-csrf-token'] === csrf).toBe(true);
+    }
+  }
   const writes = [];
   let conflict = true;
   let version = 1;
   await page.route('**/api/v1/admin/session-policy', async route => {
+    await checkSession(route.request());
     if (route.request().method() === 'GET') return route.fulfill({ json: { interval_minutes: 30, grace_minutes: 30, version } });
     writes.push(route.request().postDataJSON());
     if (conflict) return route.fulfill({ status: 409, json: { code: 'session_policy_conflict' } });
@@ -18,7 +34,7 @@ test('session settings preserve edits on conflict and revoke only the confirmed 
     return route.fulfill({ json: { interval_minutes: writes.at(-1).interval_minutes, grace_minutes: writes.at(-1).grace_minutes, version } });
   });
   const revocations = [];
-  await page.route('**/api/v1/admin/sessions/revoke', route => { revocations.push(route.request().postDataJSON()); return route.fulfill({ json: { success: true } }); });
+  await page.route('**/api/v1/admin/sessions/revoke', async route => { await checkSession(route.request()); revocations.push(route.request().postDataJSON()); return route.fulfill({ json: { success: true } }); });
   await page.goto(`${base}/system/sessions?lang=${info.project.metadata.locale}`);
   const interval = page.locator('#session-review');
   await expect(interval).toHaveValue('30');
@@ -32,6 +48,12 @@ test('session settings preserve edits on conflict and revoke only the confirmed 
   await expect(interval).toHaveValue('15');
   await expect(page.locator('#session-grace')).toHaveValue('0');
   expect(writes).toEqual([{ interval_minutes: 15, grace_minutes: 0, expected_version: 1 }]);
+  // A fresh read clears the previous write error and adopts the current policy.
+  await page.getByRole('alert').getByRole('button').click();
+  await expect(page.getByRole('alert')).toHaveCount(0);
+  await expect(interval).toHaveValue('30');
+  await interval.fill('15');
+  await page.locator('#session-grace').fill('0');
   conflict = false;
   await page.locator('form').first().locator('button[type="submit"]').click();
   const text=JSON.parse(fs.readFileSync(`apps/web-antd/src/locales/langs/${info.project.metadata.locale}/page.json`,'utf8')).sessionPolicy;

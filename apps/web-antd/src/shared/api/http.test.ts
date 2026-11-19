@@ -14,9 +14,9 @@ describe('HTTP boundary', () => {
   it('allows an explicitly bounded large detail while preserving the default JSON limit', async () => {
     const body = JSON.stringify({ replies: Array.from({ length: 40 }, () => '<'.repeat(20_000)) }).replaceAll('<', String.raw`\u003c`);
     const client = new Http(async () => new Response(body));
-    await expect(client.json('/api/v1/test', anything)).rejects.toMatchObject({ code: 'incompatible' });
+    await expect(client.json('/api/v1/test', anything)).rejects.toMatchObject({ code: 'capacity_exceeded', uncertain: false });
     await expect(client.json('/api/v1/test', anything, { maxJsonBytes: 16 * 1024 * 1024 })).resolves.toHaveProperty('replies.length', 40);
-    await expect(client.json('/api/v1/test', anything, { maxJsonBytes: 4 * 1024 * 1024 })).rejects.toMatchObject({ code: 'incompatible' });
+    await expect(client.json('/api/v1/test', anything, { maxJsonBytes: 4 * 1024 * 1024 })).rejects.toMatchObject({ code: 'capacity_exceeded', uncertain: false });
   });
 
   it('rejects invalid JSON budgets before sending a request', async () => {
@@ -161,6 +161,86 @@ describe('HTTP boundary', () => {
     await expect(
       new Http(hang).json('/api/v1/x', anything, { timeout: 5 }),
     ).rejects.toMatchObject({ code: 'timeout' });
+  });
+
+  it('enforces timeouts, cancellation and stream error classification while reading response bodies', async () => {
+    const stalledBody = () =>
+      new Response(new ReadableStream<Uint8Array>({ start() {} }), {
+        headers: { 'Content-Type': 'application/json' },
+      });
+    await expect(
+      new Http(async () => stalledBody()).json('/api/v1/x', anything, {
+        timeout: 10,
+      }),
+    ).rejects.toMatchObject({ code: 'timeout', uncertain: false, status: 200 });
+
+    await expect(
+      new Http(async () => stalledBody()).blob('/api/v1/x', 1024, {
+        timeout: 10,
+      }),
+    ).rejects.toMatchObject({ code: 'timeout', uncertain: false, status: 200 });
+
+    const caller = new AbortController();
+    const pendingJson = new Http(async () => stalledBody()).json(
+      '/api/v1/x',
+      anything,
+      { signal: caller.signal, timeout: 5000 },
+    );
+    setTimeout(() => caller.abort(), 5);
+    await expect(pendingJson).rejects.toMatchObject({
+      code: 'cancelled',
+      uncertain: false,
+      status: 200,
+    });
+
+    const brokenBody = () =>
+      new Response(
+        new ReadableStream<Uint8Array>({
+          pull() {
+            throw new TypeError('stream reset');
+          },
+        }),
+      );
+    await expect(
+      new Http(async () => brokenBody()).json('/api/v1/x', anything, {
+        method: 'POST',
+        body: {},
+      }),
+    ).rejects.toMatchObject({ code: 'network', uncertain: true, status: 200 });
+    await expect(
+      new Http(async () => brokenBody()).blob('/api/v1/x', 1024),
+    ).rejects.toMatchObject({ code: 'network', uncertain: false, status: 200 });
+  });
+
+  it('reports gateway 502/503/504 as unavailable and reads blobs within the byte limit', async () => {
+    const onUnavailable = vi.fn();
+    for (const status of [502, 503, 504]) {
+      const http = new Http(async () => new Response('', { status }), {
+        onUnavailable,
+      });
+      await expect(http.json('/api/v1/x', anything)).rejects.toMatchObject({
+        code: 'unavailable',
+      });
+    }
+    expect(onUnavailable).toHaveBeenCalledTimes(3);
+
+    const chunks = [new TextEncoder().encode('hello '), new TextEncoder().encode('world')];
+    const stream = () =>
+      new Response(
+        new ReadableStream<Uint8Array>({
+          start(controller) {
+            for (const chunk of chunks) controller.enqueue(chunk);
+            controller.close();
+          },
+        }),
+        { headers: { 'Content-Type': 'text/plain' } },
+      );
+    const blob = await new Http(async () => stream()).blob('/api/v1/x', 11);
+    expect(blob.type).toBe('text/plain');
+    await expect(blob.text()).resolves.toBe('hello world');
+    await expect(
+      new Http(async () => stream()).blob('/api/v1/x', 10),
+    ).rejects.toMatchObject({ code: 'capacity_exceeded', uncertain: false });
   });
 
   it('omits empty query values', () => {

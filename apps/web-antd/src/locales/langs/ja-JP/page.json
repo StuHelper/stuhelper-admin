@@ -35,7 +35,8 @@
     "lookup": "情報照会",
     "catalogTimetable": "時限設定",
     "qqGroups": "QQ グループ管理",
-    "catalogTeacherSites": "教員ページ更新"
+    "catalogTeacherSites": "教員ページ更新",
+    "closures": "アカウント閉鎖"
   },
   "common": {
     "all": "すべて",
@@ -122,7 +123,8 @@
     "disabled": "この機能はまだ有効になっていません。",
     "cooldown": "操作が多すぎます。しばらくしてから再試行してください。",
     "billing_already_accessible": "この利用者はすでに資料にアクセスできるため、購入は不要です。",
-    "invalid_rule": "条件の組み合わせが無効です。調整してから保存してください。"
+    "invalid_rule": "条件の組み合わせが無効です。調整してから保存してください。",
+    "import_conflict": "プレビュー後にカタログデータが変更されました。再度プレビューを作成してから確定してください。"
   },
   "session": {
     "signIn": "ログイン",
@@ -176,7 +178,11 @@
       "resources": "審査待ち資料",
       "failed": "失敗した処理",
       "verification": "審査待ち認証",
-      "storage": "停止中のストレージ処理"
+      "storage": "停止中のストレージ処理",
+      "refunds": "未処理の返金",
+      "feedback": "新着フィードバックメール",
+      "teacherVerification": "審査待ち教員認証",
+      "openPlatform": "審査待ち外部連携アプリ"
     },
     "todoUnknown": "不明",
     "todoFailed": "一部の件数を読み込めません。",
@@ -203,7 +209,8 @@
     "taskType": "項目の種類",
     "contentKind": "投稿の種類",
     "content": "内容",
-    "contentReview": "内容審査",
+    "submissionNote": "提出時の説明",
+    "ruleReview": "学校の審査ルールにより審査へ送付",
     "timeRange": "期間",
     "publishedAt": "公開日時",
     "author": "投稿者の表示",
@@ -303,7 +310,9 @@
       "dismiss": "内容を変えずに申請を終了",
       "feature": "おすすめに指定",
       "unfeature": "おすすめを解除",
-      "reassign": "担当教員の関連を修正"
+      "reassign": "担当教員の関連を修正",
+      "approve_append": "追記を承認",
+      "reject_append": "追記を却下"
     },
     "actionHint": {
       "publish": "内容を承認して公開します。",
@@ -315,7 +324,9 @@
       "dismiss": "申請または通報を終了し、内容は変更しません。",
       "feature": "優良コンテンツに認定します。報酬は会計モジュールが処理します。",
       "unfeature": "優良認定を取り消します。理由を記入してください。",
-      "reassign": "最新の信頼できる履修記録に基づき帰属を修正します。確認してから保存します。"
+      "reassign": "最新の信頼できる履修記録に基づき帰属を修正します。確認してから保存します。",
+      "approve_append": "この追記を公開します。",
+      "reject_append": "この追記を非公開にし、元の投稿を残します。"
     },
     "ratings": {
       "recommendation": {
@@ -366,7 +377,22 @@
     },
     "autoNext": "処理後に次へ",
     "previous": "前へ",
-    "next": "次へ"
+    "next": "次へ",
+    "target": "対象項目",
+    "term": "開講学期",
+    "proposedEdit": "投稿者による修正申請の差分",
+    "showDiff": "差分を強調表示",
+    "showPlain": "修正後の本文のみ表示",
+    "latestVersions": "最新の履歴に戻る",
+    "presetsLabel": "よく使う理由テンプレート",
+    "presets": {
+      "approved": "コミュニティ規約に適合しているため承認します。",
+      "abuse": "個人攻撃または不適切な表現が含まれています。",
+      "spam": "広告・宣伝または無関係な投稿が含まれています。",
+      "privacy": "非公開の個人情報や機密情報が含まれています。",
+      "unsubstantiated": "規約違反と判断できる根拠が確認されませんでした。"
+    },
+    "appendForReview": "審査中の追記"
   },
   "catalog": {
     "title": "授業・教員情報の管理",
@@ -427,7 +453,45 @@
       "applied": "適用済み"
     },
     "confirmImport": "インポートを確定",
-    "imported": "取り込み完了：目録 {objects}、履修 {enrollments}、保持した手動修正 {preserved}。"
+    "imported": "取り込み完了：目録 {objects}、履修 {enrollments}、保持した手動修正 {preserved}。",
+    "kinds": {
+      "school": "大学",
+      "department": "学部・学科",
+      "category": "科目区分",
+      "nature": "科目種別",
+      "term": "学期",
+      "course": "科目",
+      "teacher": "教員",
+      "term_course": "学期開講",
+      "class": "クラス",
+      "assignment": "担当割当",
+      "schedule": "時間割",
+      "enrollment": "履修記録"
+    },
+    "importFields": {
+      "name": "名称",
+      "code": "コード",
+      "department_id": "所属学部",
+      "category_id": "科目区分",
+      "nature_id": "科目種別",
+      "course_id": "対象科目",
+      "term_id": "対象学期",
+      "term_course_id": "対象開講",
+      "class_id": "対象クラス",
+      "teacher_id": "担当教員",
+      "credits": "単位数",
+      "hours": "時間数",
+      "english_name": "英語名称",
+      "former_codes": "旧コード",
+      "former_names": "旧名称",
+      "biography": "紹介",
+      "location": "教室",
+      "time_text": "時間表記",
+      "aliases": "別名",
+      "schedule_time": "時限データ"
+    },
+    "changeFilter": "変更状態で絞り込み",
+    "changeCount": "{state}（{count}件）"
   },
   "resources": {
     "manageTitle": "資料管理",
@@ -554,6 +618,22 @@
       "points": "ポイント価格",
       "ivory": "Ivory 価格",
       "save": "価格を保存"
+    },
+    "previewFile": "ファイルをプレビュー",
+    "hidePreview": "プレビューを閉じる",
+    "previewTooLarge": "15 MB のプレビュー上限を超えているため、ダウンロードして確認してください。",
+    "previewUnsupported": "この形式は埋め込みプレビュー非対応です。ダウンロードして確認してください。",
+    "rotateLeft": "左に回転",
+    "rotateRight": "右に回転",
+    "zoomIn": "拡大",
+    "zoomOut": "縮小",
+    "resetView": "表示をリセット",
+    "presets": {
+      "approved": "ファイル内容・出典・分類を確認し承認しました。",
+      "copyright": "出典またはライセンス表記が不足しています。追記して再提出してください。",
+      "corrupted": "ファイルの破損・欠落または判読困難な箇所があります。再アップロードしてください。",
+      "duplicate": "同一内容の資料がすでにディレクトリ内に存在します。",
+      "mismatch": "ファイル内容がタイトル・講義・分類と一致していません。"
     }
   },
   "verification": {
@@ -645,7 +725,8 @@
       "student": "在学生",
       "alumni": "卒業生",
       "newcomer": "新入生の仮資格",
-      "unknown": "未提供"
+      "unknown": "未提供",
+      "teacher": "教員"
     },
     "states": {
       "in_progress": "入力中",
@@ -665,7 +746,8 @@
       "failed": "未完了",
       "running": "処理中",
       "manual": "管理者の対応待ち",
-      "done": "完了"
+      "done": "完了",
+      "cancelled": "取り下げ済み"
     },
     "materialTypes": {
       "student_card": "学生証・キャンパスカード",
@@ -727,7 +809,16 @@
       "self_reported": "ユーザー入力",
       "legacy_credential": "過去の認証情報",
       "synthetic": "合成テスト情報"
-    }
+    },
+    "presets": {
+      "blurry": "証明画像が不鮮明または一部隠れています。鮮明な原本写真を再提出してください。",
+      "unregistered": "今学期の有効な在籍・登録確認ページが含まれていません。追加提出してください。",
+      "mismatch": "入力された氏名・学籍番号・所属が証明書類と一致しません。",
+      "wrongType": "提出された書類種別はこの学校の認定対象外です。",
+      "teacherProof": "在職または担当講義を確認できる証明が不足しています。追加提出してください。"
+    },
+    "teacherEnabled": "教員認証を有効にする",
+    "teacherMaterials": "教員の書類の種類"
   },
   "storage": {
     "title": "ストレージ運用管理",
@@ -793,7 +884,15 @@
       "replica_shortage": "正常な複製が目標数に達していません。",
       "no_healthy_source": "正常な取得元がありません。",
       "insufficient_eligible_capacity": "条件を満たすアカウントまたは容量が不足しています。"
-    }
+    },
+    "quotaUnit": "容量単位",
+    "quotaUnits": {
+      "B": "バイト (B)",
+      "GB": "ギガバイト (GB)",
+      "TB": "テラバイト (TB)"
+    },
+    "quotaPreview": "下限：{min}（使用済み + 予約済み） · 換算値：{value}",
+    "quotaMinimumOnly": "下限：{min}（使用済み + 予約済み）"
   },
   "contribution": {
     "title": "ストレージ提供の管理",
@@ -864,7 +963,8 @@
       "result_unknown": "遠隔処理の結果は不明です。元の専用フォルダーのみ確認できます。",
       "conflict": "アカウントは登録済み、または記録が変更されています。再読み込みして確認してください。",
       "attempts_exhausted": "再試行回数の上限に達しました。管理者による対応が必要です。",
-      "credentials_required": "復旧可能な認証情報が保存されていません。再度入力してください。"
+      "credentials_required": "復旧可能な認証情報が保存されていません。再度入力してください。",
+      "interactive_verification_required": "ストレージ側で本人確認を完了してから再試行してください。"
     }
   },
   "openPlatform": {
@@ -1203,6 +1303,15 @@
       "anyCategory": "すべての分類",
       "removeRule": "ルールを削除",
       "addRule": "ルールを追加"
+    },
+    "ledgerKind": {
+      "reward": "報酬付与",
+      "reward_revoke": "報酬回収",
+      "commerce_refund": "注文の返金",
+      "membership_grant": "会員資格の付与",
+      "expired": "ポイント失効",
+      "debt_repayment": "未控除ポイントの相殺",
+      "closure": "退会精算"
     }
   },
   "access": {
@@ -1336,6 +1445,7 @@
     "title": "時限設定",
     "intro": "学期ごとに第 1 週の月曜日、学校のタイムゾーン、各時限の開始・終了時刻を設定します。学生の時間割とカレンダー書き出しはこの設定で時限を時刻に変換します。未設定の学期はカレンダーを書き出せません。",
     "term": "学期",
+    "noTerms": "この学校の学期データはまだインポートされていません。",
     "missing": "この学期の時限はまだ設定されていません。保存すると学生がカレンダーを書き出せます。",
     "weekOne": "第 1 週の月曜日",
     "weekOneHint": "最初の授業週の月曜日を選んでください。",
@@ -1469,6 +1579,14 @@
       "noncompliant": "違反",
       "compliant": "適合",
       "pending_profile": "情報補足待ち"
+    },
+    "ruleKinds": {
+      "keyword": "キーワード",
+      "link": "外部リンク",
+      "frequency": "投稿頻度",
+      "repeat": "連投メッセージ",
+      "card": "グループ名刺",
+      "warning_limit": "警告上限"
     },
     "states": {
       "pending": "実行待ち",
@@ -1695,6 +1813,72 @@
       "site_unit_missing": "ページに所属がない",
       "catalog_name_absent": "データに同名がいない",
       "ambiguous_site": "重複したページ"
+    },
+    "checkCatalog": "ディレクトリで確認"
+  },
+  "closures": {
+    "title": "アカウント閉鎖管理",
+    "intro": "本アプリのアカウント閉鎖申請、完了済みステップ、保留理由を確認します。7日間のクーリング期間終了後、管理者は保留中の処理を再開できます（共有SSOや他アプリには影響しません）。",
+    "detailTitle": "閉鎖申請の詳細",
+    "empty": "条件に一致する閉鎖申請はありません。",
+    "closureId": "申請ID",
+    "profileId": "プロフィールID",
+    "requestedAt": "申請日時",
+    "coolingEndsAt": "クーリング期間終了",
+    "completedAt": "完了日時",
+    "completedSteps": "整理ステップの進捗",
+    "stepDone": "完了",
+    "stepPending": "未実行",
+    "skippedModules": "未導入のため省略されたモジュール",
+    "noSkipped": "省略なし",
+    "blocker": "保留理由",
+    "noBlocker": "保留なし",
+    "blockerHint": "資産精算や関連サービスの復旧を確認してから、閉鎖処理を再開してください。",
+    "pointsPolicy": "ポイント処理方針",
+    "coolingHint": "7日間のクーリング期間は {time} に終了します。期限前は申請者自身が取り消せます。",
+    "process": "閉鎖処理を再開",
+    "completedNotice": "アカウント閉鎖が完了し、公開コンテンツとの紐付けを解除しました。",
+    "resumedNotice": "閉鎖処理を再開しました。最新の進捗と保留状態を確認してください。",
+    "states": {
+      "cooling": "クーリング期間中",
+      "awaiting_assets": "資産精算待ち",
+      "processing": "整理実行中",
+      "closed": "閉鎖済み",
+      "cancelled": "取消済み"
+    },
+    "steps": {
+      "assets": "資産確認とポイント消去",
+      "sessions": "ローカルセッション失効",
+      "authorizations": "認可および連携の解除",
+      "content": "公開コンテンツの非関連化とブックマーク削除"
+    },
+    "blockers": {
+      "assets_unavailable": "会計資産サービスが利用不可",
+      "assets_pending": "残高・返金・未確定決済が未完了",
+      "sessions_unavailable": "セッションサービスが利用不可",
+      "authorizations_unavailable": "認可または連携サービスが利用不可",
+      "content_unavailable": "コンテンツまたはお気に入りサービスが利用不可"
+    },
+    "modules": {
+      "billing": "会計",
+      "open-platform": "オープンプラットフォーム",
+      "reviews": "講義評価",
+      "resources": "学習資料",
+      "favorites": "お気に入り",
+      "qq-binding": "QQ連携"
+    },
+    "pointsPolicies": {
+      "forfeit_all_points_and_pending_deductions": "最終閉鎖時にすべてのポイントと未精算控除を消去し、現金やIvoryへの換算は行いません"
     }
+  },
+  "accountJump": {
+    "copyAccount": "アカウント識別子をコピー",
+    "copied": "コピー済み",
+    "toBilling": "会計照会へ",
+    "toQqBinding": "QQ連携へ",
+    "toRoles": "ロール権限へ",
+    "toSessions": "セッション失効へ",
+    "prefilledHint": "選択したアカウントから入力欄を自動入力しました。確認して検索してください。",
+    "recentIssuerHint": "このセッションで直近に照会した発行者を自動入力しています。"
   }
 }

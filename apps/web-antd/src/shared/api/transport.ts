@@ -17,6 +17,8 @@ export const sessionFetch: typeof fetch = (input, init) => {
   const headers = new Headers(
     init?.headers ?? (input instanceof Request ? input.headers : undefined),
   );
+  // The browser supplies Origin. Take CSRF only from the current same-origin session.
+  headers.delete('X-CSRF-Token');
   const method = (
     init?.method ?? (input instanceof Request ? input.method : 'GET')
   ).toUpperCase();
@@ -31,7 +33,7 @@ export const sessionFetch: typeof fetch = (input, init) => {
       ?.slice('stuhelper_csrf='.length);
     if (value) headers.set('X-CSRF-Token', value);
   }
-  return fetch(input, { ...init, credentials: 'same-origin', headers });
+  return fetch(input, { ...init, mode: 'same-origin', credentials: 'same-origin', headers });
 };
 
 /**

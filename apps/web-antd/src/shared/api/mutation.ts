@@ -1,10 +1,15 @@
 import { ApiError, isUncertain } from './errors';
 
+export interface MutationOptions {
+  maxItems?: number;
+}
+
 /**
  * Copy a JSON-compatible value. Vue wraps nested form state in proxies that
  * structuredClone rejects, and a retry must not see later edits.
  */
-export function snapshot<T>(value: T): T {
+export function snapshot<T>(value: T, options?: MutationOptions): T {
+  const arrayLimit = options?.maxItems ?? 1000;
   const copy = (input: unknown, depth: number): unknown => {
     if (depth > 24) throw new ApiError('invalid_input');
     if (
@@ -18,7 +23,7 @@ export function snapshot<T>(value: T): T {
       return input;
     }
     if (Array.isArray(input)) {
-      if (input.length > 1000) throw new ApiError('invalid_input');
+      if (input.length > arrayLimit) throw new ApiError('invalid_input');
       return input.map((item) => copy(item, depth + 1));
     }
     if (typeof input === 'object') {
@@ -56,6 +61,8 @@ export class Mutation {
 
   private pending?: Pending;
 
+  constructor(private readonly options: MutationOptions = {}) {}
+
   /** Resend the write whose outcome is unknown, with its original body and key. */
   async retry(): Promise<unknown> {
     if (!this.pending) return undefined;
@@ -76,7 +83,7 @@ export class Mutation {
     // Typed callers pair each body with its own sender.
     this.pending ??= {
       signature,
-      body: snapshot(body),
+      body: snapshot(body, this.options),
       key: crypto.randomUUID(),
       send: send as Pending['send'],
     };

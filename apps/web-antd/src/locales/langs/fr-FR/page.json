@@ -35,7 +35,8 @@
     "lookup": "Recherche d’informations",
     "catalogTimetable": "Horaires des créneaux",
     "qqGroups": "Groupes QQ",
-    "catalogTeacherSites": "Pages des enseignants"
+    "catalogTeacherSites": "Pages des enseignants",
+    "closures": "Clôtures de compte"
   },
   "common": {
     "all": "Tous",
@@ -122,7 +123,8 @@
     "disabled": "Cette fonctionnalité n’est pas activée.",
     "cooldown": "Trop de tentatives. Réessayez dans un instant.",
     "billing_already_accessible": "Cet utilisateur a déjà accès à la ressource ; aucun achat n'est nécessaire.",
-    "invalid_rule": "Cette combinaison de conditions n'est pas valide. Modifiez-la puis enregistrez."
+    "invalid_rule": "Cette combinaison de conditions n'est pas valide. Modifiez-la puis enregistrez.",
+    "import_conflict": "Les données du catalogue ont changé depuis l’aperçu ; générez un nouvel aperçu avant de confirmer."
   },
   "session": {
     "signIn": "Se connecter",
@@ -176,7 +178,11 @@
       "resources": "Ressources à examiner",
       "failed": "Tâches en échec",
       "verification": "Vérifications à examiner",
-      "storage": "Tâches de stockage bloquées"
+      "storage": "Tâches de stockage bloquées",
+      "refunds": "Remboursements en attente",
+      "feedback": "Nouveaux messages de retour",
+      "teacherVerification": "Vérifications enseignant en attente",
+      "openPlatform": "Applications tierces à examiner"
     },
     "todoUnknown": "Inconnu",
     "todoFailed": "Certains compteurs n’ont pas pu se charger.",
@@ -203,7 +209,8 @@
     "taskType": "Type de demande",
     "contentKind": "Type de contenu",
     "content": "Contenu",
-    "contentReview": "Revue de contenu",
+    "submissionNote": "Motif de la demande",
+    "ruleReview": "Envoyé en modération selon les règles de l’établissement",
     "timeRange": "Période",
     "publishedAt": "Publié le",
     "author": "Identité de l’auteur",
@@ -303,7 +310,9 @@
       "dismiss": "Clore la demande sans modifier le contenu",
       "feature": "Marquer comme contenu de qualité",
       "unfeature": "Retirer la distinction",
-      "reassign": "Corriger l’attribution"
+      "reassign": "Corriger l’attribution",
+      "approve_append": "Approuver le complément",
+      "reject_append": "Rejeter le complément"
     },
     "actionHint": {
       "publish": "Le contenu est validé et publié.",
@@ -315,7 +324,9 @@
       "dismiss": "Clôt la demande ou le signalement sans modifier le contenu.",
       "feature": "Met l’entrée en avant ; les récompenses relèvent du module de facturation.",
       "unfeature": "Retire la mise en avant ; indiquez le motif.",
-      "reassign": "Corrige l’attribution d’après l’inscription la plus récente ; vérifiez avant d’enregistrer."
+      "reassign": "Corrige l’attribution d’après l’inscription la plus récente ; vérifiez avant d’enregistrer.",
+      "approve_append": "Publier ce complément.",
+      "reject_append": "Retirer ce complément et conserver l’avis initial."
     },
     "ratings": {
       "recommendation": {
@@ -366,7 +377,22 @@
     },
     "autoNext": "Ouvrir le suivant après décision",
     "previous": "Précédent",
-    "next": "Suivant"
+    "next": "Suivant",
+    "target": "Objet évalué",
+    "term": "Semestre universitaire",
+    "proposedEdit": "Modifications proposées par l’auteur",
+    "showDiff": "Surligner les écarts",
+    "showPlain": "Afficher uniquement le nouveau texte",
+    "latestVersions": "Revenir aux versions récentes",
+    "presetsLabel": "Modèles de motifs fréquents",
+    "presets": {
+      "approved": "Conforme aux règles de la communauté, publication validée.",
+      "abuse": "Contient des attaques personnelles ou des propos inappropriés.",
+      "spam": "Contient de la publicité ou du contenu hors sujet.",
+      "privacy": "Divulgue des données personnelles ou sensibles non publiques.",
+      "unsubstantiated": "Signalement non étayé, aucune infraction constatée."
+    },
+    "appendForReview": "Complément à examiner"
   },
   "catalog": {
     "title": "Gestion des cours et enseignants",
@@ -427,7 +453,45 @@
       "applied": "Appliqué"
     },
     "confirmImport": "Confirmer l’import",
-    "imported": "Import terminé : objets {objects}, inscriptions {enrollments}, corrections conservées {preserved}."
+    "imported": "Import terminé : objets {objects}, inscriptions {enrollments}, corrections conservées {preserved}.",
+    "kinds": {
+      "school": "Établissement",
+      "department": "Département",
+      "category": "Catégorie de cours",
+      "nature": "Nature du cours",
+      "term": "Semestre",
+      "course": "Cours",
+      "teacher": "Enseignant",
+      "term_course": "Session de cours",
+      "class": "Groupe d’enseignement",
+      "assignment": "Affectation d’enseignement",
+      "schedule": "Horaire de cours",
+      "enrollment": "Inscription au cours"
+    },
+    "importFields": {
+      "name": "Intitulé",
+      "code": "Code d’objet",
+      "department_id": "Département rattaché",
+      "category_id": "Catégorie rattachée",
+      "nature_id": "Nature rattachée",
+      "course_id": "Cours associé",
+      "term_id": "Semestre associé",
+      "term_course_id": "Session associée",
+      "class_id": "Groupe associé",
+      "teacher_id": "Enseignant associé",
+      "credits": "Nombre de crédits",
+      "hours": "Volume horaire",
+      "english_name": "Intitulé anglais",
+      "former_codes": "Anciens codes",
+      "former_names": "Anciens intitulés",
+      "biography": "Présentation",
+      "location": "Salle",
+      "time_text": "Horaire textuel",
+      "aliases": "Autres noms",
+      "schedule_time": "Créneaux structurés"
+    },
+    "changeFilter": "Filtrer par état de modification",
+    "changeCount": "{state} : {count}"
   },
   "resources": {
     "manageTitle": "Gestion des ressources",
@@ -554,6 +618,22 @@
       "points": "Prix en points",
       "ivory": "Prix en Ivory",
       "save": "Enregistrer le prix"
+    },
+    "previewFile": "Aperçu intégré du fichier",
+    "hidePreview": "Masquer l’aperçu",
+    "previewTooLarge": "Le fichier dépasse la limite d’aperçu intégré de 15 Mo ; veuillez le télécharger.",
+    "previewUnsupported": "Ce format ne prend pas en charge l’aperçu intégré ; téléchargez le fichier.",
+    "rotateLeft": "Pivoter à gauche",
+    "rotateRight": "Pivoter à droite",
+    "zoomIn": "Agrandir",
+    "zoomOut": "Réduire",
+    "resetView": "Réinitialiser la vue",
+    "presets": {
+      "approved": "Fichier lisible, source et catégorie vérifiées.",
+      "copyright": "Mention de source ou de licence manquante ; veuillez compléter.",
+      "corrupted": "Fichier endommagé, incomplet ou illisible ; veuillez le téléverser à nouveau.",
+      "duplicate": "Une ressource identique existe déjà dans ce dossier.",
+      "mismatch": "Le contenu du fichier ne correspond pas au titre, au cours ou à la catégorie."
     }
   },
   "verification": {
@@ -645,7 +725,8 @@
       "student": "Étudiant inscrit",
       "alumni": "Ancien étudiant",
       "newcomer": "Nouvel étudiant temporaire",
-      "unknown": "Non fourni"
+      "unknown": "Non fourni",
+      "teacher": "Enseignant"
     },
     "states": {
       "in_progress": "En cours",
@@ -665,7 +746,8 @@
       "failed": "Non terminé",
       "running": "Traitement en cours",
       "manual": "Action administrative requise",
-      "done": "Terminé"
+      "done": "Terminé",
+      "cancelled": "Retirée"
     },
     "materialTypes": {
       "student_card": "Carte étudiante ou universitaire",
@@ -727,7 +809,16 @@
       "self_reported": "Saisi par l’utilisateur",
       "legacy_credential": "Vérification historique",
       "synthetic": "Données de test synthétiques"
-    }
+    },
+    "presets": {
+      "blurry": "La photo du justificatif est floue ou masquée ; veuillez fournir une image nette.",
+      "unregistered": "Page d’inscription ou cachet du semestre en cours manquant ; veuillez compléter.",
+      "mismatch": "Le nom, le numéro ou le département saisi ne correspond pas au justificatif.",
+      "wrongType": "Ce type de justificatif n’est pas accepté pour cet établissement.",
+      "teacherProof": "Justificatif d’emploi ou d’enseignement manquant ; veuillez compléter."
+    },
+    "teacherEnabled": "Activer la vérification des enseignants",
+    "teacherMaterials": "Types de justificatifs des enseignants"
   },
   "storage": {
     "title": "Gestion du stockage",
@@ -793,7 +884,15 @@
       "replica_shortage": "Le nombre de copies valides est inférieur à la cible.",
       "no_healthy_source": "Aucune source valide disponible.",
       "insufficient_eligible_capacity": "Comptes admissibles ou capacité insuffisants."
-    }
+    },
+    "quotaUnit": "Unité de capacité",
+    "quotaUnits": {
+      "B": "Octets (o)",
+      "GB": "Gigaoctets (Go)",
+      "TB": "Téraoctets (To)"
+    },
+    "quotaPreview": "Minimum autorisé : {min} (utilisé + réservé) · Converti : {value}",
+    "quotaMinimumOnly": "Minimum autorisé : {min} (utilisé + réservé)"
   },
   "contribution": {
     "title": "Gestion des contributions",
@@ -864,7 +963,8 @@
       "result_unknown": "Le résultat distant est inconnu. Seul le dossier dédié initial peut être vérifié.",
       "conflict": "Le compte est déjà enregistré ou les données ont changé. Actualisez et vérifiez.",
       "attempts_exhausted": "La limite de tentatives est atteinte. Un administrateur doit intervenir.",
-      "credentials_required": "Aucun identifiant récupérable n’a été enregistré. Soumettez-les à nouveau."
+      "credentials_required": "Aucun identifiant récupérable n’a été enregistré. Soumettez-les à nouveau.",
+      "interactive_verification_required": "Terminez la vérification interactive du service de stockage, puis réessayez."
     }
   },
   "openPlatform": {
@@ -1203,6 +1303,15 @@
       "anyCategory": "Toutes les catégories",
       "removeRule": "Supprimer la règle",
       "addRule": "Ajouter une règle"
+    },
+    "ledgerKind": {
+      "reward": "Octroi de récompense",
+      "reward_revoke": "Révocation de récompense",
+      "commerce_refund": "Remboursement de commande",
+      "membership_grant": "Abonnement accordé",
+      "expired": "Expiration de points",
+      "debt_repayment": "Compensation de dette",
+      "closure": "Clôture de compte"
     }
   },
   "access": {
@@ -1336,6 +1445,7 @@
     "title": "Horaires des créneaux",
     "intro": "Définissez pour chaque semestre le lundi de la première semaine, le fuseau horaire de l’établissement et les horaires de chaque créneau. Les emplois du temps et les exports d’agenda s’en servent pour convertir les créneaux en heures ; sans eux, l’agenda ne peut pas être exporté.",
     "term": "Semestre",
+    "noTerms": "Aucun semestre n’a encore été importé pour cet établissement.",
     "missing": "Aucun horaire n’est encore défini pour ce semestre. Les étudiants pourront exporter leur agenda après l’enregistrement.",
     "weekOne": "Lundi de la première semaine",
     "weekOneHint": "Choisissez le lundi de la première semaine de cours.",
@@ -1469,6 +1579,14 @@
       "noncompliant": "Infraction",
       "compliant": "Conforme",
       "pending_profile": "Profil à compléter"
+    },
+    "ruleKinds": {
+      "keyword": "Mot-clé",
+      "link": "Lien externe",
+      "frequency": "Fréquence des messages",
+      "repeat": "Message répété",
+      "card": "Carte de groupe",
+      "warning_limit": "Seuil d’avertissement"
     },
     "states": {
       "pending": "En file",
@@ -1695,6 +1813,72 @@
       "site_unit_missing": "Unité absente de la page",
       "catalog_name_absent": "Nom absent du catalogue",
       "ambiguous_site": "Pages en double"
+    },
+    "checkCatalog": "Vérifier dans le répertoire"
+  },
+  "closures": {
+    "title": "Gestion des clôtures de compte",
+    "intro": "Consultez les demandes de clôture du compte applicatif, les étapes terminées et les blocages. Après le délai de réflexion de sept jours, un administrateur peut relancer le traitement ; le SSO partagé reste intact.",
+    "detailTitle": "Détail de la demande de clôture",
+    "empty": "Aucune demande de clôture pour ce filtre.",
+    "closureId": "Identifiant de clôture",
+    "profileId": "Identifiant du profil",
+    "requestedAt": "Demandée le",
+    "coolingEndsAt": "Fin du délai de réflexion",
+    "completedAt": "Terminée le",
+    "completedSteps": "Avancement du nettoyage",
+    "stepDone": "Terminée",
+    "stepPending": "En attente",
+    "skippedModules": "Modules jamais installés ignorés",
+    "noSkipped": "Aucun module ignoré",
+    "blocker": "Motif de blocage",
+    "noBlocker": "Aucun blocage",
+    "blockerHint": "Vérifiez le règlement des avoirs ou le rétablissement du service concerné avant de reprendre la clôture.",
+    "pointsPolicy": "Règle sur les points",
+    "coolingHint": "Le délai de réflexion de sept jours prend fin le {time}. Le demandeur peut encore annuler avant cette échéance.",
+    "process": "Reprendre la clôture",
+    "completedNotice": "La clôture du compte est terminée et les contenus publics sont dissociés.",
+    "resumedNotice": "Le traitement a repris ; vérifiez les étapes et le blocage mis à jour.",
+    "states": {
+      "cooling": "En réflexion",
+      "awaiting_assets": "Attente de règlement des avoirs",
+      "processing": "Nettoyage en cours",
+      "closed": "Clôturé",
+      "cancelled": "Annulé"
+    },
+    "steps": {
+      "assets": "Vérification des avoirs et remise à zéro des points",
+      "sessions": "Révocation des sessions locales",
+      "authorizations": "Retrait des autorisations et liaisons",
+      "content": "Dissociation des contenus et suppression des favoris"
+    },
+    "blockers": {
+      "assets_unavailable": "Service de facturation indisponible",
+      "assets_pending": "Solde restant, remboursement ou paiement en suspens",
+      "sessions_unavailable": "Service de sessions indisponible",
+      "authorizations_unavailable": "Service des autorisations ou liaisons indisponible",
+      "content_unavailable": "Service des contenus ou favoris indisponible"
+    },
+    "modules": {
+      "billing": "Facturation",
+      "open-platform": "Plateforme ouverte",
+      "reviews": "Évaluations",
+      "resources": "Ressources pédagogiques",
+      "favorites": "Favoris",
+      "qq-binding": "Liaison QQ"
+    },
+    "pointsPolicies": {
+      "forfeit_all_points_and_pending_deductions": "Effacer tous les points et déductions en attente lors de la clôture finale sans conversion en espèces ni en Ivory"
     }
+  },
+  "accountJump": {
+    "copyAccount": "Copier l’identifiant du compte",
+    "copied": "Copié",
+    "toBilling": "Compte de facturation",
+    "toQqBinding": "Liaison QQ",
+    "toRoles": "Attribution des rôles",
+    "toSessions": "Révocation de session",
+    "prefilledHint": "Prérempli à partir du compte sélectionné ; vérifiez avant de lancer la recherche.",
+    "recentIssuerHint": "Émetteur prérempli d’après la dernière consultation de cette session."
   }
 }

@@ -35,7 +35,8 @@
     "lookup": "정보 조회",
     "catalogTimetable": "교시 시간",
     "qqGroups": "QQ 그룹 관리",
-    "catalogTeacherSites": "교원 홈페이지"
+    "catalogTeacherSites": "교원 홈페이지",
+    "closures": "계정 해지"
   },
   "common": {
     "all": "전체",
@@ -122,7 +123,8 @@
     "disabled": "이 기능은 아직 사용할 수 없습니다.",
     "cooldown": "요청이 너무 잦습니다. 잠시 후 다시 시도하세요.",
     "billing_already_accessible": "이 사용자는 이미 자료에 접근할 수 있어 구매할 필요가 없습니다.",
-    "invalid_rule": "조건 조합이 올바르지 않습니다. 조정한 뒤 다시 저장하세요."
+    "invalid_rule": "조건 조합이 올바르지 않습니다. 조정한 뒤 다시 저장하세요.",
+    "import_conflict": "미리보기 이후 목록 데이터가 변경되었습니다. 다시 미리보기를 생성한 뒤 확정하세요."
   },
   "session": {
     "signIn": "로그인",
@@ -176,7 +178,11 @@
       "resources": "검토 대기 자료",
       "failed": "실패한 처리",
       "verification": "검토 대기 인증",
-      "storage": "차단된 저장소 작업"
+      "storage": "차단된 저장소 작업",
+      "refunds": "처리 대기 환불",
+      "feedback": "새 피드백 메일",
+      "teacherVerification": "심사 대기 교원 인증",
+      "openPlatform": "심사 대기 오픈 플랫폼 앱"
     },
     "todoUnknown": "알 수 없음",
     "todoFailed": "일부 건수를 불러오지 못했습니다.",
@@ -203,7 +209,8 @@
     "taskType": "항목 유형",
     "contentKind": "콘텐츠 유형",
     "content": "내용",
-    "contentReview": "내용 심사",
+    "submissionNote": "제출 설명",
+    "ruleReview": "학교 심사 규칙에 따라 심사로 전달",
     "timeRange": "기간",
     "publishedAt": "게시 시각",
     "author": "작성자 표시",
@@ -303,7 +310,9 @@
       "dismiss": "내용 변경 없이 신청 종료",
       "feature": "우수 콘텐츠 지정",
       "unfeature": "우수 지정 취소",
-      "reassign": "담당 교원 연결 수정"
+      "reassign": "담당 교원 연결 수정",
+      "approve_append": "추가 후기 승인",
+      "reject_append": "추가 후기 반려"
     },
     "actionHint": {
       "publish": "콘텐츠를 승인하고 공개합니다.",
@@ -315,7 +324,9 @@
       "dismiss": "신청이나 신고를 종료하며 내용은 바꾸지 않습니다.",
       "feature": "우수 콘텐츠로 지정하며 보상은 회계 모듈이 처리합니다.",
       "unfeature": "우수 지정을 취소하며 사유를 적어 주세요.",
-      "reassign": "최신 수강 기록에 따라 귀속을 수정하며, 확인 후 저장합니다."
+      "reassign": "최신 수강 기록에 따라 귀속을 수정하며, 확인 후 저장합니다.",
+      "approve_append": "이 추가 후기를 공개합니다.",
+      "reject_append": "원문은 유지하고 이 추가 후기만 내립니다."
     },
     "ratings": {
       "recommendation": {
@@ -366,7 +377,22 @@
     },
     "autoNext": "처리 후 다음으로",
     "previous": "이전",
-    "next": "다음"
+    "next": "다음",
+    "target": "평가 대상",
+    "term": "개설 학기",
+    "proposedEdit": "작성자 수정 요청 본문 비교",
+    "showDiff": "변경 부분 강조",
+    "showPlain": "수정 본문만 보기",
+    "latestVersions": "최신 버전으로 돌아가기",
+    "presetsLabel": "자주 쓰는 사유 템플릿",
+    "presets": {
+      "approved": "커뮤니티 운영 기준에 부합하여 승인합니다.",
+      "abuse": "인신공격이나 부적절한 표현이 포함되어 있습니다.",
+      "spam": "광고성 홍보 또는 주제와 무관한 도배 내용입니다.",
+      "privacy": "비공개 개인정보나 민감한 정보가 노출되어 있습니다.",
+      "unsubstantiated": "규정 위반을 확인할 수 있는 근거가 부족합니다."
+    },
+    "appendForReview": "심사할 추가 후기"
   },
   "catalog": {
     "title": "강의 및 교수 정보 관리",
@@ -427,7 +453,45 @@
       "applied": "실행됨"
     },
     "confirmImport": "가져오기 확인",
-    "imported": "가져오기 완료: 목록 {objects}, 수강 {enrollments}, 유지된 수동 수정 {preserved}."
+    "imported": "가져오기 완료: 목록 {objects}, 수강 {enrollments}, 유지된 수동 수정 {preserved}.",
+    "kinds": {
+      "school": "학교",
+      "department": "학부·학과",
+      "category": "과목 분류",
+      "nature": "과목 성격",
+      "term": "학기",
+      "course": "과목",
+      "teacher": "교원",
+      "term_course": "학기 개설",
+      "class": "분반",
+      "assignment": "담당 배정",
+      "schedule": "강의 시간",
+      "enrollment": "수강 기록"
+    },
+    "importFields": {
+      "name": "이름",
+      "code": "코드",
+      "department_id": "소속 학과",
+      "category_id": "과목 분류",
+      "nature_id": "과목 성격",
+      "course_id": "연결 과목",
+      "term_id": "소속 학기",
+      "term_course_id": "소속 개설",
+      "class_id": "소속 분반",
+      "teacher_id": "담당 교원",
+      "credits": "학점",
+      "hours": "시수",
+      "english_name": "영문명",
+      "former_codes": "이전 코드",
+      "former_names": "이전 이름",
+      "biography": "소개",
+      "location": "장소",
+      "time_text": "시간 설명",
+      "aliases": "다른 이름",
+      "schedule_time": "교시 정보"
+    },
+    "changeFilter": "변경 상태별 필터",
+    "changeCount": "{state} ({count}건)"
   },
   "resources": {
     "manageTitle": "자료 관리",
@@ -554,6 +618,22 @@
       "points": "포인트 가격",
       "ivory": "Ivory 가격",
       "save": "가격 저장"
+    },
+    "previewFile": "파일 내장 미리보기",
+    "hidePreview": "미리보기 닫기",
+    "previewTooLarge": "파일이 15MB 미리보기 한도를 초과하므로 직접 다운로드하여 확인하세요.",
+    "previewUnsupported": "이 형식은 내장 미리보기를 지원하지 않습니다. 다운로드하여 확인하세요.",
+    "rotateLeft": "왼쪽으로 회전",
+    "rotateRight": "오른쪽으로 회전",
+    "zoomIn": "확대",
+    "zoomOut": "축소",
+    "resetView": "보기 초기화",
+    "presets": {
+      "approved": "파일 상태와 출처 및 분류를 확인하여 승인합니다.",
+      "copyright": "출처 또는 라이선스 표기가 누락되었습니다. 보완 후 다시 제출해 주세요.",
+      "corrupted": "파일이 손상되었거나 식별하기 어렵습니다. 다시 업로드해 주세요.",
+      "duplicate": "동일한 자료가 이미 해당 디렉터리에 등록되어 있습니다.",
+      "mismatch": "파일의 실제 내용이 제목, 과목 또는 분류와 일치하지 않습니다."
     }
   },
   "verification": {
@@ -645,7 +725,8 @@
       "student": "재학생",
       "alumni": "동문",
       "newcomer": "임시 신입생",
-      "unknown": "제공되지 않음"
+      "unknown": "제공되지 않음",
+      "teacher": "교원"
     },
     "states": {
       "in_progress": "작성 중",
@@ -665,7 +746,8 @@
       "failed": "완료되지 않음",
       "running": "처리 중",
       "manual": "관리자 조치 필요",
-      "done": "완료됨"
+      "done": "완료됨",
+      "cancelled": "철회됨"
     },
     "materialTypes": {
       "student_card": "학생증 또는 캠퍼스 카드",
@@ -727,7 +809,16 @@
       "self_reported": "사용자 입력",
       "legacy_credential": "기존 인증 정보",
       "synthetic": "합성 테스트 정보"
-    }
+    },
+    "presets": {
+      "blurry": "증빙 사진이 흐리거나 주요 정보가 가려져 있습니다. 선명한 원본을 다시 제출해 주세요.",
+      "unregistered": "이번 학기 유효한 등록 확인 페이지나 직인이 없습니다. 보완 제출해 주세요.",
+      "mismatch": "입력한 이름, 학번 또는 소속이 증빙 서류와 일치하지 않습니다.",
+      "wrongType": "업로드한 서류 유형은 해당 학교의 인정 대상이 아닙니다.",
+      "teacherProof": "재직 또는 강의 담당을 확인할 수 있는 증빙이 부족합니다. 보완 제출해 주세요."
+    },
+    "teacherEnabled": "교원 인증 사용",
+    "teacherMaterials": "교원 증빙 자료 유형"
   },
   "storage": {
     "title": "스토리지 운영 관리",
@@ -793,7 +884,15 @@
       "replica_shortage": "정상 복제본이 목표 수에 미달합니다.",
       "no_healthy_source": "정상적인 원본을 사용할 수 없습니다.",
       "insufficient_eligible_capacity": "조건에 맞는 계정 또는 용량이 부족합니다."
-    }
+    },
+    "quotaUnit": "용량 단위",
+    "quotaUnits": {
+      "B": "바이트 (B)",
+      "GB": "기가바이트 (GB)",
+      "TB": "테라바이트 (TB)"
+    },
+    "quotaPreview": "최소 허용치: {min}(사용 + 예약) · 환산값: {value}",
+    "quotaMinimumOnly": "최소 허용치: {min}(사용 + 예약)"
   },
   "contribution": {
     "title": "저장소 기여 관리",
@@ -864,7 +963,8 @@
       "result_unknown": "원격 처리 결과가 불명확합니다. 원래 전용 폴더만 확인할 수 있습니다.",
       "conflict": "이미 등록된 계정이거나 기록이 변경되었습니다. 새로 고침 후 확인하세요.",
       "attempts_exhausted": "재시도 한도에 도달했습니다. 관리자 조치가 필요합니다.",
-      "credentials_required": "복구 가능한 인증 정보가 저장되지 않았습니다. 다시 제출하세요."
+      "credentials_required": "복구 가능한 인증 정보가 저장되지 않았습니다. 다시 제출하세요.",
+      "interactive_verification_required": "저장소 서비스에서 추가 인증을 완료한 후 다시 시도하세요."
     }
   },
   "openPlatform": {
@@ -1203,6 +1303,15 @@
       "anyCategory": "모든 분류",
       "removeRule": "규칙 삭제",
       "addRule": "규칙 추가"
+    },
+    "ledgerKind": {
+      "reward": "보상 지급",
+      "reward_revoke": "보상 회수",
+      "commerce_refund": "주문 환불",
+      "membership_grant": "멤버십 부여",
+      "expired": "포인트 만료",
+      "debt_repayment": "미차감 포인트 상계",
+      "closure": "계정 해지 정산"
     }
   },
   "access": {
@@ -1336,6 +1445,7 @@
     "title": "교시 시간",
     "intro": "학기마다 첫째 주 월요일, 학교 시간대, 각 교시의 시작·종료 시간을 설정합니다. 학생 시간표와 캘린더 내보내기는 이 설정으로 교시를 시각으로 바꿉니다. 설정이 없는 학기는 캘린더를 내보낼 수 없습니다.",
     "term": "학기",
+    "noTerms": "이 학교에 아직 가져온 학기가 없습니다.",
     "missing": "이 학기의 교시 시간이 아직 없습니다. 저장하면 학생이 캘린더를 내보낼 수 있습니다.",
     "weekOne": "첫째 주 월요일",
     "weekOneHint": "첫 수업 주의 월요일을 선택하세요.",
@@ -1469,6 +1579,14 @@
       "noncompliant": "위반",
       "compliant": "적합",
       "pending_profile": "정보 보완 필요"
+    },
+    "ruleKinds": {
+      "keyword": "키워드",
+      "link": "외부 링크",
+      "frequency": "발언 빈도",
+      "repeat": "반복 메시지",
+      "card": "그룹 명함",
+      "warning_limit": "경고 한도"
     },
     "states": {
       "pending": "실행 대기",
@@ -1695,6 +1813,72 @@
       "site_unit_missing": "홈페이지에 소속 없음",
       "catalog_name_absent": "데이터에 같은 이름 없음",
       "ambiguous_site": "중복 홈페이지"
+    },
+    "checkCatalog": "디렉터리에서 확인"
+  },
+  "closures": {
+    "title": "계정 해지 관리",
+    "intro": "앱 계정 해지 신청, 완료된 정리 단계 및 보류 사유를 확인합니다. 7일 숙려 기간이 지난 뒤 관리자가 보류된 처리를 재개할 수 있으며, 공용 SSO와 다른 앱은 변경되지 않습니다.",
+    "detailTitle": "해지 신청 상세",
+    "empty": "현재 조건에 해당하는 해지 신청이 없습니다.",
+    "closureId": "신청 ID",
+    "profileId": "프로필 ID",
+    "requestedAt": "신청 시각",
+    "coolingEndsAt": "숙려 기간 종료",
+    "completedAt": "완료 시각",
+    "completedSteps": "정리 단계 진행률",
+    "stepDone": "완료됨",
+    "stepPending": "대기 중",
+    "skippedModules": "미설치로 건너뛴 모듈",
+    "noSkipped": "건너뛴 모듈 없음",
+    "blocker": "보류 사유",
+    "noBlocker": "보류 없음",
+    "blockerHint": "자산 정산 완료 또는 하위 서비스 복구를 확인한 뒤 해지 처리를 재개하세요.",
+    "pointsPolicy": "포인트 처리 규칙",
+    "coolingHint": "7일 숙려 기간은 {time}에 종료됩니다. 종료 전에는 신청자가 직접 취소할 수 있습니다.",
+    "process": "해지 처리 계속 실행",
+    "completedNotice": "계정 해지가 완료되었으며 공개 콘텐츠의 계정 연결이 해제되었습니다.",
+    "resumedNotice": "해지 처리를 다시 시작했습니다. 업데이트된 단계와 보류 상태를 확인하세요.",
+    "states": {
+      "cooling": "숙려 기간 중",
+      "awaiting_assets": "자산 정산 대기",
+      "processing": "정리 진행 중",
+      "closed": "해지 완료",
+      "cancelled": "취소됨"
+    },
+    "steps": {
+      "assets": "자산 확인 및 포인트 소멸",
+      "sessions": "로컬 세션 해지",
+      "authorizations": "권한 승인 및 연동 해제",
+      "content": "공개 콘텐츠 연결 해제 및 즐겨찾기 삭제"
+    },
+    "blockers": {
+      "assets_unavailable": "청구 자산 서비스를 사용할 수 없음",
+      "assets_pending": "잔액, 환불 또는 미확정 결제가 남아 있음",
+      "sessions_unavailable": "세션 서비스를 사용할 수 없음",
+      "authorizations_unavailable": "권한 또는 연동 서비스를 사용할 수 없음",
+      "content_unavailable": "콘텐츠 또는 즐겨찾기 서비스를 사용할 수 없음"
+    },
+    "modules": {
+      "billing": "청구",
+      "open-platform": "오픈 플랫폼",
+      "reviews": "강의 평가",
+      "resources": "학습 자료",
+      "favorites": "즐겨찾기",
+      "qq-binding": "QQ 연동"
+    },
+    "pointsPolicies": {
+      "forfeit_all_points_and_pending_deductions": "최종 해지 시 모든 포인트와 차감 대기 내역이 현금이나 Ivory 전환 없이 소멸됩니다"
     }
+  },
+  "accountJump": {
+    "copyAccount": "계정 식별자 복사",
+    "copied": "복사됨",
+    "toBilling": "계정 청구 조회",
+    "toQqBinding": "QQ 연동 조회",
+    "toRoles": "역할 권한 조회",
+    "toSessions": "세션 강제 로그아웃",
+    "prefilledHint": "선택한 계정 정보로 입력란을 미리 채웠습니다. 확인 후 조회하세요.",
+    "recentIssuerHint": "현재 세션에서 최근 조회한 발급자를 자동으로 채웠습니다."
   }
 }

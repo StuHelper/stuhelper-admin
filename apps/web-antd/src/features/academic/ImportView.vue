@@ -13,6 +13,7 @@ import {
   DescriptionsItem,
   Form,
   FormItem,
+  Select,
   Space,
   Table,
   Tag,
@@ -39,11 +40,12 @@ const { t, te } = useI18n();
 const format = useFormat();
 const errorText = useErrorText();
 const api = useAcademicAdmin();
-const confirm = useMutation();
+const confirm = useMutation({ maxItems: 50_000 });
 const school = useCampusId();
 const input = shallowRef<CatalogImport>();
 const preview = shallowRef<ImportPreview>();
 const result = shallowRef<ImportResult>();
+const stateFilter = ref('');
 const error = ref('');
 const previewing = ref(false);
 const fileInput = ref<HTMLInputElement>();
@@ -56,7 +58,11 @@ watch(school, () => {
   generation++;
   input.value = undefined;
   preview.value = undefined;
+  stateFilter.value = '';
   error.value = '';
+});
+watch(preview, () => {
+  stateFilter.value = '';
 });
 useLeaveGuard(() => (locked.value ? t('page.common.leaveUncertain') : ''));
 
@@ -104,7 +110,14 @@ async function apply() {
     (value, key) => api.confirmImport(value, key),
   );
   if (saved) done(saved);
-  else if (confirm.error.value === 'conflict') preview.value = undefined;
+  else if (
+    confirm.error.value === 'conflict' ||
+    confirm.error.value === 'import_conflict'
+  ) {
+    error.value = confirm.error.value;
+    confirm.dismiss();
+    preview.value = undefined;
+  }
 }
 async function retry() {
   const saved = await confirm.retry();
@@ -120,10 +133,20 @@ function done(saved: ImportResult) {
 
 const columns = computed(() => [
   { dataIndex: 'id', key: 'id', title: t('page.catalog.recordId') },
-  { dataIndex: 'kind', key: 'kind', title: t('page.catalog.kind') },
+  { key: 'kind', title: t('page.catalog.kind') },
   { key: 'state', title: t('page.common.status') },
   { key: 'fields', title: t('page.catalog.changedFields') },
 ]);
+const kindLabel = (kind: string) =>
+  te(`page.catalog.kinds.${kind}`) ? t(`page.catalog.kinds.${kind}`) : kind;
+const fieldsLabel = (fields: string[]) =>
+  format.value.list(
+    fields.map((field) =>
+      te(`page.catalog.importFields.${field}`)
+        ? t(`page.catalog.importFields.${field}`)
+        : field,
+    ),
+  );
 const stateColor: Record<string, string> = {
   new: 'green',
   updated: 'blue',
@@ -131,6 +154,46 @@ const stateColor: Record<string, string> = {
   unlinked: 'orange',
   preserved: 'purple',
 };
+const changeStateLabel = (state: string) =>
+  te(`page.catalog.changeState.${state}`)
+    ? t(`page.catalog.changeState.${state}`)
+    : state;
+const stateCounts = computed(() => {
+  const counts: Record<string, number> = {};
+  for (const row of preview.value?.changes ?? []) {
+    counts[row.state] = (counts[row.state] ?? 0) + 1;
+  }
+  return counts;
+});
+const changeStates = computed(() => {
+  const ordered = ['new', 'updated', 'conflict', 'unlinked', 'preserved'];
+  const extras = Object.keys(stateCounts.value).filter(
+    (key) => !ordered.includes(key),
+  );
+  return [...ordered, ...extras].filter((key) => (stateCounts.value[key] ?? 0) > 0);
+});
+const changeFilterOptions = computed(() => [
+  {
+    value: '',
+    label: t('page.catalog.changeCount', {
+      state: t('page.common.all'),
+      count: format.value.number(preview.value?.changes.length ?? 0),
+    }),
+  },
+  ...changeStates.value.map((state) => ({
+    value: state,
+    label: t('page.catalog.changeCount', {
+      state: changeStateLabel(state),
+      count: format.value.number(stateCounts.value[state] ?? 0),
+    }),
+  })),
+]);
+const filteredChanges = computed(() => {
+  const changes = preview.value?.changes ?? [];
+  return stateFilter.value
+    ? changes.filter((item) => item.state === stateFilter.value)
+    : changes;
+});
 </script>
 
 <template>
@@ -225,9 +288,35 @@ const stateColor: Record<string, string> = {
               : t('page.catalog.previewInvalid')
           "
         />
+        <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <Form layout="inline">
+            <FormItem :label="t('page.catalog.changeFilter')">
+              <Select
+                v-model:value="stateFilter"
+                class="w-60 max-w-full"
+                :aria-label="t('page.catalog.changeFilter')"
+                :options="changeFilterOptions"
+              />
+            </FormItem>
+          </Form>
+          <Space wrap size="small">
+            <Tag
+              v-for="state in changeStates"
+              :key="state"
+              :color="stateColor[state]"
+            >
+              {{
+                t('page.catalog.changeCount', {
+                  state: changeStateLabel(state),
+                  count: format.number(stateCounts[state] ?? 0),
+                })
+              }}
+            </Tag>
+          </Space>
+        </div>
         <Table
           :columns="columns"
-          :data-source="preview.changes"
+          :data-source="filteredChanges"
           :pagination="{ pageSize: 50 }"
           :row-key="
             (row: ImportPreview['changes'][number]) => `${row.kind}:${row.id}`
@@ -236,7 +325,10 @@ const stateColor: Record<string, string> = {
           :scroll="{ x: 640 }"
         >
           <template #bodyCell="{ column, record }">
-            <template v-if="column.key === 'state'">
+            <template v-if="column.key === 'kind'">
+              {{ kindLabel(record.kind) }}
+            </template>
+            <template v-else-if="column.key === 'state'">
 <Tag :color="stateColor[record.state]">
 {{
                 te(`page.catalog.changeState.${record.state}`)
@@ -247,7 +339,7 @@ const stateColor: Record<string, string> = {
 </template>
             <template v-else-if="column.key === 'fields'">
 {{
-              record.fields.join(', ')
+              fieldsLabel(record.fields)
             }}
 </template>
           </template>

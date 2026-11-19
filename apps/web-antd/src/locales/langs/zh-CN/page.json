@@ -35,7 +35,8 @@
     "lookup": "信息查询",
     "catalogTimetable": "学校作息",
     "qqGroups": "QQ 群管理",
-    "catalogTeacherSites": "教师官网刷新"
+    "catalogTeacherSites": "教师官网刷新",
+    "closures": "账号注销"
   },
   "common": {
     "all": "全部",
@@ -122,7 +123,8 @@
     "disabled": "该功能尚未启用。",
     "cooldown": "操作过于频繁，请稍后再试。",
     "billing_already_accessible": "该用户已经可以访问这份资料，无需购买。",
-    "invalid_rule": "资格条件组合无效，请调整后再保存。"
+    "invalid_rule": "资格条件组合无效，请调整后再保存。",
+    "import_conflict": "目录数据已在预览后发生变化，请重新生成预览后再确认导入。"
   },
   "session": {
     "signIn": "登录",
@@ -176,7 +178,11 @@
       "resources": "待审核资料",
       "failed": "处理失败",
       "verification": "待审核认证",
-      "storage": "阻塞的存储任务"
+      "storage": "阻塞的存储任务",
+      "refunds": "待处理退款",
+      "feedback": "新反馈来信",
+      "teacherVerification": "待审核教师认证",
+      "openPlatform": "待审核开放平台应用"
     },
     "todoUnknown": "未知",
     "todoFailed": "部分待办数量暂时无法加载。",
@@ -203,7 +209,8 @@
     "taskType": "事项类型",
     "contentKind": "内容类型",
     "content": "内容",
-    "contentReview": "内容审核",
+    "submissionNote": "提交说明",
+    "ruleReview": "按学校审核规则送审",
     "timeRange": "时间范围",
     "publishedAt": "发布时间",
     "author": "作者身份",
@@ -303,7 +310,9 @@
       "dismiss": "结束申请，不修改内容",
       "feature": "认定优质内容",
       "unfeature": "撤销优质认定",
-      "reassign": "更正教师归属"
+      "reassign": "更正教师归属",
+      "approve_append": "通过追评",
+      "reject_append": "驳回追评"
     },
     "actionHint": {
       "publish": "内容通过审核并公开。",
@@ -315,7 +324,9 @@
       "dismiss": "结束这项申请或举报，内容保持不变。",
       "feature": "认定为优质内容。奖励由账务模块依据结果处理。",
       "unfeature": "撤销优质认定，请在说明中写明原因。",
-      "reassign": "依据最新可信选课来源更正教师归属，先核对再保存。"
+      "reassign": "依据最新可信选课来源更正教师归属，先核对再保存。",
+      "approve_append": "公开这条追评。",
+      "reject_append": "撤下这条追评，保留主帖。"
     },
     "ratings": {
       "recommendation": {
@@ -366,7 +377,22 @@
     },
     "autoNext": "处理后进入下一条",
     "previous": "上一条",
-    "next": "下一条"
+    "next": "下一条",
+    "target": "评价对象",
+    "term": "开课学期",
+    "proposedEdit": "作者申请修改的正文对比",
+    "showDiff": "差异高亮",
+    "showPlain": "仅看新文本",
+    "latestVersions": "返回最新版本",
+    "presetsLabel": "常用说明模板",
+    "presets": {
+      "approved": "内容符合社区规范，予以通过。",
+      "abuse": "包含人身攻击或不当言辞，请文明客观交流。",
+      "spam": "包含广告推广或无关刷屏信息。",
+      "privacy": "涉及未公开的个人隐私或敏感信息。",
+      "unsubstantiated": "举报依据不足，未发现违反社区规则的内容。"
+    },
+    "appendForReview": "待裁决的追评"
   },
   "catalog": {
     "title": "课程与教师维护",
@@ -427,7 +453,45 @@
       "applied": "已执行"
     },
     "confirmImport": "确认导入",
-    "imported": "导入完成：目录对象 {objects}，选课记录 {enrollments}，保留人工更正 {preserved}。"
+    "imported": "导入完成：目录对象 {objects}，选课记录 {enrollments}，保留人工更正 {preserved}。",
+    "kinds": {
+      "school": "学校",
+      "department": "院系",
+      "category": "课程类别",
+      "nature": "课程性质",
+      "term": "学期",
+      "course": "课程",
+      "teacher": "教师",
+      "term_course": "学期开课",
+      "class": "教学班",
+      "assignment": "任课关联",
+      "schedule": "排课时间",
+      "enrollment": "选课记录"
+    },
+    "importFields": {
+      "name": "名称",
+      "code": "代码",
+      "department_id": "所属院系",
+      "category_id": "课程类别",
+      "nature_id": "课程性质",
+      "course_id": "关联课程",
+      "term_id": "所属学期",
+      "term_course_id": "所属开课",
+      "class_id": "所属教学班",
+      "teacher_id": "任课教师",
+      "credits": "学分",
+      "hours": "学时",
+      "english_name": "英文名称",
+      "former_codes": "曾用代码",
+      "former_names": "曾用名称",
+      "biography": "简介",
+      "location": "地点",
+      "time_text": "时间说明",
+      "aliases": "其他名称",
+      "schedule_time": "结构化节次"
+    },
+    "changeFilter": "变更状态筛选",
+    "changeCount": "{state}（{count}）"
   },
   "resources": {
     "manageTitle": "资料管理",
@@ -554,6 +618,22 @@
       "points": "积分价格",
       "ivory": "Ivory 价格",
       "save": "保存价格"
+    },
+    "previewFile": "内嵌预览文件",
+    "hidePreview": "收起预览",
+    "previewTooLarge": "文件超过 15 MB 内嵌预览上限，请直接下载后核查。",
+    "previewUnsupported": "该文件格式暂不支持内嵌预览，请下载后查看。",
+    "rotateLeft": "向左旋转",
+    "rotateRight": "向右旋转",
+    "zoomIn": "放大",
+    "zoomOut": "缩小",
+    "resetView": "重置视图",
+    "presets": {
+      "approved": "文件完整可读，来源与分类核对无误。",
+      "copyright": "缺少明确的来源或版权许可说明，请补充后重提。",
+      "corrupted": "文件损坏、缺页或清晰度不足，请重新上传。",
+      "duplicate": "目录内已有相同版本的资料，无需重复上传。",
+      "mismatch": "文件实际内容与所填标题、课程或分类不符。"
     }
   },
   "verification": {
@@ -645,7 +725,8 @@
       "student": "在校学生",
       "alumni": "校友",
       "newcomer": "临时新生",
-      "unknown": "未提供"
+      "unknown": "未提供",
+      "teacher": "教师"
     },
     "states": {
       "in_progress": "填写中",
@@ -665,7 +746,8 @@
       "failed": "未完成",
       "running": "处理中",
       "manual": "等待人工处理",
-      "done": "已完成"
+      "done": "已完成",
+      "cancelled": "已撤回"
     },
     "materialTypes": {
       "student_card": "学生证或校园卡",
@@ -727,7 +809,16 @@
       "self_reported": "用户填写",
       "legacy_credential": "历史认证资料",
       "synthetic": "合成测试资料"
-    }
+    },
+    "presets": {
+      "blurry": "证件照片模糊或关键信息被遮挡，请重新拍摄清晰原件。",
+      "unregistered": "未包含本学期有效注册章或学籍状态页，请补充上传。",
+      "mismatch": "填写的姓名、学号或院系与证明材料不一致，请核对后重交。",
+      "wrongType": "上传的材料类型不在本校认可范围内，请更换有效证明。",
+      "teacherProof": "缺少有效的在职或任课证明，请补充工作证或院系名录材料。"
+    },
+    "teacherEnabled": "开放教师认证",
+    "teacherMaterials": "教师材料类型"
   },
   "storage": {
     "title": "存储运营管理",
@@ -793,7 +884,15 @@
       "replica_shortage": "健康副本尚未达到目标。",
       "no_healthy_source": "没有可用的健康来源。",
       "insufficient_eligible_capacity": "合规账号或可用容量不足。"
-    }
+    },
+    "quotaUnit": "容量单位",
+    "quotaUnits": {
+      "B": "字节 (B)",
+      "GB": "十亿字节 (GB)",
+      "TB": "万亿字节 (TB)"
+    },
+    "quotaPreview": "最低允许：{min}（已用 + 预占） · 换算结果：{value}",
+    "quotaMinimumOnly": "最低允许：{min}（已用 + 预占）"
   },
   "contribution": {
     "title": "存储贡献管理",
@@ -864,7 +963,8 @@
       "result_unknown": "远端结果尚未确认，只能核对原专用目录。",
       "conflict": "账号已登记或记录发生变化，请刷新后核对。",
       "attempts_exhausted": "已达到重试上限，需要管理员处理。",
-      "credentials_required": "未保存可恢复的凭据，请重新提交。"
+      "credentials_required": "未保存可恢复的凭据，请重新提交。",
+      "interactive_verification_required": "网盘要求交互验证，请完成验证后重试。"
     }
   },
   "openPlatform": {
@@ -1203,6 +1303,15 @@
       "anyCategory": "全部分类",
       "removeRule": "删除规则",
       "addRule": "添加规则"
+    },
+    "ledgerKind": {
+      "reward": "奖励发放",
+      "reward_revoke": "奖励扣回",
+      "commerce_refund": "消费退款",
+      "membership_grant": "管理员授予会员",
+      "expired": "到期清零",
+      "debt_repayment": "待扣积分抵扣",
+      "closure": "注销结清"
     }
   },
   "access": {
@@ -1336,6 +1445,7 @@
     "title": "学校作息",
     "intro": "设置每个学期第一周的日期、学校时区和每节课的起止时间。学生课表和日历导出按这里把节次换算成具体时间；没有作息的学期无法导出日历。",
     "term": "学期",
+    "noTerms": "当前学校还没有导入学期。",
     "missing": "这个学期还没有设置作息。保存后学生即可导出日历。",
     "weekOne": "第一周周一",
     "weekOneHint": "选择第一教学周的周一。",
@@ -1469,6 +1579,14 @@
       "noncompliant": "不符合",
       "compliant": "符合",
       "pending_profile": "待补充资料"
+    },
+    "ruleKinds": {
+      "keyword": "敏感词",
+      "link": "拦截链接",
+      "frequency": "发言频率",
+      "repeat": "复读消息",
+      "card": "群名片",
+      "warning_limit": "警告上限"
     },
     "states": {
       "pending": "等待执行",
@@ -1695,6 +1813,72 @@
       "site_unit_missing": "官网缺单位",
       "catalog_name_absent": "数据库没有同名",
       "ambiguous_site": "官网有重复主页"
+    },
+    "checkCatalog": "去目录核对"
+  },
+  "closures": {
+    "title": "账号注销管理",
+    "intro": "查看本应用业务账号的注销申请、已完成步骤与阻塞原因。7 天冷静期结束后，管理员可对阻塞申请继续执行清理；共享 SSO 与其他应用不受影响。",
+    "detailTitle": "注销申请详情",
+    "empty": "当前条件下没有注销申请。",
+    "closureId": "申请编号",
+    "profileId": "业务档案编号",
+    "requestedAt": "申请时间",
+    "coolingEndsAt": "冷静期截止",
+    "completedAt": "完成时间",
+    "completedSteps": "清理步骤进度",
+    "stepDone": "已完成",
+    "stepPending": "待执行",
+    "skippedModules": "从未安装并跳过的模块",
+    "noSkipped": "无跳过模块",
+    "blocker": "阻塞原因",
+    "noBlocker": "无阻塞",
+    "blockerHint": "请先在对应模块确认资产或服务恢复正常，再点击继续执行注销。",
+    "pointsPolicy": "积分处理规则",
+    "coolingHint": "当前处于 7 天冷静期内（截止 {time}），申请人登录可撤销，届满后才可执行注销。",
+    "process": "继续执行注销",
+    "completedNotice": "账号注销已完成，公开内容已解除账号关联。",
+    "resumedNotice": "已触发继续处理，请核对最新步骤与阻塞状态。",
+    "states": {
+      "cooling": "冷静期中",
+      "awaiting_assets": "等待资产结清",
+      "processing": "清理执行中",
+      "closed": "已注销",
+      "cancelled": "已撤销"
+    },
+    "steps": {
+      "assets": "资产核对与清零",
+      "sessions": "撤销本地会话",
+      "authorizations": "撤回授权与绑定",
+      "content": "公开内容去关联与收藏清理"
+    },
+    "blockers": {
+      "assets_unavailable": "账务资产服务不可用",
+      "assets_pending": "仍有余额、退款或未决支付待结清",
+      "sessions_unavailable": "会话服务不可用",
+      "authorizations_unavailable": "授权或绑定服务不可用",
+      "content_unavailable": "内容或收藏服务不可用"
+    },
+    "modules": {
+      "billing": "账务",
+      "open-platform": "开放平台",
+      "reviews": "评价",
+      "resources": "学习资料",
+      "favorites": "收藏",
+      "qq-binding": "QQ 绑定"
+    },
+    "pointsPolicies": {
+      "forfeit_all_points_and_pending_deductions": "正式注销时清零全部积分与待扣记录，不兑换现金或 Ivory"
     }
+  },
+  "accountJump": {
+    "copyAccount": "复制账号标识",
+    "copied": "已复制",
+    "toBilling": "查账务",
+    "toQqBinding": "查 QQ 绑定",
+    "toRoles": "查角色授权",
+    "toSessions": "去会话下线",
+    "prefilledHint": "已按上一步选择的账号预填查询条件，核对后点击查询。",
+    "recentIssuerHint": "已自动填入本次会话最近查询的签发方。"
   }
 }

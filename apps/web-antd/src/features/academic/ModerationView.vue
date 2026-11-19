@@ -37,6 +37,8 @@ import AdminPage from '#/shared/ui/AdminPage.vue';
 import LoadState from '#/shared/ui/LoadState.vue';
 import { useErrorText } from '#/shared/ui/messages';
 import MutationAlert from '#/shared/ui/MutationAlert.vue';
+import ReasonPresets from '#/shared/ui/ReasonPresets.vue';
+import { stateColor } from '#/shared/ui/state-color';
 
 import { arrayCursor, pageSize, useAcademicAdmin } from './api';
 import { useCampusId } from './campus';
@@ -63,28 +65,36 @@ const selected = shallowRef<{ entryId?: string; taskId?: string }>();
 const panelBusy = ref(false);
 const panelDirty = ref(false);
 
+const maxSkippedEmptyPages = 5;
+
 const rows = usePaged<AdminEntry | Task>(async (after, signal) => {
   if (!school.value) return { items: [], next: '' };
   if (props.mode === 'queue') {
     const [from, until] = filters.range ?? [];
-    const tasks = await api.tasks(
-      {
-        school_id: school.value,
-        state: filters.state,
-        kind: filters.taskKind,
-        content_kind: filters.kind,
-        from,
-        until,
-        after,
-        limit: pageSize,
-      },
-      signal,
-    );
-    // Resource reviews have their own queue.
-    return {
-      items: tasks.filter((task) => task.content_kind !== 'resource'),
-      next: arrayCursor(tasks, (task) => task.id),
-    };
+    let cursor = after;
+    for (let step = 0; step < maxSkippedEmptyPages; step++) {
+      const tasks = await api.tasks(
+        {
+          school_id: school.value,
+          state: filters.state,
+          kind: filters.taskKind,
+          content_kind: filters.kind,
+          from,
+          until,
+          after: cursor,
+          limit: pageSize,
+        },
+        signal,
+      );
+      const next = arrayCursor(tasks, (task) => task.id);
+      // Resource reviews have their own queue.
+      const visible = tasks.filter((task) => task.content_kind !== 'resource');
+      if (visible.length > 0 || !next || next === cursor) {
+        return { items: visible, next };
+      }
+      cursor = next;
+    }
+    return { items: [], next: cursor };
   }
   const page = await api.entries(
     {
@@ -112,10 +122,15 @@ const locked = computed(
     batch.uncertain.value,
 );
 
-watch(school, () => {
-  selected.value = undefined;
-  void rows.reload();
-});
+watch(
+  school,
+  () => {
+    selected.value = undefined;
+    if (!school.value) return;
+    void rows.reload();
+  },
+  { immediate: true },
+);
 
 function canLeave() {
   return (
@@ -145,12 +160,18 @@ function move(step: number) {
 }
 // A decision may remove its row from the filter, so find the next row before reloading.
 async function decided(message: string) {
+  const current = selected.value?.taskId ?? selected.value?.entryId;
   const following = neighbour(1);
   lastResult.value = message;
   await rows.reload();
-  if (autoNext.value && following) {
+  if (!autoNext.value) return;
+  const fallback = visibleRows().find(
+    (row) => row.id !== current && ('submission' in row ? row.state === 'waiting' : true),
+  );
+  const nextTarget = following ?? (fallback ? targetOf(fallback) : undefined);
+  if (nextTarget) {
     panelDirty.value = false;
-    selected.value = following;
+    selected.value = nextTarget;
   }
 }
 function open(target: { entryId?: string; taskId?: string }) {
@@ -234,6 +255,10 @@ async function batchApplied(result: BatchPreview) {
 function label(key: string) {
   return te(key) ? t(key) : (key.split('.').at(-1) ?? '');
 }
+const presetKeys = ['approved', 'abuse', 'spam', 'privacy', 'unsubstantiated'] as const;
+const reasonPresets = computed(() =>
+  presetKeys.map((key) => ({ key, text: t(`page.moderation.presets.${key}`) })),
+);
 const stateOptions = computed(() =>
   (props.mode === 'queue'
     ? ['waiting', 'decided', 'applied', 'failed']
@@ -245,7 +270,7 @@ const stateOptions = computed(() =>
 );
 const taskColumns = computed(() => [
   { key: 'kind', title: t('page.moderation.taskType') },
-  { key: 'reason', title: t('page.moderation.reason'), ellipsis: true },
+  { key: 'reason', title: t('page.moderation.submissionNote'), ellipsis: true },
   { key: 'state', title: t('page.common.status') },
   { key: 'updated', title: t('page.common.updatedAt') },
   { key: 'action', title: t('page.common.operation') },
@@ -357,14 +382,27 @@ id="moderationview-field-3"
 
       <CampusPending v-if="!school" @ready="school = $event" />
       <Card v-else :bordered="false">
-        <LoadState
-          v-if="rows.items.value.length === 0"
-          :status="rows.status.value"
-          :error="rows.error.value"
-          :empty="true"
-          :empty-text="t('page.moderation.empty')"
-          @retry="rows.reload"
-        />
+        <div v-if="rows.items.value.length === 0">
+          <LoadState
+            :status="rows.status.value"
+            :error="rows.error.value"
+            :empty="true"
+            :empty-text="t('page.moderation.empty')"
+            @retry="rows.reload"
+          />
+          <div
+            v-if="rows.status.value === 'ready' && rows.next.value"
+            class="mt-4 flex justify-center"
+          >
+            <Button
+              :loading="rows.appending.value"
+              :disabled="locked"
+              @click="rows.loadMore"
+            >
+              {{ t('page.common.loadMore') }}
+            </Button>
+          </div>
+        </div>
         <template v-else>
           <Table
             v-if="mode === 'queue'"
@@ -392,12 +430,12 @@ id="moderationview-field-3"
               <template v-else-if="column.key === 'reason'">
 {{
                 record.submission.reason === 'content_review'
-                  ? t('page.moderation.contentReview')
+                  ? t('page.moderation.ruleReview')
                   : record.submission.reason
               }}
 </template>
               <template v-else-if="column.key === 'state'">
-<Tag>
+<Tag :color="stateColor(record.state)">
 {{
                   label(`page.moderation.taskState.${record.state}`)
                 }}
@@ -441,7 +479,7 @@ id="moderationview-field-3"
               }}
 </template>
               <template v-else-if="column.key === 'state'">
-<Tag>{{ label(`page.moderation.state.${record.state}`) }}</Tag><Tag v-if="record.featured" color="green">
+<Tag :color="stateColor(record.state)">{{ label(`page.moderation.state.${record.state}`) }}</Tag><Tag v-if="record.featured" color="green">
 {{
                   t('page.moderation.featured')
                 }}
@@ -449,7 +487,9 @@ id="moderationview-field-3"
 </template>
               <template v-else-if="column.key === 'published'">
 {{
-                format.dateTime(record.published_at)
+                record.published_at
+                  ? format.dateTime(record.published_at)
+                  : t('page.common.notProvided')
               }}
 </template>
               <template v-else-if="column.key === 'action'">
@@ -519,6 +559,12 @@ id="moderationview-field-5"
             />
           </FormItem>
           <FormItem :label="t('page.moderation.reason')" required html-for="moderationview-field-6">
+            <ReasonPresets
+              v-model="batchReason"
+              :presets="reasonPresets"
+              :disabled="batch.busy.value || batch.uncertain.value"
+              :max-length="2000"
+            />
             <Textarea
 id="moderationview-field-6"
               v-model:value="batchReason"

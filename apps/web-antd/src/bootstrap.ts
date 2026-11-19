@@ -1,4 +1,4 @@
-import { createApp, watchEffect } from 'vue';
+import { createApp, watch, watchEffect } from 'vue';
 
 import { registerAccessDirective } from '@vben/access';
 import { registerLoadingDirective } from '@vben/common-ui/es/loading';
@@ -14,10 +14,19 @@ import { $t, setupI18n } from '#/locales';
 import { initComponentAdapter } from './adapter/component';
 import { initSetupVbenForm } from './adapter/form';
 import App from './app.vue';
+import {
+  catalogJumpKey,
+  createCatalogJumpStore,
+} from './features/academic/catalogJump';
 import { availableMenus } from './menus';
 import { router } from './router';
+import { accountJumpKey, createAccountJumpStore } from './shared/account-jump';
 import { hostFetchKey, sessionFetch } from './shared/api/transport';
-import { capabilitiesKey, createCapabilities } from './shared/capabilities';
+import {
+  capabilitiesKey,
+  createCapabilities,
+  routeCapability,
+} from './shared/capabilities';
 import { createSessionStore, sessionKey } from './shared/session';
 
 import './styles/theme.css';
@@ -43,7 +52,22 @@ async function bootstrap(namespace: string, fetcher: typeof fetch = sessionFetch
   app.provide(capabilitiesKey, capabilities);
   void capabilities.load();
   const session = createSessionStore(fetcher);
-  app.provide(hostFetchKey, fetcher).provide(sessionKey, session);
+  const accountJump = createAccountJumpStore();
+  const catalogJump = createCatalogJumpStore();
+  app
+    .provide(hostFetchKey, fetcher)
+    .provide(sessionKey, session)
+    .provide(accountJumpKey, accountJump)
+    .provide(catalogJumpKey, catalogJump);
+  watch(
+    () => session.state.value,
+    (next, previous) => {
+      if (previous === 'member' && next === 'guest') {
+        accountJump.clear();
+        catalogJump.clear();
+      }
+    },
+  );
   void session.reload();
 
   // 注册v-loading指令
@@ -75,12 +99,20 @@ async function bootstrap(namespace: string, fetcher: typeof fetch = sessionFetch
   app.use(MotionPlugin);
 
   // 动态更新标题
+  const pageTitle = useTitle();
   watchEffect(() => {
     if (preferences.app.dynamicTitle) {
-      const routeTitle = router.currentRoute.value.meta?.title;
-      const pageTitle =
+      const current = router.currentRoute.value;
+      const required = routeCapability(current.path);
+      const disabled =
+        !!required &&
+        capabilities.status.value !== 'loading' &&
+        !capabilities.has(required);
+      const routeTitle = disabled
+        ? 'page.framework.unavailable'
+        : current.meta?.title;
+      pageTitle.value =
         (routeTitle ? `${$t(routeTitle)} - ` : '') + preferences.app.name;
-      useTitle(pageTitle);
     }
   });
 

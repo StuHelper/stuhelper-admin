@@ -182,3 +182,75 @@ it('does not restore a session when an in-flight check completes after a 401', a
  expect(store.session.value).toBeNull();
  expect(fetcher).toHaveBeenCalledOnce();
 });
+
+it('cancels a pending backoff wait on invalidate so the next reload checks immediately, and backs off on 502/504', async () => {
+  vi.useFakeTimers();
+  let status = 200;
+  const fetcher = vi.fn(async () =>
+    status === 200 ? Response.json(session) : Response.json({}, { status }),
+  );
+  const store = createSessionStore(fetcher);
+  await store.reload();
+  expect(store.state.value).toBe('member');
+
+  status = 502;
+  await store.reload();
+  expect(store.unavailable.value).toBe(true);
+
+  status = 504;
+  const backoff = store.reload();
+  await vi.advanceTimersByTimeAsync(999);
+  expect(fetcher).toHaveBeenCalledTimes(2);
+  await vi.advanceTimersByTimeAsync(1);
+  await backoff;
+  expect(fetcher).toHaveBeenCalledTimes(3);
+
+  // Start another reload that enters the 2000ms backoff sleep, then invalidate mid-wait.
+  const sleeping = store.reload();
+  await vi.advanceTimersByTimeAsync(200);
+  store.invalidate();
+  await sleeping;
+  expect(store.state.value).toBe('guest');
+
+  status = 200;
+  await store.reload();
+  expect(fetcher).toHaveBeenCalledTimes(4);
+  expect(store.state.value).toBe('member');
+  expect(store.session.value?.profile.nickname).toBe('A');
+});
+
+it('refreshes profile revision when saveProfile encounters a 409 conflict', async () => {
+  let revision = 1;
+  const store = createSessionStore(async (_input, init) => {
+    if (init?.method === 'PUT') {
+      const body = JSON.parse(String(init.body)) as {
+        nickname: string;
+        revision: number;
+      };
+      if (body.revision === 1) {
+        revision = 2;
+        return Response.json(
+          {
+            code: 'revision_conflict',
+            current: { ...session.profile, nickname: 'Other', revision: 2 },
+          },
+          { status: 409 },
+        );
+      }
+      return Response.json({
+        ...session.profile,
+        nickname: body.nickname,
+        revision: body.revision + 1,
+      });
+    }
+    return Response.json({
+      ...session,
+      profile: { ...session.profile, revision },
+    });
+  });
+  await store.reload();
+  await expect(
+    store.saveProfile({ nickname: 'Mine', revision: 1 }, 'key-conflict'),
+  ).rejects.toMatchObject({ code: 'conflict', status: 409 });
+  expect(store.session.value?.profile.revision).toBe(2);
+});

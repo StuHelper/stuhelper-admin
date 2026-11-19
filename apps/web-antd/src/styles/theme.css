@@ -132,4 +132,5 @@ header.flex-center, .vben-layout-header, [class*="layout-header"] {
 .ant-statistic-content { font-size: 22px !important; }
 
 /* Ant Design measures column widths with a hidden row; it must take no height. */
-.ant-table-measure-row > td { height: 0 !important; padding: 0 !important; border: 0 !important; }
+/* The selector repeats the wrapper and tbody so it outranks the padding and border rules above. */
+.ant-table-wrapper .ant-table-tbody > tr.ant-table-measure-row > td { height: 0 !important; padding: 0 !important; border: 0 !important; }

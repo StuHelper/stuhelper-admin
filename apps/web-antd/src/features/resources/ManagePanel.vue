@@ -13,6 +13,7 @@ import { useAsync, useMutation, usePaged } from '#/shared/composables/async';
 import { useFormat } from '#/shared/format';
 import LoadState from '#/shared/ui/LoadState.vue';
 import MutationAlert from '#/shared/ui/MutationAlert.vue';
+import { stateColor } from '#/shared/ui/state-color';
 
 import { localName, useResourcesApi } from './api';
 
@@ -80,6 +81,7 @@ function changed(result: Resource) {
 }
 
 async function grant(existing?: Grant) {
+  if (!existing && [...subject.value.trim()].length < 3) return;
   const id = existing?.id ?? grantId;
   const body = existing ? { revision: existing.revision, subject_key: existing.subject_key, revoked: true } : { revision: 0, subject_key: subject.value.trim(), revoked: false, ...(expires.value ? { expires_at: expires.value } : {}) };
   if (await granting.run(`grant:${id}`, body, (value, key) => api.putGrant(props.id, id, value, key))) granted();
@@ -101,7 +103,7 @@ function granted() {
       <Descriptions :column="{ xs: 1, sm: 2 }" size="small" bordered>
         <DescriptionsItem :label="t('page.resources.title')" :span="2">{{ version.metadata.title }}</DescriptionsItem>
         <DescriptionsItem :label="t('page.resources.category')">{{ localName(version.category.names, locale) }}</DescriptionsItem>
-        <DescriptionsItem :label="t('page.common.status')"><Tag>{{ t(`page.resources.state.${resource.state}`) }}</Tag></DescriptionsItem>
+        <DescriptionsItem :label="t('page.common.status')"><Tag :color="stateColor(resource.state)">{{ t(`page.resources.state.${resource.state}`) }}</Tag></DescriptionsItem>
         <DescriptionsItem :label="t('page.resources.access')">{{ t(`page.resources.accessLevel.${version.metadata.access}`) }}</DescriptionsItem>
         <DescriptionsItem :label="t('page.resources.origin')">{{ t(`page.resources.originKind.${version.metadata.origin.kind}`) }}</DescriptionsItem>
         <DescriptionsItem v-if="version.file" :label="t('page.resources.file')" :span="2">{{ version.file.filename }} · {{ format.bytes(version.file.size) }}</DescriptionsItem>
@@ -152,7 +154,7 @@ function granted() {
         </FormItem>
         <MutationAlert :busy="granting.busy.value" :error="granting.error.value" :uncertain="granting.uncertain.value" @retry="retryGrant" />
         <Space class="mt-3">
-          <Button type="primary" html-type="submit" :loading="granting.busy.value" :disabled="granting.uncertain.value || !subject.trim()">{{ t('page.resources.grant') }}</Button>
+          <Button type="primary" html-type="submit" :loading="granting.busy.value" :disabled="granting.uncertain.value || [...subject.trim()].length < 3">{{ t('page.resources.grant') }}</Button>
         </Space>
       </Form>
     </div>

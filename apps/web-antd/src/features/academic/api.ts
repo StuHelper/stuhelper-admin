@@ -43,6 +43,8 @@ const reviews = reviewsContract.components.schemas;
 const moderation = moderationContract.components.schemas;
 // Object kinds the public catalog no longer returns to ordinary readers.
 const hiddenKinds = new Set(['assignment', 'class', 'schedule', 'term_course']);
+const importMaxItems = 50_000;
+const importMaxBytes = 16 * 1024 * 1024;
 
 const parse = {
   object: schemaOf<CatalogObject>(catalog, 'Object'),
@@ -50,7 +52,9 @@ const parse = {
   summary: schemaOf<ObjectSummary>(catalog, 'Summary'),
   lookup: schemaOf<Catalog['schemas']['Lookup']>(catalog, 'Lookup'),
   mergePreview: schemaOf<MergePreview>(catalog, 'MergePreview'),
-  importPreview: schemaOf<ImportPreview>(catalog, 'ImportPreview'),
+  importPreview: schemaOf<ImportPreview>(catalog, 'ImportPreview', false, {
+    maxItems: importMaxItems,
+  }),
   importResult: schemaOf<ImportResult>(catalog, 'ImportResult'),
   timetable: schemaOf<Timetable>(catalog, 'Timetable'),
   refreshStatus: schemaOf<TeacherRefreshStatus>(catalog, 'TeacherRefreshStatus'),
@@ -85,7 +89,7 @@ export function parseCatalogImport(text: string): CatalogImport {
   } catch {
     throw new ApiError('invalid_input');
   }
-  if (!validates(value, catalog.Import, catalog))
+  if (!validates(value, catalog.Import, catalog, 0, { maxItems: importMaxItems }))
     throw new ApiError('invalid_input');
   // The value matched the provider's Import schema above.
   return value as CatalogImport;
@@ -110,7 +114,7 @@ export class AcademicAdminApi {
     return this.http.json(
       '/api/v1/catalog/imports/confirm',
       parse.importResult,
-      { method: 'POST', body, key, timeout: 60_000 },
+      { method: 'POST', body, key, timeout: 60_000, maxJsonBytes: importMaxBytes },
     );
   }
 
@@ -145,7 +149,7 @@ export class AcademicAdminApi {
     return this.http.json(
       `/api/v1/reviews/admin/entries/${segment(id)}`,
       parse.entry,
-      { signal },
+      { query: { include_appends: true, include_moderation_details: true }, signal },
     );
   }
 
@@ -264,7 +268,7 @@ export class AcademicAdminApi {
     return this.http.json(
       '/api/v1/catalog/imports/preview',
       parse.importPreview,
-      { method: 'POST', body, key, timeout: 60_000 },
+      { method: 'POST', body, key, timeout: 60_000, maxJsonBytes: importMaxBytes },
     );
   }
 

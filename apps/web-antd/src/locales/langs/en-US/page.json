@@ -35,7 +35,8 @@
     "lookup": "Information lookup",
     "catalogTimetable": "Class periods",
     "qqGroups": "QQ groups",
-    "catalogTeacherSites": "Teacher homepages"
+    "catalogTeacherSites": "Teacher homepages",
+    "closures": "Account closures"
   },
   "common": {
     "all": "All",
@@ -122,7 +123,8 @@
     "disabled": "This feature is not enabled.",
     "cooldown": "Too many attempts. Try again shortly.",
     "billing_already_accessible": "This user can already access the resource; no purchase is needed.",
-    "invalid_rule": "This combination of conditions is not valid. Adjust it and save again."
+    "invalid_rule": "This combination of conditions is not valid. Adjust it and save again.",
+    "import_conflict": "Catalog records changed after previewing; generate a new preview before confirming."
   },
   "session": {
     "signIn": "Sign in",
@@ -176,7 +178,11 @@
       "resources": "Resources to review",
       "failed": "Failed tasks",
       "verification": "Verifications to review",
-      "storage": "Blocked storage jobs"
+      "storage": "Blocked storage jobs",
+      "refunds": "Pending refunds",
+      "feedback": "New feedback messages",
+      "teacherVerification": "Pending teacher verifications",
+      "openPlatform": "Pending open-platform apps"
     },
     "todoUnknown": "Unknown",
     "todoFailed": "Some counts could not load.",
@@ -203,7 +209,8 @@
     "taskType": "Item type",
     "contentKind": "Content type",
     "content": "Content",
-    "contentReview": "Content review",
+    "submissionNote": "Submission note",
+    "ruleReview": "Sent for review by school rules",
     "timeRange": "Time range",
     "publishedAt": "Published",
     "author": "Author identity",
@@ -303,7 +310,9 @@
       "dismiss": "Close request without changing content",
       "feature": "Mark as featured",
       "unfeature": "Remove featured status",
-      "reassign": "Correct teacher attribution"
+      "reassign": "Correct teacher attribution",
+      "approve_append": "Approve follow-up",
+      "reject_append": "Reject follow-up"
     },
     "actionHint": {
       "publish": "The content passes review and becomes public.",
@@ -315,7 +324,9 @@
       "dismiss": "Closes this request or report without changing the content.",
       "feature": "Marks the entry as featured; rewards are handled by the billing module.",
       "unfeature": "Removes the featured mark; state the reason in the note.",
-      "reassign": "Corrects the teacher attribution from the latest trusted enrollment; check before saving."
+      "reassign": "Corrects the teacher attribution from the latest trusted enrollment; check before saving.",
+      "approve_append": "Publish this follow-up.",
+      "reject_append": "Remove this follow-up and keep the original review."
     },
     "ratings": {
       "recommendation": {
@@ -366,7 +377,22 @@
     },
     "autoNext": "Open next after deciding",
     "previous": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "target": "Target item",
+    "term": "Academic term",
+    "proposedEdit": "Author proposed text changes",
+    "showDiff": "Highlight changes",
+    "showPlain": "Show proposed text only",
+    "latestVersions": "Back to latest versions",
+    "presetsLabel": "Quick reason templates",
+    "presets": {
+      "approved": "Meets community guidelines and is approved.",
+      "abuse": "Contains personal attacks or inappropriate language.",
+      "spam": "Contains promotional spam or off-topic content.",
+      "privacy": "Discloses private personal or sensitive information.",
+      "unsubstantiated": "Insufficient evidence of a policy violation."
+    },
+    "appendForReview": "Follow-up under review"
   },
   "catalog": {
     "title": "Course and teacher records",
@@ -427,7 +453,45 @@
       "applied": "Applied"
     },
     "confirmImport": "Confirm import",
-    "imported": "Import complete: catalog objects {objects}, enrollments {enrollments}, manual corrections kept {preserved}."
+    "imported": "Import complete: catalog objects {objects}, enrollments {enrollments}, manual corrections kept {preserved}.",
+    "kinds": {
+      "school": "School record",
+      "department": "Academic department",
+      "category": "Course category",
+      "nature": "Course nature",
+      "term": "Academic term",
+      "course": "Course record",
+      "teacher": "Instructor profile",
+      "term_course": "Term offering",
+      "class": "Teaching class",
+      "assignment": "Teaching assignment",
+      "schedule": "Class schedule",
+      "enrollment": "Course enrollment"
+    },
+    "importFields": {
+      "name": "Display name",
+      "code": "Object code",
+      "department_id": "Department link",
+      "category_id": "Category link",
+      "nature_id": "Nature link",
+      "course_id": "Course link",
+      "term_id": "Term link",
+      "term_course_id": "Offering link",
+      "class_id": "Teaching class link",
+      "teacher_id": "Instructor link",
+      "credits": "Credit value",
+      "hours": "Class hours",
+      "english_name": "English title",
+      "former_codes": "Former codes",
+      "former_names": "Former names",
+      "biography": "Biography text",
+      "location": "Classroom location",
+      "time_text": "Schedule text",
+      "aliases": "Alternate names",
+      "schedule_time": "Structured periods"
+    },
+    "changeFilter": "Filter by change status",
+    "changeCount": "{state} ({count})"
   },
   "resources": {
     "manageTitle": "Resource management",
@@ -554,6 +618,22 @@
       "points": "Points price",
       "ivory": "Ivory price",
       "save": "Save price"
+    },
+    "previewFile": "Preview file inline",
+    "hidePreview": "Hide preview",
+    "previewTooLarge": "File exceeds the 15 MB inline preview limit; download it to inspect.",
+    "previewUnsupported": "Inline preview is unavailable for this format; download the file instead.",
+    "rotateLeft": "Rotate left",
+    "rotateRight": "Rotate right",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "resetView": "Reset view",
+    "presets": {
+      "approved": "File is readable and origin metadata is verified.",
+      "copyright": "Missing clear source or license statement; please supplement.",
+      "corrupted": "File is corrupted, incomplete or illegible; please re-upload.",
+      "duplicate": "An identical resource already exists in this directory.",
+      "mismatch": "File content does not match the stated title, course or category."
     }
   },
   "verification": {
@@ -645,7 +725,8 @@
       "student": "Current student",
       "alumni": "Alumnus or alumna",
       "newcomer": "Temporary newcomer",
-      "unknown": "Not provided"
+      "unknown": "Not provided",
+      "teacher": "Instructor"
     },
     "states": {
       "in_progress": "In progress",
@@ -665,7 +746,8 @@
       "failed": "Not completed",
       "running": "Processing",
       "manual": "Needs administrator action",
-      "done": "Completed"
+      "done": "Completed",
+      "cancelled": "Withdrawn"
     },
     "materialTypes": {
       "student_card": "Student or campus card",
@@ -727,7 +809,16 @@
       "self_reported": "User supplied",
       "legacy_credential": "Historical verification",
       "synthetic": "Synthetic test data"
-    }
+    },
+    "presets": {
+      "blurry": "Document photo is blurry or occluded; please upload a clear original photo.",
+      "unregistered": "Missing valid current-term registration page or stamp; please supplement.",
+      "mismatch": "Submitted name, ID or department does not match the document.",
+      "wrongType": "Uploaded document type is not accepted for this school.",
+      "teacherProof": "Missing valid employment or teaching proof; please supplement."
+    },
+    "teacherEnabled": "Enable teacher verification",
+    "teacherMaterials": "Teacher material types"
   },
   "storage": {
     "title": "Storage operations",
@@ -793,7 +884,15 @@
       "replica_shortage": "Healthy replicas are below target.",
       "no_healthy_source": "No healthy source is available.",
       "insufficient_eligible_capacity": "Insufficient eligible accounts or capacity."
-    }
+    },
+    "quotaUnit": "Capacity unit",
+    "quotaUnits": {
+      "B": "Bytes (B)",
+      "GB": "Gigabytes (GB)",
+      "TB": "Terabytes (TB)"
+    },
+    "quotaPreview": "Minimum allowed: {min} (used + reserved) · Converted: {value}",
+    "quotaMinimumOnly": "Minimum allowed: {min} (used + reserved)"
   },
   "contribution": {
     "title": "Storage contribution management",
@@ -864,7 +963,8 @@
       "result_unknown": "The remote result is unknown. Only the original dedicated folder may be reconciled.",
       "conflict": "The account is already registered or the record changed. Refresh and review.",
       "attempts_exhausted": "The retry limit was reached. Administrator action is required.",
-      "credentials_required": "No recoverable credential was saved. Submit credentials again."
+      "credentials_required": "No recoverable credential was saved. Submit credentials again.",
+      "interactive_verification_required": "Complete the storage provider’s interactive verification and try again."
     }
   },
   "openPlatform": {
@@ -1203,6 +1303,15 @@
       "anyCategory": "All categories",
       "removeRule": "Remove rule",
       "addRule": "Add rule"
+    },
+    "ledgerKind": {
+      "reward": "Reward grant",
+      "reward_revoke": "Reward revocation",
+      "commerce_refund": "Order refund",
+      "membership_grant": "Granted membership",
+      "expired": "Points expiry",
+      "debt_repayment": "Debt offset",
+      "closure": "Account closure settlement"
     }
   },
   "access": {
@@ -1336,6 +1445,7 @@
     "title": "Class periods",
     "intro": "Set the Monday of week one, the school time zone and the start and end of each period for a term. Student timetables and calendar exports use these to turn period numbers into times; a term without them cannot be exported.",
     "term": "Term",
+    "noTerms": "No terms have been imported for this school yet.",
     "missing": "No periods are set for this term yet. Students can export calendars once they are saved.",
     "weekOne": "Monday of week one",
     "weekOneHint": "Choose the Monday of the first teaching week.",
@@ -1469,6 +1579,14 @@
       "noncompliant": "Violation",
       "compliant": "Compliant",
       "pending_profile": "Profile needed"
+    },
+    "ruleKinds": {
+      "keyword": "Keyword",
+      "link": "External link",
+      "frequency": "Message rate",
+      "repeat": "Repeated message",
+      "card": "Group card",
+      "warning_limit": "Warning limit"
     },
     "states": {
       "pending": "Waiting",
@@ -1695,6 +1813,72 @@
       "site_unit_missing": "No unit on the homepage",
       "catalog_name_absent": "No such name in the catalog",
       "ambiguous_site": "Duplicate homepages"
+    },
+    "checkCatalog": "Check in catalog"
+  },
+  "closures": {
+    "title": "Account closure administration",
+    "intro": "Inspect application account closure requests, completed cleanup steps and blockers. Once the seven-day cooling period ends, administrators can resume blocked requests; shared SSO and other applications stay untouched.",
+    "detailTitle": "Closure request details",
+    "empty": "No closure requests match the current filter.",
+    "closureId": "Closure ID",
+    "profileId": "Profile ID",
+    "requestedAt": "Requested at",
+    "coolingEndsAt": "Cooling period ends",
+    "completedAt": "Completed at",
+    "completedSteps": "Cleanup progress",
+    "stepDone": "Completed",
+    "stepPending": "Pending",
+    "skippedModules": "Never-installed skipped modules",
+    "noSkipped": "None skipped",
+    "blocker": "Blocking reason",
+    "noBlocker": "Not blocked",
+    "blockerHint": "Confirm that pending assets or downstream services have recovered before resuming closure processing.",
+    "pointsPolicy": "Points handling policy",
+    "coolingHint": "The seven-day cooling period ends at {time}. The applicant can still cancel before the deadline.",
+    "process": "Resume closure processing",
+    "completedNotice": "Account closure is complete and public content has been unlinked.",
+    "resumedNotice": "Closure processing resumed; check the updated steps and blocker status.",
+    "states": {
+      "cooling": "In cooling period",
+      "awaiting_assets": "Awaiting asset clearance",
+      "processing": "Processing cleanup",
+      "closed": "Closed",
+      "cancelled": "Cancelled"
+    },
+    "steps": {
+      "assets": "Asset check and points clearance",
+      "sessions": "Local session revocation",
+      "authorizations": "Authorization and binding removal",
+      "content": "Content unlinking and favorites removal"
+    },
+    "blockers": {
+      "assets_unavailable": "Billing asset service unavailable",
+      "assets_pending": "Remaining balance, refund or unresolved payment",
+      "sessions_unavailable": "Session service unavailable",
+      "authorizations_unavailable": "Authorization or binding service unavailable",
+      "content_unavailable": "Content or favorites service unavailable"
+    },
+    "modules": {
+      "billing": "Billing",
+      "open-platform": "Open platform",
+      "reviews": "Reviews",
+      "resources": "Study resources",
+      "favorites": "Favorites",
+      "qq-binding": "QQ binding"
+    },
+    "pointsPolicies": {
+      "forfeit_all_points_and_pending_deductions": "Clear all points and pending deductions on final closure without cash or Ivory conversion"
     }
+  },
+  "accountJump": {
+    "copyAccount": "Copy account identifier",
+    "copied": "Copied",
+    "toBilling": "Billing account",
+    "toQqBinding": "QQ binding",
+    "toRoles": "Role grants",
+    "toSessions": "Session logout",
+    "prefilledHint": "Prefilled from the selected account; verify and submit to query.",
+    "recentIssuerHint": "Defaulted to the most recently queried issuer in this session."
   }
 }

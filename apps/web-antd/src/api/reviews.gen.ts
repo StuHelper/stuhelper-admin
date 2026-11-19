@@ -14,6 +14,7 @@ export interface paths {
         /** @description Requires current content admission in the served school: valid campus eligibility or verified teacher status. Missing admission returns 403; unavailable required facts return 503. No preview, content, counts or statistics are returned on rejection. */
         get: operations["listReviews"];
         put?: never;
+        /** @description 课程创建按 catalog 解析后的规范课程 ID 计算幂等请求，新旧课程 ID 携带相同键及相同内容只产生一次评价。历史输入与选课归属证据保留，列表及统计按公开课程映射聚合。 */
         post: operations["createReview"];
         delete?: never;
         options?: never;
@@ -163,6 +164,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** @description 课程创建按 catalog 解析后的规范课程 ID 计算幂等请求，新旧课程 ID 携带相同键及相同内容只产生一次评价。历史输入与选课归属证据保留，列表及统计按公开课程映射聚合。 */
         post: operations["publishDraft"];
         delete?: never;
         options?: never;
@@ -213,6 +215,23 @@ export interface paths {
         get: operations["listAdminEntries"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/reviews/admin/entries/batch-approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description 按学校范围批量审核通过待审或事后复核条目（每次 1 至 20 项），逐项返回处置状态并支持幂等重放。 */
+        post: operations["batchApproveAdminEntries"];
         delete?: never;
         options?: never;
         head?: never;
@@ -317,21 +336,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/reviews/summaries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Current-school, current-visible course review summaries. Teachers use their persisted review attribution and equal weights across canonical courses. Mentor comments are excluded. Optional charts use the same visible samples, grouped by term. Missing or unmarked targets return 404; another school returns 403. Recomputed on every request; no cross-request cache. */
+        get: operations["getReviewSummaries"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/reviews/me/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Authenticated owner only. review_count counts current published root course/mentor entries, excluding replies; draft_count matches the owned draft box including unexpired withdrawals. pending_courses requires the existing authorized enrollment source and never treats a missing source as zero. Up to 20 pending course/term pairs are returned, with the complete bounded count. */
+        get: operations["getOwnReviewOverview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         Error: {
             code: string;
+            /** @description 稳定的机器可读细分子错误码，直接映射前端八种语言（含阿拉伯语 RTL）翻译键。 */
+            subcode?: string;
+            /** @description 出错的请求字段或参数名称，用于表单焦点定位与 aria-invalid/aria-describedby 无障碍播报。 */
+            field?: string;
+            /** @description 409 修订号冲突且调用方已通过归属或管理授权校验时返回的服务端当前修订号。 */
+            current_revision?: number;
         };
         Input: {
             /** @enum {string} */
             kind: "course" | "mentor" | "reply";
+            /** @description 体育项目评价继续使用 kind=course，target_id 为 catalog 返回的体育项目 ID。原编号体育课程被隐藏后返回 404。 */
             target_id: string;
+            /** @description 当 kind=reply 保存或发布草稿时绑定的父评价或父回复 ID；课程与导师评价禁止传入。 */
+            parent_id?: string;
             term_id?: string;
+            /** @description 体育项目评价必须选择一个教师，并且教师来自本人同一项目、同一学期的有效教学班；缺少教师返回 invalid_input，越权教师返回 forbidden。 */
             teacher_id?: string;
             title: string;
             body: string;
+            /** @description 固定五维评分数组，下标依次为：0=推荐度（recommendation）、1=内容质量（content_quality）、2=课程难度（difficulty）、3=工作量（workload）、4=考核给分（grading）。课程评价发布时各维取 1..5，草稿或非课程评价可为 0。 */
             ratings: number[];
             signed: boolean;
             /** @description Only field names. Values are obtained from current authoritative, authorized facts. Defaults to no disclosure. */
@@ -355,6 +419,7 @@ export interface components {
             expires_at?: string;
         };
         Band: {
+            /** @description 五级展示等级：0=样本不足（对应 rating_texts[locale][dim][0]），1..5=第一级至第五级（对应 rating_texts[locale][dim][1..5]）。 */
             level: number;
             samples: number;
             courses: number;
@@ -365,13 +430,22 @@ export interface components {
             id: string;
             root_id: string;
             parent_id?: string;
+            /** @description 回复所指向父楼层作者的讨论内脱敏标识（如 author 或匿名讨论句柄），根评价或撤回父帖省略。 */
+            readonly parent_author_handle?: string;
+            /** @description 回复所指向父楼层当前是否对外公开可见（含认证教师回复实名授权核验），不返回不可见父楼层正文；根评价省略。 */
+            readonly parent_visible?: boolean;
             kind: string;
             school_id: string;
+            /** @description 体育项目评价继续使用 kind=course，target_id 为 catalog 返回的体育项目 ID。原编号体育课程被隐藏后返回 404。 */
             target_id: string;
             term_id?: string;
+            /** @description 体育项目评价必须选择一个教师，并且教师来自本人同一项目、同一学期的有效教学班；缺少教师返回 invalid_input，越权教师返回 forbidden。 */
             teacher_id?: string;
+            /** @description 课程评价发布时记录的任课教师归属快照（单选教师时为该教师，未单选教师时为该学期本人选课任课教师并集）；非课程评价或无教师归属时省略。 仅在 include_teacher_ids=true 时返回。 */
+            readonly teacher_ids?: string[];
             title: string;
             body: string;
+            /** @description 固定五维评分数组，下标依次为：0=推荐度（recommendation）、1=内容质量（content_quality）、2=课程难度（difficulty）、3=工作量（workload）、4=考核给分（grading）。课程评价发布时各维取 1..5，草稿或非课程评价可为 0。 */
             ratings: number[];
             author: components["schemas"]["Author"];
             revision: number;
@@ -382,6 +456,14 @@ export interface components {
             my_vote: number;
             mine: boolean;
             featured?: boolean;
+            /** @description 评价列表中的根评价附带当前请求人可见的已发布回复总数，包括嵌套回复。删除、隐藏、撤回、到期及必需实名授权撤销的回复不计入。本人列表仅在仍有当前内容阅读权限时提供；详情和回复行可省略。 仅 include_reply_preview=true 时返回。 */
+            readonly reply_count?: number;
+            /** @description 与 reply_count 一起提供，按创建时间升序、ID 升序的最早 3 条可见回复。无回复时为空数组。预览回复不再嵌套预览，使用与回复列表相同的当前匿名、署名与公开标签规则。 仅 include_reply_preview=true 时返回。 */
+            readonly reply_preview?: components["schemas"]["View"][];
+            /** @description 作者在主帖发布的追加追评（按追加时间升序），保留首次正文、评分与教师归属不变。公开视图仅包含已发布追评，无可见追评时省略。 */
+            readonly appends?: components["schemas"]["Append"][];
+            /** @description 仅在本人专属视图（GetOwn 与 /reviews/me/entries）返回的脱敏结构化审核原因码，与管理员内部备注严格隔离。 */
+            readonly moderation_reason_code?: components["schemas"]["ModerationReasonCode"];
         };
         Page: {
             items: components["schemas"]["View"][];
@@ -389,22 +471,36 @@ export interface components {
         };
         CourseStatistic: {
             course_id: string;
+            /** @description 五维统计等级，下标固定为：0=推荐度、1=内容质量、2=课程难度、3=工作量、4=考核给分。 */
             dimensions: components["schemas"]["Band"][];
         };
         Statistics: {
             courses: components["schemas"]["CourseStatistic"][];
             next: string;
+            /** @description 五维统计等级，下标固定为：0=推荐度、1=内容质量、2=课程难度、3=工作量、4=考核给分。 */
             dimensions: components["schemas"]["Band"][];
             /** Format: date-time */
             from: string | null;
             /** Format: date-time */
             until: string | null;
         };
+        Append: {
+            id: string;
+            body: string;
+            /** @enum {string} */
+            state: "published" | "pending" | "rejected";
+            /** Format: date-time */
+            created_at: string;
+            /** @description 本人或管理端可见。此条追评等待人工裁决。 */
+            review_requested?: boolean;
+        };
         Action: {
             /** @enum {string} */
-            action: "withdraw" | "delete" | "republish" | "vote" | "save_withdrawn";
+            action: "withdraw" | "delete" | "republish" | "vote" | "save_withdrawn" | "append";
             revision?: number;
             input?: components["schemas"]["Input"];
+            /** @description 当 action=append 时提供的追评正文，不修改原帖正文、评分或教师归属。 */
+            body?: string;
             vote?: number;
         };
         DraftWrite: {
@@ -430,16 +526,27 @@ export interface components {
              */
             reference_state: "verified" | "unverified" | "unavailable";
         };
+        /**
+         * @description 面向作者展示的封闭结构化审核原因枚举键，映射前端八语言翻译键，不含管理员内部自由文本备注或举报证据。
+         * @enum {string}
+         */
+        ModerationReasonCode: "pending_review" | "spam" | "personal_attack" | "privacy_leak" | "wrong_teacher" | "academic_integrity" | "low_quality" | "policy_violation" | "other";
         Decision: {
             id: string;
             object_id: string;
             revision: number;
             /** @enum {string} */
-            action: "publish" | "hide" | "restore" | "delete" | "edit" | "identity";
+            action: "publish" | "hide" | "restore" | "delete" | "edit" | "identity" | "feature" | "unfeature" | "reassign" | "approve_append" | "reject_append";
             body?: string;
             subject?: string;
+            author_handle?: string;
+            teacher_id?: string;
+            evidence_revision?: string;
             signed?: boolean;
             reason: string;
+            reason_code?: components["schemas"]["ModerationReasonCode"];
+            /** @description 单条追评 ID，approve_append 和 reject_append 必须提供。 */
+            append_id?: string;
         };
         PublishDraft: {
             revision: number;
@@ -453,8 +560,11 @@ export interface components {
         };
         Composer: {
             allowed: boolean;
-            /** @enum {string} */
-            state: "ready" | "choose_term" | "unauthenticated" | "forbidden" | "enrollment_required" | "unavailable" | "disclosure_required";
+            /**
+             * @description Requests without an authenticated session return HTTP 401.
+             * @enum {string}
+             */
+            state: "ready" | "choose_term" | "forbidden" | "enrollment_required" | "unavailable" | "disclosure_required";
             requirements: components["schemas"]["Requirement"][];
             teacher_ids: string[];
             /** @enum {string} */
@@ -462,10 +572,17 @@ export interface components {
             rule_version: string;
             disclosures?: components["schemas"]["DisclosureOption"][];
             teacher_reply?: boolean;
+            /** @description true 表示评价对象为体育项目，发布时必须提交一个 teacher_id。选项仍为本人的 teacher_ids。普通课程省略或返回 false。 */
+            teacher_required?: boolean;
+            /** @description 请求人在当前目标（及所选学期或父回复）下最近保存的既有草稿或未过期撤回草稿 ID，供移动端断点续写。 */
+            own_draft_id?: string;
+            /** @description 请求人在当前目标（及所选学期或父回复）下已保存的非删除、未过期评价或回复 ID 列表。 */
+            own_entry_ids?: string[];
         };
         AdminEntry: {
             id: string;
             root_id: string;
+            parent_id?: string;
             school_id: string;
             input: components["schemas"]["Input"];
             author_handle: string;
@@ -475,14 +592,38 @@ export interface components {
             /** Format: date-time */
             created_at: string;
             /** Format: date-time */
+            updated_at?: string;
+            /** Format: date-time */
             published_at: string | null;
             featured?: boolean;
+            review_requested?: boolean;
+            moderation_reason_code?: components["schemas"]["ModerationReasonCode"];
             change_reason?: string;
             change_origin?: string;
+            appends?: components["schemas"]["Append"][];
         };
         AdminPage: {
             items: components["schemas"]["AdminEntry"][];
             next: string;
+        };
+        AdminBatchItem: {
+            object_id: string;
+            revision: number;
+        };
+        AdminBatchApproveRequest: {
+            school_id: string;
+            reason: string;
+            items: components["schemas"]["AdminBatchItem"][];
+        };
+        AdminBatchItemResult: {
+            object_id: string;
+            /** @enum {string} */
+            status: "approved" | "conflict" | "not_found" | "forbidden";
+            state?: string;
+            revision?: number;
+        };
+        AdminBatchApproveResponse: {
+            items: components["schemas"]["AdminBatchItemResult"][];
         };
         /** @enum {string} */
         DisclosureKey: "gender" | "department" | "enrollment" | "real_name" | "teacher" | "organization";
@@ -491,6 +632,7 @@ export interface components {
             value: string;
             required: boolean;
         };
+        /** @description 按八种支持语言（zh-CN、en-US、ja-JP、ko-KR、fr-FR、es-ES、ru-RU、ar-EG，其中 ar-EG 为 RTL 文案）组织的五维评分提示文案字典。rating_texts[locale][dim][score] 中 dim 固定为 0=推荐度、1=内容质量、2=课程难度、3=工作量、4=考核给分；score 固定为 0=暂无足够数据/未选择，1..5=第一级至第五级展示与无障碍 aria-valuetext 文案（难度与工作量使用程度描述而非质量好坏）。 */
         RatingTexts: {
             [key: string]: string[][];
         };
@@ -538,6 +680,72 @@ export interface components {
             items: components["schemas"]["Reference"][];
             missing_ids: string[];
         };
+        /**
+         * @description Accepted: four bands from the mean recommendation dimension. Fewer than the configured minimum samples is unrated. No exact mean is exposed.
+         * @enum {string}
+         */
+        Recommendation: "unrated" | "not_recommended" | "average" | "recommended" | "strongly_recommended";
+        RecommendationPolicy: {
+            /** @enum {string} */
+            status: "Accepted";
+            minimum_samples: number;
+            strongly_recommended_at: number;
+            recommended_at: number;
+            average_at: number;
+        };
+        /** @description Five relative bar lengths, normalized to the largest bin and rounded to twentieths. They are not bucket counts or percentages. Insufficient samples produce zero weights. */
+        RatingDistribution: {
+            samples: number;
+            weights: number[];
+        };
+        TermSummary: {
+            term_id: string;
+            review_count: number;
+            /** @description 五维统计等级，下标固定为：0=推荐度、1=内容质量、2=课程难度、3=工作量、4=考核给分。 */
+            dimensions: components["schemas"]["Band"][];
+            recommendation: components["schemas"]["Recommendation"];
+            term_name: string;
+            /** @description catalog 的自然年 × 10 + 季节排序键（春 1、夏 2、秋 3）；0 为未知。terms 按键倒序、term_id 升序。 */
+            term_order_key?: number;
+        };
+        ReviewSummary: {
+            target_id: string;
+            /** @enum {string} */
+            kind: "course" | "teacher";
+            review_count: number;
+            /** @description 五维统计等级，下标固定为：0=推荐度、1=内容质量、2=课程难度、3=工作量、4=考核给分。 */
+            dimensions: components["schemas"]["Band"][];
+            recommendation: components["schemas"]["Recommendation"];
+            /** @description 五维评分分布柱状比例，下标固定为：0=推荐度、1=内容质量、2=课程难度、3=工作量、4=考核给分；weights 下标 0..4 依次对应 1..5 分档。 */
+            distribution?: components["schemas"]["RatingDistribution"][];
+            terms?: components["schemas"]["TermSummary"][];
+        };
+        ReviewSummaries: {
+            items: components["schemas"]["ReviewSummary"][];
+            policy: components["schemas"]["RecommendationPolicy"];
+            /** Format: date-time */
+            generated_at: string;
+        };
+        PendingCourse: {
+            course_id: string;
+            course_name: string;
+            term_id: string;
+            term_name: string;
+            /** @description 本人在该待评价课程及学期下已保存的普通草稿 ID，无匹配草稿时省略。 */
+            draft_id?: string;
+        };
+        PendingCourses: {
+            /** @enum {string} */
+            state: "available" | "unavailable";
+            reason: string;
+            count: number | null;
+            items: components["schemas"]["PendingCourse"][];
+        };
+        OwnOverview: {
+            review_count: number;
+            draft_count: number;
+            pending_courses: components["schemas"]["PendingCourses"];
+        };
     };
     responses: never;
     parameters: never;
@@ -556,10 +764,24 @@ export interface operations {
                 root_id?: string;
                 after?: string;
                 limit?: number;
-                /** @description Stable ID order by default; newest/oldest use creation time with an opaque cursor. */
-                sort?: "id" | "newest" | "oldest";
+                /** @description Stable ID order by default; newest/oldest use creation time; recommended orders featured entries first, then net helpfulness (upvotes minus downvotes), upvotes, creation time and ID descending. */
+                sort?: "id" | "newest" | "oldest" | "upvotes" | "recommended";
                 /** @description Course reviews attributed to this teacher at publication. */
                 teacher_id?: string;
+                /** @description 筛选管理员认定的精选优质内容（true）或普通内容（false）。 */
+                featured?: boolean;
+                /** @description 筛选是否存在当前公开有效认证教师回复的根讨论（true/false），实时核验必需实名与教师授权。 */
+                has_teacher_reply?: boolean;
+                /** @description 按课程评价推荐度维度档位筛选：low 为 1-2 分，mid 为 3 分，high 为 4-5 分。 */
+                rating_group?: "low" | "mid" | "high";
+                /** @description 为当前可读根评价批量返回 reply_count 与最多三条 reply_preview。默认 false，保留旧客户端的封闭 View 结构。 */
+                include_reply_preview?: boolean;
+                /** @description 为 true 时返回课程评价保存的任课教师归属快照；缺省时省略 teacher_ids。 */
+                include_teacher_ids?: boolean;
+                /** @description 传入 true 时返回回复的父楼层可见状态和讨论内作者标识。 */
+                include_parent_summary?: boolean;
+                /** @description 传入 true 时返回当前请求人可见的追评。 */
+                include_appends?: boolean;
             };
             header?: never;
             path?: never;
@@ -714,7 +936,14 @@ export interface operations {
     };
     getReview: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description 为 true 时返回课程评价保存的任课教师归属快照；缺省时省略 teacher_ids。 */
+                include_teacher_ids?: boolean;
+                /** @description 传入 true 时返回回复的父楼层可见状态和讨论内作者标识。 */
+                include_parent_summary?: boolean;
+                /** @description 传入 true 时返回当前请求人可见的追评。 */
+                include_appends?: boolean;
+            };
             header?: never;
             path: {
                 id: string;
@@ -1038,13 +1267,29 @@ export interface operations {
             query?: {
                 after?: string;
                 limit?: number;
-                /** @description Stable ID order by default; newest/oldest use creation time with an opaque cursor. */
-                sort?: "id" | "newest" | "oldest";
+                /** @description Stable ID order by default; newest/oldest use creation time; recommended orders featured entries first, then net helpfulness (upvotes minus downvotes), upvotes, creation time and ID descending. */
+                sort?: "id" | "newest" | "oldest" | "upvotes" | "recommended";
                 /** @description Course reviews attributed to this teacher at publication. */
                 teacher_id?: string;
+                /** @description 筛选管理员认定的精选优质内容（true）或普通内容（false）。 */
+                featured?: boolean;
+                /** @description 筛选是否存在当前公开有效认证教师回复的根讨论（true/false），实时核验必需实名与教师授权。 */
+                has_teacher_reply?: boolean;
+                /** @description 按课程评价推荐度维度档位筛选：low 为 1-2 分，mid 为 3 分，high 为 4-5 分。 */
+                rating_group?: "low" | "mid" | "high";
                 kind?: string;
                 target_id?: string;
                 term_id?: string;
+                /** @description 为当前可读根评价批量返回 reply_count 与最多三条 reply_preview。默认 false，保留旧客户端的封闭 View 结构。 */
+                include_reply_preview?: boolean;
+                /** @description 为 true 时返回课程评价保存的任课教师归属快照；缺省时省略 teacher_ids。 */
+                include_teacher_ids?: boolean;
+                /** @description 传入 true 时返回获准查看的审核详情。省略时保留既有响应字段。 */
+                include_moderation_details?: boolean;
+                /** @description 传入 true 时返回回复的父楼层可见状态和讨论内作者标识。 */
+                include_parent_summary?: boolean;
+                /** @description 传入 true 时返回当前请求人可见的追评。 */
+                include_appends?: boolean;
             };
             header?: never;
             path?: never;
@@ -1595,7 +1840,16 @@ export interface operations {
     };
     getOwnEntry: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description 为 true 时返回课程评价保存的任课教师归属快照；缺省时省略 teacher_ids。 */
+                include_teacher_ids?: boolean;
+                /** @description 传入 true 时返回获准查看的审核详情。省略时保留既有响应字段。 */
+                include_moderation_details?: boolean;
+                /** @description 传入 true 时返回回复的父楼层可见状态和讨论内作者标识。 */
+                include_parent_summary?: boolean;
+                /** @description 传入 true 时返回当前请求人可见的追评。 */
+                include_appends?: boolean;
+            };
             header?: never;
             path: {
                 id: string;
@@ -1676,6 +1930,8 @@ export interface operations {
                 target_id: string;
                 term_id?: string;
                 parent_id?: string;
+                /** @description 传入 true 时返回本人的草稿或评价关联。 */
+                include_own_context?: boolean;
             };
             header?: never;
             path?: never;
@@ -1756,6 +2012,17 @@ export interface operations {
                 state?: string;
                 after?: string;
                 limit?: number;
+                /** @description 默认按稳定 ID 升序分页；newest/oldest 按创建时间及绑定筛选条件的游标分页。 */
+                sort?: "id" | "newest" | "oldest";
+                /** @description 筛选待人工审核或先发后审复核队列条目（true/false）。 */
+                review_requested?: boolean;
+                target_id?: string;
+                root_id?: string;
+                featured?: boolean;
+                /** @description 传入 true 时返回获准查看的审核详情。省略时保留既有响应字段。 */
+                include_moderation_details?: boolean;
+                /** @description 传入 true 时返回当前请求人可见的追评。 */
+                include_appends?: boolean;
             };
             header?: never;
             path?: never;
@@ -1828,9 +2095,85 @@ export interface operations {
             };
         };
     };
-    getAdminEntry: {
+    batchApproveAdminEntries: {
         parameters: {
             query?: never;
+            header: {
+                "Idempotency-Key": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminBatchApproveRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminBatchApproveResponse"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not permitted */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Idempotency conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Required dependency unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getAdminEntry: {
+        parameters: {
+            query?: {
+                /** @description 传入 true 时返回获准查看的审核详情。省略时保留既有响应字段。 */
+                include_moderation_details?: boolean;
+                /** @description 传入 true 时返回当前请求人可见的追评。 */
+                include_appends?: boolean;
+            };
             header?: never;
             path: {
                 id: string;
@@ -2225,6 +2568,10 @@ export interface operations {
             query?: {
                 before?: number;
                 limit?: number;
+                /** @description 传入 true 时返回获准查看的审核详情。省略时保留既有响应字段。 */
+                include_moderation_details?: boolean;
+                /** @description 传入 true 时返回当前请求人可见的追评。 */
+                include_appends?: boolean;
             };
             header?: never;
             path: {
@@ -2318,6 +2665,161 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["References"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not permitted */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Revision or idempotency conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Required dependency unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getReviewSummaries: {
+        parameters: {
+            query: {
+                kind: "course" | "teacher";
+                ids: string;
+                include_charts?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewSummaries"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not permitted */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Revision or idempotency conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Required dependency unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getOwnReviewOverview: {
+        parameters: {
+            query?: {
+                /** @description 传入 true 时返回本人的草稿或评价关联。 */
+                include_own_context?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OwnOverview"];
                 };
             };
             /** @description Invalid input */

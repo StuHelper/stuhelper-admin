@@ -10,6 +10,7 @@ export function pluralIndex(locale: string, count: number, choices: number, type
   return categories.indexOf(new Intl.PluralRules(locale, { type }).select(count));
 }
 function instant(value: Date | number | string) {
+  if (value === null || value === undefined || typeof value === 'boolean') throw new RangeError('Invalid instant');
   if (typeof value === 'string' && !/(?:Z|[+-]\d\d:\d\d)$/.test(value)) throw new RangeError('An instant requires an explicit UTC offset');
   const date = value instanceof Date ? value : new Date(value);
   if (!Number.isFinite(date.getTime())) throw new RangeError('Invalid instant');

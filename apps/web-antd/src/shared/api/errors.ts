@@ -16,6 +16,7 @@ const aliases: Record<string, string> = {
   permission_denied: 'forbidden',
   dependency_unavailable: 'unavailable',
   identity_unavailable: 'identity',
+  revision_conflict: 'conflict',
 };
 
 const statusCodes: Record<number, string> = {
@@ -28,10 +29,21 @@ const statusCodes: Record<number, string> = {
   429: 'rate_limited',
 };
 
+const deniedCodePattern =
+  /^(?:.+_)?(?:unauthenticated|authentication_required|forbidden|permission_denied)$/;
+
+export function isDeniedCode(code: string) {
+  return deniedCodePattern.test(code);
+}
+
 export class ApiError extends Error {
   /** The current account lost access, so pages clear private data. */
   get denied() {
-    return this.code === 'unauthenticated' || this.code === 'forbidden';
+    return (
+      this.status === 401 ||
+      this.status === 403 ||
+      isDeniedCode(this.code)
+    );
   }
 
   constructor(
@@ -40,6 +52,8 @@ export class ApiError extends Error {
     readonly uncertain = false,
     readonly status?: number,
     readonly operationId?: string,
+    /** Parsed JSON error payload for typed contract recovery (never shown as raw text). */
+    readonly detail?: unknown,
   ) {
     super(code);
     this.name = 'ApiError';

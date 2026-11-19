@@ -190,10 +190,25 @@ test('a membership refund may be partial but not above the price paid', async ({
   expect(state.writes[0].body).toEqual({ target, order_id: 'm1', amount: 750, reason: 'Service outage.' });
 });
 
+async function chooseRefundState(page, label) {
+  const segmented = page.locator('.ant-segmented');
+  const select = page.locator('main .ant-select-selector').first();
+  await expect(segmented.or(select)).toBeVisible();
+  if (await segmented.count()) {
+    await segmented.getByText(label, { exact: true }).click();
+    return;
+  }
+  await select.click();
+  await page
+    .locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden)')
+    .getByTitle(label, { exact: true })
+    .click();
+}
+
 test('payee details are read only on request and a missing record is stated', async ({ page }, info) => {
   const all = catalogue(info); const r = all.billing.refunds; const state = await server(page, { payee: { method: 'bank', name: 'Li Hua', account: '6222 0000 1111' } });
   await page.goto(`${base}/billing/refunds?lang=${info.project.metadata.locale}`);
-  await page.locator('.ant-segmented').getByText(all.billing.orderState.awaiting_manual, { exact: true }).click();
+  await chooseRefundState(page, all.billing.orderState.awaiting_manual);
   await page.getByRole('button', { name: r.handle, exact: true }).click();
   const drawer = page.locator('.ant-drawer-content');
   await expect(drawer.getByText(r.payeeHint, { exact: true })).toBeVisible();
@@ -209,7 +224,7 @@ test('payee details are read only on request and a missing record is stated', as
 test('a refund without payee details says so', async ({ page }, info) => {
   const all = catalogue(info); const r = all.billing.refunds; await server(page);
   await page.goto(`${base}/billing/refunds?lang=${info.project.metadata.locale}`);
-  await page.locator('.ant-segmented').getByText(all.billing.orderState.awaiting_manual, { exact: true }).click();
+  await chooseRefundState(page, all.billing.orderState.awaiting_manual);
   await page.getByRole('button', { name: r.handle, exact: true }).click();
   await page.locator('.ant-drawer-content').getByRole('button', { name: r.showPayee, exact: true }).click();
   await expect(page.getByText(r.noPayee, { exact: true })).toBeVisible();
@@ -226,4 +241,24 @@ test('an unpriced resource is priced from the manage panel', async ({ page }, in
   await save.click();
   await expect(page.getByText(p.hint, { exact: true })).toBeVisible();
   expect(state.writes).toEqual([{ method: 'PUT', path: '/admin/resource-prices/resource', key: expect.any(String), body: { resource_id: 'resource', points: 80, ivory_minor: null } }]);
+});
+
+test('payee details and refund queue clear immediately when permission is revoked', async ({ page }, info) => {
+  const all = catalogue(info); const r = all.billing.refunds;
+  await server(page, { payee: { method: 'bank', name: 'Li Hua', account: '6222 0000 1111' } });
+  await page.route('**/api/v1/billing/admin/refunds/r1/manual-result', (route) => route.fulfill({ status: 403, json: { code: 'billing_forbidden' } }));
+  await page.goto(`${base}/billing/refunds?lang=${info.project.metadata.locale}`);
+  await chooseRefundState(page, all.billing.orderState.awaiting_manual);
+  await page.getByRole('button', { name: r.handle, exact: true }).click();
+  const drawer = page.locator('.ant-drawer-content');
+  await drawer.getByRole('button', { name: r.showPayee, exact: true }).click();
+  await expect(drawer.getByText('Li Hua', { exact: true })).toBeVisible();
+  await expect(drawer.getByText('6222 0000 1111', { exact: true })).toBeVisible();
+  await drawer.getByLabel(r.paymentChannel).fill('bank-a-corporate');
+  await drawer.getByLabel(r.paymentReference).fill('bank-999');
+  await drawer.getByRole('button', { name: r.record, exact: true }).click();
+  await expect(page.getByRole('alert')).toContainText(all.errors.billing_forbidden);
+  await expect(page.getByText('Li Hua', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('6222 0000 1111', { exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: r.handle, exact: true })).toHaveCount(0);
 });

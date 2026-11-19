@@ -9,6 +9,7 @@ const academic = {
 const children: RouteRecordRaw[] = [
  { name: 'Feedback', path: 'moderation/feedback', component: () => import('#/features/feedback/FeedbackView.vue'), meta: { title: 'page.feedback.title' } },
  {name:'SessionSettings',path:'system/sessions',component:()=>import('#/features/sessions/SessionSettingsView.vue'),meta:{title:'page.sessionPolicy.title'}},
+  { name: 'AccountClosures', path: 'system/closures', component: () => import('#/features/closures/ClosuresView.vue'), meta: { title: 'page.closures.title' } },
   { name: 'Overview', path: '', component: () => import('#/features/overview/OverviewView.vue'), meta: { title: 'page.menu.overview', affixTab: true } },
   { name: 'ModerationQueue', path: 'moderation/queue', component: academic.moderation, props: { mode: 'queue' }, meta: { title: 'page.menu.moderationQueue' } },
   { name: 'ModerationContent', path: 'moderation/content', component: academic.moderation, props: { mode: 'content' }, meta: { title: 'page.menu.moderationContent' } },

@@ -7,10 +7,12 @@ import { useI18n } from '@vben/locales';
 
 import { Alert, Button, Card, Space, Table, Tag } from 'ant-design-vue';
 
+import { useLeaveGuard } from '#/shared/composables/leave';
 import { useFormat } from '#/shared/format';
 import AdminPage from '#/shared/ui/AdminPage.vue';
 import { useErrorText } from '#/shared/ui/messages';
 
+import { adapterName } from './quota';
 import { useCustody } from './useCustody';
 
 // Custody requests of all users. Administrators may resume an original
@@ -20,6 +22,7 @@ const format = useFormat();
 const errorText = useErrorText();
 const { data, loading, sending, error, recovery, reload, resume, recover } = useCustody(true);
 const locked = computed(() => loading.value || sending.value || !!recovery.value);
+useLeaveGuard(() => (recovery.value ? t('page.common.leaveUncertain') : (sending.value ? t('page.common.leaveUnsaved') : '')));
 const label = (key: string) => (te(key) ? t(key) : t('page.contribution.unknown'));
 const columns = computed(() => [
   { key: 'id', title: t('page.custody.binding') },
@@ -34,7 +37,7 @@ const columns = computed(() => [
 <template>
   <AdminPage :title="t('page.custody.title')" :description="t('page.custody.intro')">
     <template #extra>
-      <Button :disabled="loading || sending" :loading="loading" @click="reload('')">{{ t('page.common.refresh') }}</Button>
+      <Button :disabled="locked" :loading="loading" @click="reload('')">{{ t('page.common.refresh') }}</Button>
     </template>
     <div class="flex flex-col gap-4">
       <div aria-live="polite">
@@ -48,7 +51,7 @@ const columns = computed(() => [
       <Card :bordered="false">
         <Table :columns="columns" :data-source="[...(data?.items ?? [])]" :pagination="false" row-key="id" size="middle" :loading="loading" :scroll="{ x: 720 }" :locale="{ emptyText: t('page.common.empty') }">
           <template #bodyCell="{ column, record }">
-            <template v-if="column.key === 'id'"><span class="me-2">{{ record.adapter }}</span><bdi class="break-all font-mono text-xs">{{ record.id }}</bdi></template>
+            <template v-if="column.key === 'id'"><span class="me-2">{{ adapterName(record.adapter) }}</span><bdi class="break-all font-mono text-xs">{{ record.id }}</bdi></template>
             <template v-else-if="column.key === 'state'"><Tag :color="record.state === 'ready' ? 'green' : record.state === 'pending' ? 'orange' : 'red'">{{ label(`page.custody.states.${record.state}`) }}</Tag></template>
             <template v-else-if="column.key === 'until'">{{ format.dateTime(record.authorization_expires_at) }}</template>
             <template v-else-if="column.key === 'reason'">{{ record.last_error ? label(`page.custody.reasons.${record.last_error}`) : '' }}</template>
