@@ -80,6 +80,7 @@ function changed(result: Resource) {
 }
 
 async function grant(existing?: Grant) {
+  if (!existing && [...subject.value.trim()].length < 3) return;
   const id = existing?.id ?? grantId;
   const body = existing ? { revision: existing.revision, subject_key: existing.subject_key, revoked: true } : { revision: 0, subject_key: subject.value.trim(), revoked: false, ...(expires.value ? { expires_at: expires.value } : {}) };
   if (await granting.run(`grant:${id}`, body, (value, key) => api.putGrant(props.id, id, value, key))) granted();
@@ -152,7 +153,7 @@ function granted() {
         </FormItem>
         <MutationAlert :busy="granting.busy.value" :error="granting.error.value" :uncertain="granting.uncertain.value" @retry="retryGrant" />
         <Space class="mt-3">
-          <Button type="primary" html-type="submit" :loading="granting.busy.value" :disabled="granting.uncertain.value || !subject.trim()">{{ t('page.resources.grant') }}</Button>
+          <Button type="primary" html-type="submit" :loading="granting.busy.value" :disabled="granting.uncertain.value || [...subject.trim()].length < 3">{{ t('page.resources.grant') }}</Button>
         </Space>
       </Form>
     </div>

@@ -309,7 +309,9 @@
       "dismiss": "Cerrar solicitud sin cambiar contenido",
       "feature": "Marcar como destacado",
       "unfeature": "Quitar destacado",
-      "reassign": "Corregir atribución docente"
+      "reassign": "Corregir atribución docente",
+      "approve_append": "Aprobar comentario adicional",
+      "reject_append": "Rechazar comentario adicional"
     },
     "actionHint": {
       "publish": "El contenido se aprueba y se publica.",
@@ -321,7 +323,9 @@
       "dismiss": "Cierra la solicitud o denuncia sin cambiar el contenido.",
       "feature": "Marca la entrada como destacada; las recompensas las gestiona facturación.",
       "unfeature": "Quita el destacado; indica el motivo.",
-      "reassign": "Corrige la atribución según la matrícula más reciente; comprueba antes de guardar."
+      "reassign": "Corrige la atribución según la matrícula más reciente; comprueba antes de guardar.",
+      "approve_append": "Publicar este comentario adicional.",
+      "reject_append": "Retirar este comentario adicional y conservar la reseña original."
     },
     "ratings": {
       "recommendation": {
@@ -386,7 +390,8 @@
       "spam": "Contiene publicidad, spam o contenido ajeno al tema.",
       "privacy": "Expone datos personales privados o información sensible.",
       "unsubstantiated": "No hay pruebas suficientes de infracción de las normas."
-    }
+    },
+    "appendForReview": "Comentario adicional pendiente"
   },
   "catalog": {
     "title": "Gestión de cursos y docentes",
@@ -740,7 +745,8 @@
       "failed": "Sin completar",
       "running": "Procesando",
       "manual": "Requiere un administrador",
-      "done": "Completado"
+      "done": "Completado",
+      "cancelled": "Retirada"
     },
     "materialTypes": {
       "student_card": "Carné de estudiante",
@@ -809,7 +815,9 @@
       "mismatch": "El nombre, número o facultad indicados no coinciden con el documento.",
       "wrongType": "El tipo de documento subido no está admitido para esta universidad.",
       "teacherProof": "Falta comprobante válido de vinculación docente o cátedra; adjúntelo."
-    }
+    },
+    "teacherEnabled": "Activar la verificación del profesorado",
+    "teacherMaterials": "Tipos de documentos del profesorado"
   },
   "storage": {
     "title": "Gestión del almacenamiento",
@@ -954,7 +962,8 @@
       "result_unknown": "Se desconoce el resultado remoto. Solo se puede comprobar la carpeta dedicada original.",
       "conflict": "La cuenta ya está registrada o cambió el registro. Actualiza y revisa.",
       "attempts_exhausted": "Se alcanzó el límite de intentos. Se requiere la intervención de un administrador.",
-      "credentials_required": "No se guardaron credenciales recuperables. Vuelve a enviarlas."
+      "credentials_required": "No se guardaron credenciales recuperables. Vuelve a enviarlas.",
+      "interactive_verification_required": "Completa la verificación interactiva del proveedor de almacenamiento y vuelve a intentarlo."
     }
   },
   "openPlatform": {

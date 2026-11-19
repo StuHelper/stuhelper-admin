@@ -35,7 +35,8 @@
       "tests/e2e/review-workbench.spec.mjs#resource review previews sandboxed PDFs, warns above 15 MiB, applies reason presets and advances across pages"
     ],
     "CM-01": [
-      "tests/e2e/review-workbench.spec.mjs#moderation decision panel shows target course and term, highlights proposed edits and appends older versions"
+      "tests/e2e/review-workbench.spec.mjs#moderation decision panel shows target course and term, highlights proposed edits and appends older versions",
+      "tests/e2e/moderation.spec.mjs#a moderator rejects the selected follow-up without deciding its sibling or the original review"
     ],
     "RES-ADMIN-03": [
       "tests/e2e/resources.spec.mjs#grant creation and revocation retain the subject and respect current permissions"

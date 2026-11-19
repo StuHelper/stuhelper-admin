@@ -40,13 +40,14 @@ function instance(value: unknown): InstanceHealth {
 }
 function job(value: unknown): JobFailure {
   const v = record(value);
-  return { id: text(v.id), object_id: text(v.object_id), kind: text(v.kind), state: text(v.state), generation: integer(v.generation), attempts: integer(v.attempts), error_code: text(v.error_code), next_attempt: date(v.next_attempt) };
+  return { id: text(v.id), object_id: text(v.object_id), ...(v.replica_id === undefined ? {} : { replica_id: text(v.replica_id) }), kind: text(v.kind), state: text(v.state), generation: integer(v.generation), attempts: integer(v.attempts), error_code: text(v.error_code), next_attempt: date(v.next_attempt) };
 }
 export function parseOperations(value: unknown): Operations {
-  const v = record(value); const jobs = record(v.jobs);
+  const v = record(value); const jobs = record(v.jobs); const totals = record(v.object_totals);
   return {
     generated_at: date(v.generated_at), instances: list(v.instances, instance), failures: list(v.failures, job),
     objects: list(v.objects, (value) => { const o = record(value); return { id: text(o.id), state: text(o.state), healthy: integer(o.healthy), desired: integer(o.desired), missing: integer(o.missing), reason: text(o.reason) }; }),
+    object_totals: { pending: integer(totals.pending), ready: integer(totals.ready), degraded: integer(totals.degraded), unavailable: integer(totals.unavailable), deleting: integer(totals.deleting) },
     jobs: { pending: integer(jobs.pending), running: integer(jobs.running), blocked: integer(jobs.blocked) },
     next_cursor: text(v.next_cursor), failures_next_cursor: text(v.failures_next_cursor),
   };

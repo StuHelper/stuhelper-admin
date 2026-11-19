@@ -181,6 +181,7 @@ const blankSchool = (id: string): School => ({
 });
 const config = reactive<School>(blankSchool(''));
 const materialTypes = ref('');
+const teacherMaterials = ref('');
 
 let pendingApply: ((result: unknown) => Promise<void> | void) | undefined;
 
@@ -321,6 +322,7 @@ async function load(append = false) {
     if (current && current.id === schoolId.value) {
       Object.assign(config, current);
       materialTypes.value = current.material_types.join(', ');
+      teacherMaterials.value = (current.teacher_material_types ?? []).join(', ');
     }
   } else {
     const page = currentPaged.value;
@@ -520,6 +522,8 @@ async function saveConfig() {
   const body: School = {
     ...config,
     methods: [...config.methods],
+    teacher_enabled: config.teacher_enabled === true,
+    teacher_material_types: teacherMaterials.value.split(',').map(value => value.trim()).filter(Boolean),
     material_types: materialTypes.value
       .split(',')
       .map((value) => value.trim())
@@ -540,6 +544,7 @@ async function saveConfig() {
     (saved) => {
       Object.assign(config, saved);
       materialTypes.value = saved.material_types.join(', ');
+      teacherMaterials.value = (saved.teacher_material_types ?? []).join(', ');
       notice.value = t('page.common.saved');
     },
   );
@@ -1070,6 +1075,12 @@ function chooseSchool(school: School) {
                     {{ label(`page.verification.methods.${method}`) }}
                   </Checkbox>
                 </CheckboxGroup>
+              </FormItem>
+              <FormItem :label="t('page.verification.teacherEnabled')">
+                <Switch v-model:checked="config.teacher_enabled" :disabled="locked" :aria-label="t('page.verification.teacherEnabled')" />
+              </FormItem>
+              <FormItem :label="t('page.verification.teacherMaterials')" html-for="teacher-material-types">
+                <Input id="teacher-material-types" v-model:value="teacherMaterials" :disabled="locked" />
               </FormItem>
               <FormItem
                 :label="t('page.verification.materialTypesLabel')"

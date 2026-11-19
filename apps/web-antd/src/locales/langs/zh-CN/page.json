@@ -309,7 +309,9 @@
       "dismiss": "结束申请，不修改内容",
       "feature": "认定优质内容",
       "unfeature": "撤销优质认定",
-      "reassign": "更正教师归属"
+      "reassign": "更正教师归属",
+      "approve_append": "通过追评",
+      "reject_append": "驳回追评"
     },
     "actionHint": {
       "publish": "内容通过审核并公开。",
@@ -321,7 +323,9 @@
       "dismiss": "结束这项申请或举报，内容保持不变。",
       "feature": "认定为优质内容。奖励由账务模块依据结果处理。",
       "unfeature": "撤销优质认定，请在说明中写明原因。",
-      "reassign": "依据最新可信选课来源更正教师归属，先核对再保存。"
+      "reassign": "依据最新可信选课来源更正教师归属，先核对再保存。",
+      "approve_append": "公开这条追评。",
+      "reject_append": "撤下这条追评，保留主帖。"
     },
     "ratings": {
       "recommendation": {
@@ -386,7 +390,8 @@
       "spam": "包含广告推广或无关刷屏信息。",
       "privacy": "涉及未公开的个人隐私或敏感信息。",
       "unsubstantiated": "举报依据不足，未发现违反社区规则的内容。"
-    }
+    },
+    "appendForReview": "待裁决的追评"
   },
   "catalog": {
     "title": "课程与教师维护",
@@ -740,7 +745,8 @@
       "failed": "未完成",
       "running": "处理中",
       "manual": "等待人工处理",
-      "done": "已完成"
+      "done": "已完成",
+      "cancelled": "已撤回"
     },
     "materialTypes": {
       "student_card": "学生证或校园卡",
@@ -809,7 +815,9 @@
       "mismatch": "填写的姓名、学号或院系与证明材料不一致，请核对后重交。",
       "wrongType": "上传的材料类型不在本校认可范围内，请更换有效证明。",
       "teacherProof": "缺少有效的在职或任课证明，请补充工作证或院系名录材料。"
-    }
+    },
+    "teacherEnabled": "开放教师认证",
+    "teacherMaterials": "教师材料类型"
   },
   "storage": {
     "title": "存储运营管理",
@@ -954,7 +962,8 @@
       "result_unknown": "远端结果尚未确认，只能核对原专用目录。",
       "conflict": "账号已登记或记录发生变化，请刷新后核对。",
       "attempts_exhausted": "已达到重试上限，需要管理员处理。",
-      "credentials_required": "未保存可恢复的凭据，请重新提交。"
+      "credentials_required": "未保存可恢复的凭据，请重新提交。",
+      "interactive_verification_required": "网盘要求交互验证，请完成验证后重试。"
     }
   },
   "openPlatform": {

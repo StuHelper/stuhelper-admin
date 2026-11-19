@@ -309,7 +309,9 @@
       "dismiss": "内容を変えずに申請を終了",
       "feature": "おすすめに指定",
       "unfeature": "おすすめを解除",
-      "reassign": "担当教員の関連を修正"
+      "reassign": "担当教員の関連を修正",
+      "approve_append": "追記を承認",
+      "reject_append": "追記を却下"
     },
     "actionHint": {
       "publish": "内容を承認して公開します。",
@@ -321,7 +323,9 @@
       "dismiss": "申請または通報を終了し、内容は変更しません。",
       "feature": "優良コンテンツに認定します。報酬は会計モジュールが処理します。",
       "unfeature": "優良認定を取り消します。理由を記入してください。",
-      "reassign": "最新の信頼できる履修記録に基づき帰属を修正します。確認してから保存します。"
+      "reassign": "最新の信頼できる履修記録に基づき帰属を修正します。確認してから保存します。",
+      "approve_append": "この追記を公開します。",
+      "reject_append": "この追記を非公開にし、元の投稿を残します。"
     },
     "ratings": {
       "recommendation": {
@@ -386,7 +390,8 @@
       "spam": "広告・宣伝または無関係な投稿が含まれています。",
       "privacy": "非公開の個人情報や機密情報が含まれています。",
       "unsubstantiated": "規約違反と判断できる根拠が確認されませんでした。"
-    }
+    },
+    "appendForReview": "審査中の追記"
   },
   "catalog": {
     "title": "授業・教員情報の管理",
@@ -740,7 +745,8 @@
       "failed": "未完了",
       "running": "処理中",
       "manual": "管理者の対応待ち",
-      "done": "完了"
+      "done": "完了",
+      "cancelled": "取り下げ済み"
     },
     "materialTypes": {
       "student_card": "学生証・キャンパスカード",
@@ -809,7 +815,9 @@
       "mismatch": "入力された氏名・学籍番号・所属が証明書類と一致しません。",
       "wrongType": "提出された書類種別はこの学校の認定対象外です。",
       "teacherProof": "在職または担当講義を確認できる証明が不足しています。追加提出してください。"
-    }
+    },
+    "teacherEnabled": "教員認証を有効にする",
+    "teacherMaterials": "教員の書類の種類"
   },
   "storage": {
     "title": "ストレージ運用管理",
@@ -954,7 +962,8 @@
       "result_unknown": "遠隔処理の結果は不明です。元の専用フォルダーのみ確認できます。",
       "conflict": "アカウントは登録済み、または記録が変更されています。再読み込みして確認してください。",
       "attempts_exhausted": "再試行回数の上限に達しました。管理者による対応が必要です。",
-      "credentials_required": "復旧可能な認証情報が保存されていません。再度入力してください。"
+      "credentials_required": "復旧可能な認証情報が保存されていません。再度入力してください。",
+      "interactive_verification_required": "ストレージ側で本人確認を完了してから再試行してください。"
     }
   },
   "openPlatform": {

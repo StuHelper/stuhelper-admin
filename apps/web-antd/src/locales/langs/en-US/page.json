@@ -309,7 +309,9 @@
       "dismiss": "Close request without changing content",
       "feature": "Mark as featured",
       "unfeature": "Remove featured status",
-      "reassign": "Correct teacher attribution"
+      "reassign": "Correct teacher attribution",
+      "approve_append": "Approve follow-up",
+      "reject_append": "Reject follow-up"
     },
     "actionHint": {
       "publish": "The content passes review and becomes public.",
@@ -321,7 +323,9 @@
       "dismiss": "Closes this request or report without changing the content.",
       "feature": "Marks the entry as featured; rewards are handled by the billing module.",
       "unfeature": "Removes the featured mark; state the reason in the note.",
-      "reassign": "Corrects the teacher attribution from the latest trusted enrollment; check before saving."
+      "reassign": "Corrects the teacher attribution from the latest trusted enrollment; check before saving.",
+      "approve_append": "Publish this follow-up.",
+      "reject_append": "Remove this follow-up and keep the original review."
     },
     "ratings": {
       "recommendation": {
@@ -386,7 +390,8 @@
       "spam": "Contains promotional spam or off-topic content.",
       "privacy": "Discloses private personal or sensitive information.",
       "unsubstantiated": "Insufficient evidence of a policy violation."
-    }
+    },
+    "appendForReview": "Follow-up under review"
   },
   "catalog": {
     "title": "Course and teacher records",
@@ -740,7 +745,8 @@
       "failed": "Not completed",
       "running": "Processing",
       "manual": "Needs administrator action",
-      "done": "Completed"
+      "done": "Completed",
+      "cancelled": "Withdrawn"
     },
     "materialTypes": {
       "student_card": "Student or campus card",
@@ -809,7 +815,9 @@
       "mismatch": "Submitted name, ID or department does not match the document.",
       "wrongType": "Uploaded document type is not accepted for this school.",
       "teacherProof": "Missing valid employment or teaching proof; please supplement."
-    }
+    },
+    "teacherEnabled": "Enable teacher verification",
+    "teacherMaterials": "Teacher material types"
   },
   "storage": {
     "title": "Storage operations",
@@ -954,7 +962,8 @@
       "result_unknown": "The remote result is unknown. Only the original dedicated folder may be reconciled.",
       "conflict": "The account is already registered or the record changed. Refresh and review.",
       "attempts_exhausted": "The retry limit was reached. Administrator action is required.",
-      "credentials_required": "No recoverable credential was saved. Submit credentials again."
+      "credentials_required": "No recoverable credential was saved. Submit credentials again.",
+      "interactive_verification_required": "Complete the storage provider’s interactive verification and try again."
     }
   },
   "openPlatform": {

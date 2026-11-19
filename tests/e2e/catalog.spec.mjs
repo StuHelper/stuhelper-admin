@@ -66,7 +66,7 @@ test('catalog paged search appends courses, preserves edits across conflict relo
             department: null,
             categories: [],
             natures: [],
-            course_count: 2,
+            courses: [], teachers: [], course_count: 2,
             teacher_count: 1,
             offering_count: 3,
           },

@@ -309,7 +309,9 @@
       "dismiss": "내용 변경 없이 신청 종료",
       "feature": "우수 콘텐츠 지정",
       "unfeature": "우수 지정 취소",
-      "reassign": "담당 교원 연결 수정"
+      "reassign": "담당 교원 연결 수정",
+      "approve_append": "추가 후기 승인",
+      "reject_append": "추가 후기 반려"
     },
     "actionHint": {
       "publish": "콘텐츠를 승인하고 공개합니다.",
@@ -321,7 +323,9 @@
       "dismiss": "신청이나 신고를 종료하며 내용은 바꾸지 않습니다.",
       "feature": "우수 콘텐츠로 지정하며 보상은 회계 모듈이 처리합니다.",
       "unfeature": "우수 지정을 취소하며 사유를 적어 주세요.",
-      "reassign": "최신 수강 기록에 따라 귀속을 수정하며, 확인 후 저장합니다."
+      "reassign": "최신 수강 기록에 따라 귀속을 수정하며, 확인 후 저장합니다.",
+      "approve_append": "이 추가 후기를 공개합니다.",
+      "reject_append": "원문은 유지하고 이 추가 후기만 내립니다."
     },
     "ratings": {
       "recommendation": {
@@ -386,7 +390,8 @@
       "spam": "광고성 홍보 또는 주제와 무관한 도배 내용입니다.",
       "privacy": "비공개 개인정보나 민감한 정보가 노출되어 있습니다.",
       "unsubstantiated": "규정 위반을 확인할 수 있는 근거가 부족합니다."
-    }
+    },
+    "appendForReview": "심사할 추가 후기"
   },
   "catalog": {
     "title": "강의 및 교수 정보 관리",
@@ -740,7 +745,8 @@
       "failed": "완료되지 않음",
       "running": "처리 중",
       "manual": "관리자 조치 필요",
-      "done": "완료됨"
+      "done": "완료됨",
+      "cancelled": "철회됨"
     },
     "materialTypes": {
       "student_card": "학생증 또는 캠퍼스 카드",
@@ -809,7 +815,9 @@
       "mismatch": "입력한 이름, 학번 또는 소속이 증빙 서류와 일치하지 않습니다.",
       "wrongType": "업로드한 서류 유형은 해당 학교의 인정 대상이 아닙니다.",
       "teacherProof": "재직 또는 강의 담당을 확인할 수 있는 증빙이 부족합니다. 보완 제출해 주세요."
-    }
+    },
+    "teacherEnabled": "교원 인증 사용",
+    "teacherMaterials": "교원 증빙 자료 유형"
   },
   "storage": {
     "title": "스토리지 운영 관리",
@@ -954,7 +962,8 @@
       "result_unknown": "원격 처리 결과가 불명확합니다. 원래 전용 폴더만 확인할 수 있습니다.",
       "conflict": "이미 등록된 계정이거나 기록이 변경되었습니다. 새로 고침 후 확인하세요.",
       "attempts_exhausted": "재시도 한도에 도달했습니다. 관리자 조치가 필요합니다.",
-      "credentials_required": "복구 가능한 인증 정보가 저장되지 않았습니다. 다시 제출하세요."
+      "credentials_required": "복구 가능한 인증 정보가 저장되지 않았습니다. 다시 제출하세요.",
+      "interactive_verification_required": "저장소 서비스에서 추가 인증을 완료한 후 다시 시도하세요."
     }
   },
   "openPlatform": {

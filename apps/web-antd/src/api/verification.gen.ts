@@ -4,6 +4,23 @@
  */
 
 export interface paths {
+    "/api/v1/admin/verification/teacher-credentials": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description School-scoped teacher credential search by school_id, teacher_id, owner, or state. Reads are audited. */
+        get: operations["searchAdminTeacherCredentials"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/verification/teacher-credentials/{id}": {
         parameters: {
             query?: never;
@@ -90,8 +107,65 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description Review independently from student applications. Approval validates canonical teacher IDs through catalog; self-review is forbidden. */
+        /** @description Review independently from student applications. Approval validates canonical teacher IDs through catalog; if an active qualification already exists in the school for the applicant, approval merges bindings and refreshes expiry, disclosures and encrypted profile in place. Self-review is forbidden. */
         post: operations["reviewTeacherApplication"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/verification/teacher-credentials/{id}/requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["ID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Request revocation or physical deletion of the caller's teacher qualification. Eligibility is unchanged until approval. */
+        post: operations["requestTeacherRemoval"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/verification/schools/{id}/teacher-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["ID"];
+            };
+            cookie?: never;
+        };
+        /** @description School-scoped pending teacher removal requests; requires teacher review permission. */
+        get: operations["listTeacherRemovalQueue"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/verification/teacher-requests/{id}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["ID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Review a teacher removal request. Approved deletion clears encrypted teacher profile data, materials and active bindings while preserving student qualifications and independent identity. */
+        post: operations["reviewTeacherRemoval"];
         delete?: never;
         options?: never;
         head?: never;
@@ -107,7 +181,7 @@ export interface paths {
             };
             cookie?: never;
         };
-        /** @description Pending teacher applications in the authorized school, ordered by ID. */
+        /** @description Pending teacher applications in the authorized school, ordered by creation time ascending (FIFO). */
         get: operations["listTeacherReviewQueue"];
         put?: never;
         post?: never;
@@ -124,7 +198,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description The caller's teacher qualifications, including revoked and expired history, ordered by ID. */
+        /** @description The caller's teacher qualifications, including revoked and expired history, ordered by verification time descending. */
         get: operations["listOwnTeacherCredentials"];
         put?: never;
         post?: never;
@@ -274,6 +348,25 @@ export interface paths {
         get: operations["getApplication"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/verification/applications/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["ID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Cancel the caller's in_progress, pending_review, or supplement_required application and immediately clear its draft materials, capture tickets, email challenges, and encrypted form. */
+        post: operations["cancelApplication"];
         delete?: never;
         options?: never;
         head?: never;
@@ -750,6 +843,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/verification/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Pending review queue and abnormal job counts within the caller's current administrative authorization. When school_id is set, counts are restricted to that school and platform-scoped pending_suggestions is zero. */
+        get: operations["getAdminOverview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/verification/credentials": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description School-scoped student credential lookup by school_id, student_id (via server-computed identity_hash index), owner, or state. Reads are audited. */
+        get: operations["searchAdminCredentials"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/verification/credentials/{id}": {
         parameters: {
             query?: never;
@@ -868,7 +995,20 @@ export interface components {
         Stage: "bachelor" | "master" | "doctor" | "other" | "unknown";
         /** @enum {string} */
         Kind: "student" | "alumni" | "newcomer" | "unknown";
+        MethodCapabilities: {
+            /** @description When false the applicant stage is ignored and source facts determine the recorded stage. Defaults to true when absent. */
+            study_stage_required: boolean;
+            allowed_kinds?: components["schemas"]["Kind"][];
+        };
+        /** @description User-visible explanation keys by method. Real-name checks use verification.methodDescriptions.real_name_identity_check for both school and authorized third-party providers. */
+        MethodDescriptionKeys: {
+            [key: string]: string;
+        };
         School: {
+            method_description_keys?: components["schemas"]["MethodDescriptionKeys"];
+            readonly method_capabilities?: {
+                [key: string]: components["schemas"]["MethodCapabilities"];
+            };
             /** @description Data schema advertised by the school adapter; independent from the selected authentication method. */
             readonly profile_schema?: string;
             id: string;
@@ -881,14 +1021,19 @@ export interface components {
             /** @default 90 */
             newcomer_days: number;
             email_domain: string;
+            /** @description Allowed material types for student manual verification; may be empty when manual_material_review is not enabled. */
             material_types: string[];
+            /** @description Independent switch for manual teacher verification. Disabled by default. */
+            teacher_enabled?: boolean;
+            /** @description Allowed materials for teachers. Enabling teacher verification requires at least one teacher material type. */
+            teacher_material_types?: string[];
             /** Format: int64 */
             revision: number;
         };
         CreateApplication: {
             school_id: string;
             method: components["schemas"]["Method"];
-            stage: components["schemas"]["Stage"];
+            stage?: components["schemas"]["Stage"];
             kind: components["schemas"]["Kind"];
             notice_version: string;
             /** @enum {boolean} */
@@ -902,7 +1047,7 @@ export interface components {
             /** @enum {string} */
             kind: "student" | "alumni" | "newcomer" | "unknown" | "teacher";
             /** @enum {string} */
-            state: "in_progress" | "pending_review" | "supplement_required" | "approved" | "rejected" | "expired" | "deleted";
+            state: "in_progress" | "pending_review" | "supplement_required" | "approved" | "rejected" | "expired" | "cancelled" | "deleted";
             /** Format: int64 */
             revision: number;
             /** Format: date-time */
@@ -914,6 +1059,10 @@ export interface components {
             credential_id: string;
             result_code: string;
             review_note?: string;
+            /** @description Non-sensitive material category selected in manual submission. */
+            material_type?: string;
+            /** @description Number of captured images submitted with the manual form. */
+            material_count?: number;
             school_challenge?: components["schemas"]["SchoolChallenge"];
             /** Format: date-time */
             qualification_expires_at?: string | null;
@@ -950,12 +1099,24 @@ export interface components {
         EmailInput: {
             student_id: string;
             name: string;
+            /**
+             * @description Preferred message locale; defaults to zh-CN when omitted.
+             * @enum {string}
+             */
+            locale?: "zh-CN" | "en-US" | "fr-FR" | "ru-RU" | "ja-JP" | "ko-KR" | "es-ES" | "ar-EG";
         };
         EmailChallenge: {
             id: string;
             application_id: string;
             /** Format: date-time */
             expires_at: string;
+            /**
+             * Format: date-time
+             * @description Earliest UTC timestamp when resending is permitted.
+             */
+            resend_available_at?: string;
+            /** @description Remaining OTP confirmation attempts for outbound challenges. */
+            remaining_attempts?: number;
             /** @enum {string} */
             state: "queued" | "waiting" | "delivered" | "used" | "failed";
             masked_email: string;
@@ -1038,6 +1199,8 @@ export interface components {
             revision: number;
             /** Format: date-time */
             next_evaluation_at: string | null;
+            /** @description School ID of the earliest expiring active qualification, guiding temporary newcomers to formal verification. */
+            next_evaluation_school_id?: string;
         };
         RemovalInput: {
             /** @enum {string} */
@@ -1045,6 +1208,11 @@ export interface components {
             reason: string;
         };
         RemovalRequest: {
+            /**
+             * @description Qualification category; defaults to student when omitted.
+             * @enum {string}
+             */
+            target_type?: "student" | "teacher";
             id: string;
             credential_id: string;
             school_id: string;
@@ -1067,7 +1235,10 @@ export interface components {
         };
         SuggestionInput: {
             name: string;
-            /** Format: uri */
+            /**
+             * Format: uri
+             * @description HTTPS school website with a host and no user information.
+             */
             website: string;
         };
         Suggestion: {
@@ -1088,6 +1259,13 @@ export interface components {
             /** Format: date-time */
             expires_at: string;
         };
+        AdminOverview: {
+            pending_student_applications: number;
+            pending_teacher_applications: number;
+            pending_removal_requests: number;
+            pending_suggestions: number;
+            abnormal_jobs: number;
+        };
         Job: {
             id: string;
             school_id: string;
@@ -1101,6 +1279,8 @@ export interface components {
         Problem: {
             code: string;
             operation_id?: string;
+            retry_after_seconds?: number;
+            remaining_attempts?: number;
         };
         SchoolChallenge: {
             id: string;
@@ -1161,9 +1341,11 @@ export interface components {
                 "application/json": components["schemas"]["Problem"];
             };
         };
-        /** @description Stable error. 400 invalid_input, 401 authentication_required, 403 permission_denied, 404 not_found, 409 conflict/identity_owned, 410 expired, 422 information_mismatch, 429 rate_limited, 503 dependency_unavailable/method_unavailable. No provider error or identity data is included. */
+        /** @description Stable error. 400 invalid_input, 401 authentication_required, 403 permission_denied, 404 not_found, 409 conflict/identity_owned, 410 expired, 422 information_mismatch/real_name_mismatch/real_name_no_record/email_identity_mismatch/email_identity_no_record/school_credentials_rejected/school_account_locked/school_account_disabled/school_account_unavailable/method_identity_not_allowed, 429 rate_limited, 503 dependency_unavailable/method_unavailable. No provider error or identity data is included. */
         Problem: {
             headers: {
+                /** @description Remaining cooldown seconds when rate-limited. */
+                "Retry-After"?: string;
                 [name: string]: unknown;
             };
             content: {
@@ -1173,8 +1355,10 @@ export interface components {
     };
     parameters: {
         ID: string;
+        /** @description Exclusive pagination cursor; accepts either an item ID or a composite RFC3339Nano|ID token. */
         After: string;
         Limit: number;
+        /** @description Retry a rolled-back local write after dependency_unavailable with the same key and body. Operations with external attempts retain their outcome. */
         IdempotencyKey: string;
     };
     requestBodies: never;
@@ -1183,6 +1367,35 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    searchAdminTeacherCredentials: {
+        parameters: {
+            query: {
+                school_id: string;
+                teacher_id?: string;
+                owner?: string;
+                state?: "active" | "revoked" | "expired";
+                /** @description Exclusive pagination cursor; accepts either an item ID or a composite RFC3339Nano|ID token. */
+                after?: components["parameters"]["After"];
+                limit?: components["parameters"]["Limit"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Matching teacher qualifications in the authorized school. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeacherCredential"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
     getTeacherCredential: {
         parameters: {
             query?: never;
@@ -1210,6 +1423,7 @@ export interface operations {
         parameters: {
             query?: never;
             header: {
+                /** @description Retry a rolled-back local write after dependency_unavailable with the same key and body. Operations with external attempts retain their outcome. */
                 "Idempotency-Key": components["parameters"]["IdempotencyKey"];
             };
             path?: never;
@@ -1261,6 +1475,7 @@ export interface operations {
         parameters: {
             query?: never;
             header: {
+                /** @description Retry a rolled-back local write after dependency_unavailable with the same key and body. Operations with external attempts retain their outcome. */
                 "Idempotency-Key": components["parameters"]["IdempotencyKey"];
             };
             path: {
@@ -1314,6 +1529,7 @@ export interface operations {
         parameters: {
             query?: never;
             header: {
+                /** @description Retry a rolled-back local write after dependency_unavailable with the same key and body. Operations with external attempts retain their outcome. */
                 "Idempotency-Key": components["parameters"]["IdempotencyKey"];
             };
             path: {
@@ -1340,9 +1556,99 @@ export interface operations {
             default: components["responses"]["Problem"];
         };
     };
+    requestTeacherRemoval: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Retry a rolled-back local write after dependency_unavailable with the same key and body. Operations with external attempts retain their outcome. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                id: components["parameters"]["ID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RemovalInput"];
+            };
+        };
+        responses: {
+            /** @description Pending teacher removal request. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RemovalRequest"];
+                };
+            };
+            202: components["responses"]["Processing"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    listTeacherRemovalQueue: {
+        parameters: {
+            query?: {
+                /** @description Exclusive pagination cursor; accepts either an item ID or a composite RFC3339Nano|ID token. */
+                after?: components["parameters"]["After"];
+                limit?: components["parameters"]["Limit"];
+            };
+            header?: never;
+            path: {
+                id: components["parameters"]["ID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Pending teacher removal requests. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RemovalRequest"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    reviewTeacherRemoval: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Retry a rolled-back local write after dependency_unavailable with the same key and body. Operations with external attempts retain their outcome. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                id: components["parameters"]["ID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecisionInput"];
+            };
+        };
+        responses: {
+            /** @description Reviewed teacher removal request. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RemovalRequest"];
+                };
+            };
+            202: components["responses"]["Processing"];
+            default: components["responses"]["Problem"];
+        };
+    };
     listTeacherReviewQueue: {
         parameters: {
             query?: {
+                /** @description Exclusive pagination cursor; accepts either an item ID or a composite RFC3339Nano|ID token. */
                 after?: components["parameters"]["After"];
                 limit?: components["parameters"]["Limit"];
             };
@@ -1369,6 +1675,7 @@ export interface operations {
     listOwnTeacherCredentials: {
         parameters: {
             query?: {
+                /** @description Exclusive pagination cursor; accepts either an item ID or a composite RFC3339Nano|ID token. */
                 after?: components["parameters"]["After"];
                 limit?: components["parameters"]["Limit"];
             };
@@ -1394,6 +1701,7 @@ export interface operations {
         parameters: {
             query?: never;
             header: {
+                /** @description Retry a rolled-back local write after dependency_unavailable with the same key and body. Operations with external attempts retain their outcome. */
                 "Idempotency-Key": components["parameters"]["IdempotencyKey"];
             };
             path: {
@@ -1424,6 +1732,7 @@ export interface operations {
         parameters: {
             query?: never;
             header: {
+                /** @description Retry a rolled-back local write after dependency_unavailable with the same key and body. Operations with external attempts retain their outcome. */
                 "Idempotency-Key": components["parameters"]["IdempotencyKey"];
             };
             path: {
@@ -1454,6 +1763,7 @@ export interface operations {
         parameters: {
             query?: never;
             header: {
+                /** @description Retry a rolled-back local write after dependency_unavailable with the same key and body. Operations with external attempts retain their outcome. */
                 "Idempotency-Key": components["parameters"]["IdempotencyKey"];
             };
             path: {
@@ -1527,6 +1837,7 @@ export interface operations {
             query?: {
                 /** @description Trimmed literal school query. Numeric id/code matches exactly; five digits also match the suffix of a ten-digit id/code. */
                 q?: string;
+                /** @description Exclusive pagination cursor; accepts either an item ID or a composite RFC3339Nano|ID token. */
                 after?: components["parameters"]["After"];
                 limit?: components["parameters"]["Limit"];
             };
@@ -1551,6 +1862,7 @@ export interface operations {
     listApplications: {
         parameters: {
             query?: {
+                /** @description Exclusive pagination cursor; accepts either an item ID or a composite RFC3339Nano|ID token. */
                 after?: components["parameters"]["After"];
                 limit?: components["parameters"]["Limit"];
             };
@@ -1560,7 +1872,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The caller's applications, ordered by ID. */
+            /** @description The caller's applications, ordered by creation time descending. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1576,6 +1888,7 @@ export interface operations {
         parameters: {
             query?: never;
             header: {
+                /** @description Retry a rolled-back local write after dependency_unavailable with the same key and body. Operations with external attempts retain their outcome. */
                 "Idempotency-Key": components["parameters"]["IdempotencyKey"];
             };
             path?: never;
@@ -1607,10 +1920,30 @@ export interface operations {
             default: components["responses"]["Problem"];
         };
     };
+    cancelApplication: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Retry a rolled-back local write after dependency_unavailable with the same key and body. Operations with external attempts retain their outcome. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                id: components["parameters"]["ID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["Application"];
+            202: components["responses"]["Processing"];
+            default: components["responses"]["Problem"];
+        };
+    };
     verifyApplication: {
         parameters: {
             query?: never;
             header: {
+                /** @description Retry a rolled-back local write after dependency_unavailable with the same key and body. Operations with external attempts retain their outcome. */
                 "Idempotency-Key": components["parameters"]["IdempotencyKey"];
             };
             path: {
@@ -1656,6 +1989,7 @@ export interface operations {
         parameters: {
             query?: never;
             header: {
+                /** @description Retry a rolled-back local write after dependency_unavailable with the same key and body. Operations with external attempts retain their outcome. */
                 "Idempotency-Key": components["parameters"]["IdempotencyKey"];
             };
             path: {
@@ -1686,6 +2020,7 @@ export interface operations {
         parameters: {
             query?: never;
             header: {
+                /** @description Retry a rolled-back local write after dependency_unavailable with the same key and body. Operations with external attempts retain their outcome. */
                 "Idempotency-Key": components["parameters"]["IdempotencyKey"];
             };
             path: {
@@ -1710,6 +2045,7 @@ export interface operations {
         parameters: {
             query?: never;
             header: {
+                /** @description Retry a rolled-back local write after dependency_unavailable with the same key and body. Operations with external attempts retain their outcome. */
                 "Idempotency-Key": components["parameters"]["IdempotencyKey"];
             };
             path: {
@@ -1746,7 +2082,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Captured material reference. Maximum 1 MiB and 16 million pixels per image, five images per application. */
+            /** @description Captured material reference. A valid ticket admits a bounded upload of at most 1 MiB and 16 million pixels. A saturated instance returns 429 rate_limited. Each application can retain five images. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1810,6 +2146,7 @@ export interface operations {
         parameters: {
             query?: never;
             header: {
+                /** @description Retry a rolled-back local write after dependency_unavailable with the same key and body. Operations with external attempts retain their outcome. */
                 "Idempotency-Key": components["parameters"]["IdempotencyKey"];
             };
             path: {
@@ -1859,6 +2196,7 @@ export interface operations {
         parameters: {
             query?: never;
             header: {
+                /** @description Retry a rolled-back local write after dependency_unavailable with the same key and body. Operations with external attempts retain their outcome. */
                 "Idempotency-Key": components["parameters"]["IdempotencyKey"];
             };
             path: {
@@ -1880,6 +2218,7 @@ export interface operations {
     listCredentials: {
         parameters: {
             query?: {
+                /** @description Exclusive pagination cursor; accepts either an item ID or a composite RFC3339Nano|ID token. */
                 after?: components["parameters"]["After"];
                 limit?: components["parameters"]["Limit"];
             };
@@ -1928,6 +2267,7 @@ export interface operations {
         parameters: {
             query?: never;
             header: {
+                /** @description Retry a rolled-back local write after dependency_unavailable with the same key and body. Operations with external attempts retain their outcome. */
                 "Idempotency-Key": components["parameters"]["IdempotencyKey"];
             };
             path?: never;
@@ -1956,6 +2296,7 @@ export interface operations {
         parameters: {
             query?: never;
             header: {
+                /** @description Retry a rolled-back local write after dependency_unavailable with the same key and body. Operations with external attempts retain their outcome. */
                 "Idempotency-Key": components["parameters"]["IdempotencyKey"];
             };
             path: {
@@ -1985,6 +2326,7 @@ export interface operations {
     listRemovalRequests: {
         parameters: {
             query?: {
+                /** @description Exclusive pagination cursor; accepts either an item ID or a composite RFC3339Nano|ID token. */
                 after?: components["parameters"]["After"];
                 limit?: components["parameters"]["Limit"];
             };
@@ -2010,6 +2352,7 @@ export interface operations {
         parameters: {
             query?: never;
             header: {
+                /** @description Retry a rolled-back local write after dependency_unavailable with the same key and body. Operations with external attempts retain their outcome. */
                 "Idempotency-Key": components["parameters"]["IdempotencyKey"];
             };
             path?: never;
@@ -2084,6 +2427,7 @@ export interface operations {
         parameters: {
             query?: never;
             header: {
+                /** @description Retry a rolled-back local write after dependency_unavailable with the same key and body. Operations with external attempts retain their outcome. */
                 "Idempotency-Key": components["parameters"]["IdempotencyKey"];
             };
             path: {
@@ -2113,6 +2457,7 @@ export interface operations {
     listReviewQueue: {
         parameters: {
             query?: {
+                /** @description Exclusive pagination cursor; accepts either an item ID or a composite RFC3339Nano|ID token. */
                 after?: components["parameters"]["After"];
                 limit?: components["parameters"]["Limit"];
             };
@@ -2124,7 +2469,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description School-scoped review queue, ordered by ID. */
+            /** @description School-scoped review queue, ordered by creation time ascending (FIFO). */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2163,6 +2508,7 @@ export interface operations {
         parameters: {
             query?: never;
             header: {
+                /** @description Retry a rolled-back local write after dependency_unavailable with the same key and body. Operations with external attempts retain their outcome. */
                 "Idempotency-Key": components["parameters"]["IdempotencyKey"];
             };
             path: {
@@ -2184,6 +2530,7 @@ export interface operations {
     listRemovalQueue: {
         parameters: {
             query?: {
+                /** @description Exclusive pagination cursor; accepts either an item ID or a composite RFC3339Nano|ID token. */
                 after?: components["parameters"]["After"];
                 limit?: components["parameters"]["Limit"];
             };
@@ -2211,6 +2558,7 @@ export interface operations {
         parameters: {
             query?: never;
             header: {
+                /** @description Retry a rolled-back local write after dependency_unavailable with the same key and body. Operations with external attempts retain their outcome. */
                 "Idempotency-Key": components["parameters"]["IdempotencyKey"];
             };
             path: {
@@ -2241,6 +2589,7 @@ export interface operations {
         parameters: {
             query?: never;
             header: {
+                /** @description Retry a rolled-back local write after dependency_unavailable with the same key and body. Operations with external attempts retain their outcome. */
                 "Idempotency-Key": components["parameters"]["IdempotencyKey"];
             };
             path: {
@@ -2271,6 +2620,7 @@ export interface operations {
         parameters: {
             query?: never;
             header: {
+                /** @description Retry a rolled-back local write after dependency_unavailable with the same key and body. Operations with external attempts retain their outcome. */
                 "Idempotency-Key": components["parameters"]["IdempotencyKey"];
             };
             path: {
@@ -2300,6 +2650,7 @@ export interface operations {
     listSuggestions: {
         parameters: {
             query?: {
+                /** @description Exclusive pagination cursor; accepts either an item ID or a composite RFC3339Nano|ID token. */
                 after?: components["parameters"]["After"];
                 limit?: components["parameters"]["Limit"];
             };
@@ -2325,6 +2676,7 @@ export interface operations {
         parameters: {
             query?: never;
             header: {
+                /** @description Retry a rolled-back local write after dependency_unavailable with the same key and body. Operations with external attempts retain their outcome. */
                 "Idempotency-Key": components["parameters"]["IdempotencyKey"];
             };
             path: {
@@ -2375,6 +2727,58 @@ export interface operations {
             default: components["responses"]["Problem"];
         };
     };
+    getAdminOverview: {
+        parameters: {
+            query?: {
+                school_id?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Authorized pending counts. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminOverview"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    searchAdminCredentials: {
+        parameters: {
+            query: {
+                school_id: string;
+                student_id?: string;
+                owner?: string;
+                state?: "active" | "revoked" | "expired";
+                /** @description Exclusive pagination cursor; accepts either an item ID or a composite RFC3339Nano|ID token. */
+                after?: components["parameters"]["After"];
+                limit?: components["parameters"]["Limit"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Matching student qualifications in the authorized school. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Credential"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
     getAdminCredential: {
         parameters: {
             query?: never;
@@ -2401,6 +2805,7 @@ export interface operations {
     listJobs: {
         parameters: {
             query?: {
+                /** @description Exclusive pagination cursor; accepts either an item ID or a composite RFC3339Nano|ID token. */
                 after?: components["parameters"]["After"];
                 limit?: components["parameters"]["Limit"];
                 school_id?: string;
@@ -2427,6 +2832,7 @@ export interface operations {
         parameters: {
             query?: never;
             header: {
+                /** @description Retry a rolled-back local write after dependency_unavailable with the same key and body. Operations with external attempts retain their outcome. */
                 "Idempotency-Key": components["parameters"]["IdempotencyKey"];
             };
             path: {
@@ -2436,7 +2842,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Retry a failed manual-queue job with its original external idempotency identity. */
+            /** @description Retry a manual-queue job using its original delivery key. An expired email challenge is never sent. */
             200: {
                 headers: {
                     [name: string]: unknown;

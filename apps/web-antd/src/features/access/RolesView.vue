@@ -67,7 +67,7 @@ function startRole(template?: Role) {
   Object.assign(roleForm, { id: template ? `${template.id}.custom` : '', name: template?.name ?? '', capabilities: [...(template?.capabilities ?? [])], reason: '' });
 }
 const idPattern = /^[a-z][\d._a-z-]*$/;
-const roleReady = computed(() => idPattern.test(roleForm.id) && !!roleForm.name.trim() && roleForm.capabilities.length > 0 && roleForm.capabilities.length <= 64 && roleForm.capabilities.every((item) => idPattern.test(item)) && !!roleForm.reason.trim());
+const roleReady = computed(() => idPattern.test(roleForm.id) && !!roleForm.name.trim() && roleForm.capabilities.length > 0 && roleForm.capabilities.length <= 64 && roleForm.capabilities.every((item) => item.length <= 128 && /^[a-z][a-z0-9-]*(\.[a-z][a-z0-9_-]*)+$/.test(item)) && !!roleForm.reason.trim());
 async function createRole() {
   if (!roleReady.value) return;
   const body = { role: { id: roleForm.id, name: roleForm.name.trim(), capabilities: [...new Set(roleForm.capabilities)] }, reason: roleForm.reason.trim() };
