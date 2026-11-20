@@ -1,23 +1,9 @@
-import type { CatalogObject } from './api';
-
 import type { SessionStore } from '#/shared/session';
 
 import { effectScope, onMounted, ref, type Ref, watch } from 'vue';
 
 import { ApiError, errorCode } from '#/shared/api/errors';
 import { useSession } from '#/shared/session';
-
-import { useAcademicAdmin } from './api';
-
-/** The backend session supplies the single community school configuration. */
-export function chooseCampus(
-  schools: CatalogObject[],
-  configured: string | undefined,
-) {
-  const chosen = schools.find((row) => row.id === configured);
-  if (!chosen) throw new ApiError('incompatible');
-  return chosen;
-}
 
 type CampusStatus = 'error' | 'idle' | 'loading' | 'ready';
 
@@ -45,15 +31,16 @@ function getCampusState(session: SessionStore): CampusState {
     watch(
       [session.state, () => session.session.value?.content_school_id],
       ([nextState, nextSchool], [prevState, prevSchool]) => {
-        if (
-          (nextState === 'guest' && prevState !== 'guest') ||
-          (prevSchool && nextSchool && prevSchool !== nextSchool)
-        ) {
+        if (nextState === 'guest' && prevState !== 'guest') {
           created.generation++;
           created.pending = undefined;
           created.campusId.value = '';
           created.failure.value = '';
           created.status.value = 'idle';
+        } else if (prevSchool && nextSchool && prevSchool !== nextSchool) {
+          created.campusId.value = nextSchool;
+          created.failure.value = '';
+          created.status.value = 'ready';
         }
       },
       { flush: 'sync' },
@@ -64,7 +51,6 @@ function getCampusState(session: SessionStore): CampusState {
 }
 
 export function useCampus() {
-  const api = useAcademicAdmin();
   const session = useSession();
   const state = getCampusState(session);
 
@@ -83,12 +69,15 @@ export function useCampus() {
             state.status.value = 'error';
             return;
           }
-          const schools = await api.options({ kind: 'school' });
-          if (current !== state.generation) return;
-          state.campusId.value = chooseCampus(
-            schools,
-            session.session.value?.content_school_id,
-          ).id;
+          // The session selects the community school. The public catalog
+          // applies student eligibility, while Admin APIs check staff grants.
+          const school = session.session.value?.content_school_id;
+          if (!school) {
+            throw new ApiError(
+              session.unavailable.value ? 'unavailable' : 'incompatible',
+            );
+          }
+          state.campusId.value = school;
           state.status.value = 'ready';
         } catch (error) {
           if (current !== state.generation) return;
