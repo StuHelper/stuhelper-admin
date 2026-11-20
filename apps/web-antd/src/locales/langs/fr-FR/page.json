@@ -1312,7 +1312,8 @@
       "expired": "Expiration de points",
       "debt_repayment": "Compensation de dette",
       "closure": "Clôture de compte"
-    }
+    },
+    "ledgerOnly": "La consultation des points et du registre, les règles et le rapprochement sont disponibles."
   },
   "access": {
     "title": "Rôles et accès",
@@ -1880,5 +1881,25 @@
     "toSessions": "Révocation de session",
     "prefilledHint": "Prérempli à partir du compte sélectionné ; vérifiez avant de lancer la recherche.",
     "recentIssuerHint": "Émetteur prérempli d’après la dernière consultation de cette session."
+  },
+  "admissions": {
+    "title": "Admission du stockage contributif",
+    "help": "Les ressources publiques sont admises par défaut. Les règles par instance priment. Toute réduction déclenche la réparation des copies non admissibles.",
+    "rules": "Règles d’admission",
+    "memberships": "Appartenance aux rôles et groupes",
+    "subject": "Type de cible",
+    "subjectId": "Identifiant du contributeur, du rôle ou du groupe",
+    "instance": "Identifiant de l’instance (facultatif)",
+    "levels": "Niveaux autorisés",
+    "contributor": "Contributeur",
+    "role": "Rôle d’admission au stockage",
+    "group": "Groupe d’admission au stockage",
+    "public": "Ressources publiques",
+    "quarantine": "Ressources en attente ou en quarantaine",
+    "restricted": "Ressources restreintes sans paiement",
+    "paidRestricted": "Ressources payantes restreintes (chiffrement requis)",
+    "addRule": "Ajouter une règle",
+    "addMember": "Ajouter un membre",
+    "remove": "Retirer"
   }
 }

@@ -176,7 +176,7 @@ const todos = useAsync(async (signal) => {
     }),
   });
   if (id) sources.unshift(...schoolSources);
-  if (capabilities.has('billing.manage')) {
+  if (capabilities.has('billing.commerce')) {
     sources.push({
       key: 'refunds',
       to: '/billing/refunds',

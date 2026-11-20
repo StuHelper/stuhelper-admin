@@ -7,6 +7,7 @@ import PresentationView from '#/features/academic/PresentationView.vue';
 import EligibilityView from '#/features/eligibility/EligibilityView.vue';
 import AppsView from '#/features/open-platform/AppsView.vue';
 import BindingView from '#/features/qq-binding/BindingView.vue';
+import { capabilitiesKey, createCapabilities } from '#/shared/capabilities';
 import { createSessionStore, sessionKey } from '#/shared/session';
 
 import ConfigView from './ConfigView.vue';
@@ -341,6 +342,7 @@ describe('Conflict comparison, directory tree pagination, AppsView filter advanc
       },
     });
     app.provide(sessionKey, store);
+    app.provide(capabilitiesKey, createCapabilities(fetcher));
     app.mount(root);
     cleanups.push(() => {
       app.unmount();

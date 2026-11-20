@@ -1312,7 +1312,8 @@
       "expired": "到期清零",
       "debt_repayment": "待扣积分抵扣",
       "closure": "注销结清"
-    }
+    },
+    "ledgerOnly": "当前只开放积分和账务查询、后台规则与对账。"
   },
   "access": {
     "title": "角色授权",
@@ -1880,5 +1881,25 @@
     "toSessions": "去会话下线",
     "prefilledHint": "已按上一步选择的账号预填查询条件，核对后点击查询。",
     "recentIssuerHint": "已自动填入本次会话最近查询的签发方。"
+  },
+  "admissions": {
+    "title": "贡献存储准入",
+    "help": "普通贡献默认承载公开资料。限定实例的规则优先，收窄级别后系统会修复不合规副本。",
+    "rules": "准入规则",
+    "memberships": "角色与分组成员",
+    "subject": "匹配主体",
+    "subjectId": "贡献者、角色或分组 ID",
+    "instance": "实例 ID（可选）",
+    "levels": "允许级别",
+    "contributor": "贡献者",
+    "role": "存储准入角色",
+    "group": "存储准入分组",
+    "public": "公开资料",
+    "quarantine": "待审或隔离资料",
+    "restricted": "非付费受限资料",
+    "paidRestricted": "付费受限资料（需要加密保护）",
+    "addRule": "新增规则",
+    "addMember": "新增成员",
+    "remove": "移除"
   }
 }

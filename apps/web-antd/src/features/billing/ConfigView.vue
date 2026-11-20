@@ -8,6 +8,7 @@ import { useI18n } from '@vben/locales';
 import { Alert, Button, Card, Checkbox, Drawer, Form, FormItem, Input, InputNumber, Switch, Table, Tag } from 'ant-design-vue';
 
 import { errorCode } from '#/shared/api/errors';
+import { useCapabilities } from '#/shared/capabilities';
 import { useMutation } from '#/shared/composables/async';
 import { useLeaveGuard } from '#/shared/composables/leave';
 import { useFormat } from '#/shared/format';
@@ -29,6 +30,8 @@ const { t } = useI18n();
 const format = useFormat();
 const money = useMoney();
 const api = useBillingAdmin();
+const capabilities = useCapabilities();
+const ledgerOnly = computed(() => capabilities.has('billing.ledger-only') && capabilities.status.value === 'ready');
 const day = 86_400;
 
 const status = ref<'error' | 'loading' | 'ready'>('loading');
@@ -40,7 +43,7 @@ async function load() {
   status.value = 'loading';
   loadError.value = '';
   try {
-    [channels.value, offers.value, rules.value] = await Promise.all([api.channels(), api.offers(), api.rules()]);
+    [channels.value, offers.value, rules.value] = await Promise.all([ledgerOnly.value ? [] : api.channels(), ledgerOnly.value ? [] : api.offers(), api.rules()]);
     status.value = 'ready';
   } catch (error) {
     loadError.value = errorCode(error);
@@ -204,7 +207,8 @@ const ruleColumns = computed(() => [
       <LoadState :status="status" :error="loadError" @retry="load" />
     </Card>
     <div v-else class="flex flex-col gap-4">
-        <Card :bordered="false" :title="t('page.billing.config.channels')">
+        <Alert v-if="ledgerOnly" type="info" show-icon :message="t('page.billing.ledgerOnly')" />
+        <Card v-if="!ledgerOnly" :bordered="false" :title="t('page.billing.config.channels')">
           <Button class="mb-3" @click="edit('channel')">{{ t('page.billing.config.newChannel') }}</Button>
           <Table :columns="channelColumns" :data-source="channels" :pagination="false" row-key="id" size="middle" :scroll="{ x: 640 }" :locale="{ emptyText: t('page.common.empty') }">
             <template #bodyCell="{ column, record }">
@@ -216,7 +220,7 @@ const ruleColumns = computed(() => [
             </template>
           </Table>
         </Card>
-        <Card :bordered="false" :title="t('page.billing.config.offers')">
+        <Card v-if="!ledgerOnly" :bordered="false" :title="t('page.billing.config.offers')">
           <Button class="mb-3" @click="edit('offer')">{{ t('page.billing.config.newOffer') }}</Button>
           <Table :columns="offerColumns" :data-source="offers" :pagination="false" row-key="id" size="middle" :scroll="{ x: 720 }" :locale="{ emptyText: t('page.common.empty') }">
             <template #bodyCell="{ column, record }">
