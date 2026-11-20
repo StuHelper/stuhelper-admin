@@ -1,15 +1,11 @@
 // @vitest-environment happy-dom
-import type { CatalogObject } from './api';
-
 import { createApp, h, nextTick } from 'vue';
 
 import { describe, expect, it } from 'vitest';
 
 import { createSessionStore, sessionKey } from '#/shared/session';
 
-import { chooseCampus, useCampus } from './campus';
-
-const school = (id: string) => ({ id }) as CatalogObject;
+import { useCampus } from './campus';
 
 const makeSession = (schoolId: string) => ({
   administrator: true,
@@ -45,37 +41,16 @@ const makeSession = (schoolId: string) => ({
 });
 
 describe('served university', () => {
-  it('uses the only school record, or the configured one among several', () => {
-    expect(() => chooseCampus([school('a')], undefined)).toThrow();
-    expect(chooseCampus([school('a')], 'a').id).toBe('a');
-    expect(chooseCampus([school('a'), school('b')], 'b').id).toBe('b');
-  });
-  it('refuses to guess when the record is missing or ambiguous', () => {
-    expect(() => chooseCampus([], undefined)).toThrow();
-    expect(() => chooseCampus([school('a'), school('b')], undefined)).toThrow();
-    expect(() => chooseCampus([school('a')], 'b')).toThrow();
-  });
-  it('isolates campus state per session store and clears stale school ID on session invalidation (A-11)', async () => {
+  it('uses the session school without public catalog eligibility and clears it on invalidation (A-11)', async () => {
+    let catalogRequests = 0;
+    let configuredSchool = 'buaa';
     const fetcher: typeof fetch = async (input) => {
       const path = new URL(String(input), 'http://localhost').pathname;
       if (path === '/api/v1/auth/session') {
-        return Response.json(makeSession('buaa'));
+        return Response.json(makeSession(configuredSchool));
       }
-      return Response.json({
-        items: [
-          {
-            aliases: [],
-            credits: null,
-            id: 'buaa',
-            kind: 'school',
-            name: 'BUAA',
-            revision: 1,
-            school_id: 'buaa',
-            updated_at: '2026-11-18T00:00:00Z',
-          },
-        ],
-        next: '',
-      });
+      catalogRequests++;
+      return Response.json({ code: 'forbidden' }, { status: 403 });
     };
     globalThis.fetch = fetcher;
     const sessionA = createSessionStore(fetcher);
@@ -104,9 +79,17 @@ describe('served university', () => {
 
     try {
       await campusA.load();
+      expect(campusA.status.value).toBe('ready');
       expect(campusA.id.value).toBe('buaa');
+      expect(catalogRequests).toBe(0);
       // Separate session store has its own isolated campus state
       expect(campusB.status.value).toBe('idle');
+      expect(campusB.id.value).toBe('');
+
+      configuredSchool = 'next-school';
+      await campusA.load();
+      expect(campusA.status.value).toBe('ready');
+      expect(campusA.id.value).toBe('next-school');
       expect(campusB.id.value).toBe('');
 
       // Invalidating sessionA clears stale campusId and resets status
