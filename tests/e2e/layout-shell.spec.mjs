@@ -134,8 +134,8 @@ test('disabled module routes set the unavailable document title instead of expos
     route.fulfill({ json: { api_version: 1, capabilities: [] } }),
   );
   const locale = info.project.metadata.locale;
-  const unavailableTitle = pageCatalogue(locale).framework.unavailable;
+  const unavailableTitle = pageCatalogue(locale).errors.disabled;
   await page.goto(`${base}/billing/refunds?lang=${locale}`);
-  await expect(page.locator('.ant-result-404')).toBeVisible();
+  await expect(page.locator('.ant-result-info')).toBeVisible();
   await expect(page).toHaveTitle(`${unavailableTitle} - stuhelper-admin`);
 });

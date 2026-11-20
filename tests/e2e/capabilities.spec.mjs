@@ -1,16 +1,17 @@
 import { expect, test } from '../session-fixture.mjs';
 
 const base = 'http://127.0.0.1:18786';
-const paths = ['/billing/refunds', '/billing/accounts', '/billing/memberships', '/billing/config', '/qq/groups', '/qq/groups/group-1/settings', '/qq-binding', '/open-platform', '/system/lookup'];
-const capabilities = ['billing.manage', 'groups.manage', 'qq-binding.manage', 'open-platform.manage', 'information-query.query'];
+const paths = ['/billing/refunds', '/billing/accounts', '/billing/memberships', '/billing/config', '/qq/groups', '/qq/groups/group-1/settings', '/qq-binding', '/open-platform', '/system/lookup', '/storage/custody'];
+const capabilities = ['billing.manage', 'groups.manage', 'qq-binding.manage', 'open-platform.manage', 'information-query.query', 'storage.custody.operations'];
 
 test('disabled module direct routes never mount business pages', async ({ page }) => {
   await page.route('**/api/v1/system/capabilities', route => route.fulfill({ json: { api_version: 1, capabilities: [] } }));
   const requests = [];
-  page.on('request', request => { if (/\/api\/v1\/(billing|groups|qq-binding|open-platform|information-query)\//.test(request.url())) requests.push(request.url()); });
+  page.on('request', request => { if (/\/api\/v1\/(billing|groups|qq-binding|open-platform|information-query|storage\/custody)(?:\/|\?|$)/.test(request.url())) requests.push(request.url()); });
   for (const path of paths) {
     await page.goto(`${base}${path}`);
-    await expect(page.locator('.ant-result-404')).toBeVisible();
+    await expect(page.locator('.ant-result-info')).toBeVisible();
+    await expect(page.locator('.ant-result-404')).toHaveCount(0);
   }
   expect(requests).toEqual([]);
 });

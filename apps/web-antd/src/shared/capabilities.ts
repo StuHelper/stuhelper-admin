@@ -33,6 +33,7 @@ export function routeCapability(path: string): string | undefined {
   if (path === '/qq/groups' || path.startsWith('/qq/groups/')) return 'groups.manage';
   if (path === '/qq-binding') return 'qq-binding.manage';
   if (path === '/open-platform') return 'open-platform.manage';
+  if (path === '/storage/custody') return 'storage.custody.operations';
   if (path === '/system/lookup') return 'information-query.query';
   return undefined;
 }

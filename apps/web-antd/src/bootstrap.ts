@@ -109,7 +109,7 @@ async function bootstrap(namespace: string, fetcher: typeof fetch = sessionFetch
         capabilities.status.value !== 'loading' &&
         !capabilities.has(required);
       const routeTitle = disabled
-        ? 'page.framework.unavailable'
+        ? 'page.errors.disabled'
         : current.meta?.title;
       pageTitle.value =
         (routeTitle ? `${$t(routeTitle)} - ` : '') + preferences.app.name;

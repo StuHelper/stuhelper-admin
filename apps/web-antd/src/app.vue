@@ -45,7 +45,7 @@ const tokenTheme = computed(() => {
 <template>
   <ConfigProvider :locale="antdLocale" :direction="direction" :theme="tokenTheme" :auto-insert-space-in-button="false">
     <App>
-      <NotFoundView v-if="missing" />
+      <NotFoundView v-if="missing" disabled />
       <RouterView v-else-if="!waiting" />
     </App>
   </ConfigProvider>
