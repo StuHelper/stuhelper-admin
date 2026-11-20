@@ -73,6 +73,7 @@ export const menus: MenuRecordRaw[] = [
       { name: 'page.menu.storage', path: '/storage' },
       { name: 'page.menu.custody', path: '/storage/custody' },
       { name: 'page.menu.contributions', path: '/storage/contributions' },
+      { name: 'page.admissions.title', path: '/storage/admissions' },
     ],
   },
   {

@@ -9,6 +9,7 @@ import { Alert, Button, Card, DatePicker, Descriptions, DescriptionsItem, Form, 
 
 import { useAccountJump } from '#/shared/account-jump';
 import { ApiError, errorCode, isDeniedCode } from '#/shared/api/errors';
+import { useCapabilities } from '#/shared/capabilities';
 import { useMutation } from '#/shared/composables/async';
 import { useLeaveGuard } from '#/shared/composables/leave';
 import { useFormat } from '#/shared/format';
@@ -33,6 +34,8 @@ const format = useFormat();
 const money = useMoney();
 const errorText = useErrorText();
 const api = useBillingAdmin();
+const capabilities = useCapabilities();
+const ledgerOnly = computed(() => capabilities.has('billing.ledger-only') && capabilities.status.value === 'ready');
 const accountJump = useAccountJump();
 const session = getCurrentInstance() ? inject(sessionKey, undefined) : undefined;
 
@@ -302,6 +305,7 @@ const ledgerKindText = (kind: string) => (te(`page.billing.ledgerKind.${kind}`) 
         </Card>
         <MutationAlert :busy="write.busy.value" :error="write.error.value" :uncertain="write.uncertain.value" :success="success" @retry="retry" />
         <Card :bordered="false">
+          <Alert v-if="ledgerOnly" type="info" show-icon :message="t('page.billing.ledgerOnly')" class="mb-4" />
           <Tabs @change="(key) => (key === 'grant' ? loadRules() : key === 'membership' && loadPlans())">
             <TabPane key="orders" :tab="t('page.billing.accounts.orders')">
               <Table :columns="orderColumns" :data-source="orders" :pagination="false" row-key="id" size="small" :scroll="{ x: 640 }" :locale="{ emptyText: t('page.common.empty') }">
@@ -310,7 +314,7 @@ const ledgerKindText = (kind: string) => (te(`page.billing.ledgerKind.${kind}`) 
                   <template v-else-if="column.key === 'kind'">{{ t(`page.billing.kind.${record.kind}`) }}</template>
                   <template v-else-if="column.key === 'amount'">{{ money.order(record as Order) }}</template>
                   <template v-else-if="column.key === 'state'"><Tag :color="stateColor(record.state)">{{ t(`page.billing.orderState.${record.state}`) }}</Tag></template>
-                  <template v-else-if="column.key === 'action'">
+                  <template v-else-if="column.key === 'action' && !ledgerOnly">
                     <Button v-if="record.kind === 'purchase' && record.state === 'succeeded'" type="link" size="small" :disabled="locked" @click="refunding = record as Order">{{ t('page.billing.accounts.refundPurchase') }}</Button>
                     <Button v-else-if="(record.kind === 'resource_unlock' || record.kind === 'membership') && (record.state === 'fulfilled' || record.state === 'succeeded') && fullAmount(record as Order) > 0" type="link" size="small" :disabled="locked" @click="openCommerce(record as Order)">{{ t('page.billing.accounts.refundCommerce') }}</Button>
                     <Button v-else-if="record.state === 'needs_review'" type="link" size="small" :disabled="locked" @click="reviewing = record as Order">{{ t('page.billing.review.open') }}</Button>
@@ -330,7 +334,7 @@ const ledgerKindText = (kind: string) => (te(`page.billing.ledgerKind.${kind}`) 
               </Table>
               <div class="mt-3 flex justify-center"><Button v-if="cursors.ledger" :loading="loading" @click="more('ledger')">{{ t('page.common.loadMore') }}</Button></div>
             </TabPane>
-            <TabPane key="grant" :tab="t('page.billing.accounts.grant')">
+            <TabPane v-if="!ledgerOnly" key="grant" :tab="t('page.billing.accounts.grant')">
               <Alert v-if="rulesError" class="mb-4" type="error" show-icon :message="errorText(rulesError)" />
               <Form layout="vertical" class="max-w-2xl" @submit.prevent="grant">
                 <FormItem :label="t('page.billing.accounts.rule')" required html-for="billing-grant-rule">
@@ -348,7 +352,7 @@ const ledgerKindText = (kind: string) => (te(`page.billing.ledgerKind.${kind}`) 
                 <Button type="primary" html-type="submit" :loading="write.busy.value" :disabled="!grantReady || write.uncertain.value">{{ t('page.billing.accounts.grantSubmit') }}</Button>
               </Form>
             </TabPane>
-            <TabPane key="membership" :tab="t('page.billing.accounts.membership')">
+            <TabPane v-if="!ledgerOnly" key="membership" :tab="t('page.billing.accounts.membership')">
               <p class="text-muted-foreground mb-3 text-sm">{{ t('page.billing.accounts.membershipHint') }}</p>
               <Alert v-if="plansError" class="mb-4" type="error" show-icon :message="errorText(plansError)" />
               <Form layout="vertical" class="max-w-2xl" @submit.prevent="grantMembership">
@@ -361,7 +365,7 @@ const ledgerKindText = (kind: string) => (te(`page.billing.ledgerKind.${kind}`) 
                 <Button type="primary" html-type="submit" :loading="write.busy.value" :disabled="!membershipForm.plan || !membershipForm.reason.trim() || write.uncertain.value">{{ t('page.billing.accounts.membershipSubmit') }}</Button>
               </Form>
             </TabPane>
-            <TabPane key="revoke" :tab="t('page.billing.accounts.revoke')">
+            <TabPane v-if="!ledgerOnly" key="revoke" :tab="t('page.billing.accounts.revoke')">
               <p class="text-muted-foreground mb-3 text-sm">{{ t('page.billing.accounts.revokeHint') }}</p>
               <Form layout="vertical" class="max-w-2xl" @submit.prevent="revoke">
                 <FormItem :label="t('page.billing.accounts.event')" required html-for="billing-revoke-event"><Input id="billing-revoke-event" v-model:value="revokeForm.event" :maxlength="256" :disabled="locked" /></FormItem>

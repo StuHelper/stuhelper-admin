@@ -123,8 +123,8 @@ function granted() {
         <Button class="mt-3" type="primary" html-type="submit" :loading="changing.busy.value" :disabled="changing.uncertain.value || !reason.trim()">{{ t('page.resources.applyState') }}</Button>
       </Form>
 
-      <Divider v-if="capabilities.has('billing.manage')" orientation="left">{{ t('page.resources.price.title') }}</Divider>
-      <PricePanel v-if="capabilities.has('billing.manage')" :resource-id="resource.id" @pending="pricing = $event" />
+      <Divider v-if="capabilities.has('billing.resource-price')" orientation="left">{{ t('page.resources.price.title') }}</Divider>
+      <PricePanel v-if="capabilities.has('billing.resource-price')" :resource-id="resource.id" @pending="pricing = $event" />
 
       <Divider orientation="left">{{ t('page.resources.grants') }}</Divider>
       <LoadState v-if="grants.items.value.length === 0" :status="grants.status.value" :error="grants.error.value" :empty="true" :empty-text="t('page.resources.noGrants')" @retry="grants.reload" />

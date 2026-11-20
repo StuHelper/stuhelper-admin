@@ -1312,7 +1312,8 @@
       "expired": "포인트 만료",
       "debt_repayment": "미차감 포인트 상계",
       "closure": "계정 해지 정산"
-    }
+    },
+    "ledgerOnly": "포인트 및 원장 조회, 규칙 설정, 대사를 이용할 수 있습니다."
   },
   "access": {
     "title": "역할 권한",
@@ -1880,5 +1881,25 @@
     "toSessions": "세션 강제 로그아웃",
     "prefilledHint": "선택한 계정 정보로 입력란을 미리 채웠습니다. 확인 후 조회하세요.",
     "recentIssuerHint": "현재 세션에서 최근 조회한 발급자를 자동으로 채웠습니다."
+  },
+  "admissions": {
+    "title": "기여 저장소 허용 범위",
+    "help": "기본적으로 공개 자료를 저장합니다. 인스턴스를 지정한 규칙이 우선하며, 허용 범위를 줄이면 부적합한 복제본을 복구합니다.",
+    "rules": "저장 허용 규칙",
+    "memberships": "역할과 그룹 소속",
+    "subject": "적용 대상",
+    "subjectId": "기여자, 역할 또는 그룹 ID",
+    "instance": "인스턴스 ID(선택)",
+    "levels": "허용 등급",
+    "contributor": "기여자",
+    "role": "저장 허용 역할",
+    "group": "저장 허용 그룹",
+    "public": "공개 자료",
+    "quarantine": "검토 대기 또는 격리 자료",
+    "restricted": "비유료 제한 자료",
+    "paidRestricted": "유료 제한 자료(암호화 필요)",
+    "addRule": "규칙 추가",
+    "addMember": "구성원 추가",
+    "remove": "제거"
   }
 }

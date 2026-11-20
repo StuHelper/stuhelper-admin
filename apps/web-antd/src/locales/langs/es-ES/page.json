@@ -1312,7 +1312,8 @@
       "expired": "Vencimiento de puntos",
       "debt_repayment": "Compensación de deuda",
       "closure": "Liquidación por cierre de cuenta"
-    }
+    },
+    "ledgerOnly": "Están disponibles la consulta de puntos y del libro mayor, las reglas y la conciliación."
   },
   "access": {
     "title": "Roles y accesos",
@@ -1880,5 +1881,25 @@
     "toSessions": "Cierre de sesiones",
     "prefilledHint": "Rellenado con la cuenta seleccionada; verifique y pulse buscar.",
     "recentIssuerHint": "Se completó con el emisor consultado más recientemente en esta sesión."
+  },
+  "admissions": {
+    "title": "Admisión de almacenamiento aportado",
+    "help": "Los materiales públicos se admiten por defecto. Las reglas de instancia tienen prioridad. Al reducir el permiso se reparan las copias que dejan de cumplirlo.",
+    "rules": "Reglas de admisión",
+    "memberships": "Pertenencia a roles y grupos",
+    "subject": "Se aplica a",
+    "subjectId": "ID del colaborador, rol o grupo",
+    "instance": "ID de instancia (opcional)",
+    "levels": "Niveles permitidos",
+    "contributor": "Colaborador",
+    "role": "Rol de admisión de almacenamiento",
+    "group": "Grupo de admisión de almacenamiento",
+    "public": "Materiales públicos",
+    "quarantine": "Materiales pendientes o en cuarentena",
+    "restricted": "Materiales restringidos sin pago",
+    "paidRestricted": "Materiales restringidos de pago (requieren cifrado)",
+    "addRule": "Añadir regla",
+    "addMember": "Añadir miembro",
+    "remove": "Quitar"
   }
 }
