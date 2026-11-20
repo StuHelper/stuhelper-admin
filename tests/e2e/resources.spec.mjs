@@ -111,10 +111,13 @@ test('review keeps its input through reload protection and shows the object in t
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
 });
 
-test('no school choice appears and a failed school lookup offers one retry', async ({ page }, info) => {
+test('staff can open the review queue when the public catalog denies access', async ({ page }, info) => {
   const all = catalogue(info);
-  await page.route('**/api/v1/catalog/objects**', (route) => route.fulfill({ status: 503, json: { code: 'unavailable' } }));
-  await page.goto(`${base}/resources?lang=${info.project.metadata.locale}`);
-  await expect(page.getByRole('button', { name: all.common.reloadCampus, exact: true })).toHaveCount(1);
+  const s = fixture();
+  await routes(page, s);
+  await page.route('**/api/v1/catalog/objects**', (route) => route.fulfill({ status: 403, json: { code: 'forbidden' } }));
+  await page.goto(`${base}/resources/reviews?lang=${info.project.metadata.locale}`);
+  await expect(page.getByRole('button', { name: all.common.open, exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: all.common.reloadCampus, exact: true })).toHaveCount(0);
   await expect(page.getByLabel(all.common.school)).toHaveCount(0);
 });

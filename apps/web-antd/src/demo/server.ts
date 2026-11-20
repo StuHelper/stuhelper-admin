@@ -9,7 +9,7 @@ void example;
 
 const demoCapabilities = [
   'platform.status',
-  'billing.manage',
+  'billing.manage', 'billing.commerce', 'billing.resource-price',
   'groups.read',
   'groups.manage',
   'groups.configure',

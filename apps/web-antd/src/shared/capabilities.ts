@@ -29,10 +29,13 @@ export function useCapabilities() {
 
 /** The same mapping controls menus, direct URLs and nested group pages. */
 export function routeCapability(path: string): string | undefined {
+  if (path === '/billing/refunds' || path === '/billing/memberships') return 'billing.commerce';
   if (path.startsWith('/billing/')) return 'billing.manage';
   if (path === '/qq/groups' || path.startsWith('/qq/groups/')) return 'groups.manage';
   if (path === '/qq-binding') return 'qq-binding.manage';
   if (path === '/open-platform') return 'open-platform.manage';
+  if (path === '/storage/custody') return 'storage.custody.operations';
+  if (path === '/storage/admissions') return 'storage.admissions';
   if (path === '/system/lookup') return 'information-query.query';
   return undefined;
 }

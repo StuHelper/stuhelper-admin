@@ -162,7 +162,7 @@ test('refund details jump to QQ binding, roles and session logout according to e
     route.fulfill({
       json: {
         api_version: 1,
-        capabilities: ['billing.manage', 'information-query.query'],
+        capabilities: ['billing.manage', 'billing.commerce', 'information-query.query'],
       },
     }),
   );

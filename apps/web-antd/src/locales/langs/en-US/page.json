@@ -1312,7 +1312,8 @@
       "expired": "Points expiry",
       "debt_repayment": "Debt offset",
       "closure": "Account closure settlement"
-    }
+    },
+    "ledgerOnly": "Points and ledger lookup, rules, and reconciliation are available."
   },
   "access": {
     "title": "Roles",
@@ -1880,5 +1881,25 @@
     "toSessions": "Session logout",
     "prefilledHint": "Prefilled from the selected account; verify and submit to query.",
     "recentIssuerHint": "Defaulted to the most recently queried issuer in this session."
+  },
+  "admissions": {
+    "title": "Contribution storage admission",
+    "help": "Public material is allowed by default. Instance rules take precedence. Narrowing a rule starts repair for ineligible copies.",
+    "rules": "Admission rules",
+    "memberships": "Role and group membership",
+    "subject": "Applies to",
+    "subjectId": "Contributor, role, or group ID",
+    "instance": "Instance ID (optional)",
+    "levels": "Allowed levels",
+    "contributor": "Contributor",
+    "role": "Storage admission role",
+    "group": "Storage admission group",
+    "public": "Public material",
+    "quarantine": "Pending or quarantined material",
+    "restricted": "Restricted material without payment",
+    "paidRestricted": "Paid restricted material (encryption required)",
+    "addRule": "Add rule",
+    "addMember": "Add member",
+    "remove": "Remove"
   }
 }
