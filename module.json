@@ -21,6 +21,9 @@
       "apps/web-antd/src/api/contribution.test.ts#keeps the operations record when the provider has no successful quota observation",
       "tests/e2e/contributions.spec.mjs#operator retry preserves conditions, retains uncertain request and clears revoked inventory"
     ],
+    "ST-12": [
+      "tests/e2e/storage-admissions.spec.mjs#edits account and group admissions and retries the original revision"
+    ],
     "RES-CLIENT-01": [
       "apps/web-antd/src/features/resources/api.test.ts#retries unknown writes with the frozen nested payload and original key",
       "apps/web-antd/src/features/resources/api.test.ts#resolves a lost upload response by querying state without sending bytes again"
