@@ -369,3 +369,26 @@ test('a moderator rejects the selected follow-up without deciding its sibling or
   expect(decisions[0]).toMatchObject({ object_id: entry.id, append_id: 'second', action: 'reject_append' });
   expect(tasks[0].state).toBe('waiting');
 });
+
+test('the queue shows each task category and filters by a chosen category', async ({ page }, info) => {
+  await schoolSession(page);
+  await mockCatalogSchool(page);
+  const m = catalogue(info).moderation;
+  const queries = [];
+  await page.route('**/api/v1/moderation/tasks**', (route) => {
+    const u = new URL(route.request().url());
+    if (u.pathname !== '/api/v1/moderation/tasks') return route.fallback();
+    queries.push(u.searchParams.get('category') ?? '');
+    const categorised = { ...makeTask('task-1', 'entry-1'), submission: { ...makeTask('task-1', 'entry-1').submission, category: 'privacy_leak' } };
+    const plain = makeTask('task-2', 'entry-2');
+    return route.fulfill({ json: u.searchParams.get('category') ? [categorised] : [categorised, plain] });
+  });
+  await page.goto(`${base}/moderation/queue?lang=${info.project.metadata.locale}`);
+  await expect(page.getByRole('cell', { name: m.categories.privacy_leak, exact: true })).toBeVisible();
+  await expect(page.getByRole('cell', { name: m.uncategorized, exact: true })).toBeVisible();
+  await page.locator('.ant-select').filter({ has: page.locator('#moderationview-field-category') }).click();
+  await page.locator('#moderationview-field-category').fill(m.categories.privacy_leak);
+  await page.locator('.ant-select-item-option').filter({ hasText: m.categories.privacy_leak }).first().click();
+  await page.locator('form button[type="submit"]').first().click();
+  await expect.poll(() => queries.at(-1)).toBe('privacy_leak');
+});

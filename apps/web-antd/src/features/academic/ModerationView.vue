@@ -44,6 +44,7 @@ import { arrayCursor, pageSize, useAcademicAdmin } from './api';
 import { useCampusId } from './campus';
 import CampusPending from './CampusPending.vue';
 import DecisionPanel from './DecisionPanel.vue';
+import { violationCategories } from './violationCategories';
 
 /**
  * Moderation workbench. "queue" lists moderation tasks (reviews, reports,
@@ -59,6 +60,7 @@ const filters = reactive({
   state: props.mode === 'queue' ? 'waiting' : '',
   kind: '',
   taskKind: '',
+  category: '',
   range: undefined as [string, string] | undefined,
 });
 const selected = shallowRef<{ entryId?: string; taskId?: string }>();
@@ -78,6 +80,7 @@ const rows = usePaged<AdminEntry | Task>(async (after, signal) => {
           school_id: school.value,
           state: filters.state,
           kind: filters.taskKind,
+          category: filters.category,
           content_kind: filters.kind,
           from,
           until,
@@ -270,6 +273,7 @@ const stateOptions = computed(() =>
 );
 const taskColumns = computed(() => [
   { key: 'kind', title: t('page.moderation.taskType') },
+  { key: 'category', title: t('page.moderation.category') },
   { key: 'reason', title: t('page.moderation.submissionNote'), ellipsis: true },
   { key: 'state', title: t('page.common.status') },
   { key: 'updated', title: t('page.common.updatedAt') },
@@ -358,6 +362,20 @@ id="moderationview-field-3"
                 ]"
               />
             </FormItem>
+            <FormItem :label="t('page.moderation.category')" html-for="moderationview-field-category">
+              <Select
+                id="moderationview-field-category"
+                v-model:value="filters.category"
+                class="w-44"
+                show-search
+                option-filter-prop="label"
+                :disabled="locked"
+                :options="[
+                  { value: '', label: t('page.common.all') },
+                  ...violationCategories.map((value) => ({ value, label: t(`page.moderation.categories.${value}`) })),
+                ]"
+              />
+            </FormItem>
             <FormItem :label="t('page.moderation.timeRange')" html-for="moderationview-field-4">
               <DatePicker.RangePicker
                 id="moderationview-field-4"
@@ -425,6 +443,13 @@ id="moderationview-field-3"
               <template v-if="column.key === 'kind'">
 {{
                 label(`page.moderation.taskKind.${record.submission.kind}`)
+              }}
+</template>
+              <template v-else-if="column.key === 'category'">
+{{
+                (record.decision?.category ?? record.submission.category)
+                  ? label(`page.moderation.categories.${record.decision?.category ?? record.submission.category}`)
+                  : t('page.moderation.uncategorized')
               }}
 </template>
               <template v-else-if="column.key === 'reason'">

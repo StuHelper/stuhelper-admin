@@ -225,6 +225,7 @@ function save() {
 
 const columns = computed(() => [
   { key: 'kind', title: t('page.moderation.taskType') },
+  { key: 'category', title: t('page.moderation.category') },
   { key: 'reason', title: t('page.moderation.submissionNote'), ellipsis: true },
   { key: 'state', title: t('page.common.status') },
   { key: 'updated', title: t('page.common.updatedAt') },
@@ -254,6 +255,7 @@ const columns = computed(() => [
           <Table :columns="columns" :data-source="tasks.items.value" :pagination="false" row-key="id" size="middle" :scroll="{ x: 640 }">
             <template #bodyCell="{ column, record }">
               <template v-if="column.key === 'kind'">{{ label(`page.moderation.taskKind.${record.submission.kind}`) }}</template>
+              <template v-else-if="column.key === 'category'">{{ (record.decision?.category ?? record.submission.category) ? label(`page.moderation.categories.${record.decision?.category ?? record.submission.category}`) : t('page.moderation.uncategorized') }}</template>
               <template v-else-if="column.key === 'reason'">{{ record.submission.reason === 'content_review' ? t('page.moderation.ruleReview') : record.submission.reason }}</template>
               <template v-else-if="column.key === 'state'"><Tag :color="stateColor(record.state)">{{ label(`page.moderation.taskState.${record.state}`) }}</Tag></template>
               <template v-else-if="column.key === 'updated'">{{ format.dateTime(record.updated_at) }}</template>

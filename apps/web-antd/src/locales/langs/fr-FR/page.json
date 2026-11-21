@@ -392,7 +392,35 @@
       "privacy": "Divulgue des données personnelles ou sensibles non publiques.",
       "unsubstantiated": "Signalement non étayé, aucune infraction constatée."
     },
-    "appendForReview": "Complément à examiner"
+    "appendForReview": "Complément à examiner",
+    "category": "Type d’infraction",
+    "uncategorized": "Non classé",
+    "categories": {
+      "illegal_content": "Contenu illégal",
+      "pornography": "Pornographique ou vulgaire",
+      "gambling_drugs": "Jeux d’argent, drogues ou produits interdits",
+      "fraud": "Fraude ou hameçonnage",
+      "violence_threat": "Violence ou menaces",
+      "minors_harm": "Nuisible aux mineurs",
+      "personal_attack": "Insultes ou attaques personnelles",
+      "harassment_discrimination": "Harcèlement ou discrimination",
+      "defamation_rumor": "Diffamation ou rumeurs",
+      "privacy_leak": "Atteinte à la vie privée",
+      "impersonation": "Usurpation d’identité",
+      "copyright": "Atteinte au droit d’auteur",
+      "other_ip": "Atteinte à d’autres droits",
+      "academic_integrity": "Fraude académique",
+      "leaked_exam": "Fuite d’examen",
+      "fake_review": "Avis mensonger",
+      "wrong_teacher": "Mauvais enseignant ou cours",
+      "wrong_info": "Informations erronées",
+      "spam": "Spam ou publicité",
+      "malware": "Fichier ou lien malveillant",
+      "duplicate": "Doublon",
+      "low_quality": "Faible qualité",
+      "author_update": "Demande de mise à jour de l’auteur",
+      "other": "Autre"
+    }
   },
   "catalog": {
     "title": "Gestion des cours et enseignants",
