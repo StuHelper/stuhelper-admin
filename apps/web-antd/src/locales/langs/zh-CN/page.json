@@ -879,7 +879,9 @@
       "authorization_revoked": "账号授权已撤销。",
       "authorization_expired": "账号授权已到期。",
       "writes_disabled": "此实例暂不接收新文件。",
-      "capacity_unknown": "容量信息已过期，等待刷新。",
+      "capacity_unknown": "暂无容量读数，等待更新。",
+      "capacity_read_failed": "读取网盘容量失败，等待重试。",
+      "capacity_expired": "容量读数已过期，等待刷新。",
       "capacity_exhausted": "可用容量已耗尽。",
       "replica_shortage": "健康副本尚未达到目标。",
       "no_healthy_source": "没有可用的健康来源。",
@@ -938,7 +940,10 @@
       "binding_unavailable": "存储绑定不可用，需要管理员检查。",
       "cleanup_unconfirmed": "仍有副本，尚未确认清理完成。",
       "storage_writes_disabled": "存储暂不接受新文件。",
-      "capacity_unknown": "容量信息无效，等待更新。",
+      "capacity_unknown": "暂无容量读数，等待更新。",
+      "capacity_read_failed": "读取网盘容量失败，等待重试。",
+      "capacity_expired": "容量读数已过期，等待刷新。",
+      "limit_exceeds_provider_capacity": "申报额度超过扣除预留空间后的可贡献容量。",
       "exit_overdue": "已超过退出目标时间，迁移仍在处理。"
     }
   },

@@ -65,7 +65,7 @@ function retry(item: Contribution) {
                   <DescriptionsItem :label="t('page.contribution.used')">{{ format.bytes(item.observation.used_bytes) }}</DescriptionsItem>
                   <DescriptionsItem :label="t('page.contribution.available')">{{ format.bytes(item.observation.available_bytes) }}</DescriptionsItem>
                   <DescriptionsItem :label="t('page.contribution.remainingLabel')">{{ format.number(item.observation.remaining_replicas) }}</DescriptionsItem>
-                  <DescriptionsItem :label="t('page.contribution.observedLabel')">{{ format.dateTime(item.observation.observed_at) }}</DescriptionsItem>
+                  <DescriptionsItem v-if="item.observation.observed_at !== null" :label="t('page.contribution.observedLabel')">{{ format.dateTime(item.observation.observed_at) }}</DescriptionsItem>
                 </template>
                 <DescriptionsItem v-if="item.exit_target_at" :label="t('page.contribution.exitTargetLabel')">{{ format.dateTime(item.exit_target_at) }}</DescriptionsItem>
               </Descriptions>

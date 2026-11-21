@@ -879,7 +879,9 @@
       "authorization_revoked": "Autorización de la cuenta revocada.",
       "authorization_expired": "Autorización de la cuenta vencida.",
       "writes_disabled": "Esta instancia no acepta nuevos archivos.",
-      "capacity_unknown": "La información de capacidad venció; pendiente de actualización.",
+      "capacity_unknown": "No hay una lectura de capacidad vigente. Pendiente de actualización.",
+      "capacity_read_failed": "No se pudo consultar la capacidad del proveedor. Se volverá a intentar.",
+      "capacity_expired": "La lectura de capacidad ha caducado. Pendiente de actualización.",
       "capacity_exhausted": "La capacidad de escritura está agotada.",
       "replica_shortage": "Las copias válidas no alcanzan el objetivo.",
       "no_healthy_source": "No hay una fuente válida disponible.",
@@ -938,7 +940,10 @@
       "binding_unavailable": "Vinculación no disponible; requiere revisión administrativa.",
       "cleanup_unconfirmed": "Quedan réplicas; limpieza sin confirmar.",
       "storage_writes_disabled": "El almacenamiento no acepta archivos nuevos.",
-      "capacity_unknown": "Capacidad desconocida; esperando actualización.",
+      "capacity_unknown": "No hay una lectura de capacidad vigente. Pendiente de actualización.",
+      "capacity_read_failed": "No se pudo consultar la capacidad del proveedor. Se volverá a intentar.",
+      "capacity_expired": "La lectura de capacidad ha caducado. Pendiente de actualización.",
+      "limit_exceeds_provider_capacity": "La contribución solicitada supera la capacidad disponible tras descontar las reservas.",
       "exit_overdue": "Plazo de salida superado; la migración sigue pendiente."
     }
   },

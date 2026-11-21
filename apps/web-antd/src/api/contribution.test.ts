@@ -5,10 +5,20 @@ import { contributionAPI, ContributionError, type Operation, parseContribution, 
 
 describe('contribution browser boundary', () => {
   it('drops private fields and rejects unsafe numbers, malformed dates and terms', () => {
-    expect(parseContribution({ ...example.page.items[0], credential: 'must-not-appear' })).not.toHaveProperty('credential');
+    const parsed = parseContribution({ ...example.page.items[0], credential: 'must-not-appear', provider_capacity: { total_bytes: 100 } });
+    expect(parsed).not.toHaveProperty('credential');
+    expect(parsed).not.toHaveProperty('provider_capacity');
     for (const changes of [{ revision: Number.MAX_SAFE_INTEGER + 1 }, { updated_at: '2030-01-01' }, { state: 'invented-success' }]) expect(() => parseContribution({ ...example.page.items[0], ...changes })).toThrow(ContributionError);
     expect(() => parsePolicy({ ...example.policy, terms: { ...example.policy.terms, url: 'javascript:alert(1)' } })).toThrow(ContributionError);
     expect(() => parseStatistics({ ...example.statistics, available_bytes: -1 })).toThrow(ContributionError);
+  });
+  it('keeps the operations record when the provider has no successful quota observation', () => {
+    const item = example.page.items[0];
+    const parsed = parseContribution({
+      ...item,
+      observation: { ...item?.observation, observed_at: null },
+    });
+    expect(parsed.observation).toEqual({ ...item?.observation, observed_at: null });
   });
   it('uses the original key, body and same-origin transport', async () => {
     const fetcher = vi.fn<typeof fetch>().mockResolvedValue(Response.json(example.page.items[0], { status: 202 }));

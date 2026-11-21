@@ -18,18 +18,33 @@ const example = JSON.parse(fs.readFileSync('contracts/contribution.example.json'
 
 test('operator retry preserves conditions, retains uncertain request and clears revoked inventory', async ({ page }, info) => {
   const all = catalogue(info); const m = all.contribution; const c = all.common; const errors = watch(page); const requests = [];
+  const item = example.page.items[0];
   let reject = false;
   await page.route('**/api/v1/storage-contributions**', async (route) => {
     if (reject) return route.fulfill({ status: 403, json: { code: 'denied' } });
     if (route.request().method() === 'POST') {
       requests.push({ body: route.request().postDataJSON(), key: route.request().headers()['idempotency-key'] });
       if (requests.length === 1) return route.abort();
-      return route.fulfill({ status: 202, json: { ...example.page.items[0], revision: 2, state: 'pending' } });
+      return route.fulfill({ status: 202, json: { ...item, revision: 2, state: 'pending' } });
     }
-    return route.fulfill({ json: { ...example.page, items: [{ ...example.page.items[0], state: 'blocked', reason: 'authorization_required', desired_state: 'exiting', exit_target_at: '2030-01-02T00:00:00Z' }] } });
+    const reason = requests.length > 1 ? 'capacity_read_failed' : 'authorization_required';
+    return route.fulfill({
+      json: {
+        ...example.page,
+        items: [{
+          ...item,
+          state: 'blocked',
+          reason,
+          desired_state: 'exiting',
+          exit_target_at: '2030-01-02T00:00:00Z',
+          observation: { ...item.observation, observed_at: null },
+        }],
+      },
+    });
   });
   await page.goto(`${base}/storage/contributions?lang=${info.project.metadata.locale}`);
   await expect(page.locator('article')).toContainText(m.reasons.authorization_required);
+  await expect(page.getByText(m.observedLabel, { exact: true })).toHaveCount(0);
   await fits(page, info);
   await page.getByRole('button', { name: m.actions.retry, exact: true }).focus();
   await page.keyboard.press('Enter');
@@ -38,6 +53,7 @@ test('operator retry preserves conditions, retains uncertain request and clears 
   await expect(page.getByRole('dialog')).toContainText(c.uncertain);
   await page.getByRole('button', { name: c.retryOriginal, exact: true }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.locator('article')).toContainText(m.reasons.capacity_read_failed);
   expect(requests).toHaveLength(2);
   expect(requests[1]).toEqual(requests[0]);
   expect(requests[0].body).toEqual({ revision: 1 });

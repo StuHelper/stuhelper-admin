@@ -879,7 +879,9 @@
       "authorization_revoked": "アカウントの認可が取り消されました。",
       "authorization_expired": "アカウントの認可が期限切れです。",
       "writes_disabled": "このストレージは新しいファイルを受け付けません。",
-      "capacity_unknown": "容量情報が期限切れのため更新待ちです。",
+      "capacity_unknown": "有効な容量情報がないため、更新を待っています。",
+      "capacity_read_failed": "ストレージの容量を取得できませんでした。再試行を待っています。",
+      "capacity_expired": "容量情報の有効期限が切れています。更新を待っています。",
       "capacity_exhausted": "書込可能な容量がありません。",
       "replica_shortage": "正常な複製が目標数に達していません。",
       "no_healthy_source": "正常な取得元がありません。",
@@ -938,7 +940,10 @@
       "binding_unavailable": "ストレージの紐付けを利用できません。管理者の確認が必要です。",
       "cleanup_unconfirmed": "複製が残っており、削除完了は未確認です。",
       "storage_writes_disabled": "新規ファイルの受け入れを停止しています。",
-      "capacity_unknown": "容量情報の更新待ちです。",
+      "capacity_unknown": "有効な容量情報がないため、更新を待っています。",
+      "capacity_read_failed": "ストレージの容量を取得できませんでした。再試行を待っています。",
+      "capacity_expired": "容量情報の有効期限が切れています。更新を待っています。",
+      "limit_exceeds_provider_capacity": "申請された提供容量が、予約領域を差し引いた空き容量を超えています。",
       "exit_overdue": "終了目標日時を過ぎていますが、移行は処理中です。"
     }
   },
