@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: StuHelper Verification
-  version: 0.4.2
+  version: 0.5.0
   description: Private verification API. Authentication supplies issuer and subject. All dates are RFC3339 UTC. Writes require an actor-scoped Idempotency-Key. School administration is authorized on every request.
 servers:
   - url: /
@@ -1284,13 +1284,18 @@ components:
         revision: { type: integer, format: int64 }
         verified_at: { type: string, format: date-time }
         expires_at: { type: string, format: date-time, nullable: true }
+    DocumentType:
+      type: string
+      enum: [cn_resident_id_card]
+      description: Document type confirmed by the real-name verification source.
     IdentityMasked:
       type: object
       additionalProperties: false
-      required: [name, document_number]
+      required: [name, document_type, document_number]
       description: Server-generated mask from successful real-name verification. Star counts follow original Unicode code-point lengths. Never contains full identity values.
       properties:
         name: { type: string, minLength: 2, maxLength: 100, description: All characters except the last are replaced with stars. }
+        document_type: { $ref: '#/components/schemas/DocumentType' }
         document_number: { type: string, minLength: 3, maxLength: 32, description: All characters except the first and last are replaced with stars. }
     Summary:
       type: object

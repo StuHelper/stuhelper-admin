@@ -1179,10 +1179,16 @@ export interface components {
             /** Format: date-time */
             expires_at: string | null;
         };
+        /**
+         * @description Document type confirmed by the real-name verification source.
+         * @enum {string}
+         */
+        DocumentType: "cn_resident_id_card";
         /** @description Server-generated mask from successful real-name verification. Star counts follow original Unicode code-point lengths. Never contains full identity values. */
         IdentityMasked: {
             /** @description All characters except the last are replaced with stars. */
             name: string;
+            document_type: components["schemas"]["DocumentType"];
             /** @description All characters except the first and last are replaced with stars. */
             document_number: string;
         };

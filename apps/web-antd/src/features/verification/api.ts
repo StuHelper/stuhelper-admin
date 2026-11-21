@@ -39,7 +39,10 @@ const text = (v: unknown): v is string => typeof v === 'string'
 /** Lengths in Unicode code points, matching the provider's limits. */
 const points = (v: string) => [...v].length
 const sized = (v: unknown, min: number, max: number): v is string => text(v) && points(v) >= min && points(v) <= max
-const masked = (v: unknown) => object(v) && Object.keys(v).length === 2 && sized(v.name, 2, 100) && /^\*+[^*]$/u.test(v.name) && sized(v.document_number, 3, 32) && /^[^*]\*+[^*]$/u.test(v.document_number)
+const masked = (v: unknown) => object(v) && Object.keys(v).length === 3
+  && v.document_type === 'cn_resident_id_card'
+  && sized(v.name, 2, 100) && /^\*+[^*]$/u.test(v.name)
+  && sized(v.document_number, 3, 32) && /^[^*]\*+[^*]$/u.test(v.document_number)
 const count = (v: unknown): v is number => typeof v === 'number' && Number.isSafeInteger(v) && v >= 0
 const instant = (v: unknown): v is string => {
   if (!text(v)) return false
