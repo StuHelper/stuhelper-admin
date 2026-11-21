@@ -879,7 +879,9 @@
       "authorization_revoked": "Account authorization revoked.",
       "authorization_expired": "Account authorization expired.",
       "writes_disabled": "This instance is not accepting new files.",
-      "capacity_unknown": "Capacity evidence expired; awaiting refresh.",
+      "capacity_unknown": "No current capacity reading. Waiting for an update.",
+      "capacity_read_failed": "Could not read the provider’s capacity. Waiting to retry.",
+      "capacity_expired": "The capacity reading has expired. Waiting for an update.",
       "capacity_exhausted": "Writable capacity exhausted.",
       "replica_shortage": "Healthy replicas are below target.",
       "no_healthy_source": "No healthy source is available.",
@@ -938,7 +940,10 @@
       "binding_unavailable": "Storage binding unavailable; administrator review required.",
       "cleanup_unconfirmed": "Replicas remain; cleanup is unconfirmed.",
       "storage_writes_disabled": "Storage is not accepting new files.",
-      "capacity_unknown": "Capacity is unknown; awaiting refresh.",
+      "capacity_unknown": "No current capacity reading. Waiting for an update.",
+      "capacity_read_failed": "Could not read the provider’s capacity. Waiting to retry.",
+      "capacity_expired": "The capacity reading has expired. Waiting for an update.",
+      "limit_exceeds_provider_capacity": "The requested contribution exceeds the capacity available after reserves.",
       "exit_overdue": "Exit target passed; migration is still pending."
     }
   },

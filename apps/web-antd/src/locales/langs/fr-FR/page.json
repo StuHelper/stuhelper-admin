@@ -879,7 +879,9 @@
       "authorization_revoked": "Autorisation du compte révoquée.",
       "authorization_expired": "Autorisation du compte expirée.",
       "writes_disabled": "Cette instance n’accepte pas de nouveaux fichiers.",
-      "capacity_unknown": "Données de capacité expirées, actualisation attendue.",
+      "capacity_unknown": "Aucun relevé de capacité à jour. Actualisation attendue.",
+      "capacity_read_failed": "Impossible de lire la capacité du fournisseur. Nouvelle tentative à venir.",
+      "capacity_expired": "Le relevé de capacité a expiré. Actualisation attendue.",
       "capacity_exhausted": "Capacité disponible épuisée.",
       "replica_shortage": "Le nombre de copies valides est inférieur à la cible.",
       "no_healthy_source": "Aucune source valide disponible.",
@@ -938,7 +940,10 @@
       "binding_unavailable": "Liaison de stockage indisponible ; vérification administrative nécessaire.",
       "cleanup_unconfirmed": "Des répliques subsistent ; nettoyage non confirmé.",
       "storage_writes_disabled": "Le stockage n’accepte pas de nouveaux fichiers.",
-      "capacity_unknown": "Capacité inconnue ; actualisation attendue.",
+      "capacity_unknown": "Aucun relevé de capacité à jour. Actualisation attendue.",
+      "capacity_read_failed": "Impossible de lire la capacité du fournisseur. Nouvelle tentative à venir.",
+      "capacity_expired": "Le relevé de capacité a expiré. Actualisation attendue.",
+      "limit_exceeds_provider_capacity": "La contribution demandée dépasse la capacité disponible après déduction des réserves.",
       "exit_overdue": "Objectif de retrait dépassé ; migration en cours."
     }
   },
