@@ -392,7 +392,35 @@
       "privacy": "Expone datos personales privados o información sensible.",
       "unsubstantiated": "No hay pruebas suficientes de infracción de las normas."
     },
-    "appendForReview": "Comentario adicional pendiente"
+    "appendForReview": "Comentario adicional pendiente",
+    "category": "Tipo de infracción",
+    "uncategorized": "Sin clasificar",
+    "categories": {
+      "illegal_content": "Contenido ilegal",
+      "pornography": "Pornográfico o vulgar",
+      "gambling_drugs": "Apuestas, drogas o artículos prohibidos",
+      "fraud": "Fraude o phishing",
+      "violence_threat": "Violencia o amenazas",
+      "minors_harm": "Perjudicial para menores",
+      "personal_attack": "Insultos o ataques personales",
+      "harassment_discrimination": "Acoso o discriminación",
+      "defamation_rumor": "Difamación o bulos",
+      "privacy_leak": "Filtración de privacidad",
+      "impersonation": "Suplantación",
+      "copyright": "Infracción de derechos de autor",
+      "other_ip": "Infracción de otros derechos",
+      "academic_integrity": "Fraude académico",
+      "leaked_exam": "Filtración de examen",
+      "fake_review": "Reseña falsa",
+      "wrong_teacher": "Profesor o asignatura incorrectos",
+      "wrong_info": "Información incorrecta",
+      "spam": "Spam o publicidad",
+      "malware": "Archivo o enlace malicioso",
+      "duplicate": "Duplicado",
+      "low_quality": "Baja calidad",
+      "author_update": "Solicitud de actualización del autor",
+      "other": "Otro"
+    }
   },
   "catalog": {
     "title": "Gestión de cursos y docentes",

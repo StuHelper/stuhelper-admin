@@ -392,7 +392,35 @@
       "privacy": "يكشف بيانات شخصية غير معلنة أو معلومات حساسة.",
       "unsubstantiated": "لا توجد أدلة كافية على مخالفة قواعد المجتمع."
     },
-    "appendForReview": "التعقيب قيد المراجعة"
+    "appendForReview": "التعقيب قيد المراجعة",
+    "category": "نوع المخالفة",
+    "uncategorized": "غير مصنف",
+    "categories": {
+      "illegal_content": "محتوى غير قانوني",
+      "pornography": "إباحي أو مبتذل",
+      "gambling_drugs": "قمار أو مخدرات أو سلع محظورة",
+      "fraud": "احتيال أو تصيد",
+      "violence_threat": "عنف أو تهديد",
+      "minors_harm": "ضار بالقُصّر",
+      "personal_attack": "سب أو هجوم شخصي",
+      "harassment_discrimination": "تحرش أو تمييز",
+      "defamation_rumor": "تشهير أو شائعات",
+      "privacy_leak": "كشف معلومات خاصة",
+      "impersonation": "انتحال شخصية",
+      "copyright": "انتهاك حقوق النشر",
+      "other_ip": "انتهاك حقوق أخرى",
+      "academic_integrity": "سوء سلوك أكاديمي",
+      "leaked_exam": "تسريب اختبار",
+      "fake_review": "تقييم غير صادق",
+      "wrong_teacher": "معلم أو مقرر خاطئ",
+      "wrong_info": "معلومات خاطئة",
+      "spam": "إعلانات أو رسائل مزعجة",
+      "malware": "ملف أو رابط ضار",
+      "duplicate": "محتوى مكرر",
+      "low_quality": "جودة منخفضة",
+      "author_update": "طلب تحديث من المؤلف",
+      "other": "أخرى"
+    }
   },
   "catalog": {
     "title": "إدارة المقررات والمدرّسين",

@@ -392,7 +392,35 @@
       "privacy": "非公開の個人情報や機密情報が含まれています。",
       "unsubstantiated": "規約違反と判断できる根拠が確認されませんでした。"
     },
-    "appendForReview": "審査中の追記"
+    "appendForReview": "審査中の追記",
+    "category": "違反の種類",
+    "uncategorized": "未分類",
+    "categories": {
+      "illegal_content": "違法・違反",
+      "pornography": "わいせつ・低俗",
+      "gambling_drugs": "賭博・薬物・禁制品",
+      "fraud": "詐欺・フィッシング",
+      "violence_threat": "暴力・脅迫",
+      "minors_harm": "未成年者への有害",
+      "personal_attack": "暴言・人身攻撃",
+      "harassment_discrimination": "嫌がらせ・差別",
+      "defamation_rumor": "名誉毀損・デマ",
+      "privacy_leak": "プライバシー漏洩",
+      "impersonation": "なりすまし",
+      "copyright": "著作権侵害",
+      "other_ip": "その他の権利侵害",
+      "academic_integrity": "学術不正",
+      "leaked_exam": "試験問題の漏洩",
+      "fake_review": "事実と異なる評価",
+      "wrong_teacher": "教員・科目の誤り",
+      "wrong_info": "情報の誤り",
+      "spam": "広告・スパム",
+      "malware": "悪意あるファイル・リンク",
+      "duplicate": "重複",
+      "low_quality": "低品質",
+      "author_update": "作成者による更新依頼",
+      "other": "その他"
+    }
   },
   "catalog": {
     "title": "授業・教員情報の管理",

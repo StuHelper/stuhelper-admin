@@ -392,7 +392,35 @@
       "privacy": "涉及未公开的个人隐私或敏感信息。",
       "unsubstantiated": "举报依据不足，未发现违反社区规则的内容。"
     },
-    "appendForReview": "待裁决的追评"
+    "appendForReview": "待裁决的追评",
+    "category": "违规类型",
+    "uncategorized": "未分类",
+    "categories": {
+      "illegal_content": "违法违规",
+      "pornography": "色情低俗",
+      "gambling_drugs": "赌博毒品违禁品",
+      "fraud": "诈骗钓鱼",
+      "violence_threat": "暴力威胁",
+      "minors_harm": "危害未成年人",
+      "personal_attack": "辱骂攻击",
+      "harassment_discrimination": "骚扰歧视",
+      "defamation_rumor": "诽谤谣言",
+      "privacy_leak": "泄露隐私",
+      "impersonation": "冒充他人",
+      "copyright": "侵犯著作权",
+      "other_ip": "侵犯其他权益",
+      "academic_integrity": "学术不端",
+      "leaked_exam": "泄露试题",
+      "fake_review": "不实评价",
+      "wrong_teacher": "教师或课程对应错误",
+      "wrong_info": "信息错误",
+      "spam": "广告垃圾",
+      "malware": "恶意文件或链接",
+      "duplicate": "重复内容",
+      "low_quality": "内容质量低",
+      "author_update": "作者要求更新",
+      "other": "其他"
+    }
   },
   "catalog": {
     "title": "课程与教师维护",

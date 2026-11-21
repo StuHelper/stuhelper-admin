@@ -392,7 +392,35 @@
       "privacy": "Discloses private personal or sensitive information.",
       "unsubstantiated": "Insufficient evidence of a policy violation."
     },
-    "appendForReview": "Follow-up under review"
+    "appendForReview": "Follow-up under review",
+    "category": "Violation type",
+    "uncategorized": "Uncategorized",
+    "categories": {
+      "illegal_content": "Illegal content",
+      "pornography": "Pornographic or vulgar",
+      "gambling_drugs": "Gambling, drugs or prohibited goods",
+      "fraud": "Fraud or phishing",
+      "violence_threat": "Violence or threats",
+      "minors_harm": "Harmful to minors",
+      "personal_attack": "Abuse or personal attacks",
+      "harassment_discrimination": "Harassment or discrimination",
+      "defamation_rumor": "Defamation or rumors",
+      "privacy_leak": "Privacy leak",
+      "impersonation": "Impersonation",
+      "copyright": "Copyright infringement",
+      "other_ip": "Other rights infringement",
+      "academic_integrity": "Academic misconduct",
+      "leaked_exam": "Leaked exam",
+      "fake_review": "Untruthful review",
+      "wrong_teacher": "Wrong teacher or course",
+      "wrong_info": "Incorrect information",
+      "spam": "Spam or ads",
+      "malware": "Malicious file or link",
+      "duplicate": "Duplicate",
+      "low_quality": "Low quality",
+      "author_update": "Author update request",
+      "other": "Other"
+    }
   },
   "catalog": {
     "title": "Course and teacher records",
