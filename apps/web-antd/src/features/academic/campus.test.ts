@@ -44,9 +44,18 @@ describe('served university', () => {
   it('uses the session school without public catalog eligibility and clears it on invalidation (A-11)', async () => {
     let catalogRequests = 0;
     let configuredSchool = 'buaa';
+    let consentPending = false;
     const fetcher: typeof fetch = async (input) => {
       const path = new URL(String(input), 'http://localhost').pathname;
       if (path === '/api/v1/auth/session') {
+        if (consentPending) {
+          return Response.json({
+            authenticated: true,
+            consent_required: true,
+            csrf_token: 'a'.repeat(43),
+            expires_at: '2030-01-01T00:00:00Z',
+          });
+        }
         return Response.json(makeSession(configuredSchool));
       }
       catalogRequests++;
@@ -91,6 +100,17 @@ describe('served university', () => {
       expect(campusA.status.value).toBe('ready');
       expect(campusA.id.value).toBe('next-school');
       expect(campusB.id.value).toBe('');
+
+      consentPending = true;
+      await sessionA.reload();
+      expect(campusA.id.value).toBe('');
+      expect(campusA.failure.value).toBe('consent_required');
+      expect(campusA.status.value).toBe('error');
+
+      consentPending = false;
+      await sessionA.reload();
+      expect(campusA.id.value).toBe('next-school');
+      expect(campusA.status.value).toBe('ready');
 
       // Invalidating sessionA clears stale campusId and resets status
       sessionA.invalidate();

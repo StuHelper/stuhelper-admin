@@ -1,11 +1,15 @@
 import example from '../../../../contracts/contribution.example.json';
 import operations from '../../../../contracts/storage-operations.example.json';
 import * as d from './data';
+import { createDemoLegalHandler } from './legal';
 
 const json = (value: unknown, status = 200) => Response.json(value, { status });
 const nope = (code: string, status: number) =>
   json({ code, request_id: 'demo' }, status);
 void example;
+
+const DEMO_CSRF_TOKEN = 'a'.repeat(43);
+const handleLegalRequest = createDemoLegalHandler({ csrfToken: DEMO_CSRF_TOKEN });
 
 const demoCapabilities = [
   'platform.status',
@@ -155,6 +159,8 @@ export async function handleDemoRequest(
   method: string,
   init?: RequestInit,
 ): Promise<Response> {
+  const legal = await handleLegalRequest(u, method, init);
+  if (legal) return legal;
   // The demo serves maintenance reads from the same objects as the public catalog.
   const p = u.pathname
     .replace('/api/v1', '')
@@ -162,6 +168,7 @@ export async function handleDemoRequest(
   if (p === '/auth/session') {
     return json({
       authenticated: true,
+      consent_required: false,
       content_school_id: d.SCHOOL,
       profile: {
         id: '00000000-0000-4000-8000-000000000001',
@@ -187,7 +194,7 @@ export async function handleDemoRequest(
         },
         revision: 1,
       },
-      csrf_token: 'a'.repeat(43),
+      csrf_token: DEMO_CSRF_TOKEN,
       phone_bound: true,
       administrator: true,
       expires_at: '2030-01-01T00:00:00Z',
@@ -240,6 +247,7 @@ export async function handleDemoRequest(
         ['open-platform', 'ready', 'available'],
         ['information-query', 'ready', 'available'],
         ['storage', 'ready', 'available'],
+        ['legal', 'ready', 'available'],
       ].map(([id, state, health]) => ({ id, state, health })),
     );
   }
@@ -738,18 +746,26 @@ function billingRoute(p: string, method: string, u: URL) {
 }
 
 export function installDemoFetch() {
+  // The real session transport reads this cookie. The demo has no HTTP login to set it.
+  // eslint-disable-next-line unicorn/no-document-cookie
+  document.cookie = `stuhelper_csrf=${DEMO_CSRF_TOKEN}; Path=/; SameSite=Strict`;
   const realFetch = window.fetch.bind(window);
   window.fetch = async (input, init) => {
     const u = new URL(
       input instanceof Request ? input.url : String(input),
       window.location.href,
     );
-    if (!u.pathname.startsWith('/api/')) return realFetch(input, init);
+    if (u.origin !== window.location.origin || !u.pathname.startsWith('/api/')) {
+      return realFetch(input, init);
+    }
     const method = (
       init?.method ?? (input instanceof Request ? input.method : 'GET')
     ).toUpperCase();
     await new Promise((resolve) => setTimeout(resolve, 100 + Math.random() * 150));
-    const response = await handleDemoRequest(u, method, init);
+    // Fetch supplies Origin at the network boundary. Mirror it for intercepted writes.
+    const headers = new Headers(init?.headers ?? (input instanceof Request ? input.headers : undefined));
+    if (method !== 'GET' && !headers.has('Origin')) headers.set('Origin', u.origin);
+    const response = await handleDemoRequest(u, method, { ...init, headers });
     if (response.status >= 400) {
       console.warn('[demo]', method, u.pathname, response.status);
     }

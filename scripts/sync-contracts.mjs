@@ -22,6 +22,7 @@ const modules = {
   billing: { repo: 'billing', files: { 'contracts/billing.openapi.json': 'contracts/billing.openapi.json', 'sdk/billing.gen.ts': 'apps/web-antd/src/api/billing.gen.ts' } },
   'qq-binding': { repo: 'qq-binding', files: { 'contracts/qq-binding.openapi.json': 'contracts/qq-binding.openapi.json', 'sdk/qq-binding.gen.ts': 'apps/web-antd/src/api/qq-binding.gen.ts' } },
   session: { repo: 'backend', single: true, files: { 'contracts/session.openapi.json': 'contracts/session.openapi.json' }, extra: { generator: 'openapi-typescript@7.13.0' } },
+  legal: { repo: 'backend', files: { 'contracts/legal.openapi.json': 'contracts/legal.openapi.json', 'sdk/legal/legal.gen.ts': 'apps/web-antd/src/api/legal.gen.ts' } },
   verification: { repo: 'verification', single: true, files: { 'contracts/verification.openapi.yaml': 'contracts/verification.openapi.yaml', 'sdk/verification.gen.ts': 'apps/web-antd/src/api/verification.gen.ts', 'contracts/verification-cases.json': 'contracts/verification-cases.json' } },
   groups: { repo: 'groups', files: { 'contracts/groups.openapi.json': 'contracts/groups.openapi.json', 'sdk/groups.gen.ts': 'apps/web-antd/src/api/groups.gen.ts' } },
   'information-query': { repo: 'information-query', files: { 'contracts/information-query.openapi.json': 'contracts/information-query.openapi.json', 'sdk/information-query.gen.ts': 'apps/web-antd/src/api/information-query.gen.ts' } },

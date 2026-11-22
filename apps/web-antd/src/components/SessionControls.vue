@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 import { useI18n } from '@vben/locales';
 
@@ -33,6 +33,13 @@ const save = useMutation();
 const editing = ref(false);
 const nickname = ref('');
 const signOutError = ref('');
+
+watch(session.session, (current) => {
+  if (!current) {
+    editing.value = false;
+    nickname.value = '';
+  }
+});
 
 const locked = computed(() => save.busy.value || save.uncertain.value);
 const trimmedNickname = computed(() => nickname.value.trim());
@@ -101,14 +108,14 @@ function choose({ key }: { key: number | string }) {
 
 <template>
   <div class="me-4 flex items-center gap-2">
-    <template v-if="session.state.value === 'member' && session.session.value">
+    <template v-if="session.state.value === 'member'">
       <Dropdown :trigger="['click']">
         <Button type="text">
-          {{ session.session.value.profile.nickname }}
+          {{ session.session.value?.profile.nickname || t('page.session.account') }}
         </Button>
         <template #overlay>
           <Menu @click="choose">
-            <MenuItem key="profile">
+            <MenuItem v-if="session.session.value" key="profile">
               {{ t('page.session.editNickname') }}
             </MenuItem>
             <MenuItem key="device">{{ t('page.session.signOut') }}</MenuItem>
@@ -139,7 +146,7 @@ function choose({ key }: { key: number | string }) {
     </span>
     <SessionNotice />
     <Modal
-      :open="editing"
+      :open="editing && session.session.value !== null"
       :title="t('page.session.editNickname')"
       :confirm-loading="save.busy.value"
       :closable="!locked"

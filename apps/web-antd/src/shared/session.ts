@@ -1,6 +1,6 @@
 import type { components } from '../api/session.gen';
 
-import { inject, type InjectionKey, readonly, ref, shallowRef } from 'vue';
+import { computed, inject, type InjectionKey, readonly, ref, shallowRef } from 'vue';
 
 import contract from '../../../../contracts/session.openapi.json';
 import { ApiError } from './api/errors';
@@ -14,8 +14,22 @@ export type ProfileUpdate = components['schemas']['ProfileUpdate'];
 export type SessionState = 'error' | 'guest' | 'loading' | 'member';
 
 const schemas = contract.components.schemas;
-const parseSession = schemaOf<Session>(schemas, 'Session');
+const validateSession = schemaOf<Session>(schemas, 'Session');
 export const parseProfile = schemaOf<Profile>(schemas, 'Profile');
+
+function parseSession(value: unknown) {
+  // A provider on the previous contract omitted the flag on full sessions.
+  // The full schema still validates every field in that response.
+  if (
+    value &&
+    typeof value === 'object' &&
+    !Array.isArray(value) &&
+    !('consent_required' in value)
+  ) {
+    return validateSession({ ...value, consent_required: false });
+  }
+  return validateSession(value);
+}
 
 /**
  * The signed-in application session. Business pages read login state from here
@@ -24,7 +38,11 @@ export const parseProfile = schemaOf<Profile>(schemas, 'Profile');
 export function createSessionStore(fetcher: typeof fetch) {
   const state = ref<SessionState>('loading');
   const unavailable = ref(false);
-  const session = shallowRef<null | Session>(null);
+  const authenticatedSession = shallowRef<null | Session>(null);
+  const session = computed(() => {
+    const snapshot = authenticatedSession.value;
+    return snapshot?.consent_required === false ? snapshot : null;
+  });
   const http = new Http(fetcher);
   let pending: Promise<void> | undefined;
   let retryAt = 0;
@@ -59,8 +77,7 @@ export function createSessionStore(fetcher: typeof fetch) {
         timeout: 10_000,
       });
       if (current !== generation) return;
-      if (!value.authenticated) throw new ApiError('incompatible');
-      session.value = value;
+      authenticatedSession.value = value;
       state.value = 'member';
       unavailable.value = false;
       failures = 0;
@@ -68,7 +85,7 @@ export function createSessionStore(fetcher: typeof fetch) {
     } catch (error) {
       if (current !== generation) return;
       if (error instanceof ApiError && error.denied) {
-        session.value = null;
+        authenticatedSession.value = null;
         state.value = 'guest';
         unavailable.value = false;
         failures = 0;
@@ -77,7 +94,7 @@ export function createSessionStore(fetcher: typeof fetch) {
         // Keep mounted forms and their valid input during a temporary outage.
         // Every business action is still authorized independently by the server.
         unavailable.value = true;
-        state.value = session.value ? 'member' : 'error';
+        state.value = authenticatedSession.value ? 'member' : 'error';
         if (
           error instanceof ApiError &&
           (error.status === 502 ||
@@ -117,7 +134,7 @@ export function createSessionStore(fetcher: typeof fetch) {
     generation++;
     cancelWait?.();
     pending = undefined;
-    session.value = null;
+    authenticatedSession.value = null;
     state.value = 'guest';
     unavailable.value = false;
     failures = 0;
@@ -137,8 +154,7 @@ export function createSessionStore(fetcher: typeof fetch) {
       method: 'POST',
       timeout: 10_000,
     });
-    session.value = null;
-    state.value = 'guest';
+    invalidate();
     window.location.assign('/');
   }
 
@@ -154,7 +170,8 @@ export function createSessionStore(fetcher: typeof fetch) {
         key,
         timeout: 10_000,
       });
-      if (session.value) session.value = { ...session.value, profile: saved };
+      const current = session.value;
+      if (current) authenticatedSession.value = { ...current, profile: saved };
       return saved;
     } catch (error) {
       if (
@@ -170,7 +187,7 @@ export function createSessionStore(fetcher: typeof fetch) {
           try {
             const current = parseProfile(error.detail.current);
             if (session.value) {
-              session.value = { ...session.value, profile: current };
+              authenticatedSession.value = { ...session.value, profile: current };
               updatedFromBody = true;
             }
           } catch {
@@ -188,6 +205,7 @@ export function createSessionStore(fetcher: typeof fetch) {
   return {
     unavailable: readonly(unavailable),
     state: readonly(state),
+    authenticatedSession: readonly(authenticatedSession),
     session: readonly(session),
     reload,
     revalidate,
