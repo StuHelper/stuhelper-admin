@@ -492,6 +492,7 @@
     },
     "confirmImport": "Confirmar importación",
     "imported": "Importación completa: objetos {objects}, matrículas {enrollments}, correcciones conservadas {preserved}.",
+    "schoolRequired": "Indica un centro concreto al buscar por identificador de estudiante o personal.",
     "kinds": {
       "school": "Universidad",
       "department": "Departamento",
@@ -799,6 +800,7 @@
       "unavailable": "No hay datos disponibles actualmente"
     },
     "profileFields": {
+      "staff_id": "Identificador del personal",
       "student_id": "Número de estudiante",
       "name": "Nombre",
       "department": "Departamento",
@@ -1237,6 +1239,7 @@
       "occurred": "Fecha del evento",
       "grantSubmit": "Conceder",
       "revokeHint": "Al revocar se retiran los puntos concedidos por el evento. Los que falten quedan como puntos adeudados.",
+      "restoreQuota": "Restablecer la cuota del período consumida por esta recompensa",
       "revokeSubmit": "Confirmar revocación",
       "refundReason": {
         "duplicate_charge": "Cobro duplicado",
@@ -1587,6 +1590,10 @@
       "subscribe": "Suscribirse",
       "feedback": "Comentarios",
       "watch": "Vigilar",
+      "cancel_action": "Cancelar acción",
+      "card_preview": "Vista previa de la tarjeta del grupo",
+      "retry_action": "Reintentar acción",
+      "unexempt": "Retirar exención",
       "ai_execute": "Ejecutar sugerencia"
     },
     "commandHints": {
@@ -1904,6 +1911,9 @@
       "content_unavailable": "Servicio de contenidos o favoritos no disponible"
     },
     "modules": {
+      "storage": "Almacenamiento",
+      "storage-contribution": "Aportación de almacenamiento",
+      "verification": "Verificación",
       "billing": "Facturación",
       "open-platform": "Plataforma abierta",
       "reviews": "Reseñas",

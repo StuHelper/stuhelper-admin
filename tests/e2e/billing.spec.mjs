@@ -22,7 +22,7 @@ async function server(page) {
       if (path === '/channels') return route.fulfill({ json: { items: [{ id: 'demo-pay', enabled: false, amounts_minor: [1000, 3000], original_refunds: true }], next: '' } });
       if (path === '/offers') return route.fulfill({ json: { items: state.offers, next: '' } });
       if (path === '/rules') return route.fulfill({ json: { items: [rule], next: '' } });
-      if (path === '/accounts') return route.fulfill({ json: { target, wallet: { points: 40, ivory_minor: 2500, frozen_ivory_minor: 0, debt_points: 0, frozen: false }, orders: { items: [order({ id: 'p1', kind: 'purchase', state: 'succeeded', amount_minor: 1000, points: 120, reference: 'points-120' })], next: '' }, ledger: { items: [{ id: 'e1', asset: 'points', kind: 'reward', amount: 5, reference: 'ev', created_at: '2026-11-02T00:00:00Z' }], next: '' } } });
+      if (path === '/accounts') return route.fulfill({ json: { target, rewards: { items: [], next: '' }, wallet: { points: 40, permanent_points: 40, expiring_points: 0, expiring_soon_points: 0, ivory_minor: 2500, frozen_ivory_minor: 0, debt_points: 0, frozen: false }, orders: { items: [order({ id: 'p1', kind: 'purchase', state: 'succeeded', amount_minor: 1000, points: 120, reference: 'points-120' })], next: '' }, ledger: { items: [{ id: 'e1', asset: 'points', kind: 'reward', amount: 5, reference: 'ev', created_at: '2026-11-02T00:00:00Z' }], next: '' } } });
       return route.fulfill({ status: 404, json: { code: 'billing_not_found' } });
     }
     const body = request.postDataJSON();
@@ -35,6 +35,7 @@ async function server(page) {
       state.offers = [{ ...body, version: body.version + 1 }];
       return route.fulfill({ json: state.offers[0] });
     }
+    if (path === '/revocations') return route.fulfill({ json: { event_id: body.event_id, rule_id: rule.id, version: 2, points: 5, state: 'granted', occurred_at: '2026-11-01T00:00:00Z', lot_id: 'lot', revoked: true } });
     if (path === '/rewards') return route.fulfill({ json: { event_id: body.event.event_id, rule_id: body.event.rule_id, version: 2, points: 5, state: 'granted', occurred_at: body.event.occurred_at, lot_id: 'lot', revoked: false } });
     return route.fulfill({ status: 404, json: { code: 'billing_not_found' } });
   });
@@ -118,6 +119,26 @@ test('an account lookup shows the wallet and a reward is granted once per event'
   await grant.click();
   await expect(page.getByText(a.rewardState.granted, { exact: true })).toBeVisible();
   expect(state.writes).toEqual([{ path: '/rewards', key: expect.any(String), body: { target, event: { event_id: expect.stringMatching(/^[0-9a-f-]{36}$/), rule_id: 'review-published', object_id: 'review-42', occurred_at: expect.any(String) } } }]);
+});
+
+test('restoring reward quota requires an explicit selection for each revocation', async ({ page }, info) => {
+  const all = catalogue(info); const a = all.billing.accounts; const state = await server(page);
+  await page.goto(`${base}/billing/accounts?lang=${info.project.metadata.locale}`);
+  await page.getByLabel(all.billing.issuer).fill(target.issuer);
+  await page.getByLabel(all.billing.subject).fill(target.subject);
+  await page.getByRole('button', { name: all.common.search, exact: true }).click();
+  await page.getByRole('tab', { name: a.revoke, exact: true }).click();
+  const restore = page.getByRole('checkbox', { name: a.restoreQuota });
+  for (const restoreQuota of [true, false]) {
+    const event = restoreQuota ? 'review-corrected' : 'abuse';
+    await expect(restore).not.toBeChecked();
+    await page.locator('#billing-revoke-event').fill(event);
+    await page.locator('#billing-revoke-reason').fill(event);
+    if (restoreQuota) await restore.check();
+    await page.getByRole('button', { name: a.revokeSubmit, exact: true }).click();
+    await expect(page.locator('#billing-revoke-event')).toHaveValue('');
+    expect(state.writes.at(-1)).toEqual({ path: '/revocations', key: expect.any(String), body: { target, event_id: event, reason: event, restore_quota: restoreQuota } });
+  }
 });
 
 test('a refund whose automatic queries ran out gets one more query with cited evidence', async ({ page }, info) => {

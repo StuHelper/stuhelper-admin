@@ -59,6 +59,9 @@
     "RES-ADMIN-05": [
       "tests/e2e/commerce.spec.mjs#an unpriced resource is priced from the manage panel"
     ],
+    "WP-21": [
+      "tests/e2e/billing.spec.mjs#restoring reward quota requires an explicit selection for each revocation"
+    ],
     "WP-ADMIN-01": [
       "tests/e2e/commerce.spec.mjs#a plan is saved with the version that was read, and a plan without coverage is marked",
       "tests/e2e/commerce.spec.mjs#stopping sales asks for confirmation and keeps the plan listed as not on sale"

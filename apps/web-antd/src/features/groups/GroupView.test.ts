@@ -56,6 +56,7 @@ const makeConfig = (id: string, name: string, number: string) => ({
   dice_sides: 6,
   frequency_limit: 8,
   frequency_seconds: 10,
+  discoverable: true, category: 'course', description: 'Algorithms', password_hint: '',
   grace_seconds: 72 * 3600,
   id,
   keywords: ['spam'],
