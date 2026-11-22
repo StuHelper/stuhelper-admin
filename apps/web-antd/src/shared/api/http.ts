@@ -291,6 +291,7 @@ export class Http {
         response.status,
         operation,
         problem,
+        response.status === 429 ? response.headers.get('Retry-After') : undefined,
       );
     } finally {
       clearTimeout(timeout);

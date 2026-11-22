@@ -7,6 +7,16 @@ const academic = {
 };
 
 const children: RouteRecordRaw[] = [
+  {
+    path: 'system/legal',
+    redirect: { name: 'LegalDocuments' },
+    meta: { hideInBreadcrumb: true, title: 'page.menu.legalDocuments' },
+    component: () => import('#/features/legal/LegalSessionScope.vue'),
+    children: [
+      { name: 'LegalDocuments', path: 'documents', component: () => import('#/features/legal/DocumentsView.vue'), meta: { title: 'page.menu.legalDocuments' } },
+      { name: 'LegalVariables', path: 'variables', component: () => import('#/features/legal/VariablesView.vue'), meta: { title: 'page.menu.legalVariables' } },
+    ],
+  },
  { name: 'Feedback', path: 'moderation/feedback', component: () => import('#/features/feedback/FeedbackView.vue'), meta: { title: 'page.feedback.title' } },
  {name:'SessionSettings',path:'system/sessions',component:()=>import('#/features/sessions/SessionSettingsView.vue'),meta:{title:'page.sessionPolicy.title'}},
   { name: 'AccountClosures', path: 'system/closures', component: () => import('#/features/closures/ClosuresView.vue'), meta: { title: 'page.closures.title' } },
@@ -19,6 +29,10 @@ const children: RouteRecordRaw[] = [
   { name: 'CatalogTimetable', path: 'catalog/timetable', component: () => import('#/features/academic/TimetableView.vue'), meta: { title: 'page.menu.catalogTimetable' } },
   { name: 'CatalogImports', path: 'catalog/imports', component: () => import('#/features/academic/ImportView.vue'), meta: { title: 'page.menu.catalogImports' } },
   { name: 'CatalogTeacherSites', path: 'catalog/teacher-sites', component: () => import('#/features/academic/TeacherSitesView.vue'), meta: { title: 'page.menu.catalogTeacherSites' } },
+  { name: 'TeacherHomepageMatching', path: 'catalog/teacher-sites/matching', component: () => import('#/features/teacher-homepage/MatchingView.vue'), meta: { title: 'page.teacherHomepage.nav.matching' } },
+  { name: 'TeacherHomepageSettings', path: 'catalog/teacher-sites/settings', component: () => import('#/features/teacher-homepage/SettingsView.vue'), meta: { title: 'page.teacherHomepage.nav.settings' } },
+  { name: 'TeacherHomepageProfile', path: 'catalog/teacher-sites/profile', component: () => import('#/features/teacher-homepage/ProfileView.vue'), meta: { title: 'page.teacherHomepage.nav.profile' } },
+  { name: 'TeacherHomepageRequests', path: 'catalog/teacher-sites/requests', component: () => import('#/features/teacher-homepage/RequestsView.vue'), meta: { title: 'page.teacherHomepage.nav.requests' } },
   { name: 'Resources', path: 'resources', component: () => import('#/features/resources/ResourcesView.vue'), meta: { title: 'page.menu.resources' } },
   { name: 'ResourceReviews', path: 'resources/reviews', component: () => import('#/features/resources/ReviewView.vue'), meta: { title: 'page.menu.resourceReviews' } },
   { name: 'ResourceCategories', path: 'resources/categories', component: () => import('#/features/resources/CategoriesView.vue'), meta: { title: 'page.menu.resourceCategories' } },

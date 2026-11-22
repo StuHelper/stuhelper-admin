@@ -11,12 +11,20 @@
     "storage",
     "media",
     "storage-contribution",
-    "resources"
+    "resources",
+    "legal"
   ],
   "specifications": [
     "README.md"
   ],
   "scenario_tests": {
+    "ST-09": [
+      "apps/web-antd/src/api/contribution.test.ts#keeps the operations record when the provider has no successful quota observation",
+      "tests/e2e/contributions.spec.mjs#operator retry preserves conditions, retains uncertain request and clears revoked inventory"
+    ],
+    "ST-12": [
+      "tests/e2e/storage-admissions.spec.mjs#edits account and group admissions and retries the original revision"
+    ],
     "RES-CLIENT-01": [
       "apps/web-antd/src/features/resources/api.test.ts#retries unknown writes with the frozen nested payload and original key",
       "apps/web-antd/src/features/resources/api.test.ts#resolves a lost upload response by querying state without sending bytes again"
@@ -51,6 +59,9 @@
     "RES-ADMIN-05": [
       "tests/e2e/commerce.spec.mjs#an unpriced resource is priced from the manage panel"
     ],
+    "WP-21": [
+      "tests/e2e/billing.spec.mjs#restoring reward quota requires an explicit selection for each revocation"
+    ],
     "WP-ADMIN-01": [
       "tests/e2e/commerce.spec.mjs#a plan is saved with the version that was read, and a plan without coverage is marked",
       "tests/e2e/commerce.spec.mjs#stopping sales asks for confirmation and keeps the plan listed as not on sale"
@@ -84,7 +95,8 @@
       "tests/e2e/layout-shell.spec.mjs#disabled module routes set the unavailable document title instead of exposing disabled module names"
     ],
     "I18N-06": [
-      "tests/e2e/layout-shell.spec.mjs#switching language preserves pending writes, original idempotency key, RTL direction and bundled header controls"
+      "tests/e2e/layout-shell.spec.mjs#switching language preserves pending writes, original idempotency key, RTL direction and bundled header controls",
+      "tests/e2e/moderation-categories.spec.mjs#academic queue filters fit within the viewport in both writing directions"
     ],
     "MOD-09": [
       "tests/e2e/overview.spec.mjs#overview counts pending refunds, new feedback, student and teacher verifications beyond 25 history rows, and hides refused cards",
@@ -140,10 +152,45 @@
       "tests/e2e/moderation.spec.mjs#queue batch preview applies decisions per item and content view handles unpublished entries"
     ],
     "AO-02": [
-      "tests/e2e/catalog.spec.mjs#catalog paged search appends courses, preserves edits across conflict reload, and merges duplicates after preview"
+      "tests/e2e/catalog.spec.mjs#catalog paged search appends courses, preserves edits across conflict reload, and merges duplicates after preview",
+      "tests/e2e/legal.spec.mjs#legal draft conflict keeps input and uncertain writes replay only the original request"
     ],
     "AO-03": [
       "tests/e2e/catalog.spec.mjs#catalog import previews normalized JSON and retries an uncertain confirmation with the original key"
+    ],
+    "CM-22": [
+      "tests/e2e/moderation.spec.mjs#a moderator rejects the selected follow-up without deciding its sibling or the original review"
+    ],
+    "CM-25": [
+      "tests/e2e/moderation-categories.spec.mjs#resource review filters tasks and submits the selected violation category",
+      "tests/e2e/moderation-categories.spec.mjs#resource review confirms before discarding a category-only edit",
+      "tests/e2e/moderation-categories.spec.mjs#academic queue retries and filters by the school category counts",
+      "tests/e2e/moderation-categories.spec.mjs#resource queue retries and filters by the school category counts",
+      "apps/web-antd/src/demo/server.test.ts#summarizes categorized and uncategorized demo tasks by school and updates after a decision"
+    ],
+    "TEACHER-SITES-03": [
+      "tests/e2e/teacher-homepage.spec.mjs#teacher homepage matching searches both lists, appends candidates and safely resolves a conflict and a lost reply",
+      "tests/e2e/teacher-homepage.spec.mjs#teacher homepage read-only staff can examine matches and a forbidden route clears private controls",
+      "apps/web-antd/src/features/teacher-homepage/matching.test.ts#preserves the draft on a revision conflict and sends a new key only after another confirmation",
+      "apps/web-antd/src/features/teacher-homepage/access.test.ts#discovers both delegated grants from home once and keeps read-only access independent",
+      "tests/e2e/teacher-homepage.spec.mjs#teacher homepage direct routes wait for consent before requesting school data",
+      "apps/web-antd/src/features/teacher-homepage/access.test.ts#clears school permissions while consent is pending and rediscovers them in the new school"
+    ],
+    "TEACHER-SITES-04": [
+      "tests/e2e/teacher-homepage.spec.mjs#teacher homepage settings show overlapping eligibility counts and save exact labels against the latest allowlist revision",
+      "tests/e2e/teacher-homepage.spec.mjs#teacher homepage profile keeps edits after capacity rejection, validates a replacement photo and removes the override on request",
+      "tests/e2e/teacher-homepage.spec.mjs#teacher homepage requests preview private photos and submit decisions using the current revisions",
+      "tests/e2e/teacher-homepage.spec.mjs#authorized homepage images follow signed redirects and revoked previews disappear",
+      "apps/web-antd/src/features/teacher-homepage/settingsSchool.test.ts#clears both school settings reads when access is forbidden",
+      "apps/web-antd/src/features/teacher-homepage/profileRules.test.ts#preserves independent edits on conflict and adopts concurrent values for overlapping edits",
+      "apps/web-antd/src/features/teacher-homepage/requestApi.test.ts#keeps the same key and request body when retrying an approval after a lost response"
+    ],
+    "CM-24": [
+      "tests/e2e/teacher-homepage.spec.mjs#teacher homepage complaints use a server-filtered queue and hide or dismiss each selected item",
+      "apps/web-antd/src/features/academic/TeacherHomepageComplaintPanel.test.ts#offers only dismissal for a missing target and uses the complaint revision"
+    ],
+    "AO-05": [
+      "tests/e2e/legal.spec.mjs#legal menu follows platform permission for a consent-pending session and revokes displayed data"
     ]
   }
 }

@@ -5,7 +5,7 @@ import { computed, getCurrentInstance, inject, onMounted, reactive, ref, shallow
 
 import { useI18n } from '@vben/locales';
 
-import { Alert, Button, Card, DatePicker, Descriptions, DescriptionsItem, Form, FormItem, Input, InputNumber, Modal, Radio, RadioGroup, Select, Table, TabPane, Tabs, Tag, Textarea } from 'ant-design-vue';
+import { Alert, Button, Card, Checkbox, DatePicker, Descriptions, DescriptionsItem, Form, FormItem, Input, InputNumber, Modal, Radio, RadioGroup, Select, Table, TabPane, Tabs, Tag, Textarea } from 'ant-design-vue';
 
 import { useAccountJump } from '#/shared/account-jump';
 import { ApiError, errorCode, isDeniedCode } from '#/shared/api/errors';
@@ -74,6 +74,9 @@ async function lookup() {
     accountJump.rememberIssuer(next.issuer);
     prefilled.value = false;
     usedRecentIssuer.value = false;
+    if (target.value?.issuer !== next.issuer || target.value?.subject !== next.subject) {
+      Object.assign(revokeForm, { event: '', reason: '', restoreQuota: false });
+    }
     target.value = next;
     show(result, false, false);
   } catch (error) {
@@ -194,13 +197,13 @@ async function grant() {
   if (result) grantForm.event = crypto.randomUUID();
   await after(result, result ? t(`page.billing.accounts.rewardState.${result.state}`) : '');
 }
-const revokeForm = reactive({ event: '', reason: '' });
+const revokeForm = reactive({ event: '', reason: '', restoreQuota: false });
 async function revoke() {
   if (!target.value || !revokeForm.event.trim() || !revokeForm.reason.trim()) return;
   success.value = '';
-  const body = { target: target.value, event_id: revokeForm.event.trim(), reason: revokeForm.reason.trim() };
+  const body = { target: target.value, event_id: revokeForm.event.trim(), reason: revokeForm.reason.trim(), restore_quota: revokeForm.restoreQuota };
   const result = await write.run(`revoke:${body.event_id}`, body, (value, key) => api.revoke(value, key));
-  if (result) Object.assign(revokeForm, { event: '', reason: '' });
+  if (result) Object.assign(revokeForm, { event: '', reason: '', restoreQuota: false });
   await after(result, t('page.billing.accounts.revoked'));
 }
 // Resource unlocks are refunded in full. A membership refund may be partial; it ends
@@ -370,6 +373,9 @@ const ledgerKindText = (kind: string) => (te(`page.billing.ledgerKind.${kind}`) 
               <Form layout="vertical" class="max-w-2xl" @submit.prevent="revoke">
                 <FormItem :label="t('page.billing.accounts.event')" required html-for="billing-revoke-event"><Input id="billing-revoke-event" v-model:value="revokeForm.event" :maxlength="256" :disabled="locked" /></FormItem>
                 <FormItem :label="t('page.common.reason')" required html-for="billing-revoke-reason"><Textarea id="billing-revoke-reason" v-model:value="revokeForm.reason" :rows="2" :maxlength="500" :disabled="locked" /></FormItem>
+                <FormItem>
+                  <Checkbox v-model:checked="revokeForm.restoreQuota" :disabled="locked">{{ t('page.billing.accounts.restoreQuota') }}</Checkbox>
+                </FormItem>
                 <Button danger type="primary" html-type="submit" :loading="write.busy.value" :disabled="!revokeForm.event.trim() || !revokeForm.reason.trim() || write.uncertain.value">{{ t('page.billing.accounts.revokeSubmit') }}</Button>
               </Form>
             </TabPane>

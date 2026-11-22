@@ -2,11 +2,11 @@
 import type { Decision, Task } from '../academic/api';
 import type { Resource } from './api';
 
-import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from 'vue';
 
 import { useI18n } from '@vben/locales';
 
-import { Alert, Button, Card, Checkbox, Descriptions, DescriptionsItem, Drawer, Form, FormItem, Select, Space, Table, Tag, Textarea } from 'ant-design-vue';
+import { Alert, Button, Card, Checkbox, Descriptions, DescriptionsItem, Drawer, Form, FormItem, Select, Space, Table, Tag } from 'ant-design-vue';
 
 import { errorCode } from '#/shared/api/errors';
 import { useMutation, usePaged, useTask } from '#/shared/composables/async';
@@ -16,14 +16,17 @@ import AdminPage from '#/shared/ui/AdminPage.vue';
 import LoadState from '#/shared/ui/LoadState.vue';
 import MaterialPreview from '#/shared/ui/MaterialPreview.vue';
 import { useErrorText } from '#/shared/ui/messages';
+import { isValidModerationReason } from '#/shared/ui/moderation-reason';
+import ModerationReasonField from '#/shared/ui/ModerationReasonField.vue';
 import MutationAlert from '#/shared/ui/MutationAlert.vue';
-import ReasonPresets from '#/shared/ui/ReasonPresets.vue';
 import { stateColor } from '#/shared/ui/state-color';
 
 import { arrayCursor, useAcademicAdmin } from '../academic/api';
 import { useCampusId } from '../academic/campus';
 import CampusPending from '../academic/CampusPending.vue';
+import CategoryCounts from '../academic/CategoryCounts.vue';
 import { useTaskPoll } from '../academic/useTaskPoll';
+import { violationCategories, type ViolationCategory } from '../academic/violationCategories';
 import { attributeText, localName, pageSize, useResourcesApi } from './api';
 
 /**
@@ -44,7 +47,12 @@ const retrying = useMutation();
 const download = useTask();
 const previewLoad = useTask();
 const school = useCampusId();
+const categoryCounts = useTemplateRef('categoryCounts');
 const taskState = ref('waiting');
+const categoryFilter = ref('');
+// The moderator's category is recorded with the decision; it starts from the reporter's choice.
+const category = ref<ViolationCategory>();
+const categoryOptions = computed(() => violationCategories.map((value) => ({ value, label: t(`page.moderation.categories.${value}`) })));
 const selected = shallowRef<Task>();
 const entry = shallowRef<Resource>();
 const openError = ref('');
@@ -55,6 +63,17 @@ const lastResult = ref('');
 const autoNext = ref(true);
 const previewOpen = ref(false);
 const previewUrl = ref('');
+
+function taskCategory(task: Task) {
+  return task.decision?.category ?? task.submission.category;
+}
+
+const hasDraft = computed(
+  () =>
+    !!reason.value ||
+    (selected.value?.state === 'waiting' &&
+      category.value !== taskCategory(selected.value)),
+);
 
 let selectionVersion = 0;
 function clearPreview() {
@@ -67,7 +86,7 @@ onBeforeUnmount(clearPreview);
 
 const tasks = usePaged(async (after, signal) => {
   if (!school.value) return { items: [], next: '' };
-  const rows = await moderation.tasks({ school_id: school.value, content_kind: 'resource', state: taskState.value, after, limit: pageSize }, signal);
+  const rows = await moderation.tasks({ school_id: school.value, content_kind: 'resource', state: taskState.value, category: categoryFilter.value, after, limit: pageSize }, signal);
   return { items: rows, next: arrayCursor(rows, (row) => row.id, pageSize) };
 });
 // Resource tasks reference "resource:<version id>".
@@ -96,7 +115,7 @@ useLeaveGuard(() => {
   if (deciding.uncertain.value || retrying.uncertain.value) {
     return t('page.common.leaveUncertain');
   }
-  return busy.value || reason.value ? t('page.common.leaveUnsaved') : '';
+  return busy.value || hasDraft.value ? t('page.common.leaveUnsaved') : '';
 });
 
 const label = (key: string) =>
@@ -145,6 +164,7 @@ async function open(task: Task) {
     entry.value = detail;
     action.value = entry.value.proposal ? 'publish' : 'hide';
     reason.value = '';
+    category.value = taskCategory(current);
   } catch (error) {
     if (selection !== selectionVersion) return;
     openError.value = errorCode(error);
@@ -152,7 +172,7 @@ async function open(task: Task) {
   }
 }
 function close() {
-  if (busy.value || (reason.value && !window.confirm(t('page.common.leaveUnsaved')))) return;
+  if (busy.value || (hasDraft.value && !window.confirm(t('page.common.leaveUnsaved')))) return;
   clearPreview();
   selected.value = undefined;
   entry.value = undefined;
@@ -178,8 +198,8 @@ async function togglePreview() {
 async function decide() {
   const task = selected.value;
   const current = entry.value;
-  if (!task || !current) return;
-  const body = { revision: task.revision, decision: { id: '', object_id: task.submission.object_id, revision: current.revision, action: action.value, signed: false, reason: reason.value } };
+  if (!task || !current || !isValidModerationReason(reason.value)) return;
+  const body = { revision: task.revision, decision: { id: '', object_id: task.submission.object_id, revision: current.revision, action: action.value, signed: false, reason: reason.value, ...(category.value ? { category: category.value } : {}) } };
   const result = await deciding.run(`decide:${task.id}`, body, (value, key) => moderation.decide(task.id, value, key));
   if (result) await decided(result);
 }
@@ -202,6 +222,7 @@ async function decided(task: Task) {
   reason.value = '';
   lastResult.value = `${version.value?.metadata.title ?? ''} · ${label(`page.moderation.taskState.${task.state}`)}`;
   success.value = lastResult.value;
+  void categoryCounts.value?.reload();
   await tasks.reload();
   if (!autoNext.value) return;
   const nextTarget = following ?? tasks.items.value.find((row) => row.id !== task.id && row.state === 'waiting');
@@ -214,7 +235,7 @@ function neighbour(step: number) {
 }
 async function move(step: number) {
   const target = neighbour(step);
-  if (!target || (reason.value && !window.confirm(t('page.common.leaveUnsaved')))) return;
+  if (!target || (hasDraft.value && !window.confirm(t('page.common.leaveUnsaved')))) return;
   await open(target);
 }
 function save() {
@@ -225,6 +246,7 @@ function save() {
 
 const columns = computed(() => [
   { key: 'kind', title: t('page.moderation.taskType') },
+  { key: 'category', title: t('page.moderation.category') },
   { key: 'reason', title: t('page.moderation.submissionNote'), ellipsis: true },
   { key: 'state', title: t('page.common.status') },
   { key: 'updated', title: t('page.common.updatedAt') },
@@ -242,18 +264,37 @@ const columns = computed(() => [
           <FormItem :label="t('page.common.status')" html-for="reviewview-field-1">
             <Select id="reviewview-field-1" v-model:value="taskState" class="w-40" :options="['waiting', 'decided', 'applied', 'failed'].map((value) => ({ value, label: label(`page.moderation.taskState.${value}`) }))" />
           </FormItem>
+          <FormItem :label="t('page.moderation.category')" html-for="reviewview-field-category">
+            <Select
+              id="reviewview-field-category"
+              v-model:value="categoryFilter"
+              class="w-44"
+              show-search
+              option-filter-prop="label"
+              :disabled="busy"
+              :options="[{ value: '', label: t('page.common.all') }, ...categoryOptions]"
+            />
+          </FormItem>
           <FormItem>
             <Button type="primary" html-type="submit" :disabled="!school || busy">{{ t('page.common.search') }}</Button>
           </FormItem>
         </Form>
       </Card>
       <CampusPending v-if="!school" @ready="school = $event" />
-      <Card v-else :bordered="false">
+      <CategoryCounts
+        v-if="school"
+        ref="categoryCounts"
+        :school="school"
+        :active="categoryFilter"
+        @pick="(value) => { if (!busy) { categoryFilter = value; void tasks.reload(); } }"
+      />
+      <Card v-if="school" :bordered="false">
         <LoadState v-if="tasks.items.value.length === 0" :status="tasks.status.value" :error="tasks.error.value" :empty="true" :empty-text="t('page.moderation.empty')" @retry="tasks.reload" />
         <template v-else>
           <Table :columns="columns" :data-source="tasks.items.value" :pagination="false" row-key="id" size="middle" :scroll="{ x: 640 }">
             <template #bodyCell="{ column, record }">
               <template v-if="column.key === 'kind'">{{ label(`page.moderation.taskKind.${record.submission.kind}`) }}</template>
+              <template v-else-if="column.key === 'category'">{{ (record.decision?.category ?? record.submission.category) ? label(`page.moderation.categories.${record.decision?.category ?? record.submission.category}`) : t('page.moderation.uncategorized') }}</template>
               <template v-else-if="column.key === 'reason'">{{ record.submission.reason === 'content_review' ? t('page.moderation.ruleReview') : record.submission.reason }}</template>
               <template v-else-if="column.key === 'state'"><Tag :color="stateColor(record.state)">{{ label(`page.moderation.taskState.${record.state}`) }}</Tag></template>
               <template v-else-if="column.key === 'updated'">{{ format.dateTime(record.updated_at) }}</template>
@@ -282,6 +323,7 @@ const columns = computed(() => [
           <DescriptionsItem v-for="field in version.category.fields" :key="field.key" :label="localName(field.names, locale)">{{ attributeText(field, version.metadata.attributes[field.key], locale) || t('page.common.notProvided') }}</DescriptionsItem>
           <DescriptionsItem :label="t('page.resources.origin')">{{ t(`page.resources.originKind.${version.metadata.origin.kind}`) }}<template v-if="version.metadata.origin.source"> · {{ version.metadata.origin.source }}</template></DescriptionsItem>
           <DescriptionsItem v-if="version.metadata.origin.license" :label="t('page.resources.license')">{{ version.metadata.origin.license }}</DescriptionsItem>
+          <DescriptionsItem :label="t('page.moderation.category')">{{ (selected.decision?.category ?? selected.submission.category) ? label(`page.moderation.categories.${selected.decision?.category ?? selected.submission.category}`) : t('page.moderation.uncategorized') }}</DescriptionsItem>
           <DescriptionsItem :label="t('page.resources.versionLabel')"><Tag :color="stateColor(version.state)">{{ t(`page.resources.versionState.${version.state}`) }}</Tag></DescriptionsItem>
           <DescriptionsItem v-if="version.file" :label="t('page.resources.file')">{{ version.file.filename }} · {{ format.bytes(version.file.size) }}</DescriptionsItem>
         </Descriptions>
@@ -317,12 +359,27 @@ const columns = computed(() => [
           <FormItem :label="t('page.moderation.action')" html-for="reviewview-field-2">
             <Select id="reviewview-field-2" v-model:value="action" :disabled="busy" :options="(['publish', 'hide', 'restore', 'delete', 'dismiss'] as const).map((value) => ({ value, label: t(`page.resources.reviewActions.${value}`) }))" />
           </FormItem>
-          <FormItem :label="t('page.common.reason')" required html-for="reviewview-field-3">
-            <ReasonPresets v-model="reason" :presets="reasonPresets" :disabled="busy" :max-length="2000" />
-            <Textarea id="reviewview-field-3" v-model:value="reason" :rows="3" :maxlength="2000" :disabled="busy" />
+          <FormItem :label="t('page.moderation.category')" html-for="reviewview-field-decision-category">
+            <Select
+              id="reviewview-field-decision-category"
+              v-model:value="category"
+              show-search
+              option-filter-prop="label"
+              allow-clear
+              :options="categoryOptions"
+              :placeholder="t('page.moderation.uncategorized')"
+              :disabled="busy"
+            />
           </FormItem>
+          <ModerationReasonField
+            id="reviewview-field-3"
+            v-model="reason"
+            :label="t('page.common.reason')"
+            :presets="reasonPresets"
+            :disabled="busy"
+          />
           <MutationAlert :busy="deciding.busy.value" :error="deciding.error.value" :uncertain="deciding.uncertain.value" :success="success" @retry="retryDecision" />
-          <Button class="mt-3" type="primary" html-type="submit" :loading="deciding.busy.value" :disabled="deciding.uncertain.value || !reason.trim()">{{ t('page.moderation.applyDecision') }}</Button>
+          <Button class="mt-3" type="primary" html-type="submit" :loading="deciding.busy.value" :disabled="deciding.uncertain.value || !isValidModerationReason(reason)">{{ t('page.moderation.applyDecision') }}</Button>
         </Form>
         <template v-else>
           <MutationAlert :busy="retrying.busy.value" :error="retrying.error.value" :uncertain="retrying.uncertain.value" :success="success" @retry="retrying.retry" />

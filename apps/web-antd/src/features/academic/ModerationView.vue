@@ -7,10 +7,11 @@ import type {
   Task,
 } from './api';
 
-import { computed, nextTick, reactive, ref, shallowRef, watch } from 'vue';
+import { computed, nextTick, reactive, ref, shallowRef, useTemplateRef, watch } from 'vue';
 
 import { useI18n } from '@vben/locales';
 
+import { useMediaQuery } from '@vueuse/core';
 import {
   Alert,
   Button,
@@ -26,7 +27,6 @@ import {
   Space,
   Table,
   Tag,
-  Textarea,
 } from 'ant-design-vue';
 
 import { errorCode } from '#/shared/api/errors';
@@ -36,14 +36,18 @@ import { useFormat } from '#/shared/format';
 import AdminPage from '#/shared/ui/AdminPage.vue';
 import LoadState from '#/shared/ui/LoadState.vue';
 import { useErrorText } from '#/shared/ui/messages';
+import { isValidModerationReason } from '#/shared/ui/moderation-reason';
+import ModerationReasonField from '#/shared/ui/ModerationReasonField.vue';
 import MutationAlert from '#/shared/ui/MutationAlert.vue';
-import ReasonPresets from '#/shared/ui/ReasonPresets.vue';
 import { stateColor } from '#/shared/ui/state-color';
 
 import { arrayCursor, pageSize, useAcademicAdmin } from './api';
 import { useCampusId } from './campus';
 import CampusPending from './CampusPending.vue';
+import CategoryCounts from './CategoryCounts.vue';
 import DecisionPanel from './DecisionPanel.vue';
+import TeacherHomepageComplaintPanel from './TeacherHomepageComplaintPanel.vue';
+import { violationCategories } from './violationCategories';
 
 /**
  * Moderation workbench. "queue" lists moderation tasks (reviews, reports,
@@ -55,35 +59,53 @@ const format = useFormat();
 const errorText = useErrorText();
 const api = useAcademicAdmin();
 const school = useCampusId();
+const compactFilters = useMediaQuery('(max-width: 767px)');
+const categoryCounts = useTemplateRef('categoryCounts');
 const filters = reactive({
   state: props.mode === 'queue' ? 'waiting' : '',
   kind: '',
   taskKind: '',
+  category: '',
   range: undefined as [string, string] | undefined,
 });
-const selected = shallowRef<{ entryId?: string; taskId?: string }>();
+interface Selection {
+  entryId?: string;
+  taskId?: string;
+  teacherHomepage?: boolean;
+}
+const selected = shallowRef<Selection>();
+const panelUncertain = ref(false);
 const panelBusy = ref(false);
 const panelDirty = ref(false);
 
 const maxSkippedEmptyPages = 5;
+let appliedFilters = { ...filters };
 
 const rows = usePaged<AdminEntry | Task>(async (after, signal) => {
   if (!school.value) return { items: [], next: '' };
+  // Keep the submitted filters paired with their pagination cursor.
+  if (!after) appliedFilters = { ...filters };
   if (props.mode === 'queue') {
-    const [from, until] = filters.range ?? [];
+    const [from, until] = appliedFilters.range ?? [];
+    const query = {
+      school_id: school.value,
+      state: appliedFilters.state,
+      kind: appliedFilters.taskKind,
+      category: appliedFilters.category,
+      content_kind: appliedFilters.kind,
+      from,
+      until,
+      after,
+      limit: pageSize,
+    };
+    if (query.content_kind === 'teacher_homepage') {
+      const page = await api.teacherComplaints(query, signal);
+      return { items: page.items, next: page.next_cursor };
+    }
     let cursor = after;
     for (let step = 0; step < maxSkippedEmptyPages; step++) {
       const tasks = await api.tasks(
-        {
-          school_id: school.value,
-          state: filters.state,
-          kind: filters.taskKind,
-          content_kind: filters.kind,
-          from,
-          until,
-          after: cursor,
-          limit: pageSize,
-        },
+        { ...query, after: cursor, include_teacher_homepage: true },
         signal,
       );
       const next = arrayCursor(tasks, (task) => task.id);
@@ -99,14 +121,16 @@ const rows = usePaged<AdminEntry | Task>(async (after, signal) => {
   const page = await api.entries(
     {
       school_id: school.value,
-      kind: filters.kind,
-      state: filters.state,
+      kind: appliedFilters.kind,
+      state: appliedFilters.state,
       after,
       limit: pageSize,
     },
     signal,
   );
   return { items: page.items, next: page.next };
+}, {
+  onDenied: () => { selected.value = undefined; },
 });
 const tasks = computed(() =>
   rows.items.value.filter((row): row is Task => 'submission' in row),
@@ -135,14 +159,19 @@ watch(
 function canLeave() {
   return (
     !(panelBusy.value || panelDirty.value) ||
-    window.confirm(t('page.common.leaveUnsaved'))
+    window.confirm(t(panelUncertain.value ? 'page.common.leaveUncertain' : 'page.common.leaveUnsaved'))
   );
 }
-useLeaveGuard(() => (panelBusy.value || panelDirty.value || batch.busy.value || batch.uncertain.value ? t(batch.uncertain.value ? 'page.common.leaveUncertain' : 'page.common.leaveUnsaved') : ''));
+useLeaveGuard(() => {
+  if (panelUncertain.value || batch.uncertain.value) return t('page.common.leaveUncertain');
+  return locked.value ? t('page.common.leaveUnsaved') : '';
+});
 const lastResult = ref('');
 const autoNext = ref(true);
-function targetOf(row: AdminEntry | Task) {
-  return 'submission' in row ? { taskId: row.id } : { entryId: row.id };
+function targetOf(row: AdminEntry | Task): Selection {
+  return 'submission' in row
+    ? { taskId: row.id, teacherHomepage: row.content_kind === 'teacher_homepage' }
+    : { entryId: row.id };
 }
 function neighbour(step: number) {
   const rows = visibleRows();
@@ -158,12 +187,16 @@ function move(step: number) {
   const target = neighbour(step);
   if (target) open(target);
 }
+function refreshQueue() {
+  void categoryCounts.value?.reload();
+  return rows.reload();
+}
 // A decision may remove its row from the filter, so find the next row before reloading.
 async function decided(message: string) {
   const current = selected.value?.taskId ?? selected.value?.entryId;
   const following = neighbour(1);
   lastResult.value = message;
-  await rows.reload();
+  await refreshQueue();
   if (!autoNext.value) return;
   const fallback = visibleRows().find(
     (row) => row.id !== current && ('submission' in row ? row.state === 'waiting' : true),
@@ -174,16 +207,17 @@ async function decided(message: string) {
     selected.value = nextTarget;
   }
 }
-function open(target: { entryId?: string; taskId?: string }) {
+function open(target: Selection) {
   if (selected.value && !canLeave()) return;
   selected.value = target;
 }
 function close() {
   if (canLeave()) selected.value = undefined;
 }
-function pending(busy: boolean, dirty: boolean) {
+function pending(busy: boolean, dirty: boolean, uncertain = false) {
   panelBusy.value = busy;
   panelDirty.value = dirty;
+  panelUncertain.value = uncertain;
 }
 
 // Batch decisions: preview each item first, then apply with the preview token.
@@ -200,13 +234,15 @@ watch([chosen, batchAction, batchReason], () => {
   request.value = undefined;
 });
 async function inspect() {
+  const reason = batchReason.value;
+  if (previewing.value || !isValidModerationReason(reason)) return;
   previewing.value = true;
   previewError.value = '';
   try {
     const items: BatchRequest['items'] = [];
     for (const id of chosen.value) {
       const task = tasks.value.find((item) => item.id === id);
-      if (!task) continue;
+      if (!task || task.content_kind === 'teacher_homepage') continue;
       const entry = await api.entry(task.submission.object_id);
       items.push({
         id,
@@ -216,7 +252,7 @@ async function inspect() {
           object_id: entry.id,
           revision: entry.revision,
           action: batchAction.value,
-          reason: batchReason.value,
+          reason,
         },
       });
     }
@@ -231,7 +267,7 @@ async function inspect() {
 }
 async function applyBatch() {
   const body = request.value;
-  if (!body) return;
+  if (!body || previewing.value || !isValidModerationReason(batchReason.value)) return;
   const result = await batch.run('batch', body, (value, key) =>
     api.applyBatch(value, key),
   );
@@ -249,7 +285,7 @@ async function batchApplied(result: BatchPreview) {
   await nextTick();
   preview.value = result;
   request.value = undefined;
-  void rows.reload();
+  void refreshQueue();
 }
 
 function label(key: string) {
@@ -268,8 +304,19 @@ const stateOptions = computed(() =>
     label: label(props.mode === 'queue' ? `page.moderation.taskState.${value}` : `page.moderation.state.${value}`),
   })),
 );
+const contentKindOptions = computed(() => {
+  const options = ['course', 'mentor', 'reply'].map((value) => ({
+    value,
+    label: t(`page.moderation.kind.${value}`),
+  }));
+  if (props.mode === 'queue') {
+    options.push({ value: 'teacher_homepage', label: t('page.teacherHomepage.moderation.kind') });
+  }
+  return options;
+});
 const taskColumns = computed(() => [
   { key: 'kind', title: t('page.moderation.taskType') },
+  { key: 'category', title: t('page.moderation.category') },
   { key: 'reason', title: t('page.moderation.submissionNote'), ellipsis: true },
   { key: 'state', title: t('page.common.status') },
   { key: 'updated', title: t('page.common.updatedAt') },
@@ -286,6 +333,7 @@ const entryColumns = computed(() => [
 
 <template>
   <AdminPage
+    class="min-w-0 max-w-full"
     :title="
       t(
         mode === 'queue'
@@ -301,19 +349,19 @@ const entryColumns = computed(() => [
       )
     "
   >
-    <div class="flex flex-col gap-3">
+    <div class="flex min-w-0 flex-col gap-3">
       <Alert v-if="lastResult" type="success" show-icon closable :message="lastResult" @close="lastResult = ''" />
       <Card :bordered="false">
         <Form
-          layout="inline"
-          class="flex flex-wrap gap-y-3"
+          :layout="compactFilters ? 'vertical' : 'inline'"
+          class="moderation-filters flex flex-wrap gap-y-3"
           @submit.prevent="rows.reload()"
         >
           <FormItem :label="t('page.common.status')" html-for="moderationview-field-1">
             <Select
 id="moderationview-field-1"
               v-model:value="filters.state"
-              class="w-40"
+              class="w-full md:w-40"
               :disabled="locked"
               :options="[
                 { value: '', label: t('page.common.all') },
@@ -325,14 +373,11 @@ id="moderationview-field-1"
             <Select
 id="moderationview-field-2"
               v-model:value="filters.kind"
-              class="w-36"
+              class="w-full md:w-36"
               :disabled="locked"
               :options="[
                 { value: '', label: t('page.common.all') },
-                ...['course', 'mentor', 'reply'].map((value) => ({
-                  value,
-                  label: t(`page.moderation.kind.${value}`),
-                })),
+                ...contentKindOptions,
               ]"
             />
           </FormItem>
@@ -341,7 +386,7 @@ id="moderationview-field-2"
               <Select
 id="moderationview-field-3"
                 v-model:value="filters.taskKind"
-                class="w-36"
+                class="w-full md:w-36"
                 :disabled="locked"
                 :options="[
                   { value: '', label: t('page.common.all') },
@@ -358,17 +403,36 @@ id="moderationview-field-3"
                 ]"
               />
             </FormItem>
-            <FormItem :label="t('page.moderation.timeRange')" html-for="moderationview-field-4">
+            <FormItem :label="t('page.moderation.category')" html-for="moderationview-field-category">
+              <Select
+                id="moderationview-field-category"
+                v-model:value="filters.category"
+                class="w-full md:w-44"
+                show-search
+                option-filter-prop="label"
+                :disabled="locked"
+                :options="[
+                  { value: '', label: t('page.common.all') },
+                  ...violationCategories.map((value) => ({ value, label: t(`page.moderation.categories.${value}`) })),
+                ]"
+              />
+            </FormItem>
+            <FormItem
+              :label="t('page.moderation.timeRange')"
+              class="moderation-filters-wide max-w-full"
+              html-for="moderationview-field-4"
+            >
               <DatePicker.RangePicker
                 id="moderationview-field-4"
                 v-model:value="filters.range"
+                class="moderation-range w-full max-w-full md:w-auto"
                 show-time
                 value-format="YYYY-MM-DDTHH:mm:ssZ"
                 :disabled="locked"
               />
             </FormItem>
           </template>
-          <FormItem>
+          <FormItem class="moderation-filters-wide">
             <Button
               type="primary"
               html-type="submit"
@@ -381,7 +445,14 @@ id="moderationview-field-3"
       </Card>
 
       <CampusPending v-if="!school" @ready="school = $event" />
-      <Card v-else :bordered="false">
+      <CategoryCounts
+        v-if="school && mode === 'queue'"
+        ref="categoryCounts"
+        :school="school"
+        :active="filters.category"
+        @pick="(value) => { if (!locked) { filters.category = value; void rows.reload(); } }"
+      />
+      <Card v-if="school" :bordered="false">
         <div v-if="rows.items.value.length === 0">
           <LoadState
             :status="rows.status.value"
@@ -417,14 +488,22 @@ id="moderationview-field-3"
               onChange: (keys: (string | number)[]) =>
                 (chosen = keys.map(String).slice(0, 20)),
               getCheckboxProps: (row: Task) => ({
-                disabled: row.state !== 'waiting' || locked,
+                disabled: row.state !== 'waiting' || row.content_kind === 'teacher_homepage' || locked,
               }),
             }"
           >
             <template #bodyCell="{ column, record }">
               <template v-if="column.key === 'kind'">
+                <div>{{ label(`page.moderation.taskKind.${record.submission.kind}`) }}</div>
+                <span v-if="record.content_kind === 'teacher_homepage'" class="text-muted-foreground text-xs">
+                  {{ t('page.teacherHomepage.moderation.kind') }}
+                </span>
+              </template>
+              <template v-else-if="column.key === 'category'">
 {{
-                label(`page.moderation.taskKind.${record.submission.kind}`)
+                (record.decision?.category ?? record.submission.category)
+                  ? label(`page.moderation.categories.${record.decision?.category ?? record.submission.category}`)
+                  : t('page.moderation.uncategorized')
               }}
 </template>
               <template v-else-if="column.key === 'reason'">
@@ -451,7 +530,7 @@ id="moderationview-field-3"
                   type="link"
                   size="small"
                   :disabled="panelBusy || batch.busy.value"
-                  @click="open({ taskId: String(record.id) })"
+                  @click="open(targetOf(record as Task))"
                   >
 {{ t('page.common.open') }}
 </Button>
@@ -558,21 +637,13 @@ id="moderationview-field-5"
               "
             />
           </FormItem>
-          <FormItem :label="t('page.moderation.reason')" required html-for="moderationview-field-6">
-            <ReasonPresets
-              v-model="batchReason"
-              :presets="reasonPresets"
-              :disabled="batch.busy.value || batch.uncertain.value"
-              :max-length="2000"
-            />
-            <Textarea
-id="moderationview-field-6"
-              v-model:value="batchReason"
-              :rows="3"
-              :maxlength="2000"
-              :disabled="batch.busy.value || batch.uncertain.value"
-            />
-          </FormItem>
+          <ModerationReasonField
+            id="moderationview-field-6"
+            v-model="batchReason"
+            :label="t('page.moderation.reason')"
+            :presets="reasonPresets"
+            :disabled="previewing || batch.busy.value || batch.uncertain.value"
+          />
         </Form>
         <p v-if="previewError" class="text-destructive mb-2" role="alert">
           {{ errorText(previewError) }}
@@ -611,7 +682,7 @@ id="moderationview-field-6"
               batch.busy.value ||
               batch.uncertain.value ||
               chosen.length === 0 ||
-              !batchReason.trim()
+              !isValidModerationReason(batchReason)
             "
             @click="inspect"
             >
@@ -621,7 +692,7 @@ id="moderationview-field-6"
             v-if="request"
             type="primary"
             :loading="batch.busy.value"
-            :disabled="batch.uncertain.value"
+            :disabled="previewing || batch.uncertain.value"
             @click="applyBatch"
             >
 {{ t('page.moderation.applyBatch') }}
@@ -656,16 +727,53 @@ id="moderationview-field-6"
           <Button size="small" :disabled="panelBusy || !neighbour(1)" @click="move(1)">{{ t('page.moderation.next') }}</Button>
         </Space>
       </div>
+      <TeacherHomepageComplaintPanel
+        v-if="selected?.teacherHomepage && selected.taskId"
+        :key="selected.taskId"
+        :school-id="school"
+        :task-id="selected.taskId"
+        @pending="pending"
+        @decided="decided"
+        @changed="refreshQueue"
+      />
       <DecisionPanel
-        v-if="selected"
+        v-else-if="selected"
         @decided="decided"
         :key="selected.taskId ?? selected.entryId"
         :school-id="school"
         :task-id="selected.taskId"
         :entry-id="selected.entryId"
         @pending="pending"
-        @changed="rows.reload"
+        @changed="refreshQueue"
       />
     </Drawer>
   </AdminPage>
 </template>
+
+<style scoped>
+.moderation-filters-wide :deep(.ant-form-item-control),
+.moderation-range :deep(.ant-picker-input) {
+  min-inline-size: 0;
+}
+
+@media (max-width: 767px) {
+  .moderation-filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+    gap: 0.75rem;
+  }
+
+  .moderation-filters > :deep(.ant-form-item) {
+    min-inline-size: 0;
+    margin-block-end: 0;
+  }
+
+  .moderation-filters-wide {
+    grid-column: 1 / -1;
+  }
+
+  .moderation-range :deep(.ant-picker-input) {
+    flex: 1 1 0;
+  }
+}
+</style>

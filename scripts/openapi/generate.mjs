@@ -20,6 +20,7 @@ const requiredContracts = [
   'favorites.openapi.json',
   'groups.openapi.json',
   'information-query.openapi.json',
+  'legal.openapi.json',
   'media.openapi.json',
   'moderation.openapi.json',
   'open-platform.openapi.json',

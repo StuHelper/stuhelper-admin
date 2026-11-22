@@ -33,13 +33,15 @@ import { ApiError, errorCode } from '#/shared/api/errors';
 import { useAsync, useMutation, usePaged } from '#/shared/composables/async';
 import { useFormat } from '#/shared/format';
 import LoadState from '#/shared/ui/LoadState.vue';
+import { isValidModerationReason } from '#/shared/ui/moderation-reason';
+import ModerationReasonField from '#/shared/ui/ModerationReasonField.vue';
 import MutationAlert from '#/shared/ui/MutationAlert.vue';
-import ReasonPresets from '#/shared/ui/ReasonPresets.vue';
 import { stateColor } from '#/shared/ui/state-color';
 
 import { dimensions, pageSize, useAcademicAdmin } from './api';
 import { diffText } from './textDiff';
 import { useTaskPoll } from './useTaskPoll';
+import { violationCategories, type ViolationCategory } from './violationCategories';
 
 /**
  * Review one entry, optionally through an existing moderation task. A decision
@@ -67,6 +69,9 @@ const task = shallowRef<Task>();
 const action = ref<Decision['action']>();
 const body = ref('');
 const reason = ref('');
+// The moderator's category takes precedence; it starts from the first category the reporter chose.
+const category = ref<'' | ViolationCategory>('');
+const categoryOptions = computed(() => violationCategories.map((value) => ({ value, label: t(`page.moderation.categories.${value}`) })));
 const signed = ref(false);
 const teacher = ref('');
 const attribution = shallowRef<AttributionPreview>();
@@ -79,6 +84,7 @@ const form = () =>
     action.value,
     body.value,
     reason.value,
+    category.value,
     signed.value,
     teacher.value,
   ]);
@@ -184,6 +190,7 @@ async function load(preserve = false) {
   action.value = undefined;
   body.value = result.task?.submission.proposed_body || result.entry.input.body;
   reason.value = '';
+  category.value = result.task?.decision?.category ?? result.task?.submission.category ?? '';
   signed.value = !result.entry.anonymous;
   teacher.value = result.entry.input.teacher_id ?? '';
   baseline.value = form();
@@ -259,7 +266,12 @@ async function inspectAttribution() {
 async function decide() {
   const current = entry.value;
   const chosen = action.value;
-  if (!current || !chosen || (chosen === 'reassign' && !attribution.value))
+  if (
+    !current ||
+    !chosen ||
+    !isValidModerationReason(reason.value) ||
+    (chosen === 'reassign' && !attribution.value)
+  )
     return;
   success.value = '';
   // A direct content action first opens a review task that records the decision.
@@ -286,6 +298,7 @@ async function decide() {
     action: chosen,
     signed: signed.value,
     reason: reason.value,
+    ...(category.value ? { category: category.value } : {}),
     ...(chosen === 'edit' ? { body: body.value } : {}),
     ...(chosen === 'identity' ? { author_handle: current.author_handle } : {}),
     ...(chosen === 'reassign'
@@ -496,6 +509,10 @@ defineExpose({ dirty, busy, uncertain });
             >
               {{ task.submission.reason }}
             </p>
+            <p>
+              {{ t('page.moderation.category') }}:
+              {{ (task.decision?.category ?? task.submission.category) ? label(`page.moderation.categories.${task.decision?.category ?? task.submission.category}`) : t('page.moderation.uncategorized') }}
+            </p>
             <p v-for="(item, index) in task.submission.evidence" :key="index">
               {{ item }}
             </p>
@@ -591,21 +608,25 @@ defineExpose({ dirty, busy, uncertain });
               {{ t('page.moderation.signedIdentity') }}
             </Checkbox>
           </FormItem>
-          <FormItem :label="t('page.moderation.reason')" required html-for="decisionpanel-field-4">
-            <ReasonPresets
-              v-model="reason"
-              :presets="reasonPresets"
-              :disabled="busy || uncertain"
-              :max-length="2000"
-            />
-            <Textarea
-              id="decisionpanel-field-4"
-              v-model:value="reason"
-              :rows="3"
-              :maxlength="2000"
+          <FormItem :label="t('page.moderation.category')" html-for="decisionpanel-field-category">
+            <Select
+              id="decisionpanel-field-category"
+              v-model:value="category"
+              show-search
+              option-filter-prop="label"
+              allow-clear
+              :options="categoryOptions"
+              :placeholder="t('page.moderation.uncategorized')"
               :disabled="busy || uncertain"
             />
           </FormItem>
+          <ModerationReasonField
+            id="decisionpanel-field-4"
+            v-model="reason"
+            :label="t('page.moderation.reason')"
+            :presets="reasonPresets"
+            :disabled="busy || uncertain"
+          />
           <MutationAlert
             :busy="busy"
             :error="opening.error.value || deciding.error.value"
@@ -621,7 +642,7 @@ defineExpose({ dirty, busy, uncertain });
               :disabled="
                 uncertain ||
                 !action ||
-                !reason.trim() ||
+                !isValidModerationReason(reason) ||
                 (action === 'reassign' && !attribution)
               "
             >

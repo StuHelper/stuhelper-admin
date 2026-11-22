@@ -5,13 +5,15 @@ import { computed, ref, shallowRef, watch } from 'vue';
 
 import { useI18n } from '@vben/locales';
 
-import { Alert, Button, DatePicker, Descriptions, DescriptionsItem, Divider, Form, FormItem, Input, List, ListItem, Popconfirm, Select, Space, Tag, Textarea } from 'ant-design-vue';
+import { Alert, Button, DatePicker, Descriptions, DescriptionsItem, Divider, Form, FormItem, Input, List, ListItem, Popconfirm, Select, Space, Tag } from 'ant-design-vue';
 
 import PricePanel from '#/features/billing/PricePanel.vue';
 import { useCapabilities } from '#/shared/capabilities';
 import { useAsync, useMutation, usePaged } from '#/shared/composables/async';
 import { useFormat } from '#/shared/format';
 import LoadState from '#/shared/ui/LoadState.vue';
+import { isValidModerationReason } from '#/shared/ui/moderation-reason';
+import ModerationReasonField from '#/shared/ui/ModerationReasonField.vue';
 import MutationAlert from '#/shared/ui/MutationAlert.vue';
 import { stateColor } from '#/shared/ui/state-color';
 
@@ -63,7 +65,7 @@ watch([changing.busy, changing.uncertain, granting.busy, granting.uncertain, rea
 
 async function change() {
   const current = resource.value;
-  if (!current) return;
+  if (!current || !isValidModerationReason(reason.value)) return;
   success.value = '';
   const result = await changing.run(`state:${current.id}`, { revision: current.revision, state: status.value, reason: reason.value }, (body, key) => api.changeState(current.id, body, key));
   if (result) changed(result);
@@ -116,11 +118,14 @@ function granted() {
         <FormItem :label="t('page.resources.targetState')" html-for="managepanel-field-1">
           <Select id="managepanel-field-1" v-model:value="status" :disabled="changing.busy.value || changing.uncertain.value" :options="(['published', 'unlisted', 'blocked'] as const).map((value) => ({ value, label: t(`page.resources.state.${value}`) }))" />
         </FormItem>
-        <FormItem :label="t('page.common.reason')" required html-for="managepanel-field-2">
-          <Textarea id="managepanel-field-2" v-model:value="reason" :rows="3" :maxlength="2000" :disabled="changing.busy.value || changing.uncertain.value" />
-        </FormItem>
+        <ModerationReasonField
+          id="managepanel-field-2"
+          v-model="reason"
+          :label="t('page.common.reason')"
+          :disabled="changing.busy.value || changing.uncertain.value"
+        />
         <MutationAlert :busy="changing.busy.value" :error="changing.error.value" :uncertain="changing.uncertain.value" :success="success" @retry="retryChange" />
-        <Button class="mt-3" type="primary" html-type="submit" :loading="changing.busy.value" :disabled="changing.uncertain.value || !reason.trim()">{{ t('page.resources.applyState') }}</Button>
+        <Button class="mt-3" type="primary" html-type="submit" :loading="changing.busy.value" :disabled="changing.uncertain.value || !isValidModerationReason(reason)">{{ t('page.resources.applyState') }}</Button>
       </Form>
 
       <Divider v-if="capabilities.has('billing.resource-price')" orientation="left">{{ t('page.resources.price.title') }}</Divider>

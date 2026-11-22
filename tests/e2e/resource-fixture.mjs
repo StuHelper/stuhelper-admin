@@ -1,3 +1,15 @@
+export function queueSummary({ waiting, byCategory = {}, resources = 0, reviews = 0, decided = 0 }) {
+  return {
+    school_id: 'school',
+    waiting,
+    decided,
+    failed: 0,
+    by_content_kind: { course: waiting - resources, mentor: 0, reply: 0, resource: resources },
+    by_request_kind: { review: reviews, report: waiting - reviews, edit_request: 0, delete_request: 0, appeal: 0 },
+    by_category: byCategory,
+  };
+}
+
 export function fixture() {
   const category = {
     id: 'custom-category',
@@ -364,6 +376,18 @@ export async function routes(page, s) {
   await page.route('**/api/v1/moderation/**', async (route) => {
     const req = route.request();
       const url = new URL(req.url());
+    if (url.pathname === '/api/v1/moderation/tasks/summary') {
+      const task = s.task.state === 'waiting' ? s.task : undefined;
+      const waiting = task ? 1 : 0;
+      const category = task?.submission.category;
+      return route.fulfill({ json: queueSummary({
+        waiting,
+        resources: waiting,
+        reviews: task?.submission.kind === 'review' ? 1 : 0,
+        byCategory: category ? { [category]: 1 } : {},
+        decided: s.task.state === 'decided' ? 1 : 0,
+      }) });
+    }
     if (req.method() === 'POST') {
       const body = req.postDataJSON();
       s.calls.push({

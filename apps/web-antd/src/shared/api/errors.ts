@@ -14,6 +14,7 @@ export const clientCodes = [
 const aliases: Record<string, string> = {
   authentication_required: 'unauthenticated',
   permission_denied: 'forbidden',
+  payload_too_large: 'capacity_exceeded',
   dependency_unavailable: 'unavailable',
   identity_unavailable: 'identity',
   revision_conflict: 'conflict',
@@ -54,6 +55,7 @@ export class ApiError extends Error {
     readonly operationId?: string,
     /** Parsed JSON error payload for typed contract recovery (never shown as raw text). */
     readonly detail?: unknown,
+    readonly retryAfter?: null | string,
   ) {
     super(code);
     this.name = 'ApiError';

@@ -39,7 +39,7 @@ const parse = {
   rule: schemaOf<Rule>(schemas, 'Rule'),
   rules: schemaOf<Schemas['AdminRulePage']>(schemas, 'AdminRulePage'),
   plan: schemaOf<MembershipPlan>(schemas, 'MembershipPlan'),
-  plans: schemaOf<MembershipPlan[]>(schemas, 'MembershipPlan', true),
+  plans: schemaOf<Schemas['AdminMembershipPlanPage']>(schemas, 'AdminMembershipPlanPage'),
   price: schemaOf<ResourcePrice>(schemas, 'ResourcePrice'),
   payee: schemaOf<Payee>(schemas, 'Payee'),
 };
@@ -121,9 +121,9 @@ export class BillingAdmin {
     return this.http.json(`/api/v1/billing/admin/orders/${segment(id)}/payment-review`, parse.order, { method: 'POST', body, key });
   }
 
-  /** Membership plans, including disabled ones; at most 100 are configured. */
+  /** Membership plans across configuration pages, including disabled plans. */
   plans(signal?: AbortSignal) {
-    return this.http.json('/api/v1/billing/admin/membership-plans', parse.plans, { query: { limit: 100 }, signal });
+    return this.all('/api/v1/billing/admin/membership-plans', parse.plans, signal);
   }
 
   purchaseRefund(body: PurchaseRefundInput, key: string) {

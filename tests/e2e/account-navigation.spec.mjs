@@ -37,6 +37,7 @@ test('lookup jumps to billing in memory without URL query params and remembers t
       json: {
         groups: [
           {
+            has_more: false,
             candidate: {
               account: `${issuer}|${subject}`,
               source: 'verification',
@@ -65,7 +66,11 @@ test('lookup jumps to billing in memory without URL query params and remembers t
     return route.fulfill({
       json: {
         target: { issuer, subject },
+        rewards: { items: [], next: '' },
         wallet: {
+          permanent_points: 100,
+          expiring_points: 0,
+          expiring_soon_points: 0,
           points: 100,
           ivory_minor: 0,
           frozen_ivory_minor: 0,
