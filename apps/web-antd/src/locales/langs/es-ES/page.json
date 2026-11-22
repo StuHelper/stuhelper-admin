@@ -2065,6 +2065,8 @@
       "conflict": "La lista ha cambiado. Compruebe sus cambios con la última versión antes de guardar."
     },
     "profile": {
+      "images": "Imágenes de la página docente",
+      "bodyImage": "Imagen del contenido {number}",
       "title": "Datos de la página del docente",
       "teacher": "Docente del directorio",
       "chooseTeacher": "Busque por nombre y seleccione un docente",

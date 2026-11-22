@@ -2065,6 +2065,8 @@
       "conflict": "허용 목록이 변경되었습니다. 최신 목록을 기준으로 수정 사항을 확인한 후 저장하세요."
     },
     "profile": {
+      "images": "교원 홈페이지 이미지",
+      "bodyImage": "본문 이미지 {number}",
       "title": "교원 홈페이지 정보",
       "teacher": "명부의 교원",
       "chooseTeacher": "이름으로 교원을 검색하여 선택",

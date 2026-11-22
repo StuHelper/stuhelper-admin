@@ -39,7 +39,7 @@ describe('teacher homepage portraits', () => {
     expect(new Uint8Array(await blob.arrayBuffer())).toEqual(bytes());
   });
 
-  it('uses the authenticated photo endpoint with redirects disabled', async () => {
+  it('uses the authenticated photo endpoint and follows the signed redirect', async () => {
     const req = vi.fn<typeof fetch>(async () => new Response(bytes(), {
       headers: { 'Content-Type': 'image/png' },
     }));
@@ -48,7 +48,7 @@ describe('teacher homepage portraits', () => {
     expect(blob.type).toBe('image/png');
     expect(req).toHaveBeenCalledWith(
       `/api/v1/catalog/objects/teacher%2Fid/teacher-homepage/photos/${'a'.repeat(64)}`,
-      expect.objectContaining({ credentials: 'same-origin', redirect: 'error' }),
+      expect.objectContaining({ credentials: 'same-origin', redirect: 'follow' }),
     );
     req.mockResolvedValueOnce(new Response('<html lang="en"></html>', {
       headers: { 'Content-Type': 'text/html' },
@@ -85,3 +85,31 @@ describe('teacher homepage profile writes', () => {
     expect(write.uncertain).toBe(false);
   });
 });
+
+describe('Catalog image signing quota', () => {
+  it('waits for Retry-After, retries the Catalog route twice and stops on cancellation', async () => {
+    vi.useFakeTimers()
+    try {
+      const fetcher = vi.fn<typeof fetch>(async () => new Response(null, { status: 429, headers: { 'Retry-After': '2' } }))
+      const api = new TeacherHomepageProfileApi(new Http(fetcher))
+      const read = (signal?: AbortSignal) => api.getSavedPhoto('teacher', 'a'.repeat(64), signal)
+      const limited = expect(read()).rejects.toMatchObject({ status: 429 })
+      await vi.advanceTimersByTimeAsync(1999)
+      expect(fetcher).toHaveBeenCalledTimes(1)
+      await vi.advanceTimersByTimeAsync(1)
+      expect(fetcher).toHaveBeenCalledTimes(2)
+      await vi.advanceTimersByTimeAsync(2000)
+      await limited
+      expect(fetcher).toHaveBeenCalledTimes(3)
+      const controller = new AbortController()
+      const cancelled = expect(read(controller.signal)).rejects.toMatchObject({ code: 'cancelled' })
+      await vi.advanceTimersByTimeAsync(1)
+      controller.abort()
+      await cancelled
+      await vi.advanceTimersByTimeAsync(2000)
+      expect(fetcher).toHaveBeenCalledTimes(4)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+})

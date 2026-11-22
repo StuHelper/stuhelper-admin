@@ -20,6 +20,7 @@ import MutationAlert from '#/shared/ui/MutationAlert.vue';
 
 import { useTeacherHomepageAccess } from './access';
 import { useTeacherHomepageProfile } from './profileApi';
+import ProfileImages from './ProfileImages.vue';
 import ProfileRuleEditor from './ProfileRuleEditor.vue';
 import {
   draftFromControls,
@@ -338,7 +339,10 @@ async function retryWrite() {
               </Button>
             </div>
           </Card>
-          <ProfileSource :source="profileRead.data.value?.source" />
+          <div class="flex flex-col gap-4">
+            <ProfileSource :source="profileRead.data.value?.source" />
+            <ProfileImages v-if="baseline?.page_visibility === 'visible'" :teacher-id="teacherId" />
+          </div>
         </div>
       </template>
     </LoadState>

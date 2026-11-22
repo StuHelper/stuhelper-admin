@@ -2065,6 +2065,8 @@
       "conflict": "The allowlist changed. Review your edits against the latest version before saving."
     },
     "profile": {
+      "images": "Teacher homepage images",
+      "bodyImage": "Body image {number}",
       "title": "Teacher homepage details",
       "teacher": "Catalog teacher",
       "chooseTeacher": "Search by name and select a teacher",

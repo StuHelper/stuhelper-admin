@@ -177,6 +177,7 @@
       "tests/e2e/teacher-homepage.spec.mjs#teacher homepage settings show overlapping eligibility counts and save exact labels against the latest allowlist revision",
       "tests/e2e/teacher-homepage.spec.mjs#teacher homepage profile keeps edits after capacity rejection, validates a replacement photo and removes the override on request",
       "tests/e2e/teacher-homepage.spec.mjs#teacher homepage requests preview private photos and submit decisions using the current revisions",
+      "tests/e2e/teacher-homepage.spec.mjs#authorized homepage images follow signed redirects and revoked previews disappear",
       "apps/web-antd/src/features/teacher-homepage/settingsSchool.test.ts#clears both school settings reads when access is forbidden",
       "apps/web-antd/src/features/teacher-homepage/profileRules.test.ts#preserves independent edits on conflict and adopts concurrent values for overlapping edits",
       "apps/web-antd/src/features/teacher-homepage/requestApi.test.ts#keeps the same key and request body when retrying an approval after a lost response"

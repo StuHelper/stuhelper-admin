@@ -332,6 +332,13 @@ export class DemoTeacherHomepage {
         return this.teacherPhoto(teacherId, photoId, method === 'HEAD');
       }
 
+      const publicRead = /^\/catalog\/objects\/([^/]+)\/teacher-homepage(\/media)?$/.exec(path);
+      if (method === 'GET' && publicRead) {
+        const teacher = decodeURIComponent(publicRead[1]!);
+        if (!reviewTeachers.some((item) => item.teacher_id === teacher)) return json({ code: 'not_found' }, 404);
+        return json(publicRead[2] ? { items: [] } : { profile: this.publicProfile(teacher) });
+      }
+
       const admin = schoolPath.exec(path);
       if (!admin) return;
       const [, encodedSchool, endpoint] = admin;
