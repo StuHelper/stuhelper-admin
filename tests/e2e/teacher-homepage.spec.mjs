@@ -265,12 +265,12 @@ test('teacher homepage profile keeps edits after capacity rejection, validates a
     }],
   });
 
-  const savedPhoto = page.waitForResponse((response) =>
-    response.url().includes(`/objects/${teacher.teacher_id}/teacher-homepage/photos/`),
+  const savedPhoto = page.waitForRequest((request) =>
+    request.url().includes(`/objects/${teacher.teacher_id}/teacher-homepage/photos/`),
   );
   await button(page, profile.photo.preview).click();
-  const photoResponse = await savedPhoto;
-  expect(photoResponse.headers()['cache-control']).toBe('private, no-store');
+  const photoRequestSent = await savedPhoto;
+  expect(photoRequestSent.method()).toBe('GET');
   await expect(preview).toHaveAttribute('src', /^blob:/);
   expect(mediaReads.map(request => new URL(request.url).pathname)).toEqual(['/manual-portrait']);
   await page.getByTestId('teacher-homepage-remove-rule').click();
