@@ -67,6 +67,11 @@ const parse = {
   attribution: schemaOf<AttributionPreview>(reviews, 'AttributionPreview'),
   task: schemaOf<Task>(moderation, 'TaskView'),
   tasks: schemaOf<Task[]>(moderation, 'TaskView', true),
+  teacherComplaintPage: schemaOf<Moderation['schemas']['TaskPage']>(moderation, 'TaskPage'),
+  teacherComplaintTarget: schemaOf<Moderation['schemas']['TeacherHomepageComplaintTarget']>(
+    moderation,
+    'TeacherHomepageComplaintTarget',
+  ),
   policy: schemaOf<PolicyView>(moderation, 'PolicyView'),
   saved: schemaOf<Moderation['schemas']['Saved']>(moderation, 'Saved'),
   batch: schemaOf<BatchPreview>(moderation, 'BatchPreview'),
@@ -360,6 +365,21 @@ export class AcademicAdminApi {
       query: { admin: true, ...query },
       signal,
     });
+  }
+
+  teacherComplaints(query: Query, signal?: AbortSignal) {
+    return this.http.json('/api/v1/moderation/tasks/page', parse.teacherComplaintPage, {
+      query: { ...query, admin: true, content_kind: 'teacher_homepage' },
+      signal,
+    });
+  }
+
+  teacherComplaintTarget(teacherId: string, signal?: AbortSignal) {
+    return this.http.json(
+      `/api/v1/moderation/teacher-homepage-complaints/${segment(teacherId)}/target`,
+      parse.teacherComplaintTarget,
+      { signal },
+    );
   }
 
   /** Latest teacher homepage refresh and the current teacher mark counts. */

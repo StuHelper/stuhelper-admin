@@ -18,6 +18,10 @@ import {
   catalogJumpKey,
   createCatalogJumpStore,
 } from './features/academic/catalogJump';
+import {
+  createTeacherHomepageAccess,
+  teacherHomepageAccessKey,
+} from './features/teacher-homepage/access';
 import { availableMenus } from './menus';
 import { router } from './router';
 import { accountJumpKey, createAccountJumpStore } from './shared/account-jump';
@@ -52,11 +56,13 @@ async function bootstrap(namespace: string, fetcher: typeof fetch = sessionFetch
   app.provide(capabilitiesKey, capabilities);
   void capabilities.load();
   const session = createSessionStore(fetcher);
+  const teacherHomepageAccess = createTeacherHomepageAccess(session, fetcher);
   const accountJump = createAccountJumpStore();
   const catalogJump = createCatalogJumpStore();
   app
     .provide(hostFetchKey, fetcher)
     .provide(sessionKey, session)
+    .provide(teacherHomepageAccessKey, teacherHomepageAccess)
     .provide(accountJumpKey, accountJump)
     .provide(catalogJumpKey, catalogJump);
   watch(
@@ -82,7 +88,15 @@ async function bootstrap(namespace: string, fetcher: typeof fetch = sessionFetch
   // 配置 pinia-tore
   await initStores(app, { namespace });
   const accessStore = useAccessStore();
-  watchEffect(() => accessStore.setAccessMenus(availableMenus(capabilities.has)));
+  watchEffect(() =>
+    accessStore.setAccessMenus(
+      availableMenus(
+        capabilities.has,
+        undefined,
+        teacherHomepageAccess.canShowMenu,
+      ),
+    ),
+  );
 
   // 安装权限指令
   registerAccessDirective(app);
@@ -93,6 +107,18 @@ async function bootstrap(namespace: string, fetcher: typeof fetch = sessionFetch
 
   // 配置路由及路由守卫
   app.use(router);
+  watch(
+    [
+      () => router.currentRoute.value.matched.length > 0 ? router.currentRoute.value.path : '',
+      teacherHomepageAccess.owner,
+      teacherHomepageAccess.school,
+      teacherHomepageAccess.platformAdmin,
+    ],
+    ([path]) => {
+      if (path) teacherHomepageAccess.discover(path);
+    },
+    { immediate: true },
+  );
 
   // 配置Motion插件
   const { MotionPlugin } = await import('@vben/plugins/motion');

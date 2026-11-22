@@ -1,6 +1,11 @@
 import example from '../../../../contracts/contribution.example.json';
 import operations from '../../../../contracts/storage-operations.example.json';
 import * as d from './data';
+import {
+  handleDemoTeacherHomepage,
+  hideDemoTeacherHomepageTarget,
+  readDemoTeacherHomepageTarget,
+} from './teacherHomepage';
 
 const json = (value: unknown, status = 200) => Response.json(value, { status });
 const nope = (code: string, status: number) =>
@@ -63,6 +68,9 @@ const task = (
   updated_at: d.ago(days),
   can_appeal: false,
 });
+const homepageComplaint = task(
+  'm8', 'teacher-homepage:p3', 'report', '主页展示了不应公开的联系方式。', 'teacher_homepage', 'waiting', 1,
+);
 const tasks: Record<string, any>[] = [
   task('m1', 'r13', 'report', '评价内容涉及人身攻击', 'review', 'waiting', 0),
   task('m2', 'r7', 'review', 'content_review', 'review', 'waiting', 0),
@@ -71,7 +79,9 @@ const tasks: Record<string, any>[] = [
   task('m5', 'resource:x8-v1', 'review', 'content_review', 'resource', 'waiting', 0),
   task('m6', 'resource:x4-v1', 'report', '疑似未经授权转载', 'resource', 'waiting', 1),
   task('m7', 'r2', 'report', '广告内容', 'review', 'failed', 3),
+  { ...homepageComplaint, submission: { ...homepageComplaint.submission, category: 'privacy_leak' } },
 ];
+const complaintReplays = new Map<string, { body: string; result: unknown }>();
 const policies: Record<string, any> = {};
 const application = (id: string, state: string, stage: string, days: number) => ({
   ...d.verification.application,
@@ -125,6 +135,45 @@ async function body(init?: RequestInit) {
   }
 }
 
+async function decideDemoTeacherComplaint(row: (typeof tasks)[number], init?: RequestInit) {
+  const key = new Headers(init?.headers).get('Idempotency-Key');
+  if (!key) return nope('invalid_input', 400);
+  const request = await body(init);
+  const serialized = JSON.stringify(request);
+  const replayKey = `${row.id}:${key}`;
+  const replay = complaintReplays.get(replayKey);
+  if (replay) return replay.body === serialized ? json(replay.result) : nope('conflict', 409);
+
+  const decision = request.decision;
+  if (
+    !decision ||
+    !['dismiss', 'hide'].includes(decision.action) ||
+    typeof decision.reason !== 'string' ||
+    !decision.reason.trim() ||
+    [...decision.reason].length > 2000
+  ) return nope('invalid_input', 400);
+  const teacherId = row.submission.object_id.replace(/^teacher-homepage:/, '');
+  const target = readDemoTeacherHomepageTarget(row.school_id, teacherId);
+  if (
+    row.state !== 'waiting' ||
+    request.revision !== row.revision ||
+    decision.revision !== (target?.revision ?? row.object_revision) ||
+    decision.object_id !== row.submission.object_id
+  ) return nope('conflict', 409);
+
+  if (decision.action === 'hide') {
+    const result = hideDemoTeacherHomepageTarget(row.school_id, teacherId, decision.revision);
+    if (result !== 'ok') return nope(result, result === 'conflict' ? 409 : 404);
+  }
+  row.state = 'applied';
+  row.revision++;
+  row.decision = { ...decision, id: `demo-decision:${row.id}` };
+  row.updated_at = new Date().toISOString();
+  const result = structuredClone(row);
+  complaintReplays.set(replayKey, { body: serialized, result });
+  return json(result);
+}
+
 function reviewResource(p: string) {
   const raw = decodeURIComponent(p.split('/')[3] ?? '').replace(/^resource:/, '');
   const versionId = raw.includes(':') ? raw.split(':')[1]! : raw;
@@ -159,6 +208,8 @@ export async function handleDemoRequest(
   const p = u.pathname
     .replace('/api/v1', '')
     .replace(/^\/catalog\/admin\/objects/, '/catalog/objects');
+  const teacherHomepage = await handleDemoTeacherHomepage(p, u.searchParams, method, init);
+  if (teacherHomepage) return teacherHomepage;
   if (p === '/auth/session') {
     return json({
       authenticated: true,
@@ -263,15 +314,35 @@ export async function handleDemoRequest(
   if (p === '/moderation/feedback' && method === 'GET') {
     return json({ items: [], next_cursor: '' });
   }
-  if (p === '/moderation/tasks' && method === 'GET') {
+  if ((p === '/moderation/tasks' || p === '/moderation/tasks/page') && method === 'GET') {
     const q = u.searchParams;
-    return json(
-      tasks.filter(
-        (row) =>
-          (!q.get('state') || row.state === q.get('state')) &&
-          (!q.get('content_kind') || row.content_kind === q.get('content_kind')),
-      ),
+    const contentKind = q.get('content_kind');
+    const includeTeacherHomepage =
+      contentKind === 'teacher_homepage' || q.get('include_teacher_homepage') === 'true';
+    const list = tasks.filter(
+      (row) =>
+        (includeTeacherHomepage || row.content_kind !== 'teacher_homepage') &&
+        (!q.get('school_id') || row.school_id === q.get('school_id')) &&
+        (!q.get('state') || row.state === q.get('state')) &&
+        (!q.get('kind') || row.submission.kind === q.get('kind')) &&
+        (!q.get('object_id') || row.submission.object_id === q.get('object_id')) &&
+        (!q.get('category') || (row.decision?.category ?? row.submission.category) === q.get('category')) &&
+        (!contentKind || row.content_kind === contentKind),
     );
+    const after = q.get('after') ?? '';
+    const start = after ? list.findIndex((row) => row.id === after) + 1 : 0;
+    const limit = Number(q.get('limit') ?? 20);
+    const items = list.slice(start, start + limit);
+    if (p === '/moderation/tasks/page') {
+      return json({ items, next_cursor: start + limit < list.length ? (items.at(-1)?.id ?? '') : '' });
+    }
+    return json(items);
+  }
+  const complaintTarget = /^\/moderation\/teacher-homepage-complaints\/([^/]+)\/target$/.exec(p);
+  if (complaintTarget?.[1] && method === 'GET') {
+    const teacherId = decodeURIComponent(complaintTarget[1]);
+    const target = readDemoTeacherHomepageTarget(d.SCHOOL, teacherId);
+    return target ? json({ object_id: `teacher-homepage:${teacherId}`, school_id: d.SCHOOL, ...target }) : nope('not_found', 404);
   }
   if (p === '/moderation/tasks/batch-preview') {
     return json({ preview_token: 'demo', items: [] });
@@ -281,6 +352,7 @@ export async function handleDemoRequest(
     const row = tasks.find((x) => x.id === p.split('/')[3]);
     if (!row) return nope('not_found', 404);
     if (p.endsWith('/decisions')) {
+      if (row.content_kind === 'teacher_homepage') return decideDemoTeacherComplaint(row, init);
       row.state = 'decided';
       row.revision++;
       return json(row);
