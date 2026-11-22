@@ -209,7 +209,9 @@ async function fits(page, info) {
 async function screenshot(page, info, view) {
   const dir = process.env.LEGALADMIN_SHOTS_DIR;
   if (dir) {
+    await page.locator('#__app-loading__').waitFor({ state: 'detached' });
     await page.screenshot({
+      animations: 'disabled',
       fullPage: true,
       path: resolve(dir, `${info.project.name}-${view}.png`),
     });

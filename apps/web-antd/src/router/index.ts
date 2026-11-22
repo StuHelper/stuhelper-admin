@@ -10,6 +10,7 @@ const children: RouteRecordRaw[] = [
   {
     path: 'system/legal',
     redirect: { name: 'LegalDocuments' },
+    meta: { hideInBreadcrumb: true, title: 'page.menu.legalDocuments' },
     component: () => import('#/features/legal/LegalSessionScope.vue'),
     children: [
       { name: 'LegalDocuments', path: 'documents', component: () => import('#/features/legal/DocumentsView.vue'), meta: { title: 'page.menu.legalDocuments' } },
