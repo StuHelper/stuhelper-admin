@@ -127,7 +127,10 @@ test('restoring reward quota requires an explicit selection for each revocation'
   await page.getByLabel(all.billing.issuer).fill(target.issuer);
   await page.getByLabel(all.billing.subject).fill(target.subject);
   await page.getByRole('button', { name: all.common.search, exact: true }).click();
-  await page.getByRole('tab', { name: a.revoke, exact: true }).click();
+  const tab = page.getByRole('tab', { name: a.revoke, exact: true });
+  await tab.focus();
+  await tab.press('Enter');
+  await expect(tab).toHaveAttribute('aria-selected', 'true');
   const restore = page.getByRole('checkbox', { name: a.restoreQuota });
   for (const restoreQuota of [true, false]) {
     const event = restoreQuota ? 'review-corrected' : 'abuse';
