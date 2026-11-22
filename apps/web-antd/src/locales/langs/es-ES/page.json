@@ -72,7 +72,8 @@
     "search": "Buscar",
     "status": "Estado",
     "uncertain": "El resultado aún no está confirmado. Para evitar duplicados, solo se puede reintentar la solicitud original y el formulario queda bloqueado.",
-    "reloadCampus": "Recargar información de la universidad"
+    "reloadCampus": "Recargar información de la universidad",
+    "loading": "Cargando…"
   },
   "errors": {
     "network": "La conexión falló o caducó. Se conservan los datos válidos; inténtalo de nuevo.",
@@ -420,7 +421,10 @@
       "low_quality": "Baja calidad",
       "author_update": "Solicitud de actualización del autor",
       "other": "Otro"
-    }
+    },
+    "categorySummary": "Pendientes por categoría",
+    "categorySummaryWaiting": "Tareas pendientes del centro: {count}",
+    "categorySummaryEmpty": "No hay tareas clasificadas pendientes."
   },
   "catalog": {
     "title": "Gestión de cursos y docentes",

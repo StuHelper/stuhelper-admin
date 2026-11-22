@@ -43,6 +43,7 @@ import { stateColor } from '#/shared/ui/state-color';
 import { arrayCursor, pageSize, useAcademicAdmin } from './api';
 import { useCampusId } from './campus';
 import CampusPending from './CampusPending.vue';
+import CategoryCounts from './CategoryCounts.vue';
 import DecisionPanel from './DecisionPanel.vue';
 import { violationCategories } from './violationCategories';
 
@@ -399,7 +400,13 @@ id="moderationview-field-3"
       </Card>
 
       <CampusPending v-if="!school" @ready="school = $event" />
-      <Card v-else :bordered="false">
+      <CategoryCounts
+        v-if="school && mode === 'queue'"
+        :school="school"
+        :active="filters.category"
+        @pick="(value) => { if (!locked) { filters.category = value; void rows.reload(); } }"
+      />
+      <Card v-if="school" :bordered="false">
         <div v-if="rows.items.value.length === 0">
           <LoadState
             :status="rows.status.value"

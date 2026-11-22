@@ -72,7 +72,8 @@
     "search": "検索",
     "status": "状態",
     "uncertain": "結果はまだ確認されていません。重複を防ぐため、元のリクエストのみ再試行でき、入力は一時的にロックされます。",
-    "reloadCampus": "大学情報を再読み込み"
+    "reloadCampus": "大学情報を再読み込み",
+    "loading": "読み込み中…"
   },
   "errors": {
     "network": "接続に失敗したかタイムアウトしました。有効な入力は保持されています。再試行してください。",
@@ -420,7 +421,10 @@
       "low_quality": "低品質",
       "author_update": "作成者による更新依頼",
       "other": "その他"
-    }
+    },
+    "categorySummary": "分類別の審査待ち",
+    "categorySummaryWaiting": "この学校の審査待ちタスク：{count}",
+    "categorySummaryEmpty": "分類済みの審査待ちタスクはありません。"
   },
   "catalog": {
     "title": "授業・教員情報の管理",

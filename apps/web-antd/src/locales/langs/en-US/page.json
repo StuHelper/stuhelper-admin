@@ -72,7 +72,8 @@
     "search": "Search",
     "status": "Status",
     "uncertain": "The result is not confirmed yet. To avoid a duplicate, only the original request can be retried and the form stays locked.",
-    "reloadCampus": "Reload university information"
+    "reloadCampus": "Reload university information",
+    "loading": "Loading…"
   },
   "errors": {
     "network": "The connection failed or timed out. Valid input is kept; please try again.",
@@ -420,7 +421,10 @@
       "low_quality": "Low quality",
       "author_update": "Author update request",
       "other": "Other"
-    }
+    },
+    "categorySummary": "Waiting by category",
+    "categorySummaryWaiting": "Waiting tasks at this school: {count}",
+    "categorySummaryEmpty": "No categorised tasks are waiting."
   },
   "catalog": {
     "title": "Course and teacher records",
