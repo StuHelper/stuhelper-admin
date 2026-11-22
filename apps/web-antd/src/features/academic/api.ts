@@ -31,6 +31,7 @@ export type Presentation = Reviews['schemas']['Presentation'];
 export type PresentationView = Reviews['schemas']['PresentationView'];
 export type AttributionPreview = Reviews['schemas']['AttributionPreview'];
 export type Task = Moderation['schemas']['TaskView'];
+export type QueueSummary = Moderation['schemas']['QueueSummary'];
 export type Decision = Moderation['schemas']['Decision'];
 export type Policy = Moderation['schemas']['Policy'];
 export type PolicyView = Moderation['schemas']['PolicyView'];
@@ -67,6 +68,7 @@ const parse = {
   attribution: schemaOf<AttributionPreview>(reviews, 'AttributionPreview'),
   task: schemaOf<Task>(moderation, 'TaskView'),
   tasks: schemaOf<Task[]>(moderation, 'TaskView', true),
+  queueSummary: schemaOf<QueueSummary>(moderation, 'QueueSummary'),
   policy: schemaOf<PolicyView>(moderation, 'PolicyView'),
   saved: schemaOf<Moderation['schemas']['Saved']>(moderation, 'Saved'),
   batch: schemaOf<BatchPreview>(moderation, 'BatchPreview'),
@@ -278,6 +280,14 @@ export class AcademicAdminApi {
       parse.mergePreview,
       { method: 'POST', body, key },
     );
+  }
+
+  /** The school's open-task counts, including waiting tasks per violation category. */
+  queueSummary(school: string, signal?: AbortSignal) {
+    return this.http.json('/api/v1/moderation/tasks/summary', parse.queueSummary, {
+      query: { school_id: school },
+      signal,
+    });
   }
 
   retryTask(id: string, body: { revision: number }, key: string) {

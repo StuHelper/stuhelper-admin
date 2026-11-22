@@ -7,10 +7,11 @@ import type {
   Task,
 } from './api';
 
-import { computed, nextTick, reactive, ref, shallowRef, watch } from 'vue';
+import { computed, nextTick, reactive, ref, shallowRef, useTemplateRef, watch } from 'vue';
 
 import { useI18n } from '@vben/locales';
 
+import { useMediaQuery } from '@vueuse/core';
 import {
   Alert,
   Button,
@@ -26,7 +27,6 @@ import {
   Space,
   Table,
   Tag,
-  Textarea,
 } from 'ant-design-vue';
 
 import { errorCode } from '#/shared/api/errors';
@@ -36,13 +36,15 @@ import { useFormat } from '#/shared/format';
 import AdminPage from '#/shared/ui/AdminPage.vue';
 import LoadState from '#/shared/ui/LoadState.vue';
 import { useErrorText } from '#/shared/ui/messages';
+import { isValidModerationReason } from '#/shared/ui/moderation-reason';
+import ModerationReasonField from '#/shared/ui/ModerationReasonField.vue';
 import MutationAlert from '#/shared/ui/MutationAlert.vue';
-import ReasonPresets from '#/shared/ui/ReasonPresets.vue';
 import { stateColor } from '#/shared/ui/state-color';
 
 import { arrayCursor, pageSize, useAcademicAdmin } from './api';
 import { useCampusId } from './campus';
 import CampusPending from './CampusPending.vue';
+import CategoryCounts from './CategoryCounts.vue';
 import DecisionPanel from './DecisionPanel.vue';
 import { violationCategories } from './violationCategories';
 
@@ -56,6 +58,8 @@ const format = useFormat();
 const errorText = useErrorText();
 const api = useAcademicAdmin();
 const school = useCampusId();
+const compactFilters = useMediaQuery('(max-width: 767px)');
+const categoryCounts = useTemplateRef('categoryCounts');
 const filters = reactive({
   state: props.mode === 'queue' ? 'waiting' : '',
   kind: '',
@@ -166,6 +170,7 @@ async function decided(message: string) {
   const current = selected.value?.taskId ?? selected.value?.entryId;
   const following = neighbour(1);
   lastResult.value = message;
+  void categoryCounts.value?.reload();
   await rows.reload();
   if (!autoNext.value) return;
   const fallback = visibleRows().find(
@@ -203,6 +208,8 @@ watch([chosen, batchAction, batchReason], () => {
   request.value = undefined;
 });
 async function inspect() {
+  const reason = batchReason.value;
+  if (previewing.value || !isValidModerationReason(reason)) return;
   previewing.value = true;
   previewError.value = '';
   try {
@@ -219,7 +226,7 @@ async function inspect() {
           object_id: entry.id,
           revision: entry.revision,
           action: batchAction.value,
-          reason: batchReason.value,
+          reason,
         },
       });
     }
@@ -234,7 +241,7 @@ async function inspect() {
 }
 async function applyBatch() {
   const body = request.value;
-  if (!body) return;
+  if (!body || previewing.value || !isValidModerationReason(batchReason.value)) return;
   const result = await batch.run('batch', body, (value, key) =>
     api.applyBatch(value, key),
   );
@@ -252,6 +259,7 @@ async function batchApplied(result: BatchPreview) {
   await nextTick();
   preview.value = result;
   request.value = undefined;
+  void categoryCounts.value?.reload();
   void rows.reload();
 }
 
@@ -290,6 +298,7 @@ const entryColumns = computed(() => [
 
 <template>
   <AdminPage
+    class="min-w-0 max-w-full"
     :title="
       t(
         mode === 'queue'
@@ -305,19 +314,19 @@ const entryColumns = computed(() => [
       )
     "
   >
-    <div class="flex flex-col gap-3">
+    <div class="flex min-w-0 flex-col gap-3">
       <Alert v-if="lastResult" type="success" show-icon closable :message="lastResult" @close="lastResult = ''" />
       <Card :bordered="false">
         <Form
-          layout="inline"
-          class="flex flex-wrap gap-y-3"
+          :layout="compactFilters ? 'vertical' : 'inline'"
+          class="moderation-filters flex flex-wrap gap-y-3"
           @submit.prevent="rows.reload()"
         >
           <FormItem :label="t('page.common.status')" html-for="moderationview-field-1">
             <Select
 id="moderationview-field-1"
               v-model:value="filters.state"
-              class="w-40"
+              class="w-full md:w-40"
               :disabled="locked"
               :options="[
                 { value: '', label: t('page.common.all') },
@@ -329,7 +338,7 @@ id="moderationview-field-1"
             <Select
 id="moderationview-field-2"
               v-model:value="filters.kind"
-              class="w-36"
+              class="w-full md:w-36"
               :disabled="locked"
               :options="[
                 { value: '', label: t('page.common.all') },
@@ -345,7 +354,7 @@ id="moderationview-field-2"
               <Select
 id="moderationview-field-3"
                 v-model:value="filters.taskKind"
-                class="w-36"
+                class="w-full md:w-36"
                 :disabled="locked"
                 :options="[
                   { value: '', label: t('page.common.all') },
@@ -366,7 +375,7 @@ id="moderationview-field-3"
               <Select
                 id="moderationview-field-category"
                 v-model:value="filters.category"
-                class="w-44"
+                class="w-full md:w-44"
                 show-search
                 option-filter-prop="label"
                 :disabled="locked"
@@ -376,17 +385,22 @@ id="moderationview-field-3"
                 ]"
               />
             </FormItem>
-            <FormItem :label="t('page.moderation.timeRange')" html-for="moderationview-field-4">
+            <FormItem
+              :label="t('page.moderation.timeRange')"
+              class="moderation-filters-wide max-w-full"
+              html-for="moderationview-field-4"
+            >
               <DatePicker.RangePicker
                 id="moderationview-field-4"
                 v-model:value="filters.range"
+                class="moderation-range w-full max-w-full md:w-auto"
                 show-time
                 value-format="YYYY-MM-DDTHH:mm:ssZ"
                 :disabled="locked"
               />
             </FormItem>
           </template>
-          <FormItem>
+          <FormItem class="moderation-filters-wide">
             <Button
               type="primary"
               html-type="submit"
@@ -399,7 +413,14 @@ id="moderationview-field-3"
       </Card>
 
       <CampusPending v-if="!school" @ready="school = $event" />
-      <Card v-else :bordered="false">
+      <CategoryCounts
+        v-if="school && mode === 'queue'"
+        ref="categoryCounts"
+        :school="school"
+        :active="filters.category"
+        @pick="(value) => { if (!locked) { filters.category = value; void rows.reload(); } }"
+      />
+      <Card v-if="school" :bordered="false">
         <div v-if="rows.items.value.length === 0">
           <LoadState
             :status="rows.status.value"
@@ -583,21 +604,13 @@ id="moderationview-field-5"
               "
             />
           </FormItem>
-          <FormItem :label="t('page.moderation.reason')" required html-for="moderationview-field-6">
-            <ReasonPresets
-              v-model="batchReason"
-              :presets="reasonPresets"
-              :disabled="batch.busy.value || batch.uncertain.value"
-              :max-length="2000"
-            />
-            <Textarea
-id="moderationview-field-6"
-              v-model:value="batchReason"
-              :rows="3"
-              :maxlength="2000"
-              :disabled="batch.busy.value || batch.uncertain.value"
-            />
-          </FormItem>
+          <ModerationReasonField
+            id="moderationview-field-6"
+            v-model="batchReason"
+            :label="t('page.moderation.reason')"
+            :presets="reasonPresets"
+            :disabled="previewing || batch.busy.value || batch.uncertain.value"
+          />
         </Form>
         <p v-if="previewError" class="text-destructive mb-2" role="alert">
           {{ errorText(previewError) }}
@@ -636,7 +649,7 @@ id="moderationview-field-6"
               batch.busy.value ||
               batch.uncertain.value ||
               chosen.length === 0 ||
-              !batchReason.trim()
+              !isValidModerationReason(batchReason)
             "
             @click="inspect"
             >
@@ -646,7 +659,7 @@ id="moderationview-field-6"
             v-if="request"
             type="primary"
             :loading="batch.busy.value"
-            :disabled="batch.uncertain.value"
+            :disabled="previewing || batch.uncertain.value"
             @click="applyBatch"
             >
 {{ t('page.moderation.applyBatch') }}
@@ -694,3 +707,31 @@ id="moderationview-field-6"
     </Drawer>
   </AdminPage>
 </template>
+
+<style scoped>
+.moderation-filters-wide :deep(.ant-form-item-control),
+.moderation-range :deep(.ant-picker-input) {
+  min-inline-size: 0;
+}
+
+@media (max-width: 767px) {
+  .moderation-filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+    gap: 0.75rem;
+  }
+
+  .moderation-filters > :deep(.ant-form-item) {
+    min-inline-size: 0;
+    margin-block-end: 0;
+  }
+
+  .moderation-filters-wide {
+    grid-column: 1 / -1;
+  }
+
+  .moderation-range :deep(.ant-picker-input) {
+    flex: 1 1 0;
+  }
+}
+</style>
