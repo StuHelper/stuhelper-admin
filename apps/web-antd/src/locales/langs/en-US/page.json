@@ -492,7 +492,6 @@
     },
     "confirmImport": "Confirm import",
     "imported": "Import complete: catalog objects {objects}, enrollments {enrollments}, manual corrections kept {preserved}.",
-    "schoolRequired": "Enter a specific school for a student or staff ID.",
     "kinds": {
       "school": "School record",
       "department": "Academic department",
@@ -800,7 +799,6 @@
       "unavailable": "No profile data is currently available"
     },
     "profileFields": {
-      "staff_id": "Staff ID",
       "student_id": "Student ID",
       "name": "Name",
       "department": "Department",
@@ -1435,7 +1433,9 @@
     "queryTab": "Query",
     "auditTab": "Query log",
     "kind": "Search by",
+    "schoolRequired": "Enter a specific school for a student or staff ID.",
     "kinds": {
+      "staff_id": "Staff ID",
       "name": "Name",
       "student_id": "Student ID",
       "qq": "QQ number",

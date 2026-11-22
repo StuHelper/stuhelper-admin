@@ -492,7 +492,6 @@
     },
     "confirmImport": "تأكيد الاستيراد",
     "imported": "اكتمل الاستيراد: الكائنات {objects}، التسجيلات {enrollments}، التصحيحات المحفوظة {preserved}.",
-    "schoolRequired": "حدّد مدرسة بعينها عند البحث برقم الطالب أو الموظف.",
     "kinds": {
       "school": "الجامعة",
       "department": "القسم",
@@ -800,7 +799,6 @@
       "unavailable": "لا توجد بيانات متاحة حاليًا"
     },
     "profileFields": {
-      "staff_id": "رقم الموظف",
       "student_id": "رقم الطالب",
       "name": "الاسم",
       "department": "القسم",
@@ -1435,7 +1433,9 @@
     "queryTab": "استعلام",
     "auditTab": "سجل الاستعلامات",
     "kind": "البحث حسب",
+    "schoolRequired": "حدّد مدرسة بعينها عند البحث برقم الطالب أو الموظف.",
     "kinds": {
+      "staff_id": "رقم الموظف",
       "name": "الاسم",
       "student_id": "الرقم الجامعي",
       "qq": "رقم QQ",

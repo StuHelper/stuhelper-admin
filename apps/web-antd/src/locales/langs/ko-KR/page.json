@@ -492,7 +492,6 @@
     },
     "confirmImport": "가져오기 확인",
     "imported": "가져오기 완료: 목록 {objects}, 수강 {enrollments}, 유지된 수동 수정 {preserved}.",
-    "schoolRequired": "학번이나 교직원 번호로 검색할 때는 학교를 지정하세요.",
     "kinds": {
       "school": "학교",
       "department": "학부·학과",
@@ -800,7 +799,6 @@
       "unavailable": "현재 이용 가능한 정보 없음"
     },
     "profileFields": {
-      "staff_id": "교직원 번호",
       "student_id": "학번",
       "name": "이름",
       "department": "소속 부서",
@@ -1435,7 +1433,9 @@
     "queryTab": "조회",
     "auditTab": "조회 기록",
     "kind": "조회 기준",
+    "schoolRequired": "학번이나 교직원 번호로 검색할 때는 학교를 지정하세요.",
     "kinds": {
+      "staff_id": "교직원 번호",
       "name": "이름",
       "student_id": "학번",
       "qq": "QQ 번호",

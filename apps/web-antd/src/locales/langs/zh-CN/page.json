@@ -492,7 +492,6 @@
     },
     "confirmImport": "确认导入",
     "imported": "导入完成：目录对象 {objects}，选课记录 {enrollments}，保留人工更正 {preserved}。",
-    "schoolRequired": "按学号或教职工号查询时，请指定一所学校。",
     "kinds": {
       "school": "学校",
       "department": "院系",
@@ -800,7 +799,6 @@
       "unavailable": "当前没有可用资料"
     },
     "profileFields": {
-      "staff_id": "教职工号",
       "student_id": "学号",
       "name": "姓名",
       "department": "院系",
@@ -1435,7 +1433,9 @@
     "queryTab": "查询",
     "auditTab": "查询记录",
     "kind": "查询依据",
+    "schoolRequired": "按学号或教职工号查询时，请指定一所学校。",
     "kinds": {
+      "staff_id": "教职工号",
       "name": "姓名",
       "student_id": "学号",
       "qq": "QQ 号",

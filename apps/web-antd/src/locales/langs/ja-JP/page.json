@@ -492,7 +492,6 @@
     },
     "confirmImport": "インポートを確定",
     "imported": "取り込み完了：目録 {objects}、履修 {enrollments}、保持した手動修正 {preserved}。",
-    "schoolRequired": "学籍番号または教職員番号で検索する場合は学校を指定してください。",
     "kinds": {
       "school": "大学",
       "department": "学部・学科",
@@ -800,7 +799,6 @@
       "unavailable": "現在利用できる情報はありません"
     },
     "profileFields": {
-      "staff_id": "教職員番号",
       "student_id": "学籍番号",
       "name": "氏名",
       "department": "所属部門",
@@ -1435,7 +1433,9 @@
     "queryTab": "照会",
     "auditTab": "照会記録",
     "kind": "照会方法",
+    "schoolRequired": "学籍番号または教職員番号で検索する場合は学校を指定してください。",
     "kinds": {
+      "staff_id": "教職員番号",
       "name": "氏名",
       "student_id": "学籍番号",
       "qq": "QQ 番号",

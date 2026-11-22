@@ -492,7 +492,6 @@
     },
     "confirmImport": "Confirmar importación",
     "imported": "Importación completa: objetos {objects}, matrículas {enrollments}, correcciones conservadas {preserved}.",
-    "schoolRequired": "Indica un centro concreto al buscar por identificador de estudiante o personal.",
     "kinds": {
       "school": "Universidad",
       "department": "Departamento",
@@ -800,7 +799,6 @@
       "unavailable": "No hay datos disponibles actualmente"
     },
     "profileFields": {
-      "staff_id": "Identificador del personal",
       "student_id": "Número de estudiante",
       "name": "Nombre",
       "department": "Departamento",
@@ -1435,7 +1433,9 @@
     "queryTab": "Consulta",
     "auditTab": "Registro de consultas",
     "kind": "Buscar por",
+    "schoolRequired": "Indica un centro concreto al buscar por identificador de estudiante o personal.",
     "kinds": {
+      "staff_id": "Identificador del personal",
       "name": "Nombre",
       "student_id": "Número de estudiante",
       "qq": "Número de QQ",

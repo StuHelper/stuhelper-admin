@@ -492,7 +492,6 @@
     },
     "confirmImport": "Confirmer l’import",
     "imported": "Import terminé : objets {objects}, inscriptions {enrollments}, corrections conservées {preserved}.",
-    "schoolRequired": "Précisez un établissement pour chercher un matricule étudiant ou du personnel.",
     "kinds": {
       "school": "Établissement",
       "department": "Département",
@@ -800,7 +799,6 @@
       "unavailable": "Aucune donnée disponible actuellement"
     },
     "profileFields": {
-      "staff_id": "Matricule du personnel",
       "student_id": "Numéro étudiant",
       "name": "Nom",
       "department": "Département",
@@ -1435,7 +1433,9 @@
     "queryTab": "Recherche",
     "auditTab": "Journal des recherches",
     "kind": "Rechercher par",
+    "schoolRequired": "Précisez un établissement pour chercher un matricule étudiant ou du personnel.",
     "kinds": {
+      "staff_id": "Matricule du personnel",
       "name": "Nom",
       "student_id": "Numéro d’étudiant",
       "qq": "Numéro QQ",
