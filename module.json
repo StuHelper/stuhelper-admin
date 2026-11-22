@@ -11,7 +11,8 @@
     "storage",
     "media",
     "storage-contribution",
-    "resources"
+    "resources",
+    "legal"
   ],
   "specifications": [
     "README.md"
@@ -148,7 +149,8 @@
       "tests/e2e/moderation.spec.mjs#queue batch preview applies decisions per item and content view handles unpublished entries"
     ],
     "AO-02": [
-      "tests/e2e/catalog.spec.mjs#catalog paged search appends courses, preserves edits across conflict reload, and merges duplicates after preview"
+      "tests/e2e/catalog.spec.mjs#catalog paged search appends courses, preserves edits across conflict reload, and merges duplicates after preview",
+      "tests/e2e/legal.spec.mjs#legal draft conflict keeps input and uncertain writes replay only the original request"
     ],
     "AO-03": [
       "tests/e2e/catalog.spec.mjs#catalog import previews normalized JSON and retries an uncertain confirmation with the original key"
@@ -167,7 +169,9 @@
       "tests/e2e/teacher-homepage.spec.mjs#teacher homepage matching searches both lists, appends candidates and safely resolves a conflict and a lost reply",
       "tests/e2e/teacher-homepage.spec.mjs#teacher homepage read-only staff can examine matches and a forbidden route clears private controls",
       "apps/web-antd/src/features/teacher-homepage/matching.test.ts#preserves the draft on a revision conflict and sends a new key only after another confirmation",
-      "apps/web-antd/src/features/teacher-homepage/access.test.ts#discovers both delegated grants from home once and keeps read-only access independent"
+      "apps/web-antd/src/features/teacher-homepage/access.test.ts#discovers both delegated grants from home once and keeps read-only access independent",
+      "tests/e2e/teacher-homepage.spec.mjs#teacher homepage direct routes wait for consent before requesting school data",
+      "apps/web-antd/src/features/teacher-homepage/access.test.ts#clears school permissions while consent is pending and rediscovers them in the new school"
     ],
     "TEACHER-SITES-04": [
       "tests/e2e/teacher-homepage.spec.mjs#teacher homepage settings show overlapping eligibility counts and save exact labels against the latest allowlist revision",
@@ -180,6 +184,9 @@
     "CM-24": [
       "tests/e2e/teacher-homepage.spec.mjs#teacher homepage complaints use a server-filtered queue and hide or dismiss each selected item",
       "apps/web-antd/src/features/academic/TeacherHomepageComplaintPanel.test.ts#offers only dismissal for a missing target and uses the complaint revision"
+    ],
+    "AO-05": [
+      "tests/e2e/legal.spec.mjs#legal menu follows platform permission for a consent-pending session and revokes displayed data"
     ]
   }
 }

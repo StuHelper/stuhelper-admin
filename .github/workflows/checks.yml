@@ -39,6 +39,8 @@ jobs:
           cat contracts/platform.source.json >> "$GITHUB_STEP_SUMMARY"
           cat contracts/storage.source.json >> "$GITHUB_STEP_SUMMARY"
           cat contracts/contribution.source.json >> "$GITHUB_STEP_SUMMARY"
+          cat contracts/legal.source.json >> "$GITHUB_STEP_SUMMARY"
+          cat contracts/session.source.json >> "$GITHUB_STEP_SUMMARY"
       - run: make build
       - uses: StuHelper/stuhelper-tooling/actions/chromium@v0.1.10
       - run: make browser

@@ -8,7 +8,7 @@ const session = useSession()
 </script>
 
 <template>
-  <span v-if="session.unavailable.value && session.session.value" role="status">
+  <span v-if="session.unavailable.value && session.state.value === 'member'" role="status">
     {{ t('page.session.unavailable') }}
     <button type="button" @click="session.reload">{{ t('page.common.retry') }}</button>
   </span>

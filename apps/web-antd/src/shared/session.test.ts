@@ -69,6 +69,41 @@ describe('application session', () => {
     expect(store.session.value?.profile.nickname).toBe('A');
   });
 
+  it('keeps a pending-consent session signed in without exposing the previous profile', async () => {
+    const pending = {
+      authenticated: true,
+      consent_required: true,
+      csrf_token: session.csrf_token,
+      expires_at: session.expires_at,
+    };
+    const responses = [
+      Response.json({ ...session, consent_required: false }),
+      Response.json(pending),
+      Response.json({ ...pending, profile: session.profile }),
+      Response.json({ code: 'unauthenticated' }, { status: 401 }),
+    ];
+    const store = createSessionStore(
+      async () => responses.shift() ?? Response.json({}, { status: 500 }),
+    );
+
+    await store.reload();
+    expect(store.session.value?.profile.nickname).toBe('A');
+
+    await store.reload();
+    expect(store.state.value).toBe('member');
+    expect(store.session.value).toBeNull();
+    expect(store.authenticatedSession.value).toEqual(pending);
+
+    await store.reload();
+    expect(store.unavailable.value).toBe(true);
+    expect(store.state.value).toBe('member');
+    expect(store.authenticatedSession.value).toEqual(pending);
+
+    await store.reload();
+    expect(store.state.value).toBe('guest');
+    expect(store.authenticatedSession.value).toBeNull();
+  });
+
   it('updates the profile with an idempotency key and keeps the session in sync', async () => {
     const calls: RequestInit[] = [];
     const store = createSessionStore(async (_input, init) => {

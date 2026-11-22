@@ -22,6 +22,12 @@ import {
 const base = 'http://127.0.0.1:18786';
 const pages = '/catalog/teacher-sites';
 
+test.beforeEach(async ({ page }) => {
+  await page.route(/\/api\/v1\/admin\/legal\/documents(?:\?|$)/, (route) =>
+    route.fulfill({ status: 403, json: { code: 'forbidden' } }),
+  );
+});
+
 function labels(info) {
   const locale = info.project.metadata.locale;
   return JSON.parse(readFileSync(
@@ -354,6 +360,28 @@ test('teacher homepage read-only staff can examine matches and a forbidden route
   await expect(button(page, all.common.save)).toHaveCount(0);
   expect(calls.some(({ path, method }) => path === '/allowlist' && method === 'GET')).toBe(true);
   expect(calls.every(({ method, school }) => method === 'GET' && school === 'school')).toBe(true);
+});
+
+test('teacher homepage direct routes wait for consent before requesting school data', async ({ page }, info) => {
+  await page.route('**/api/v1/auth/session', (route) => route.fulfill({ json: {
+    authenticated: true,
+    consent_required: true,
+    csrf_token: 'a'.repeat(43),
+    expires_at: '2030-01-01T00:00:00Z',
+  } }));
+  const catalogRequests = [];
+  page.on('request', (request) => {
+    const path = new URL(request.url()).pathname;
+    if (path.startsWith('/api/v1/catalog/')) catalogRequests.push(path);
+  });
+  const all = labels(info);
+  await open(page, info, `${pages}/matching`);
+  await expect(page.getByText(all.errors.consent_required, { exact: true }).first()).toBeVisible();
+  await expect(page.locator(`a[role="menuitem"][href="${pages}/matching"]`)).toHaveCount(0);
+
+  await open(page, info, `${pages}/profile`, { teacher_id: teacher.teacher_id });
+  await expect(page.getByText(all.errors.consent_required, { exact: true }).first()).toBeVisible();
+  expect(catalogRequests).toEqual([]);
 });
 
 test('teacher homepage complaints use a server-filtered queue and hide or dismiss each selected item', async ({ page }, info) => {

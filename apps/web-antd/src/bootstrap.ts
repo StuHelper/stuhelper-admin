@@ -18,6 +18,7 @@ import {
   catalogJumpKey,
   createCatalogJumpStore,
 } from './features/academic/catalogJump';
+import { createLegalMenuAccess } from './features/legal/menu-access';
 import {
   createTeacherHomepageAccess,
   teacherHomepageAccessKey,
@@ -57,18 +58,27 @@ async function bootstrap(namespace: string, fetcher: typeof fetch = sessionFetch
   void capabilities.load();
   const session = createSessionStore(fetcher);
   const teacherHomepageAccess = createTeacherHomepageAccess(session, fetcher);
+  const legalMenu = createLegalMenuAccess(fetcher);
+  watch(
+    [
+      () => session.authenticatedSession.value?.csrf_token,
+      () => session.authenticatedSession.value?.consent_required || session.session.value?.administrator,
+    ],
+    ([, mayManage]) => legalMenu.changeSession(!!mayManage),
+    { flush: 'sync' },
+  );
   const accountJump = createAccountJumpStore();
   const catalogJump = createCatalogJumpStore();
   app
-    .provide(hostFetchKey, fetcher)
+    .provide(hostFetchKey, legalMenu.transport)
     .provide(sessionKey, session)
     .provide(teacherHomepageAccessKey, teacherHomepageAccess)
     .provide(accountJumpKey, accountJump)
     .provide(catalogJumpKey, catalogJump);
   watch(
-    () => session.state.value,
+    () => session.session.value?.profile.id,
     (next, previous) => {
-      if (previous === 'member' && next === 'guest') {
+      if (previous && previous !== next) {
         accountJump.clear();
         catalogJump.clear();
       }
@@ -92,6 +102,7 @@ async function bootstrap(namespace: string, fetcher: typeof fetch = sessionFetch
     accessStore.setAccessMenus(
       availableMenus(
         capabilities.has,
+        legalMenu.allowed.value,
         undefined,
         teacherHomepageAccess.canShowMenu,
       ),

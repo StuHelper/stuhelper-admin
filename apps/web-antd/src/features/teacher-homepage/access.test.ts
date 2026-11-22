@@ -12,10 +12,13 @@ const apiPrefix = '/api/v1/catalog/admin/schools/school/teacher-sites';
 const readPath = `${apiPrefix}/review/sites?limit=1`;
 const maintainPath = `${apiPrefix}/allowlist`;
 
-function sessionValue(administrator: boolean): Session {
+type FullSession = Extract<Session, { consent_required: false }>;
+
+function sessionValue(administrator: boolean): FullSession {
   return {
     administrator,
     authenticated: true,
+    consent_required: false,
     content_school_id: 'school',
     csrf_token: 'a'.repeat(43),
     expires_at: '2030-01-01T00:00:00Z',
@@ -59,7 +62,7 @@ async function fixture(
     signal?: AbortSignal | null,
   ) => Promise<Response> | Response,
 ) {
-  let user = sessionValue(administrator);
+  let user: Session = sessionValue(administrator);
   const fetcher = vi.fn<typeof fetch>(async (path, init) =>
     path === '/api/v1/auth/session'
       ? Response.json(user)
@@ -161,5 +164,50 @@ describe('teacher homepage permissions', () => {
     expect(access.canMaintain.value).toBe(false);
     access.reportMaintain('school', true);
     expect(access.canMaintain.value).toBe(false);
+  });
+
+  it('clears school permissions while consent is pending and rediscovers them in the new school', async () => {
+    let complete: ((value: Response) => void) | undefined;
+    let pendingSignal: AbortSignal | null | undefined;
+    const { access, paths, switchSession } = await fixture(false, (path, signal) => {
+      if (path === maintainPath) {
+        pendingSignal = signal;
+        return new Promise<Response>((resolve) => {
+          complete = resolve;
+        });
+      }
+      return path.endsWith('/allowlist') ? allowedMaintain() : allowedRead();
+    });
+    access.reportRead('school', true);
+    const previous = access.checkMaintain();
+    expect(access.canShowMenu(matching)).toBe(true);
+
+    await switchSession({
+      authenticated: true,
+      consent_required: true,
+      csrf_token: 'a'.repeat(43),
+      expires_at: '2030-01-01T00:00:00Z',
+    });
+    expect(pendingSignal?.aborted).toBe(true);
+    complete?.(allowedMaintain());
+    await previous;
+    access.discover('/');
+    await access.retryMaintain();
+    expect(access.school.value).toBe('');
+    expect(access.canShowMenu(matching)).toBe(false);
+    expect(access.canShowMenu(settings)).toBe(false);
+    expect(paths()).toEqual([maintainPath]);
+
+    await switchSession({ ...sessionValue(false), content_school_id: 'new-school' });
+    const currentApi = '/api/v1/catalog/admin/schools/new-school/teacher-sites';
+    access.discover('/');
+    await access.checkMaintain();
+    await vi.waitFor(() => expect(access.canRead.value).toBe(true));
+    expect(access.canMaintain.value).toBe(true);
+    expect(paths()).toEqual([
+      maintainPath,
+      `${currentApi}/review/sites?limit=1`,
+      `${currentApi}/allowlist`,
+    ]);
   });
 });
