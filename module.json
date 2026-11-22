@@ -91,7 +91,8 @@
       "tests/e2e/layout-shell.spec.mjs#disabled module routes set the unavailable document title instead of exposing disabled module names"
     ],
     "I18N-06": [
-      "tests/e2e/layout-shell.spec.mjs#switching language preserves pending writes, original idempotency key, RTL direction and bundled header controls"
+      "tests/e2e/layout-shell.spec.mjs#switching language preserves pending writes, original idempotency key, RTL direction and bundled header controls",
+      "tests/e2e/moderation-categories.spec.mjs#academic queue filters fit within the viewport in both writing directions"
     ],
     "MOD-09": [
       "tests/e2e/overview.spec.mjs#overview counts pending refunds, new feedback, student and teacher verifications beyond 25 history rows, and hides refused cards",

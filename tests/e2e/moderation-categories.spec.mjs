@@ -358,3 +358,138 @@ test('resource queue retries and filters by the school category counts', async (
     'resource',
   );
 });
+
+test('academic queue filters fit within the viewport in both writing directions', async ({
+  page,
+}, info) => {
+  const { locale } = info.project.metadata;
+  const { common, moderation } = catalogue(locale);
+  if (info.project.name.startsWith('mobile-')) {
+    await page.setViewportSize({ width: 412, height: 839 });
+  }
+  const { width } = page.viewportSize();
+  const state = fixture();
+  state.task = {
+    ...state.task,
+    content_kind: 'course',
+    submission: {
+      object_id: 'course-review',
+      kind: 'report',
+      reason: 'Privacy concern in a course review',
+      category: 'privacy_leak',
+      evidence: [],
+    },
+  };
+  await routes(page, state);
+  await page.route(summaryPath, (route) =>
+    route.fulfill({
+      json: queueSummary({ waiting: 1, byCategory: { privacy_leak: 1 } }),
+    }),
+  );
+  await page.goto(`${base}/moderation/queue?lang=${locale}`);
+  await expect(page.locator('html')).toHaveAttribute(
+    'dir',
+    locale === 'ar-EG' ? 'rtl' : 'ltr',
+  );
+
+  const search = page.getByRole('button', { name: common.search, exact: true });
+  const filters = page.locator('main form').filter({ has: search });
+  const range = filters.locator('.ant-picker-range');
+  const dateInputs = range.locator('input');
+  const selectControls = filters.locator('.ant-select');
+  const counts = categoryCard(page, moderation);
+  const countButton = counts.getByRole('button', {
+    name: moderation.categories.privacy_leak,
+  });
+  await expect(countButton).toBeVisible();
+  await expect(dateInputs).toHaveCount(2);
+  await expect(selectControls).toHaveCount(4);
+  const visibleTask = page.getByRole('cell', {
+    name: state.task.submission.reason,
+    exact: true,
+  });
+  await expect(visibleTask).toBeVisible();
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+  });
+
+  const labels = [
+    common.status,
+    moderation.contentKind,
+    moderation.taskType,
+    moderation.category,
+    moderation.timeRange,
+  ];
+  const elements = [
+    [
+      'Queue heading',
+      page.getByRole('heading', { name: moderation.queueTitle, level: 1 }),
+    ],
+    ['Filter form', filters],
+    ...labels.map((label) => [
+      `Filter label: ${label}`,
+      filters.getByText(label, { exact: true }),
+    ]),
+    ...labels
+      .slice(0, 4)
+      .map((label, index) => [
+        `Filter select: ${label}`,
+        selectControls.nth(index),
+      ]),
+    ['Dates', range],
+    ['Start date', dateInputs.first()],
+    ['End date', dateInputs.last()],
+    ['Search', search],
+    ['School category counts', counts],
+    ['Category filter shortcut', countButton],
+  ];
+  async function expectHorizontalFit(stateLabel) {
+    for (const [name, locator] of elements) {
+      await expect(locator, name).toBeVisible();
+    }
+    // The route can be visible before its slide-in transition finishes.
+    await expect
+      .poll(
+        async () => {
+          const bounds = await Promise.all(
+            elements.map(async ([name, locator]) => [
+              name,
+              await locator.boundingBox(),
+            ]),
+          );
+          const overflow = [];
+          for (const [name, box] of bounds) {
+            if (!box) {
+              overflow.push(`${name} has no visible bounds`);
+              continue;
+            }
+            const right = box.x + box.width;
+            if (box.x < -1 || right > width + 1) {
+              overflow.push(
+                `${name} spans ${box.x.toFixed(1)} to ${right.toFixed(1)}px in a ${width}px viewport`,
+              );
+            }
+          }
+          const scrollOverflow = await filters.evaluate((form) => ({
+            'Filter form': form.scrollWidth - form.clientWidth,
+            Document:
+              document.documentElement.scrollWidth -
+              document.documentElement.clientWidth,
+          }));
+          for (const [name, pixels] of Object.entries(scrollOverflow)) {
+            if (pixels > 1)
+              overflow.push(`${name} overflows horizontally by ${pixels}px`);
+          }
+          return overflow;
+        },
+        { message: `${stateLabel}: horizontal overflow` },
+      )
+      .toEqual([]);
+  }
+
+  await expectHorizontalFit('Before filtering');
+  await countButton.click();
+  await expect(countButton).toHaveAttribute('aria-pressed', 'true');
+  await expect(visibleTask).toBeVisible();
+  await expectHorizontalFit('After filtering');
+});

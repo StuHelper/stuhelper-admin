@@ -11,6 +11,7 @@ import { computed, nextTick, reactive, ref, shallowRef, useTemplateRef, watch } 
 
 import { useI18n } from '@vben/locales';
 
+import { useMediaQuery } from '@vueuse/core';
 import {
   Alert,
   Button,
@@ -57,6 +58,7 @@ const format = useFormat();
 const errorText = useErrorText();
 const api = useAcademicAdmin();
 const school = useCampusId();
+const compactFilters = useMediaQuery('(max-width: 767px)');
 const categoryCounts = useTemplateRef('categoryCounts');
 const filters = reactive({
   state: props.mode === 'queue' ? 'waiting' : '',
@@ -296,6 +298,7 @@ const entryColumns = computed(() => [
 
 <template>
   <AdminPage
+    class="min-w-0 max-w-full"
     :title="
       t(
         mode === 'queue'
@@ -311,19 +314,19 @@ const entryColumns = computed(() => [
       )
     "
   >
-    <div class="flex flex-col gap-3">
+    <div class="flex min-w-0 flex-col gap-3">
       <Alert v-if="lastResult" type="success" show-icon closable :message="lastResult" @close="lastResult = ''" />
       <Card :bordered="false">
         <Form
-          layout="inline"
-          class="flex flex-wrap gap-y-3"
+          :layout="compactFilters ? 'vertical' : 'inline'"
+          class="moderation-filters flex flex-wrap gap-y-3"
           @submit.prevent="rows.reload()"
         >
           <FormItem :label="t('page.common.status')" html-for="moderationview-field-1">
             <Select
 id="moderationview-field-1"
               v-model:value="filters.state"
-              class="w-40"
+              class="w-full md:w-40"
               :disabled="locked"
               :options="[
                 { value: '', label: t('page.common.all') },
@@ -335,7 +338,7 @@ id="moderationview-field-1"
             <Select
 id="moderationview-field-2"
               v-model:value="filters.kind"
-              class="w-36"
+              class="w-full md:w-36"
               :disabled="locked"
               :options="[
                 { value: '', label: t('page.common.all') },
@@ -351,7 +354,7 @@ id="moderationview-field-2"
               <Select
 id="moderationview-field-3"
                 v-model:value="filters.taskKind"
-                class="w-36"
+                class="w-full md:w-36"
                 :disabled="locked"
                 :options="[
                   { value: '', label: t('page.common.all') },
@@ -372,7 +375,7 @@ id="moderationview-field-3"
               <Select
                 id="moderationview-field-category"
                 v-model:value="filters.category"
-                class="w-44"
+                class="w-full md:w-44"
                 show-search
                 option-filter-prop="label"
                 :disabled="locked"
@@ -382,17 +385,22 @@ id="moderationview-field-3"
                 ]"
               />
             </FormItem>
-            <FormItem :label="t('page.moderation.timeRange')" html-for="moderationview-field-4">
+            <FormItem
+              :label="t('page.moderation.timeRange')"
+              class="moderation-filters-wide max-w-full"
+              html-for="moderationview-field-4"
+            >
               <DatePicker.RangePicker
                 id="moderationview-field-4"
                 v-model:value="filters.range"
+                class="moderation-range w-full max-w-full md:w-auto"
                 show-time
                 value-format="YYYY-MM-DDTHH:mm:ssZ"
                 :disabled="locked"
               />
             </FormItem>
           </template>
-          <FormItem>
+          <FormItem class="moderation-filters-wide">
             <Button
               type="primary"
               html-type="submit"
@@ -699,3 +707,31 @@ id="moderationview-field-5"
     </Drawer>
   </AdminPage>
 </template>
+
+<style scoped>
+.moderation-filters-wide :deep(.ant-form-item-control),
+.moderation-range :deep(.ant-picker-input) {
+  min-inline-size: 0;
+}
+
+@media (max-width: 767px) {
+  .moderation-filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+    gap: 0.75rem;
+  }
+
+  .moderation-filters > :deep(.ant-form-item) {
+    min-inline-size: 0;
+    margin-block-end: 0;
+  }
+
+  .moderation-filters-wide {
+    grid-column: 1 / -1;
+  }
+
+  .moderation-range :deep(.ant-picker-input) {
+    flex: 1 1 0;
+  }
+}
+</style>
