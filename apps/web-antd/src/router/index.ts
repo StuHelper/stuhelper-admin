@@ -7,6 +7,16 @@ const academic = {
 };
 
 const children: RouteRecordRaw[] = [
+  {
+    path: 'system/legal',
+    redirect: { name: 'LegalDocuments' },
+    meta: { hideInBreadcrumb: true, title: 'page.menu.legalDocuments' },
+    component: () => import('#/features/legal/LegalSessionScope.vue'),
+    children: [
+      { name: 'LegalDocuments', path: 'documents', component: () => import('#/features/legal/DocumentsView.vue'), meta: { title: 'page.menu.legalDocuments' } },
+      { name: 'LegalVariables', path: 'variables', component: () => import('#/features/legal/VariablesView.vue'), meta: { title: 'page.menu.legalVariables' } },
+    ],
+  },
  { name: 'Feedback', path: 'moderation/feedback', component: () => import('#/features/feedback/FeedbackView.vue'), meta: { title: 'page.feedback.title' } },
  {name:'SessionSettings',path:'system/sessions',component:()=>import('#/features/sessions/SessionSettingsView.vue'),meta:{title:'page.sessionPolicy.title'}},
   { name: 'AccountClosures', path: 'system/closures', component: () => import('#/features/closures/ClosuresView.vue'), meta: { title: 'page.closures.title' } },

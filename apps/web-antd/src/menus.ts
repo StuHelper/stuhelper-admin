@@ -81,6 +81,8 @@ export const menus: MenuRecordRaw[] = [
     path: '/system',
     icon: ShieldUser,
     children: [
+      { name: 'page.menu.legalDocuments', path: '/system/legal/documents' },
+      { name: 'page.menu.legalVariables', path: '/system/legal/variables' },
       { name: 'page.sessionPolicy.title', path: '/system/sessions' },
       { name: 'page.menu.closures', path: '/system/closures' },
       { name: 'page.menu.accessRoles', path: '/system/roles' },
@@ -92,12 +94,13 @@ export const menus: MenuRecordRaw[] = [
 ];
 
 /** Empty groups disappear along with their unavailable children. */
-export function availableMenus(has: (capability: string) => boolean, items = menus): MenuRecordRaw[] {
+export function availableMenus(has: (capability: string) => boolean, legalAccess: boolean, items = menus): MenuRecordRaw[] {
   return items.flatMap((item) => {
+    if (item.path.startsWith('/system/legal/') && !legalAccess) return [];
     const capability = routeCapability(item.path);
     if (capability && !has(capability)) return [];
     if (!item.children) return [item];
-    const children = availableMenus(has, item.children);
+    const children = availableMenus(has, legalAccess, item.children);
     return children.length > 0 ? [{ ...item, children }] : [];
   });
 }

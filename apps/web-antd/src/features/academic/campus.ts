@@ -29,15 +29,29 @@ function getCampusState(session: SessionStore): CampusState {
   const scope = effectScope(true);
   scope.run(() => {
     watch(
-      [session.state, () => session.session.value?.content_school_id],
-      ([nextState, nextSchool], [prevState, prevSchool]) => {
-        if (nextState === 'guest' && prevState !== 'guest') {
+      [
+        session.state,
+        () => session.session.value?.content_school_id,
+        () => session.authenticatedSession.value?.consent_required,
+      ],
+      (
+        [nextState, nextSchool, consentPending],
+        [prevState, prevSchool, prevConsent],
+      ) => {
+        if (
+          (nextState === 'guest' && prevState !== 'guest') ||
+          (consentPending && !prevConsent)
+        ) {
           created.generation++;
           created.pending = undefined;
           created.campusId.value = '';
-          created.failure.value = '';
-          created.status.value = 'idle';
-        } else if (prevSchool && nextSchool && prevSchool !== nextSchool) {
+          created.failure.value = consentPending ? 'consent_required' : '';
+          created.status.value = consentPending ? 'error' : 'idle';
+        } else if (
+          nextSchool &&
+          (prevSchool || prevConsent) &&
+          prevSchool !== nextSchool
+        ) {
           created.campusId.value = nextSchool;
           created.failure.value = '';
           created.status.value = 'ready';
@@ -72,6 +86,9 @@ export function useCampus() {
           // The session selects the community school. The public catalog
           // applies student eligibility, while Admin APIs check staff grants.
           const school = session.session.value?.content_school_id;
+          if (session.authenticatedSession.value?.consent_required) {
+            throw new ApiError('consent_required');
+          }
           if (!school) {
             throw new ApiError(
               session.unavailable.value ? 'unavailable' : 'incompatible',

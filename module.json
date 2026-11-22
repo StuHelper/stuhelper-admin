@@ -11,7 +11,8 @@
     "storage",
     "media",
     "storage-contribution",
-    "resources"
+    "resources",
+    "legal"
   ],
   "specifications": [
     "README.md"
@@ -148,7 +149,8 @@
       "tests/e2e/moderation.spec.mjs#queue batch preview applies decisions per item and content view handles unpublished entries"
     ],
     "AO-02": [
-      "tests/e2e/catalog.spec.mjs#catalog paged search appends courses, preserves edits across conflict reload, and merges duplicates after preview"
+      "tests/e2e/catalog.spec.mjs#catalog paged search appends courses, preserves edits across conflict reload, and merges duplicates after preview",
+      "tests/e2e/legal.spec.mjs#legal draft conflict keeps input and uncertain writes replay only the original request"
     ],
     "AO-03": [
       "tests/e2e/catalog.spec.mjs#catalog import previews normalized JSON and retries an uncertain confirmation with the original key"
@@ -162,6 +164,9 @@
       "tests/e2e/moderation-categories.spec.mjs#academic queue retries and filters by the school category counts",
       "tests/e2e/moderation-categories.spec.mjs#resource queue retries and filters by the school category counts",
       "apps/web-antd/src/demo/server.test.ts#summarizes categorized and uncategorized demo tasks by school and updates after a decision"
+    ],
+    "AO-05": [
+      "tests/e2e/legal.spec.mjs#legal menu follows platform permission for a consent-pending session and revokes displayed data"
     ]
   }
 }
