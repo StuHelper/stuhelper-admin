@@ -26,7 +26,7 @@ async function server(page, options = {}) {
     }
     state.queries.push(body);
     if (options.queryStatus) return route.fulfill({ status: options.queryStatus, json: { code: options.queryStatus === 403 ? 'forbidden' : 'unavailable' } });
-    const pages = options.pages ?? [{ items: [], next_cursor: '', unavailable_domains: [] }];
+    const pages = options.pages ?? [{ groups: [], next_cursor: '', unavailable_domains: [] }];
     return route.fulfill({ json: pages[Math.min(state.queries.length - 1, pages.length - 1)] });
   });
   return state;
@@ -37,14 +37,25 @@ const candidate = (account, extra = {}) => ({ account, source: 'verification', c
 test('a lookup states its purpose, groups records by candidate and continues a candidate on the next page', async ({ page }, info) => {
   const all = catalogue(info); const l = all.lookup;
   const person = candidate('https://id.example|user-7');
-  const first = { groups: [{ candidate: person, items: [record('p1', 'profiles', [{ name: 'phone', category: 'identity', value: '138****2046', masked: true }])] }], next_cursor: 'c1', unavailable_domains: ['groups'] };
-  const second = { groups: [{ candidate: person, items: [record('r1', 'reviews', [{ name: 'count', category: 'business', value: '12', masked: false }], false)] }], next_cursor: '', unavailable_domains: ['groups'] };
+  const first = { groups: [{ has_more: true, candidate: person, items: [record('p1', 'profiles', [{ name: 'phone', category: 'identity', value: '138****2046', masked: true }])] }], next_cursor: 'c1', unavailable_domains: ['groups'] };
+  const second = { groups: [{ has_more: false, candidate: person, items: [record('r1', 'reviews', [{ name: 'count', category: 'business', value: '12', masked: false }], false)] }], next_cursor: '', unavailable_domains: ['groups'] };
   const state = await server(page, { pages: [first, second] });
   await page.goto(`${base}/system/lookup?lang=${info.project.metadata.locale}`);
   const submit = page.getByRole('button', { name: l.submit, exact: true });
   await page.getByLabel(l.value, { exact: true }).fill('张三');
   await expect(submit).toBeDisabled();
+  await page.getByLabel(l.purpose, { exact: true }).fill('Ticket\u007F2041');
+  await expect(submit).toBeDisabled();
   await page.getByLabel(l.purpose, { exact: true }).fill('Ticket 2041');
+  const kind = page.locator('.ant-form-item').filter({ hasText: l.kind }).locator('.ant-select-selector');
+  await kind.click();
+  await page.locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden)').getByTitle(l.kinds.staff_id, { exact: true }).click();
+  await expect(submit).toBeDisabled();
+  await page.locator('#lookup-school').fill('school-1');
+  await expect(submit).toBeEnabled();
+  await kind.click();
+  await page.locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden)').getByTitle(l.kinds.name, { exact: true }).click();
+  await page.locator('#lookup-school').fill('*');
   await page.getByRole('checkbox', { name: l.domainNames.billing, exact: true }).uncheck();
   await page.getByRole('checkbox', { name: l.categories.identity, exact: true }).check();
   await submit.click();
@@ -64,8 +75,8 @@ test('a lookup states its purpose, groups records by candidate and continues a c
 test('people with the same name stay separate and a past QQ binding is marked historical', async ({ page }, info) => {
   const l = catalogue(info).lookup;
   const pages = [{ groups: [
-    { candidate: candidate('https://id.example|user-7', { source: 'onebot', label: [] }), items: [] },
-    { candidate: candidate('https://id.example|user-9', { source: 'onebot', current: false, label: [] }), items: [] },
+    { has_more: false, candidate: candidate('https://id.example|user-7', { source: 'onebot', label: [] }), items: [] },
+    { has_more: false, candidate: candidate('https://id.example|user-9', { source: 'onebot', current: false, label: [] }), items: [] },
   ], next_cursor: '', unavailable_domains: [] }];
   const state = await server(page, { pages });
   await page.goto(`${base}/system/lookup?lang=${info.project.metadata.locale}`);
@@ -94,7 +105,7 @@ test('a refused lookup shows the reason and keeps nothing on screen', async ({ p
 
 test('the query log needs a purpose and lists what each query returned', async ({ page }, info) => {
   const all = catalogue(info); const l = all.lookup;
-  const entry = { id: '9', actor: 'admin-1', request_id: 'req-1', purpose: 'Ticket 2041', scope: any, channel: 'web', target_group: '', action: 'query', result: 'success', count: 3, targets: ['user-7'], fields: ['identity'], basis: [], created_at: '2026-11-08T01:00:00Z' };
+  const entry = { id: '9', actor: 'admin-1', request_id: 'req-1', purpose: 'Ticket 2041', scope: any, channel: 'admin', target_group: '', action: 'query', result: 'success', count: 3, targets: ['user-7'], fields: ['identity'], basis: [], created_at: '2026-11-08T01:00:00Z' };
   const state = await server(page, { audits: [entry] });
   await page.goto(`${base}/system/lookup?lang=${info.project.metadata.locale}`);
   await page.getByRole('tab', { name: l.auditTab }).click();

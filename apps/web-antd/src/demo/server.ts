@@ -601,6 +601,7 @@ const groupConfig = (id: string, name: string, number: string) => ({
   require_student: true,
   accept_alumni: false,
   accept_temporary: true,
+  discoverable: true, category: 'course', description: 'Algorithms', password_hint: '',
   grace_seconds: 72 * 3600,
   reminder_seconds: 24 * 3600,
   retention_seconds: 7 * 86_400,
@@ -782,7 +783,7 @@ function billingRoute(p: string, method: string, u: URL) {
         next: '',
       });
     }
-    if (path === '/membership-plans') return json([]);
+    if (path === '/membership-plans') return json({ items: [], next: '' });
     if (path === '/channels') {
       return json({
         items: [
@@ -832,7 +833,11 @@ function billingRoute(p: string, method: string, u: URL) {
     if (path === '/accounts') {
       return json({
         target: billingTarget,
+        rewards: { items: [], next: '' },
         wallet: {
+          permanent_points: 133,
+          expiring_points: 0,
+          expiring_soon_points: 0,
           points: 133,
           ivory_minor: 2000,
           frozen_ivory_minor: 0,

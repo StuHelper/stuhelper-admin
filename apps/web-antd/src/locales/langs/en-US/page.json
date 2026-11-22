@@ -1237,6 +1237,7 @@
       "occurred": "Occurred at",
       "grantSubmit": "Grant",
       "revokeHint": "Revoking takes back the points granted for the event. Missing points are recorded as points owed.",
+      "restoreQuota": "Restore the period quota used by this reward",
       "revokeSubmit": "Confirm revocation",
       "refundReason": {
         "duplicate_charge": "Duplicate charge",
@@ -1432,7 +1433,9 @@
     "queryTab": "Query",
     "auditTab": "Query log",
     "kind": "Search by",
+    "schoolRequired": "Enter a specific school for a student or staff ID.",
     "kinds": {
+      "staff_id": "Staff ID",
       "name": "Name",
       "student_id": "Student ID",
       "qq": "QQ number",
@@ -1587,6 +1590,10 @@
       "subscribe": "Subscribe",
       "feedback": "Feedback",
       "watch": "Watch",
+      "cancel_action": "Cancel action",
+      "card_preview": "Preview group card",
+      "retry_action": "Retry action",
+      "unexempt": "Remove exemption",
       "ai_execute": "Run suggestion"
     },
     "commandHints": {
@@ -1904,6 +1911,9 @@
       "content_unavailable": "Content or favorites service unavailable"
     },
     "modules": {
+      "storage": "Storage",
+      "storage-contribution": "Storage contribution",
+      "verification": "Verification",
       "billing": "Billing",
       "open-platform": "Open platform",
       "reviews": "Reviews",

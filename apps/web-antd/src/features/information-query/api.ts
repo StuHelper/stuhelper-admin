@@ -1,7 +1,7 @@
 import type { components } from '#/api/information-query.gen';
 
 import { type Http } from '#/shared/api/http';
-import { schemaOf } from '#/shared/api/schema';
+import { schemaOf, validates } from '#/shared/api/schema';
 import { useHttp } from '#/shared/session';
 
 import contract from '../../../../../contracts/information-query.openapi.json';
@@ -25,9 +25,13 @@ const parse = {
   result: schemaOf<Result>(schemas, 'Result'),
 };
 
+export function validPurpose(value: string) {
+  return validates(value.trim(), schemas.Query.properties.purpose, schemas);
+}
+
 export const domains: Domain[] = ['profiles', 'verification', 'catalog', 'reviews', 'resources', 'billing', 'groups'];
 export const sensitive: Sensitive[] = ['identity', 'document', 'material', 'refund_payee'];
-export const kinds: Query['kind'][] = ['name', 'student_id', 'qq', 'account'];
+export const kinds: Query['kind'][] = ['name', 'student_id', 'staff_id', 'qq', 'account'];
 export const pageSize = 50;
 
 /** One person per candidate: the same account across pages stays one group. */
@@ -41,8 +45,10 @@ export function mergeGroups(shown: CandidateGroup[], page: CandidateGroup[]) {
   const merged = shown.map((group) => ({ ...group, items: [...group.items] }));
   for (const group of page) {
     const existing = merged.find((item) => candidateKey(item.candidate) === candidateKey(group.candidate));
-    if (existing) existing.items.push(...group.items);
-    else merged.push({ ...group, items: [...group.items] });
+    if (existing) {
+      existing.items.push(...group.items);
+      existing.has_more = group.has_more;
+    } else merged.push({ ...group, items: [...group.items] });
   }
   return merged;
 }

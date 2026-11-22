@@ -148,7 +148,7 @@ describe('demo server contract alignment', () => {
     expect(schemaOf(informationQueryContract.components.schemas, 'AuditPage')(await audit.response.json())).toEqual({ items: [], next_cursor: '' });
     const plans = await call('/api/v1/billing/admin/membership-plans');
     expect(plans.status).toBe(200);
-    expect(schemaOf(billingContract.components.schemas, 'MembershipPlan', true)(await plans.response.json())).toEqual([]);
+    expect(schemaOf(billingContract.components.schemas, 'AdminMembershipPlanPage')(await plans.response.json())).toEqual({ items: [], next: '' });
     const apps = await call('/api/v1/open-platform/admin/apps');
     expect(apps.status).toBe(200);
     expect(schemaOf(openPlatformContract.components.schemas, 'Applications')(await apps.response.json())).toEqual({ items: [] });

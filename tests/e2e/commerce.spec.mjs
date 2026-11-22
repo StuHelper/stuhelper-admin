@@ -45,11 +45,11 @@ async function server(page, options = {}) {
     const path = url.pathname.replace('/api/v1/billing', '');
     if (request.method() === 'GET') {
       state.reads.push(`${path}${url.search}`);
-      if (path === '/admin/membership-plans') return route.fulfill({ json: state.plans });
+      if (path === '/admin/membership-plans') return route.fulfill({ json: { items: state.plans, next: '' } });
       if (path === '/resource-prices/resource') return state.price ? route.fulfill({ json: state.price }) : route.fulfill({ status: 404, json: { code: 'billing_not_found' } });
       if (path === '/admin/refunds') return route.fulfill({ json: { items: url.searchParams.get('state') === 'awaiting_manual' ? [order({ id: 'r1', kind: 'refund', state: 'awaiting_manual', amount_minor: 1000, target })] : [], next: '' } });
       if (path === '/admin/refunds/r1/payee') return options.payee ? route.fulfill({ json: options.payee }) : route.fulfill({ status: 404, json: { code: 'billing_not_found' } });
-      if (path === '/admin/accounts') return route.fulfill({ json: { target, wallet: { points: 40, ivory_minor: 2500, frozen_ivory_minor: 0, debt_points: 0, frozen: false }, orders: { items: [order({ id: 'u1', kind: 'resource_unlock', state: 'fulfilled', points: 80, account: 'points', resource_id: 'resource' }), order({ id: 'm1', kind: 'membership', state: 'succeeded', amount_minor: 1500, account: 'ivory', plan_id: 'semester' })], next: '' }, ledger: { items: [], next: '' } } });
+      if (path === '/admin/accounts') return route.fulfill({ json: { target, rewards: { items: [], next: '' }, wallet: { points: 40, permanent_points: 40, expiring_points: 0, expiring_soon_points: 0, ivory_minor: 2500, frozen_ivory_minor: 0, debt_points: 0, frozen: false }, orders: { items: [order({ id: 'u1', kind: 'resource_unlock', state: 'fulfilled', points: 80, account: 'points', resource_id: 'resource' }), order({ id: 'm1', kind: 'membership', state: 'succeeded', amount_minor: 1500, account: 'ivory', plan_id: 'semester' })], next: '' }, ledger: { items: [], next: '' } } });
       return route.fulfill({ status: 404, json: { code: 'billing_not_found' } });
     }
     const body = request.method() === 'DELETE' ? undefined : request.postDataJSON();

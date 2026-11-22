@@ -1237,6 +1237,7 @@
       "occurred": "发生时间",
       "grantSubmit": "发放",
       "revokeHint": "撤销会扣回该事件发放的积分；积分不足时记为待扣积分。",
+      "restoreQuota": "恢复本次奖励占用的周期配额",
       "revokeSubmit": "确认撤销",
       "refundReason": {
         "duplicate_charge": "重复扣款",
@@ -1432,7 +1433,9 @@
     "queryTab": "查询",
     "auditTab": "查询记录",
     "kind": "查询依据",
+    "schoolRequired": "按学号或教职工号查询时，请指定一所学校。",
     "kinds": {
+      "staff_id": "教职工号",
       "name": "姓名",
       "student_id": "学号",
       "qq": "QQ 号",
@@ -1587,6 +1590,10 @@
       "subscribe": "订阅",
       "feedback": "反馈",
       "watch": "关注",
+      "cancel_action": "取消操作",
+      "card_preview": "预览群名片",
+      "retry_action": "重试操作",
+      "unexempt": "移除豁免",
       "ai_execute": "执行建议"
     },
     "commandHints": {
@@ -1904,6 +1911,9 @@
       "content_unavailable": "内容或收藏服务不可用"
     },
     "modules": {
+      "storage": "存储",
+      "storage-contribution": "存储贡献",
+      "verification": "认证",
       "billing": "账务",
       "open-platform": "开放平台",
       "reviews": "评价",

@@ -1237,6 +1237,7 @@
       "occurred": "発生日時",
       "grantSubmit": "付与する",
       "revokeHint": "取り消すとそのイベントで付与したポイントを回収します。不足分は未精算のポイントとして記録されます。",
+      "restoreQuota": "この報酬が消費した期間内の付与枠を戻す",
       "revokeSubmit": "取り消しを確定",
       "refundReason": {
         "duplicate_charge": "二重請求",
@@ -1432,7 +1433,9 @@
     "queryTab": "照会",
     "auditTab": "照会記録",
     "kind": "照会方法",
+    "schoolRequired": "学籍番号または教職員番号で検索する場合は学校を指定してください。",
     "kinds": {
+      "staff_id": "教職員番号",
       "name": "氏名",
       "student_id": "学籍番号",
       "qq": "QQ 番号",
@@ -1587,6 +1590,10 @@
       "subscribe": "購読",
       "feedback": "フィードバック",
       "watch": "注視",
+      "cancel_action": "操作を取り消す",
+      "card_preview": "グループカードをプレビュー",
+      "retry_action": "操作を再試行",
+      "unexempt": "免除を解除",
       "ai_execute": "提案を実行"
     },
     "commandHints": {
@@ -1904,6 +1911,9 @@
       "content_unavailable": "コンテンツまたはお気に入りサービスが利用不可"
     },
     "modules": {
+      "storage": "ストレージ",
+      "storage-contribution": "ストレージ提供",
+      "verification": "認証",
       "billing": "会計",
       "open-platform": "オープンプラットフォーム",
       "reviews": "講義評価",

@@ -1237,6 +1237,7 @@
       "occurred": "발생 시각",
       "grantSubmit": "지급",
       "revokeHint": "취소하면 해당 이벤트로 지급한 포인트를 회수합니다. 부족한 포인트는 차감 예정 포인트로 기록됩니다.",
+      "restoreQuota": "이 보상으로 사용한 기간 한도 복원",
       "revokeSubmit": "취소 확인",
       "refundReason": {
         "duplicate_charge": "중복 결제",
@@ -1432,7 +1433,9 @@
     "queryTab": "조회",
     "auditTab": "조회 기록",
     "kind": "조회 기준",
+    "schoolRequired": "학번이나 교직원 번호로 검색할 때는 학교를 지정하세요.",
     "kinds": {
+      "staff_id": "교직원 번호",
       "name": "이름",
       "student_id": "학번",
       "qq": "QQ 번호",
@@ -1587,6 +1590,10 @@
       "subscribe": "구독",
       "feedback": "피드백",
       "watch": "주시",
+      "cancel_action": "작업 취소",
+      "card_preview": "그룹 카드 미리 보기",
+      "retry_action": "작업 다시 시도",
+      "unexempt": "면제 해제",
       "ai_execute": "제안 실행"
     },
     "commandHints": {
@@ -1904,6 +1911,9 @@
       "content_unavailable": "콘텐츠 또는 즐겨찾기 서비스를 사용할 수 없음"
     },
     "modules": {
+      "storage": "저장소",
+      "storage-contribution": "저장 공간 기여",
+      "verification": "인증",
       "billing": "청구",
       "open-platform": "오픈 플랫폼",
       "reviews": "강의 평가",

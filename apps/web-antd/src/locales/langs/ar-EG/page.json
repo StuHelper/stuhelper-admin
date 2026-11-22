@@ -1237,6 +1237,7 @@
       "occurred": "وقت الحدث",
       "grantSubmit": "منح",
       "revokeHint": "يسترجع الإلغاء النقاط الممنوحة للحدث، وتُسجّل النقاط الناقصة كنقاط مستحقة.",
+      "restoreQuota": "استعادة حصة الفترة التي استهلكتها هذه المكافأة",
       "revokeSubmit": "تأكيد الإلغاء",
       "refundReason": {
         "duplicate_charge": "خصم مكرر",
@@ -1432,7 +1433,9 @@
     "queryTab": "استعلام",
     "auditTab": "سجل الاستعلامات",
     "kind": "البحث حسب",
+    "schoolRequired": "حدّد مدرسة بعينها عند البحث برقم الطالب أو الموظف.",
     "kinds": {
+      "staff_id": "رقم الموظف",
       "name": "الاسم",
       "student_id": "الرقم الجامعي",
       "qq": "رقم QQ",
@@ -1587,6 +1590,10 @@
       "subscribe": "اشتراك",
       "feedback": "ملاحظات",
       "watch": "مراقبة",
+      "cancel_action": "إلغاء الإجراء",
+      "card_preview": "معاينة بطاقة المجموعة",
+      "retry_action": "إعادة محاولة الإجراء",
+      "unexempt": "إزالة الإعفاء",
       "ai_execute": "تنفيذ الاقتراح"
     },
     "commandHints": {
@@ -1904,6 +1911,9 @@
       "content_unavailable": "خدمة المحتوى أو المفضلة غير متاحة"
     },
     "modules": {
+      "storage": "التخزين",
+      "storage-contribution": "المساهمة في التخزين",
+      "verification": "التحقق",
       "billing": "الفوترة",
       "open-platform": "المنصة المفتوحة",
       "reviews": "التقييمات",

@@ -150,8 +150,12 @@ describe('Conflict comparison, directory tree pagination, AppsView filter advanc
 
       // Memberships & >100 directories
       if (path === '/api/v1/billing/admin/membership-plans') {
-        return Response.json([
-          {
+        if (!url.searchParams.get('after')) {
+          return Response.json({ items: [], next: 'next-plan' });
+        }
+        expect(url.searchParams.get('after')).toBe('next-plan');
+        return Response.json({
+          items: [{
             enabled: true,
             id: 'plan-1',
             ivory_minor: 1000,
@@ -159,8 +163,9 @@ describe('Conflict comparison, directory tree pagination, AppsView filter advanc
             points: 500,
             valid_seconds: 30 * 86_400,
             version: 1,
-          },
-        ]);
+          }],
+          next: '',
+        });
       }
       if (path === '/api/v1/resources/coverage/plan-1') {
         return Response.json({

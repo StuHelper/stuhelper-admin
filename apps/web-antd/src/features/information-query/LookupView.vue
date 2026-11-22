@@ -14,7 +14,7 @@ import AdminPage from '#/shared/ui/AdminPage.vue';
 import LoadState from '#/shared/ui/LoadState.vue';
 import { useErrorText } from '#/shared/ui/messages';
 
-import { candidateKey, domains, kinds, mergeGroups, pageSize, sensitive, useInformationQuery } from './api';
+import { candidateKey, domains, kinds, mergeGroups, pageSize, sensitive, useInformationQuery, validPurpose } from './api';
 
 /**
  * Look up the records linked to one person across business modules. Every query
@@ -31,7 +31,9 @@ const label = (key: string, fallback: string) => (te(key) ? t(key) : fallback);
 
 const form = reactive({ kind: 'name' as Query['kind'], value: '', school: '*', group: '*', module: '*', domains: [...domains] as Domain[], fields: [] as Sensitive[], purpose: '' });
 const scope = (): Scope => ({ school: form.school.trim() || '*', group: form.group.trim() || '*', module: form.module.trim() || '*' });
-const ready = computed(() => !!form.value.trim() && !!form.purpose.trim() && form.domains.length > 0);
+const schoolRequired = computed(() => form.kind === 'student_id' || form.kind === 'staff_id');
+const schoolMissing = computed(() => schoolRequired.value && (!form.school.trim() || form.school.trim() === '*'));
+const ready = computed(() => !!form.value.trim() && validPurpose(form.purpose) && !schoolMissing.value && form.domains.length > 0);
 
 const groups = shallowRef<CandidateGroup[]>([]);
 const unavailable = shallowRef<string[]>([]);
@@ -115,7 +117,7 @@ async function loadAudit(after: string) {
   }
 }
 function searchAudit() {
-  if (!auditForm.purpose.trim()) return;
+  if (!validPurpose(auditForm.purpose)) return;
   auditApplied = { purpose: auditForm.purpose.trim(), scope: { school: auditForm.school.trim() || '*', group: auditForm.group.trim() || '*', module: auditForm.module.trim() || '*' } };
   void loadAudit('');
 }
@@ -137,7 +139,7 @@ const scopeText = (value: Scope) => [value.school, value.group, value.module].ma
                 <FormItem class="md:col-span-2" :label="t('page.lookup.value')" required html-for="lookup-value">
                   <Input id="lookup-value" v-model:value="form.value" :maxlength="256" autocomplete="off" allow-clear />
                 </FormItem>
-                <FormItem :label="t('page.access.school')" html-for="lookup-school"><Input id="lookup-school" v-model:value="form.school" :maxlength="128" /></FormItem>
+                <FormItem :label="t('page.access.school')" :required="schoolRequired" :help="schoolMissing ? t('page.lookup.schoolRequired') : undefined" html-for="lookup-school"><Input id="lookup-school" v-model:value="form.school" :maxlength="128" /></FormItem>
                 <FormItem :label="t('page.access.group')" html-for="lookup-group"><Input id="lookup-group" v-model:value="form.group" :maxlength="128" /></FormItem>
                 <FormItem :label="t('page.access.module')" html-for="lookup-module"><Input id="lookup-module" v-model:value="form.module" :maxlength="128" /></FormItem>
               </div>
@@ -221,7 +223,7 @@ const scopeText = (value: Scope) => [value.school, value.group, value.module].ma
               <FormItem :label="t('page.lookup.purpose')" required :extra="t('page.lookup.auditPurposeHint')" html-for="lookup-audit-purpose">
                 <Textarea id="lookup-audit-purpose" v-model:value="auditForm.purpose" :rows="2" :maxlength="512" />
               </FormItem>
-              <Button type="primary" html-type="submit" :loading="auditStatus === 'loading'" :disabled="!auditForm.purpose.trim()">{{ t('page.common.search') }}</Button>
+              <Button type="primary" html-type="submit" :loading="auditStatus === 'loading'" :disabled="!validPurpose(auditForm.purpose)">{{ t('page.common.search') }}</Button>
             </Form>
           </Card>
           <Card v-if="auditStatus !== 'idle'" :bordered="false">

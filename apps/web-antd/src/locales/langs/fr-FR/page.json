@@ -1237,6 +1237,7 @@
       "occurred": "Date de l’événement",
       "grantSubmit": "Attribuer",
       "revokeHint": "La révocation reprend les points attribués pour l’événement. Les points manquants sont enregistrés comme dus.",
+      "restoreQuota": "Rétablir le quota de la période utilisé par cette récompense",
       "revokeSubmit": "Confirmer la révocation",
       "refundReason": {
         "duplicate_charge": "Débit en double",
@@ -1432,7 +1433,9 @@
     "queryTab": "Recherche",
     "auditTab": "Journal des recherches",
     "kind": "Rechercher par",
+    "schoolRequired": "Précisez un établissement pour chercher un matricule étudiant ou du personnel.",
     "kinds": {
+      "staff_id": "Matricule du personnel",
       "name": "Nom",
       "student_id": "Numéro d’étudiant",
       "qq": "Numéro QQ",
@@ -1587,6 +1590,10 @@
       "subscribe": "S’abonner",
       "feedback": "Retour",
       "watch": "Surveiller",
+      "cancel_action": "Annuler l’action",
+      "card_preview": "Apercevoir la fiche de groupe",
+      "retry_action": "Réessayer l’action",
+      "unexempt": "Retirer la dispense",
       "ai_execute": "Appliquer la suggestion"
     },
     "commandHints": {
@@ -1904,6 +1911,9 @@
       "content_unavailable": "Service des contenus ou favoris indisponible"
     },
     "modules": {
+      "storage": "Stockage",
+      "storage-contribution": "Contribution au stockage",
+      "verification": "Vérification",
       "billing": "Facturation",
       "open-platform": "Plateforme ouverte",
       "reviews": "Évaluations",
