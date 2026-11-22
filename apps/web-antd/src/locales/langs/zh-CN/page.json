@@ -128,6 +128,7 @@
     "billing_already_accessible": "该用户已经可以访问这份资料，无需购买。",
     "invalid_rule": "资格条件组合无效，请调整后再保存。",
     "import_conflict": "目录数据已在预览后发生变化，请重新生成预览后再确认导入。",
+    "teacher_homepage_capacity_exceeded": "合并后的人工字段或栏目超过容量。请确保通用字段最多 128 项、栏目最多 64 项，再重试。",
     "consent_required": "使用此功能前，请先确认同意所需的法律文件。"
   },
   "session": {
@@ -1943,6 +1944,218 @@
     "addRule": "新增规则",
     "addMember": "新增成员",
     "remove": "移除"
+  },
+  "teacherHomepage": {
+    "nav": {
+      "matching": "教师站点匹配",
+      "settings": "主页白名单与人数",
+      "profile": "教师主页资料",
+      "requests": "教师本人申请"
+    },
+    "fields": {
+      "name": "官网姓名",
+      "position": "职务",
+      "education": "学历",
+      "degree": "学位",
+      "discipline": "学科",
+      "supervisors": "导师资格",
+      "email": "邮箱",
+      "phone": "电话",
+      "office_location": "办公地点",
+      "hire_date": "入校任教时间",
+      "biography": "个人简介",
+      "research": "研究方向",
+      "fields": "通用字段",
+      "sections": "栏目",
+      "photo": "头像",
+      "page": "整页"
+    },
+    "supervisors": {
+      "doctoral": "博士生导师",
+      "masters": "硕士生导师"
+    },
+    "match": {
+      "title": "教师主页匹配",
+      "intro": "核对官网主页与教务目录。可从任一列表查看同名候选，再确认人工决定。",
+      "sites": "官网主页",
+      "teachers": "目录教师",
+      "searchSites": "搜索官网主页",
+      "searchTeachers": "搜索目录教师",
+      "siteStatus": "官网主页状态",
+      "teacherStatus": "目录教师状态",
+      "pending": "待处理",
+      "decided": "已人工处理",
+      "unmatched": "未匹配",
+      "total": "共 {count} 条",
+      "reviewSite": "核对主页",
+      "reviewTitle": "核对官网主页",
+      "siteId": "站点标识",
+      "checkCandidates": "查看候选（{count}）",
+      "siteCandidates": "官网主页候选",
+      "teacherCandidates": "目录教师候选",
+      "candidateLimit": "返回 {shown} 条候选，快照共记录 {total} 条。",
+      "locateSite": "定位主页",
+      "siteMissing": "当前官网资料不可用",
+      "chooseTeacher": "选择教师",
+      "selectedTeacher": "已选教师",
+      "clearTeacher": "清除选择",
+      "profile": "维护主页资料",
+      "currentDecision": "当前人工决定",
+      "bindingTarget": "人工绑定教师",
+      "matchedTeacher": "当前匹配教师",
+      "matchedSite": "当前匹配主页",
+      "siteNotFound": "当前列表中找不到该官网主页。",
+      "conflictReloaded": "已重新读取当前匹配。请核对后再次提交。",
+      "cursorConflict": "匹配列表已有更新，已重新加载首页。",
+      "decision": {
+        "bind": "人工绑定",
+        "reject": "已标记不对应",
+        "none": "无人工决定"
+      },
+      "action": {
+        "bind": "绑定教师",
+        "reject": "标记不对应",
+        "revoke": "撤销人工决定"
+      },
+      "confirm": {
+        "bind": "将官网主页 {site} 绑定到目录教师 {teacher}？",
+        "reject": "将官网主页 {site} 标记为不对应？",
+        "revoke": "撤销官网主页 {site} 的人工决定？"
+      },
+      "reason": {
+        "catalog_name_missing": "目录教师缺姓名",
+        "name_absent": "官网无同名教师",
+        "awaiting_snapshot": "等待采集快照",
+        "snapshot_changed": "匹配来源已变化",
+        "manual_conflict": "与人工决定冲突",
+        "site_unavailable": "官网资料不可用"
+      },
+      "discipline": "官网学科",
+      "biography": "官网简介摘要"
+    },
+    "settings": {
+      "title": "教师主页设置",
+      "counts": "目录资格人数",
+      "countsHint": "各项人数可以重叠。目录资格总人数按教师去重。",
+      "count": {
+        "teaching": "授课",
+        "official": "官网匹配",
+        "both": "授课且匹配官网",
+        "eligible": "目录资格总人数",
+        "verified_homepage": "已核实的主页资料"
+      },
+      "allowlist": "学校白名单",
+      "allowlistHint": "指定学校官网采集后允许展示的字段。通用字段和栏目按标签或标题逐项放行。",
+      "standardFields": "固定字段",
+      "dynamicFields": "按名称放行",
+      "kind": {
+        "fields": "通用字段",
+        "sections": "栏目"
+      },
+      "label": {
+        "fields": "通用字段标签",
+        "sections": "栏目标题"
+      },
+      "add": "添加到白名单",
+      "remove": "移除 {label}",
+      "duplicate": "此项已在白名单中。",
+      "invalidLabel": "请输入 1 至 160 个字符的标签或标题。",
+      "limit": "学校白名单最多可包含 256 项。",
+      "empty": "此类别尚无条目。",
+      "conflict": "白名单已更新。请核对重新应用的修改后再保存。"
+    },
+    "profile": {
+      "title": "教师主页资料",
+      "teacher": "目录教师",
+      "chooseTeacher": "搜索姓名并选择教师",
+      "selectTeacher": "请选择要查看的目录教师。",
+      "source": "官网采集资料",
+      "noSource": "当前教师没有已匹配的官网采集资料。",
+      "visibility": "主页展示状态",
+      "visible": "展示",
+      "hidden": "隐藏主页",
+      "stopped": "停止展示",
+      "visibilityHelp": "隐藏或停止展示会收回主页资料及头像的访问权限。恢复展示须在此处保存。",
+      "independent": "已有通过本人申请获批的独立主页资料。",
+      "rules": "字段规则",
+      "noRules": "当前没有人工规则。",
+      "fieldLabel": "字段",
+      "selectorLabel": "字段标签或栏目标题",
+      "selectorPlaceholder": "留空时处理整组",
+      "addRule": "添加规则",
+      "removeRule": "移除规则",
+      "hideField": "隐藏字段",
+      "override": "替代原值",
+      "overrideValue": "替代值",
+      "pairLabel": "标签",
+      "pairTitle": "栏目标题",
+      "pairValue": "内容",
+      "addValue": "添加一项",
+      "removeValue": "移除一项",
+      "photo": {
+        "choose": "选择替代头像",
+        "formats": "JPEG 或 PNG，最多 2 MiB。",
+        "invalid": "请选择能正常打开的 JPEG 或 PNG 图片，单边不超过 4,096 像素，总像素不超过 8,388,608。",
+        "tooLarge": "头像文件不能超过 2 MiB。",
+        "saved": "已保存替代头像。",
+        "preview": "预览已保存头像",
+        "close": "关闭预览",
+        "alt": "教师替代头像预览",
+        "unavailable": "已保存的替代头像会保留。当前展示状态或访问权限无法预览该图片。"
+      },
+      "duplicate": "此字段已有规则。",
+      "invalidRule": "每条规则至少须启用隐藏或填写有效替代值。",
+      "tooManyRules": "最多可保存 256 条字段规则。",
+      "conflict": "已读取服务器最新修订，并保留可以继续提交的修改。请确认后保存。",
+      "conflictOverlapping": "同一展示状态或字段规则已被其他操作修改。页面已显示冲突项的服务器版本，请检查后重新编辑。",
+      "saved": "教师主页资料已保存。"
+    },
+    "requests": {
+      "title": "教师主页本人申请",
+      "detail": "申请详情",
+      "teacherId": "教师目录 ID",
+      "type": "申请类型",
+      "field": "申请字段",
+      "message": "申请说明",
+      "proposal": "申请内容",
+      "photo": "申请头像",
+      "previewPhoto": "预览申请头像",
+      "homeRevision": "当前主页修订",
+      "resolve": "审批结果",
+      "note": "处理说明",
+      "noteHint": "处理说明将发送给申请人。",
+      "noteLimit": "处理说明最多可填写 {limit} 个字符。",
+      "submit": "提交审批",
+      "resolvedAt": "处理时间",
+      "conflict": "申请或教师主页已更新。请核对重新读取的资料后再审批。",
+      "editProfile": "查看教师主页设置",
+      "groupCleared": "清空此组内容",
+      "states": {
+        "approved": "已批准",
+        "pending": "待处理",
+        "rejected": "已驳回"
+      },
+      "kinds": {
+        "correction": "更正",
+        "supplement": "补充",
+        "hide": "隐藏"
+      },
+      "actions": {
+        "approve": "批准",
+        "reject": "驳回"
+      }
+    },
+    "moderation": {
+      "kind": "教师主页",
+      "target": "目录教师 ID",
+      "targetVisibility": "主页展示状态",
+      "visible": "公开展示",
+      "notVisible": "当前无公开资料",
+      "missing": "原教师档案已无法读取，可驳回这项投诉。",
+      "hide": "隐藏教师主页资料",
+      "hideHint": "隐藏主页资料和照片。教务目录信息及评价按现有规则展示。",
+      "dismiss": "驳回投诉"
+    }
   },
   "legal": {
     "documents": {

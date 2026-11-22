@@ -282,7 +282,7 @@ async function checkCategoryCounts(page, locale, path, contentKind) {
     const loading = counts.getByText(common.loading, { exact: true });
     await expect(loading).toBeVisible();
     await expect(loading).toHaveAttribute('aria-busy', 'true');
-    await expect.poll(() => summaryQueries).toEqual([{ school_id: 'school' }]);
+    await expect.poll(() => summaryQueries).toEqual([{ school_id: 'school', include_teacher_homepage: 'true' }]);
   } finally {
     releaseFirstResponse();
   }
@@ -297,8 +297,8 @@ async function checkCategoryCounts(page, locale, path, contentKind) {
     ),
   ).toBeVisible();
   expect(summaryQueries).toEqual([
-    { school_id: 'school' },
-    { school_id: 'school' },
+    { school_id: 'school', include_teacher_homepage: 'true' },
+    { school_id: 'school', include_teacher_homepage: 'true' },
   ]);
   await expect(alert).toHaveCount(0);
 

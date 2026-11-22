@@ -14,6 +14,7 @@ export const clientCodes = [
 const aliases: Record<string, string> = {
   authentication_required: 'unauthenticated',
   permission_denied: 'forbidden',
+  payload_too_large: 'capacity_exceeded',
   dependency_unavailable: 'unavailable',
   identity_unavailable: 'identity',
   revision_conflict: 'conflict',

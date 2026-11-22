@@ -118,7 +118,11 @@ function countPendingApps(signal: AbortSignal) {
 const todos = useAsync(async (signal) => {
   const id = school.value;
   const tasks = (state: string, kind?: string) =>
-    moderation.tasks({ school_id: id, state, content_kind: kind, limit: countLimit }, signal);
+    moderation.tasks({
+      school_id: id, state, content_kind: kind,
+      include_teacher_homepage: kind ? undefined : true,
+      limit: countLimit,
+    }, signal);
   type Source = { icon: Component; key: string; load: () => Promise<number | undefined>; to: string };
   const sources: Source[] = [];
   const schoolSources: Source[] = [
@@ -232,7 +236,7 @@ const todos = useAsync(async (signal) => {
   return { items, failed };
 });
 const recent = useAsync((signal) =>
-  moderation.tasks({ school_id: school.value, state: 'applied', limit: 5 }, signal),
+  moderation.tasks({ school_id: school.value, state: 'applied', include_teacher_homepage: true, limit: 5 }, signal),
 );
 
 watch(

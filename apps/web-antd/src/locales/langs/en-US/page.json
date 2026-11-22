@@ -128,6 +128,7 @@
     "billing_already_accessible": "This user can already access the resource; no purchase is needed.",
     "invalid_rule": "This combination of conditions is not valid. Adjust it and save again.",
     "import_conflict": "Catalog records changed after previewing; generate a new preview before confirming.",
+    "teacher_homepage_capacity_exceeded": "The combined manual entries exceed capacity. Limit additional fields to 128 and sections to 64, then try again.",
     "consent_required": "Accept the required legal documents to use this feature."
   },
   "session": {
@@ -1943,6 +1944,218 @@
     "addRule": "Add rule",
     "addMember": "Add member",
     "remove": "Remove"
+  },
+  "teacherHomepage": {
+    "nav": {
+      "matching": "Match teacher sites",
+      "settings": "Homepage allowlist and counts",
+      "profile": "Teacher homepage profile",
+      "requests": "Teacher requests"
+    },
+    "fields": {
+      "name": "Name on official homepage",
+      "position": "Position",
+      "education": "Educational background",
+      "degree": "Academic degree",
+      "discipline": "Discipline",
+      "supervisors": "Supervision qualifications",
+      "email": "Email address",
+      "phone": "Phone number",
+      "office_location": "Office location",
+      "hire_date": "Teaching start date",
+      "biography": "Biography",
+      "research": "Research interests",
+      "fields": "Additional fields",
+      "sections": "Sections",
+      "photo": "Portrait",
+      "page": "Entire homepage"
+    },
+    "supervisors": {
+      "doctoral": "Doctoral supervisor",
+      "masters": "Master’s supervisor"
+    },
+    "match": {
+      "title": "Teacher homepage matching",
+      "intro": "Compare official homepages with the academic directory. Review candidates from either list and confirm a manual decision.",
+      "sites": "Official homepages",
+      "teachers": "Directory teachers",
+      "searchSites": "Search official homepages",
+      "searchTeachers": "Search directory teachers",
+      "siteStatus": "Official homepage status",
+      "teacherStatus": "Directory teacher status",
+      "pending": "Pending",
+      "decided": "Manually reviewed",
+      "unmatched": "Unmatched",
+      "total": "Results ({count})",
+      "reviewSite": "Review homepage",
+      "reviewTitle": "Review official homepage",
+      "siteId": "Homepage ID",
+      "checkCandidates": "View candidates ({count})",
+      "siteCandidates": "Homepage candidates",
+      "teacherCandidates": "Directory teacher candidates",
+      "candidateLimit": "Candidates shown ({shown}). Total recorded ({total}).",
+      "locateSite": "Find homepage",
+      "siteMissing": "Current homepage data unavailable",
+      "chooseTeacher": "Select teacher",
+      "selectedTeacher": "Selected teacher",
+      "clearTeacher": "Clear selection",
+      "profile": "Manage homepage profile",
+      "currentDecision": "Current manual decision",
+      "bindingTarget": "Manually linked teacher",
+      "matchedTeacher": "Currently matched teacher",
+      "matchedSite": "Currently matched homepage",
+      "siteNotFound": "The official homepage is missing from the current list.",
+      "conflictReloaded": "Current matching data was reloaded. Review it before submitting again.",
+      "cursorConflict": "The matching list changed. Its first page has been reloaded.",
+      "decision": {
+        "bind": "Manually linked",
+        "reject": "Marked as unrelated",
+        "none": "No manual decision"
+      },
+      "action": {
+        "bind": "Link teacher",
+        "reject": "Mark as unrelated",
+        "revoke": "Revoke manual decision"
+      },
+      "confirm": {
+        "bind": "Link the official homepage {site} to directory teacher {teacher}?",
+        "reject": "Mark the official homepage {site} as unrelated?",
+        "revoke": "Revoke the manual decision for the official homepage {site}?"
+      },
+      "reason": {
+        "catalog_name_missing": "Directory teacher has no name",
+        "name_absent": "No matching name on the official website",
+        "awaiting_snapshot": "Waiting for collection snapshot",
+        "snapshot_changed": "Matching data changed",
+        "manual_conflict": "Conflicts with a manual decision",
+        "site_unavailable": "Homepage data unavailable"
+      },
+      "discipline": "Official discipline",
+      "biography": "Official biography excerpt"
+    },
+    "settings": {
+      "title": "Teacher homepage settings",
+      "counts": "Teacher directory eligibility",
+      "countsHint": "Counts can overlap. Each teacher appears once in the eligibility total.",
+      "count": {
+        "teaching": "Teaching",
+        "official": "Official homepage match",
+        "both": "Teaching and official match",
+        "eligible": "Total eligible teachers",
+        "verified_homepage": "Verified homepage profile"
+      },
+      "allowlist": "School allowlist",
+      "allowlistHint": "Choose which fields collected from official homepages can be displayed. Allow additional fields and sections by their exact labels or titles.",
+      "standardFields": "Standard fields",
+      "dynamicFields": "Allow by name",
+      "kind": {
+        "fields": "Additional fields",
+        "sections": "Sections"
+      },
+      "label": {
+        "fields": "Additional field label",
+        "sections": "Section title"
+      },
+      "add": "Add to allowlist",
+      "remove": "Remove {label}",
+      "duplicate": "This selection is already in the allowlist.",
+      "invalidLabel": "Enter a label or title of 1 to 160 characters.",
+      "limit": "The school allowlist can contain up to 256 items.",
+      "empty": "This category has no entries.",
+      "conflict": "The allowlist changed. Review your edits against the latest version before saving."
+    },
+    "profile": {
+      "title": "Teacher homepage details",
+      "teacher": "Catalog teacher",
+      "chooseTeacher": "Search by name and select a teacher",
+      "selectTeacher": "Select a catalog teacher to view their homepage details.",
+      "source": "Data from the official homepage",
+      "noSource": "The selected teacher has no matched official homepage data.",
+      "visibility": "Homepage visibility",
+      "visible": "Visible",
+      "hidden": "Hide homepage",
+      "stopped": "Stop publishing",
+      "visibilityHelp": "Hiding or stopping publication removes access to homepage details and photos. Save the visible state here to restore access.",
+      "independent": "The teacher has independent homepage details approved through a personal request.",
+      "rules": "Field rules",
+      "noRules": "There are no manual rules for this teacher.",
+      "fieldLabel": "Field",
+      "selectorLabel": "Field label or section title",
+      "selectorPlaceholder": "Leave blank to apply to the entire group",
+      "addRule": "Add rule",
+      "removeRule": "Remove rule",
+      "hideField": "Hide field",
+      "override": "Replace original value",
+      "overrideValue": "Replacement value",
+      "pairLabel": "Label",
+      "pairTitle": "Section title",
+      "pairValue": "Content",
+      "addValue": "Add item",
+      "removeValue": "Remove item",
+      "photo": {
+        "choose": "Choose replacement photo",
+        "formats": "JPEG or PNG, up to 2 MiB.",
+        "invalid": "Choose a valid JPEG or PNG image. Each side must be 4,096 pixels or less, and the total must be 8,388,608 pixels or less.",
+        "tooLarge": "The photo must be 2 MiB or smaller.",
+        "saved": "A replacement photo is saved.",
+        "preview": "Preview saved photo",
+        "close": "Close preview",
+        "alt": "Teacher replacement photo preview",
+        "unavailable": "The saved replacement photo is retained. Its current visibility or access restrictions prevent a preview."
+      },
+      "duplicate": "A rule already exists for this field.",
+      "invalidRule": "Each rule must hide the field or supply a valid replacement.",
+      "tooManyRules": "Save up to 256 field rules.",
+      "conflict": "The latest revision was loaded and edits that can still be submitted were kept. Review and save again.",
+      "conflictOverlapping": "Another operation changed the same visibility or field rules. Review the server values shown for the conflicting items before editing them again.",
+      "saved": "Teacher homepage details saved."
+    },
+    "requests": {
+      "title": "Teacher homepage requests",
+      "detail": "Request details",
+      "teacherId": "Teacher directory ID",
+      "type": "Request type",
+      "field": "Requested field",
+      "message": "Applicant’s explanation",
+      "proposal": "Requested change",
+      "photo": "Requested portrait",
+      "previewPhoto": "Preview requested portrait",
+      "homeRevision": "Current homepage revision",
+      "resolve": "Decision",
+      "note": "Decision note",
+      "noteHint": "The applicant will receive the decision note.",
+      "noteLimit": "The decision note can contain up to {limit} characters.",
+      "submit": "Submit decision",
+      "resolvedAt": "Decision time",
+      "conflict": "The request or teacher homepage has changed. Review the refreshed details before deciding again.",
+      "editProfile": "View teacher homepage settings",
+      "groupCleared": "Clear this group",
+      "states": {
+        "approved": "Approved",
+        "pending": "Pending",
+        "rejected": "Rejected"
+      },
+      "kinds": {
+        "correction": "Correction",
+        "supplement": "Addition",
+        "hide": "Hide"
+      },
+      "actions": {
+        "approve": "Approve",
+        "reject": "Reject"
+      }
+    },
+    "moderation": {
+      "kind": "Teacher homepage",
+      "target": "Directory teacher ID",
+      "targetVisibility": "Homepage visibility",
+      "visible": "Visible",
+      "notVisible": "No public profile at present",
+      "missing": "The original teacher record is unavailable. This complaint can be dismissed.",
+      "hide": "Hide teacher homepage profile",
+      "hideHint": "Hide the profile and photos. Directory information and reviews follow their existing visibility rules.",
+      "dismiss": "Dismiss complaint"
+    }
   },
   "legal": {
     "documents": {

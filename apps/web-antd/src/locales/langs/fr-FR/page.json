@@ -128,6 +128,7 @@
     "billing_already_accessible": "Cet utilisateur a déjà accès à la ressource ; aucun achat n'est nécessaire.",
     "invalid_rule": "Cette combinaison de conditions n'est pas valide. Modifiez-la puis enregistrez.",
     "import_conflict": "Les données du catalogue ont changé depuis l’aperçu ; générez un nouvel aperçu avant de confirmer.",
+    "teacher_homepage_capacity_exceeded": "Le nombre d’éléments saisis dépasse la capacité autorisée après fusion. Limitez les champs complémentaires à 128 et les rubriques à 64 avant de réessayer.",
     "consent_required": "Acceptez les documents juridiques requis pour utiliser cette fonctionnalité."
   },
   "session": {
@@ -1943,6 +1944,218 @@
     "addRule": "Ajouter une règle",
     "addMember": "Ajouter un membre",
     "remove": "Retirer"
+  },
+  "teacherHomepage": {
+    "nav": {
+      "matching": "Correspondance des pages",
+      "settings": "Champs autorisés et effectifs",
+      "profile": "Données de la page d’enseignant",
+      "requests": "Demandes des enseignants"
+    },
+    "fields": {
+      "name": "Nom affiché sur la page officielle",
+      "position": "Fonction",
+      "education": "Parcours universitaire",
+      "degree": "Diplôme universitaire",
+      "discipline": "Domaine d’enseignement",
+      "supervisors": "Habilitation à encadrer",
+      "email": "Adresse électronique",
+      "phone": "Numéro de téléphone",
+      "office_location": "Emplacement du bureau",
+      "hire_date": "Début de l’enseignement dans l’établissement",
+      "biography": "Notice biographique",
+      "research": "Thèmes de recherche",
+      "fields": "Champs complémentaires",
+      "sections": "Rubriques",
+      "photo": "Photo de profil",
+      "page": "Page entière"
+    },
+    "supervisors": {
+      "doctoral": "Direction de thèses",
+      "masters": "Direction de mémoires de master"
+    },
+    "match": {
+      "title": "Correspondance des pages des enseignants",
+      "intro": "Comparez les pages officielles avec l’annuaire. Consultez les correspondances possibles dans l’une ou l’autre liste, puis confirmez votre décision.",
+      "sites": "Pages officielles",
+      "teachers": "Enseignants de l’annuaire",
+      "searchSites": "Rechercher une page officielle",
+      "searchTeachers": "Rechercher un enseignant dans l’annuaire",
+      "siteStatus": "État de la page officielle",
+      "teacherStatus": "État de l’enseignant dans l’annuaire",
+      "pending": "À examiner",
+      "decided": "Traité manuellement",
+      "unmatched": "Sans correspondance",
+      "total": "Nombre de résultats ({count})",
+      "reviewSite": "Vérifier la page",
+      "reviewTitle": "Vérifier la page officielle",
+      "siteId": "Identifiant de la page",
+      "checkCandidates": "Voir les correspondances ({count})",
+      "siteCandidates": "Pages officielles possibles",
+      "teacherCandidates": "Enseignants possibles dans l’annuaire",
+      "candidateLimit": "Correspondances affichées ({shown}). Total enregistré ({total}).",
+      "locateSite": "Trouver la page",
+      "siteMissing": "Données actuelles de la page indisponibles",
+      "chooseTeacher": "Sélectionner un enseignant",
+      "selectedTeacher": "Enseignant sélectionné",
+      "clearTeacher": "Effacer la sélection",
+      "profile": "Gérer les données de la page",
+      "currentDecision": "Décision manuelle actuelle",
+      "bindingTarget": "Enseignant associé manuellement",
+      "matchedTeacher": "Enseignant actuellement associé",
+      "matchedSite": "Page actuellement associée",
+      "siteNotFound": "La liste actuelle ne contient pas cette page officielle.",
+      "conflictReloaded": "Les correspondances actuelles ont été rechargées. Vérifiez-les avant de soumettre votre décision de nouveau.",
+      "cursorConflict": "La liste des correspondances a changé. Sa première page a été rechargée.",
+      "decision": {
+        "bind": "Associée manuellement",
+        "reject": "Signalée sans correspondance",
+        "none": "Aucune décision manuelle"
+      },
+      "action": {
+        "bind": "Associer un enseignant",
+        "reject": "Indiquer l’absence de correspondance",
+        "revoke": "Annuler la décision manuelle"
+      },
+      "confirm": {
+        "bind": "Associer la page officielle {site} à l’enseignant {teacher} dans l’annuaire ?",
+        "reject": "Indiquer que la page officielle {site} n’a pas de correspondance ?",
+        "revoke": "Annuler la décision manuelle pour la page officielle {site} ?"
+      },
+      "reason": {
+        "catalog_name_missing": "Aucun nom pour l’enseignant dans l’annuaire",
+        "name_absent": "Aucun nom correspondant sur le site officiel",
+        "awaiting_snapshot": "En attente d’une collecte de données",
+        "snapshot_changed": "Les données de correspondance ont changé",
+        "manual_conflict": "Conflit avec une décision manuelle",
+        "site_unavailable": "Données de la page indisponibles"
+      },
+      "discipline": "Domaine de la page officielle",
+      "biography": "Extrait de la biographie officielle"
+    },
+    "settings": {
+      "title": "Paramètres des pages des enseignants",
+      "counts": "Admissibilité des enseignants à l’annuaire",
+      "countsHint": "Un enseignant peut figurer dans plusieurs catégories. Le total admissible compte chaque enseignant une seule fois.",
+      "count": {
+        "teaching": "Enseignement",
+        "official": "Page officielle associée",
+        "both": "Enseignement et page officielle associée",
+        "eligible": "Total des enseignants admissibles",
+        "verified_homepage": "Profil vérifié"
+      },
+      "allowlist": "Liste des champs autorisés de l’établissement",
+      "allowlistHint": "Choisissez les champs des pages officielles qui peuvent être affichés. Autorisez les champs complémentaires et les rubriques selon leur libellé ou leur titre exact.",
+      "standardFields": "Champs prédéfinis",
+      "dynamicFields": "Autorisation par nom",
+      "kind": {
+        "fields": "Champs complémentaires",
+        "sections": "Rubriques"
+      },
+      "label": {
+        "fields": "Libellé du champ complémentaire",
+        "sections": "Titre de la rubrique"
+      },
+      "add": "Ajouter à la liste",
+      "remove": "Retirer {label}",
+      "duplicate": "Cet élément figure déjà dans la liste.",
+      "invalidLabel": "Saisissez un libellé ou un titre de 1 à 160 caractères.",
+      "limit": "La liste de l’établissement peut contenir jusqu’à 256 éléments.",
+      "empty": "Aucun élément dans cette catégorie.",
+      "conflict": "La liste a été mise à jour. Vérifiez vos modifications par rapport à la dernière version avant d’enregistrer."
+    },
+    "profile": {
+      "title": "Données de la page d’enseignant",
+      "teacher": "Enseignant de l’annuaire",
+      "chooseTeacher": "Rechercher un enseignant par nom et le sélectionner",
+      "selectTeacher": "Sélectionnez un enseignant de l’annuaire pour consulter les données de sa page.",
+      "source": "Données de la page officielle",
+      "noSource": "Aucune page officielle associée ne fournit de données pour cet enseignant.",
+      "visibility": "Visibilité de la page",
+      "visible": "Afficher",
+      "hidden": "Masquer la page",
+      "stopped": "Arrêter la publication",
+      "visibilityHelp": "Masquer la page ou arrêter sa publication retire l’accès à ses données et aux photos. Enregistrez l’état visible ici pour rétablir l’accès.",
+      "independent": "Cet enseignant dispose de données indépendantes approuvées après une demande personnelle.",
+      "rules": "Règles par champ",
+      "noRules": "Aucune règle manuelle pour cet enseignant.",
+      "fieldLabel": "Champ",
+      "selectorLabel": "Libellé du champ ou titre de la rubrique",
+      "selectorPlaceholder": "Laisser vide pour appliquer la règle au groupe entier",
+      "addRule": "Ajouter une règle",
+      "removeRule": "Supprimer la règle",
+      "hideField": "Masquer le champ",
+      "override": "Remplacer la valeur d’origine",
+      "overrideValue": "Valeur de remplacement",
+      "pairLabel": "Libellé",
+      "pairTitle": "Titre de la rubrique",
+      "pairValue": "Contenu",
+      "addValue": "Ajouter un élément",
+      "removeValue": "Retirer l’élément",
+      "photo": {
+        "choose": "Choisir une photo de remplacement",
+        "formats": "JPEG ou PNG, 2 Mio maximum.",
+        "invalid": "Choisissez une image JPEG ou PNG valide. Chaque côté doit mesurer au plus 4 096 pixels, dans la limite de 8 388 608 pixels au total.",
+        "tooLarge": "La photo doit peser au plus 2 Mio.",
+        "saved": "Une photo de remplacement est enregistrée.",
+        "preview": "Aperçu de la photo enregistrée",
+        "close": "Fermer l’aperçu",
+        "alt": "Aperçu de la nouvelle photo de l’enseignant",
+        "unavailable": "La photo de remplacement est conservée. La visibilité ou les droits d’accès actuels empêchent de l’afficher en aperçu."
+      },
+      "duplicate": "Ce champ a déjà une règle.",
+      "invalidRule": "Chaque règle doit masquer le champ ou fournir une valeur de remplacement valide.",
+      "tooManyRules": "Vous pouvez enregistrer jusqu’à 256 règles.",
+      "conflict": "La dernière révision a été chargée et les modifications encore applicables ont été conservées. Vérifiez-les avant d’enregistrer à nouveau.",
+      "conflictOverlapping": "Une autre opération a modifié la même règle ou le même réglage de visibilité. Vérifiez les valeurs du serveur affichées pour les éléments en conflit avant de les modifier à nouveau.",
+      "saved": "Données de la page d’enseignant enregistrées."
+    },
+    "requests": {
+      "title": "Demandes concernant les pages des enseignants",
+      "detail": "Détails de la demande",
+      "teacherId": "Identifiant de l’enseignant dans l’annuaire",
+      "type": "Type de demande",
+      "field": "Champ concerné",
+      "message": "Explication du demandeur",
+      "proposal": "Modification demandée",
+      "photo": "Photo proposée",
+      "previewPhoto": "Aperçu de la photo proposée",
+      "homeRevision": "Révision actuelle de la page",
+      "resolve": "Décision",
+      "note": "Motif de la décision",
+      "noteHint": "La note sera communiquée au demandeur.",
+      "noteLimit": "La note ne peut pas dépasser {limit} caractères.",
+      "submit": "Enregistrer la décision",
+      "resolvedAt": "Date de la décision",
+      "conflict": "La demande ou la page de l’enseignant a été modifiée. Consultez les données actualisées avant de rendre une nouvelle décision.",
+      "editProfile": "Consulter les paramètres de la page de l’enseignant",
+      "groupCleared": "Vider ce groupe",
+      "states": {
+        "approved": "Approuvée",
+        "pending": "En attente",
+        "rejected": "Rejetée"
+      },
+      "kinds": {
+        "correction": "Rectification",
+        "supplement": "Ajout",
+        "hide": "Masquage"
+      },
+      "actions": {
+        "approve": "Approuver",
+        "reject": "Rejeter"
+      }
+    },
+    "moderation": {
+      "kind": "Page d’enseignant",
+      "target": "Identifiant de l’enseignant dans l’annuaire",
+      "targetVisibility": "Visibilité de la page",
+      "visible": "Affichage public",
+      "notVisible": "Aucune donnée publique actuellement",
+      "missing": "La fiche d’origine de l’enseignant est indisponible. Vous pouvez rejeter ce signalement.",
+      "hide": "Masquer les données de la page d’enseignant",
+      "hideHint": "Masquez les données de la page et les photos. La visibilité des données de l’annuaire et des avis suit les règles en vigueur.",
+      "dismiss": "Rejeter le signalement"
+    }
   },
   "legal": {
     "documents": {

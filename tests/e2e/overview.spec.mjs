@@ -31,6 +31,9 @@ test('overview counts pending refunds, new feedback, student and teacher verific
   page,
 }, info) => {
   await schoolSession(page);
+  await page.route('**/api/v1/admin/legal/documents**', (route) =>
+    route.fulfill({ status: 403, json: { code: 'forbidden' } }),
+  );
   const all = catalogue(info);
   const num = (value) =>
     new Intl.NumberFormat(info.project.metadata.locale).format(value);
@@ -177,7 +180,7 @@ test('overview counts pending refunds, new feedback, student and teacher verific
   await page.goto(`${base}/?lang=${info.project.metadata.locale}`);
 
   const cardOf = (label) =>
-    page.locator('a').filter({ has: page.getByText(label, { exact: true }) });
+    page.getByRole('link').filter({ has: page.getByText(label, { exact: true }) });
 
   await expect(cardOf(all.overview.todo.refunds)).toContainText(num(4));
   await expect(cardOf(all.overview.todo.feedback)).toContainText(num(2));
