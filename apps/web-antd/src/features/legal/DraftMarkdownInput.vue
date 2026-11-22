@@ -62,7 +62,7 @@ function insert() {
       id="legal-document-markdown"
       ref="area"
       v-model="markdown"
-      class="ant-input min-h-[16rem] w-full resize-y font-mono"
+      class="ant-input min-h-[16rem] w-full resize-y"
       :disabled="locked"
       :maxlength="131072"
       dir="auto"
@@ -117,3 +117,9 @@ function insert() {
     </div>
   </div>
 </template>
+
+<style scoped>
+textarea.ant-input {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+</style>

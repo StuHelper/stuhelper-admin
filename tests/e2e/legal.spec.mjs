@@ -464,7 +464,7 @@ test('legal draft conflict keeps input and uncertain writes replay only the orig
   ).toBeVisible();
   await expect(editor).toHaveValue('Unsaved operator changes');
   expect(state.reads.filter((read) => read.path === docPath)).toHaveLength(2);
-  await page.getByText(copy.serverDraft, { exact: true }).click();
+  await expect(page.getByText(copy.serverDraft, { exact: true })).toBeVisible();
   await expect(
     page.getByText('Server revision', { exact: true }),
   ).toBeVisible();
@@ -699,7 +699,9 @@ test('published legal versions expose changed variables, copy to drafts and arch
     'GET /documents': ({ route, state }) =>
       route.fulfill({
         json: {
-          items: [source, state.document, copied].filter(Boolean).map((item) => metadata(item)),
+          items: [source, state.document, copied]
+            .filter(Boolean)
+            .map((item) => metadata(item)),
         },
       }),
     [`GET ${publishedPath}`]: ({ route }) => route.fulfill({ json: source }),
