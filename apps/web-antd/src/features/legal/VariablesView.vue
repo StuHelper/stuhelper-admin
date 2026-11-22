@@ -19,7 +19,7 @@ import {
 
 import { useI18n } from '@vben/locales';
 
-import { Alert, Button, Card, Input, Modal, Textarea } from 'ant-design-vue';
+import { Alert, Button, Card, Modal } from 'ant-design-vue';
 
 import { ApiError } from '#/shared/api/errors';
 import { useAsync, useMutation, usePaged } from '#/shared/composables/async';
@@ -44,6 +44,8 @@ const api = useLegalApi();
 const format = useFormat();
 const id = useId();
 const emptyForm = { key: '', description: '', value: '' };
+const inputClass =
+  'ant-input w-full rounded-md border px-3 py-1 disabled:cursor-not-allowed disabled:opacity-50';
 const form = reactive({ ...emptyForm });
 const dialog = shallowRef<Dialog>();
 const denied = ref('');
@@ -495,9 +497,10 @@ async function retryOriginal() {
             <label :for="`${id}-key`" class="mb-1 block font-medium">{{
               t('page.legal.variables.key')
             }}</label>
-            <Input
+            <input
               :id="`${id}-key`"
-              v-model:value="form.key"
+              v-model="form.key"
+              :class="inputClass"
               :disabled="locked"
               :readonly="dialog.kind === 'edit'"
               :aria-describedby="
@@ -505,18 +508,19 @@ async function retryOriginal() {
               "
               :aria-invalid="!!keyError"
               required
-              :status="keyError ? 'error' : undefined"
+              type="text"
               autocomplete="off"
               autocapitalize="off"
-              @update:value="duplicateKey && write.dismiss()"
               dir="ltr"
               :spellcheck="false"
+              @input="duplicateKey && write.dismiss()"
             />
             <p
               v-if="dialog.kind === 'create'"
               :id="`${id}-key-help`"
               :role="keyError ? 'alert' : undefined"
               class="mt-1 text-sm"
+              :class="{ 'text-destructive': keyError }"
             >
               {{ t(keyError || 'page.legal.variables.keyHint') }}
             </p>
@@ -525,9 +529,11 @@ async function retryOriginal() {
             <label :for="`${id}-description`" class="mb-1 block font-medium">{{
               t('page.legal.variables.description')
             }}</label>
-            <Textarea
+            <textarea
               :id="`${id}-description`"
-              v-model:value="form.description"
+              v-model="form.description"
+              class="resize-y"
+              :class="inputClass"
               :disabled="locked"
               :aria-describedby="
                 visibleErrors.description
@@ -536,15 +542,14 @@ async function retryOriginal() {
               "
               :aria-invalid="visibleErrors.description"
               required
-              :status="visibleErrors.description ? 'error' : undefined"
-              :rows="2"
+              rows="2"
               dir="auto"
-            />
+            ></textarea>
             <p
               v-if="visibleErrors.description"
               :id="`${id}-description-error`"
               role="alert"
-              class="mt-1 text-sm"
+              class="text-destructive mt-1 text-sm"
             >
               {{ t('page.legal.variables.invalidDescription') }}
             </p>
@@ -553,20 +558,22 @@ async function retryOriginal() {
             <label :for="`${id}-value`" class="mb-1 block font-medium">{{
               t('page.legal.variables.value')
             }}</label>
-            <Textarea
+            <textarea
               :id="`${id}-value`"
-              v-model:value="form.value"
+              v-model="form.value"
+              class="resize-y"
+              :class="inputClass"
               :disabled="locked"
               :aria-describedby="`${id}-value-help`"
               :aria-invalid="visibleErrors.value"
-              :status="visibleErrors.value ? 'error' : undefined"
-              :rows="3"
+              rows="3"
               dir="auto"
-            />
+            ></textarea>
             <p
               :id="`${id}-value-help`"
               :role="visibleErrors.value ? 'alert' : undefined"
               class="mt-1 text-sm"
+              :class="{ 'text-destructive': visibleErrors.value }"
             >
               {{
                 t(
