@@ -223,6 +223,7 @@
     "unrated": "未評価",
     "action": "処理内容",
     "reason": "処理理由とフィードバック",
+    "reasonTooLong": "理由は Unicode コードポイントで {limit} 文字以内にしてください。",
     "editedBody": "修正後の本文",
     "signedIdentity": "ニックネームで表示（外すと匿名）",
     "previewAttribution": "最新の担当帰属を確認",

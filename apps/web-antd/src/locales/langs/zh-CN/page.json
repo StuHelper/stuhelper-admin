@@ -223,6 +223,7 @@
     "unrated": "未评价",
     "action": "处理动作",
     "reason": "处理说明与反馈",
+    "reasonTooLong": "处理说明最多可填写 {limit} 个 Unicode 码点。",
     "editedBody": "修改后的正文",
     "signedIdentity": "以平台昵称署名展示（取消则匿名）",
     "previewAttribution": "核对最新任课归属",

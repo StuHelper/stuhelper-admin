@@ -33,8 +33,9 @@ import { ApiError, errorCode } from '#/shared/api/errors';
 import { useAsync, useMutation, usePaged } from '#/shared/composables/async';
 import { useFormat } from '#/shared/format';
 import LoadState from '#/shared/ui/LoadState.vue';
+import { isValidModerationReason } from '#/shared/ui/moderation-reason';
+import ModerationReasonField from '#/shared/ui/ModerationReasonField.vue';
 import MutationAlert from '#/shared/ui/MutationAlert.vue';
-import ReasonPresets from '#/shared/ui/ReasonPresets.vue';
 import { stateColor } from '#/shared/ui/state-color';
 
 import { dimensions, pageSize, useAcademicAdmin } from './api';
@@ -265,7 +266,12 @@ async function inspectAttribution() {
 async function decide() {
   const current = entry.value;
   const chosen = action.value;
-  if (!current || !chosen || (chosen === 'reassign' && !attribution.value))
+  if (
+    !current ||
+    !chosen ||
+    !isValidModerationReason(reason.value) ||
+    (chosen === 'reassign' && !attribution.value)
+  )
     return;
   success.value = '';
   // A direct content action first opens a review task that records the decision.
@@ -614,21 +620,13 @@ defineExpose({ dirty, busy, uncertain });
               :disabled="busy || uncertain"
             />
           </FormItem>
-          <FormItem :label="t('page.moderation.reason')" required html-for="decisionpanel-field-4">
-            <ReasonPresets
-              v-model="reason"
-              :presets="reasonPresets"
-              :disabled="busy || uncertain"
-              :max-length="2000"
-            />
-            <Textarea
-              id="decisionpanel-field-4"
-              v-model:value="reason"
-              :rows="3"
-              :maxlength="2000"
-              :disabled="busy || uncertain"
-            />
-          </FormItem>
+          <ModerationReasonField
+            id="decisionpanel-field-4"
+            v-model="reason"
+            :label="t('page.moderation.reason')"
+            :presets="reasonPresets"
+            :disabled="busy || uncertain"
+          />
           <MutationAlert
             :busy="busy"
             :error="opening.error.value || deciding.error.value"
@@ -644,7 +642,7 @@ defineExpose({ dirty, busy, uncertain });
               :disabled="
                 uncertain ||
                 !action ||
-                !reason.trim() ||
+                !isValidModerationReason(reason) ||
                 (action === 'reassign' && !attribution)
               "
             >

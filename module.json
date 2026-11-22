@@ -151,6 +151,16 @@
     ],
     "AO-03": [
       "tests/e2e/catalog.spec.mjs#catalog import previews normalized JSON and retries an uncertain confirmation with the original key"
+    ],
+    "CM-22": [
+      "tests/e2e/moderation.spec.mjs#a moderator rejects the selected follow-up without deciding its sibling or the original review"
+    ],
+    "CM-25": [
+      "tests/e2e/moderation-categories.spec.mjs#resource review filters tasks and submits the selected violation category",
+      "tests/e2e/moderation-categories.spec.mjs#resource review confirms before discarding a category-only edit",
+      "tests/e2e/moderation-categories.spec.mjs#academic queue retries and filters by the school category counts",
+      "tests/e2e/moderation-categories.spec.mjs#resource queue retries and filters by the school category counts",
+      "apps/web-antd/src/demo/server.test.ts#summarizes categorized and uncategorized demo tasks by school and updates after a decision"
     ]
   }
 }

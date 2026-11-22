@@ -223,6 +223,7 @@
     "unrated": "غير مقيّم",
     "action": "إجراء القرار",
     "reason": "السبب والملاحظات",
+    "reasonTooLong": "يجب ألا يتجاوز السبب {limit} نقطة ترميز Unicode.",
     "editedBody": "النص المعدّل",
     "signedIdentity": "العرض بالاسم المستعار (ألغِ للتجهيل)",
     "previewAttribution": "تحقق من النسبة الحالية",

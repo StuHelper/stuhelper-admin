@@ -1,5 +1,9 @@
+import type { components as Moderation } from '../api/moderation.gen';
+
 import example from '../../../../contracts/contribution.example.json';
+import moderationContract from '../../../../contracts/moderation.openapi.json';
 import operations from '../../../../contracts/storage-operations.example.json';
+import { schemaOf } from '../shared/api/schema';
 import * as d from './data';
 
 const json = (value: unknown, status = 200) => Response.json(value, { status });
@@ -43,19 +47,30 @@ const entries: Record<string, any>[] = (d.reviews as Record<string, any>[]).map(
     featured: !!r.featured,
   }),
 );
+
+type TaskView = Moderation['schemas']['TaskView'];
+type QueueSummary = Moderation['schemas']['QueueSummary'];
+type DemoTask = TaskView & {
+  content_kind: keyof Omit<QueueSummary['by_content_kind'], 'teacher_homepage'>;
+};
+const moderationSchemas = moderationContract.components.schemas;
+const parseDecide = schemaOf<Moderation['schemas']['Decide']>(moderationSchemas, 'Decide');
+const taskCategory = (row: TaskView) => row.decision?.category ?? row.submission.category;
+
 const task = (
   id: string,
   object_id: string,
-  kind: string,
+  kind: TaskView['submission']['kind'],
   reason: string,
-  content_kind: string,
+  content_kind: DemoTask['content_kind'],
   state = 'waiting',
   days = 1,
-) => ({
+  category?: TaskView['submission']['category'],
+): DemoTask => ({
   id,
   school_id: d.SCHOOL,
   content_kind,
-  submission: { object_id, kind, reason, evidence: [] as string[] },
+  submission: { object_id, kind, reason, evidence: [], ...(category ? { category } : {}) },
   object_revision: 1,
   revision: 1,
   state,
@@ -63,14 +78,14 @@ const task = (
   updated_at: d.ago(days),
   can_appeal: false,
 });
-const tasks: Record<string, any>[] = [
-  task('m1', 'r13', 'report', '评价内容涉及人身攻击', 'review', 'waiting', 0),
-  task('m2', 'r7', 'review', 'content_review', 'review', 'waiting', 0),
-  task('m3', 'r5', 'edit_request', '想修改评价中的错别字', 'review', 'waiting', 1),
-  task('m4', 'r11', 'appeal', '我认为隐藏决定有误，内容属实', 'review', 'waiting', 2),
+const tasks = [
+  task('m1', 'r13', 'report', '评价内容涉及人身攻击', 'course', 'waiting', 0, 'personal_attack'),
+  task('m2', 'r7', 'review', 'content_review', 'course', 'waiting', 0),
+  task('m3', 'r5', 'edit_request', '想修改评价中的错别字', 'course', 'waiting', 1),
+  task('m4', 'r11', 'appeal', '我认为隐藏决定有误，内容属实', 'course', 'waiting', 2),
   task('m5', 'resource:x8-v1', 'review', 'content_review', 'resource', 'waiting', 0),
-  task('m6', 'resource:x4-v1', 'report', '疑似未经授权转载', 'resource', 'waiting', 1),
-  task('m7', 'r2', 'report', '广告内容', 'review', 'failed', 3),
+  task('m6', 'resource:x4-v1', 'report', '疑似未经授权转载', 'resource', 'waiting', 1, 'copyright'),
+  task('m7', 'r2', 'report', '广告内容', 'course', 'failed', 3, 'spam'),
 ];
 const policies: Record<string, any> = {};
 const application = (id: string, state: string, stage: string, days: number) => ({
@@ -87,6 +102,30 @@ const applications = [
   application('a3', 'supplement_required', 'bachelor', 3),
   application('a4', 'approved', 'doctor', 8),
 ];
+
+function moderationSummary(school: string): QueueSummary {
+  const summary: QueueSummary = {
+    school_id: school,
+    waiting: 0,
+    decided: 0,
+    failed: 0,
+    by_content_kind: { course: 0, mentor: 0, reply: 0, resource: 0 },
+    by_request_kind: { review: 0, report: 0, edit_request: 0, delete_request: 0, appeal: 0 },
+    by_category: {},
+  };
+  for (const row of tasks) {
+    if (row.school_id !== school) continue;
+    if (row.state === 'decided') summary.decided++;
+    if (row.state === 'failed') summary.failed++;
+    if (row.state !== 'waiting') continue;
+    summary.waiting++;
+    summary.by_content_kind[row.content_kind]++;
+    summary.by_request_kind[row.submission.kind]++;
+    const category = taskCategory(row);
+    if (category) summary.by_category[category] = (summary.by_category[category] ?? 0) + 1;
+  }
+  return summary;
+}
 
 function catalog(u: URL) {
   const q = u.searchParams;
@@ -263,13 +302,25 @@ export async function handleDemoRequest(
   if (p === '/moderation/feedback' && method === 'GET') {
     return json({ items: [], next_cursor: '' });
   }
+  if (p === '/moderation/tasks/summary' && method === 'GET') {
+    const school = u.searchParams.get('school_id');
+    if (!school) return nope('invalid_input', 400);
+    if (school !== d.SCHOOL) return nope('forbidden', 403);
+    return json(moderationSummary(school));
+  }
   if (p === '/moderation/tasks' && method === 'GET') {
     const q = u.searchParams;
+    const category = q.get('category');
+    if (category && !moderationSchemas.ViolationCategory.enum.includes(category)) {
+      return nope('invalid_input', 400);
+    }
     return json(
       tasks.filter(
         (row) =>
+          (!q.get('school_id') || row.school_id === q.get('school_id')) &&
           (!q.get('state') || row.state === q.get('state')) &&
-          (!q.get('content_kind') || row.content_kind === q.get('content_kind')),
+          (!q.get('content_kind') || row.content_kind === q.get('content_kind')) &&
+          (!category || taskCategory(row) === category),
       ),
     );
   }
@@ -280,9 +331,19 @@ export async function handleDemoRequest(
   if (p.startsWith('/moderation/tasks/')) {
     const row = tasks.find((x) => x.id === p.split('/')[3]);
     if (!row) return nope('not_found', 404);
-    if (p.endsWith('/decisions')) {
+    if (p.endsWith('/decisions') && method === 'POST') {
+      let input: Moderation['schemas']['Decide'];
+      try {
+        input = parseDecide(await body(init));
+      } catch {
+        return nope('invalid_input', 400);
+      }
+      if (input.revision !== row.revision) return nope('conflict', 409);
+      if (input.decision.object_id !== row.submission.object_id) return nope('invalid_input', 400);
       row.state = 'decided';
       row.revision++;
+      row.decision = { ...input.decision, id: `demo-decision-${row.id}-${row.revision}` };
+      row.updated_at = d.ago(0);
       return json(row);
     }
     return json(row);

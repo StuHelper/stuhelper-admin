@@ -8,6 +8,7 @@ import { useI18n } from '@vben/locales';
 import { Button, Card, Space, Tag } from 'ant-design-vue';
 
 import { errorCode } from '#/shared/api/errors';
+import { useFormat } from '#/shared/format';
 import { useErrorText } from '#/shared/ui/messages';
 
 import { type QueueSummary, useAcademicAdmin } from './api';
@@ -20,6 +21,7 @@ import { violationCategories } from './violationCategories';
 const props = defineProps<{ active?: string; school: string; }>();
 const emit = defineEmits<{ pick: [category: '' | ViolationCategory] }>();
 const { t } = useI18n();
+const format = useFormat();
 const errorText = useErrorText();
 const api = useAcademicAdmin();
 const summary = shallowRef<QueueSummary>();
@@ -30,6 +32,7 @@ async function load() {
   controller?.abort();
   const current = new AbortController();
   controller = current;
+  summary.value = undefined;
   error.value = '';
   if (!props.school) return;
   try {
@@ -39,7 +42,7 @@ async function load() {
     if (!current.signal.aborted) error.value = errorCode(error_);
   }
 }
-watch(() => props.school, () => { summary.value = undefined; void load(); }, { immediate: true });
+watch(() => props.school, load, { immediate: true });
 onBeforeUnmount(() => controller?.abort());
 defineExpose({ reload: load });
 
@@ -58,7 +61,7 @@ const rows = computed(() => {
     </p>
     <p v-else-if="!summary" class="text-muted-foreground text-sm" aria-busy="true">{{ t('page.common.loading') }}</p>
     <template v-else>
-      <p class="text-muted-foreground mb-2 text-sm">{{ t('page.moderation.categorySummaryWaiting', { count: summary.waiting }) }}</p>
+      <p class="text-muted-foreground mb-2 text-sm">{{ t('page.moderation.categorySummaryWaiting', { count: format.number(summary.waiting) }) }}</p>
       <p v-if="rows.length === 0" class="text-muted-foreground text-sm">{{ t('page.moderation.categorySummaryEmpty') }}</p>
       <Space v-else wrap>
         <Button
@@ -70,7 +73,7 @@ const rows = computed(() => {
           @click="emit('pick', active === row.code ? '' : row.code)"
         >
           {{ t(`page.moderation.categories.${row.code}`) }}
-          <Tag class="ms-1" :bordered="false">{{ row.count }}</Tag>
+          <Tag class="ms-1" :bordered="false">{{ format.number(row.count) }}</Tag>
         </Button>
       </Space>
     </template>

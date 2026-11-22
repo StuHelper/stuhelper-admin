@@ -223,6 +223,7 @@
     "unrated": "Sin valorar",
     "action": "Acción de la decisión",
     "reason": "Motivo y respuesta",
+    "reasonTooLong": "El motivo puede contener hasta {limit} puntos de código Unicode.",
     "editedBody": "Texto editado",
     "signedIdentity": "Mostrar con el apodo (desmarca para anónimo)",
     "previewAttribution": "Comprobar la atribución actual",

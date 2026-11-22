@@ -3,12 +3,14 @@ import { useI18n } from '@vben/locales';
 
 const props = withDefaults(
   defineProps<{
+    countCodePoints?: boolean;
     disabled?: boolean;
     maxLength?: number;
     modelValue: string;
     presets: { key: string; text: string }[];
   }>(),
   {
+    countCodePoints: false,
     disabled: false,
     maxLength: 2000,
   },
@@ -22,13 +24,15 @@ const { t } = useI18n();
 
 function apply(text: string) {
   if (props.disabled) return;
-  const current = props.modelValue.trim();
-  if (!current) {
-    emit('update:modelValue', text.slice(0, props.maxLength));
-    return;
+  const current = props.countCodePoints ? props.modelValue : props.modelValue.trim();
+  if (current && current.includes(text)) return;
+  const next = current ? `${current} ${text}` : text;
+  if (props.countCodePoints) {
+    // Preserve the draft when the whole preset would exceed the available space.
+    if ([...next].length <= props.maxLength) emit('update:modelValue', next);
+  } else {
+    emit('update:modelValue', next.slice(0, props.maxLength));
   }
-  if (current.includes(text)) return;
-  emit('update:modelValue', `${current} ${text}`.slice(0, props.maxLength));
 }
 </script>
 

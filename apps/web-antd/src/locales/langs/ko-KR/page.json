@@ -223,6 +223,7 @@
     "unrated": "평가 안 함",
     "action": "처리 작업",
     "reason": "처리 사유 및 피드백",
+    "reasonTooLong": "사유는 유니코드 코드 포인트 기준으로 최대 {limit}개까지 입력할 수 있습니다.",
     "editedBody": "수정된 본문",
     "signedIdentity": "닉네임으로 표시(해제 시 익명)",
     "previewAttribution": "최신 담당 귀속 확인",

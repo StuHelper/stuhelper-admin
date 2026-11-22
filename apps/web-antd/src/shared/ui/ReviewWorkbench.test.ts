@@ -116,4 +116,31 @@ describe('ReasonPresets', () => {
     await settle();
     expect(value.value).toBe('First template. Second template.');
   });
+
+  it('adds a complete preset that fits the code-point limit and preserves an oversized draft', async () => {
+    const value = ref('😀');
+    const root = mountRender(() =>
+      h(ReasonPresets, {
+        countCodePoints: true,
+        maxLength: 3,
+        modelValue: value.value,
+        'onUpdate:modelValue': (next: string) => {
+          value.value = next;
+        },
+        presets: [{ key: 'A', text: '😀' }, { key: 'B', text: '😃' }],
+      }),
+    );
+    await settle();
+
+    const buttons = [...root.querySelectorAll('button')];
+    buttons[1]?.click();
+    await settle();
+    expect(value.value).toBe('😀 😃');
+
+    value.value = '😀😀😀😀';
+    await settle();
+    buttons[1]?.click();
+    await settle();
+    expect(value.value).toBe('😀😀😀😀');
+  });
 });

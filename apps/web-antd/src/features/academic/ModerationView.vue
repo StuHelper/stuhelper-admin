@@ -7,7 +7,7 @@ import type {
   Task,
 } from './api';
 
-import { computed, nextTick, reactive, ref, shallowRef, watch } from 'vue';
+import { computed, nextTick, reactive, ref, shallowRef, useTemplateRef, watch } from 'vue';
 
 import { useI18n } from '@vben/locales';
 
@@ -26,7 +26,6 @@ import {
   Space,
   Table,
   Tag,
-  Textarea,
 } from 'ant-design-vue';
 
 import { errorCode } from '#/shared/api/errors';
@@ -36,8 +35,9 @@ import { useFormat } from '#/shared/format';
 import AdminPage from '#/shared/ui/AdminPage.vue';
 import LoadState from '#/shared/ui/LoadState.vue';
 import { useErrorText } from '#/shared/ui/messages';
+import { isValidModerationReason } from '#/shared/ui/moderation-reason';
+import ModerationReasonField from '#/shared/ui/ModerationReasonField.vue';
 import MutationAlert from '#/shared/ui/MutationAlert.vue';
-import ReasonPresets from '#/shared/ui/ReasonPresets.vue';
 import { stateColor } from '#/shared/ui/state-color';
 
 import { arrayCursor, pageSize, useAcademicAdmin } from './api';
@@ -57,6 +57,7 @@ const format = useFormat();
 const errorText = useErrorText();
 const api = useAcademicAdmin();
 const school = useCampusId();
+const categoryCounts = useTemplateRef('categoryCounts');
 const filters = reactive({
   state: props.mode === 'queue' ? 'waiting' : '',
   kind: '',
@@ -167,6 +168,7 @@ async function decided(message: string) {
   const current = selected.value?.taskId ?? selected.value?.entryId;
   const following = neighbour(1);
   lastResult.value = message;
+  void categoryCounts.value?.reload();
   await rows.reload();
   if (!autoNext.value) return;
   const fallback = visibleRows().find(
@@ -204,6 +206,8 @@ watch([chosen, batchAction, batchReason], () => {
   request.value = undefined;
 });
 async function inspect() {
+  const reason = batchReason.value;
+  if (previewing.value || !isValidModerationReason(reason)) return;
   previewing.value = true;
   previewError.value = '';
   try {
@@ -220,7 +224,7 @@ async function inspect() {
           object_id: entry.id,
           revision: entry.revision,
           action: batchAction.value,
-          reason: batchReason.value,
+          reason,
         },
       });
     }
@@ -235,7 +239,7 @@ async function inspect() {
 }
 async function applyBatch() {
   const body = request.value;
-  if (!body) return;
+  if (!body || previewing.value || !isValidModerationReason(batchReason.value)) return;
   const result = await batch.run('batch', body, (value, key) =>
     api.applyBatch(value, key),
   );
@@ -253,6 +257,7 @@ async function batchApplied(result: BatchPreview) {
   await nextTick();
   preview.value = result;
   request.value = undefined;
+  void categoryCounts.value?.reload();
   void rows.reload();
 }
 
@@ -402,6 +407,7 @@ id="moderationview-field-3"
       <CampusPending v-if="!school" @ready="school = $event" />
       <CategoryCounts
         v-if="school && mode === 'queue'"
+        ref="categoryCounts"
         :school="school"
         :active="filters.category"
         @pick="(value) => { if (!locked) { filters.category = value; void rows.reload(); } }"
@@ -590,21 +596,13 @@ id="moderationview-field-5"
               "
             />
           </FormItem>
-          <FormItem :label="t('page.moderation.reason')" required html-for="moderationview-field-6">
-            <ReasonPresets
-              v-model="batchReason"
-              :presets="reasonPresets"
-              :disabled="batch.busy.value || batch.uncertain.value"
-              :max-length="2000"
-            />
-            <Textarea
-id="moderationview-field-6"
-              v-model:value="batchReason"
-              :rows="3"
-              :maxlength="2000"
-              :disabled="batch.busy.value || batch.uncertain.value"
-            />
-          </FormItem>
+          <ModerationReasonField
+            id="moderationview-field-6"
+            v-model="batchReason"
+            :label="t('page.moderation.reason')"
+            :presets="reasonPresets"
+            :disabled="previewing || batch.busy.value || batch.uncertain.value"
+          />
         </Form>
         <p v-if="previewError" class="text-destructive mb-2" role="alert">
           {{ errorText(previewError) }}
@@ -643,7 +641,7 @@ id="moderationview-field-6"
               batch.busy.value ||
               batch.uncertain.value ||
               chosen.length === 0 ||
-              !batchReason.trim()
+              !isValidModerationReason(batchReason)
             "
             @click="inspect"
             >
@@ -653,7 +651,7 @@ id="moderationview-field-6"
             v-if="request"
             type="primary"
             :loading="batch.busy.value"
-            :disabled="batch.uncertain.value"
+            :disabled="previewing || batch.uncertain.value"
             @click="applyBatch"
             >
 {{ t('page.moderation.applyBatch') }}

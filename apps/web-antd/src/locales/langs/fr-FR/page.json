@@ -223,6 +223,7 @@
     "unrated": "Non noté",
     "action": "Action à effectuer",
     "reason": "Motif et retour",
+    "reasonTooLong": "Le motif peut contenir au plus {limit} points de code Unicode.",
     "editedBody": "Texte modifié",
     "signedIdentity": "Afficher avec le pseudo (décocher pour anonyme)",
     "previewAttribution": "Vérifier l’attribution actuelle",

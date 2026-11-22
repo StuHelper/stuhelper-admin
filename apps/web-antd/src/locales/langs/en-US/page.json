@@ -223,6 +223,7 @@
     "unrated": "Not rated",
     "action": "Decision action",
     "reason": "Reason and feedback",
+    "reasonTooLong": "The reason can contain up to {limit} Unicode code points.",
     "editedBody": "Edited text",
     "signedIdentity": "Show with the platform nickname (clear for anonymous)",
     "previewAttribution": "Check current teaching attribution",
