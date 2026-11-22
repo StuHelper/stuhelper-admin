@@ -109,6 +109,7 @@ test('teacher homepage matching searches both lists, appends candidates and safe
   await expect.poll(() => calls.filter(({ query }) => query.q === 'Lin Zhiyuan').map(({ path }) => path))
     .toEqual(['/review/teachers', '/review/sites']);
   await chooseAntOption(page, teachers.locator('.ant-select'), all.common.all);
+  await fits(page, info);
   await expect.poll(() => calls.some(({ path, query }) => path === '/review/teachers'
     && query.status === 'all' && query.q === teacher.name)).toBe(true);
   await teachers.locator('summary').click();
@@ -141,6 +142,7 @@ test('teacher homepage matching searches both lists, appends candidates and safe
   expect(writes()[1].key).not.toBe(writes()[0].key);
 
   await chooseAntOption(page, sites.locator('.ant-select'), match.decided);
+  await fits(page, info);
   await expect.poll(() => calls.some(({ path, query }) => path === '/review/sites'
     && query.status === 'decided' && query.q === 'Lin Zhiyuan')).toBe(true);
   await decide('reject');

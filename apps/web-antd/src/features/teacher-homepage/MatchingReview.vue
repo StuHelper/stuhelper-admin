@@ -318,7 +318,7 @@ useLeaveGuard(() => {
     <section :aria-label="t('page.teacherHomepage.match.sites')" class="min-w-0">
       <Card :title="t('page.teacherHomepage.match.sites')" :bordered="false">
         <div class="flex flex-wrap gap-3">
-          <form class="flex min-w-0 flex-1 gap-2" @submit.prevent="siteQuery = siteSearch.trim()">
+          <form class="flex min-w-0 basis-52 grow gap-2" @submit.prevent="siteQuery = siteSearch.trim()">
             <Input
               v-model:value="siteSearch"
               :maxlength="200"
@@ -327,9 +327,10 @@ useLeaveGuard(() => {
             />
             <Button html-type="submit">{{ t('page.common.search') }}</Button>
           </form>
+          <!-- Keep the anchor width stable until the dropdown's exit animation ends. -->
           <Select
             v-model:value="siteStatus"
-            class="min-w-36"
+            class="w-56 max-w-full shrink-0"
             :aria-label="t('page.teacherHomepage.match.siteStatus')"
             :options="siteStatuses"
           />
@@ -564,7 +565,7 @@ useLeaveGuard(() => {
     <section :aria-label="t('page.teacherHomepage.match.teachers')" class="min-w-0">
       <Card :title="t('page.teacherHomepage.match.teachers')" :bordered="false">
         <div class="flex flex-wrap gap-3">
-          <form class="flex min-w-0 flex-1 gap-2" @submit.prevent="teacherQuery = teacherSearch.trim()">
+          <form class="flex min-w-0 basis-52 grow gap-2" @submit.prevent="teacherQuery = teacherSearch.trim()">
             <Input
               v-model:value="teacherSearch"
               :maxlength="200"
@@ -575,7 +576,7 @@ useLeaveGuard(() => {
           </form>
           <Select
             v-model:value="teacherStatus"
-            class="min-w-36"
+            class="w-56 max-w-full shrink-0"
             :aria-label="t('page.teacherHomepage.match.teacherStatus')"
             :options="teacherStatuses"
           />
