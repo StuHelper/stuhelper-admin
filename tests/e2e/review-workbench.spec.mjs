@@ -3,7 +3,7 @@ import fs from 'node:fs';
 
 import { schoolSession } from '../school-session-fixture.mjs';
 import { expect, test } from '../session-fixture.mjs';
-import { fixture, routes } from './resource-fixture.mjs';
+import { fixture, queueSummary, routes } from './resource-fixture.mjs';
 
 const catalogue = (info) =>
   JSON.parse(
@@ -56,6 +56,9 @@ test('resource review previews sandboxed PDFs, warns above 15 MiB, applies reaso
   await page.route('**/api/v1/moderation/**', async (route) => {
     const req = route.request();
     const url = new URL(req.url());
+    if (url.pathname.endsWith('/summary')) {
+      return route.fallback();
+    }
     if (req.method() === 'POST') {
       const body = req.postDataJSON();
       decidedFirst = true;
@@ -250,6 +253,9 @@ test('moderation decision panel shows target course and term, highlights propose
 
   await page.route('**/api/v1/moderation/**', async (route) => {
     const url = new URL(route.request().url());
+    if (url.pathname.endsWith('/summary')) {
+      return route.fulfill({ json: queueSummary({ waiting: 1 }) });
+    }
     if (url.pathname === '/api/v1/moderation/tasks') {
       return route.fulfill({
         json: url.searchParams.get('object_id') ? [editTask] : [editTask],

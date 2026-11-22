@@ -74,7 +74,8 @@
     "search": "Rechercher",
     "status": "État",
     "uncertain": "Le résultat n’est pas encore confirmé. Pour éviter un doublon, seule la demande initiale peut être renvoyée et le formulaire reste verrouillé.",
-    "reloadCampus": "Recharger les informations de l’université"
+    "reloadCampus": "Recharger les informations de l’université",
+    "loading": "Chargement…"
   },
   "errors": {
     "network": "La connexion a échoué ou expiré. Les saisies valides sont conservées ; réessayez.",
@@ -226,6 +227,7 @@
     "unrated": "Non noté",
     "action": "Action à effectuer",
     "reason": "Motif et retour",
+    "reasonTooLong": "Le motif peut contenir au plus {limit} points de code Unicode.",
     "editedBody": "Texte modifié",
     "signedIdentity": "Afficher avec le pseudo (décocher pour anonyme)",
     "previewAttribution": "Vérifier l’attribution actuelle",
@@ -424,7 +426,10 @@
       "low_quality": "Faible qualité",
       "author_update": "Demande de mise à jour de l’auteur",
       "other": "Autre"
-    }
+    },
+    "categorySummary": "En attente par catégorie",
+    "categorySummaryWaiting": "Tâches en attente dans l’établissement : {count}",
+    "categorySummaryEmpty": "Aucune tâche classée n’est en attente."
   },
   "catalog": {
     "title": "Gestion des cours et enseignants",

@@ -74,7 +74,8 @@
     "search": "搜索",
     "status": "状态",
     "uncertain": "结果尚未确认。为避免重复提交，只能重试原请求，输入内容暂时锁定。",
-    "reloadCampus": "重新加载学校信息"
+    "reloadCampus": "重新加载学校信息",
+    "loading": "正在读取…"
   },
   "errors": {
     "network": "网络连接失败或超时，已保留仍有效的输入，请重试。",
@@ -226,6 +227,7 @@
     "unrated": "未评价",
     "action": "处理动作",
     "reason": "处理说明与反馈",
+    "reasonTooLong": "处理说明最多可填写 {limit} 个 Unicode 码点。",
     "editedBody": "修改后的正文",
     "signedIdentity": "以平台昵称署名展示（取消则匿名）",
     "previewAttribution": "核对最新任课归属",
@@ -424,7 +426,10 @@
       "low_quality": "内容质量低",
       "author_update": "作者要求更新",
       "other": "其他"
-    }
+    },
+    "categorySummary": "本校待审分类",
+    "categorySummaryWaiting": "本校待处理任务：{count}",
+    "categorySummaryEmpty": "目前没有已分类的待审任务。"
   },
   "catalog": {
     "title": "课程与教师维护",

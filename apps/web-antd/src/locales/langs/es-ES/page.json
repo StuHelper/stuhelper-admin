@@ -74,7 +74,8 @@
     "search": "Buscar",
     "status": "Estado",
     "uncertain": "El resultado aún no está confirmado. Para evitar duplicados, solo se puede reintentar la solicitud original y el formulario queda bloqueado.",
-    "reloadCampus": "Recargar información de la universidad"
+    "reloadCampus": "Recargar información de la universidad",
+    "loading": "Cargando…"
   },
   "errors": {
     "network": "La conexión falló o caducó. Se conservan los datos válidos; inténtalo de nuevo.",
@@ -226,6 +227,7 @@
     "unrated": "Sin valorar",
     "action": "Acción de la decisión",
     "reason": "Motivo y respuesta",
+    "reasonTooLong": "El motivo puede contener hasta {limit} puntos de código Unicode.",
     "editedBody": "Texto editado",
     "signedIdentity": "Mostrar con el apodo (desmarca para anónimo)",
     "previewAttribution": "Comprobar la atribución actual",
@@ -424,7 +426,10 @@
       "low_quality": "Baja calidad",
       "author_update": "Solicitud de actualización del autor",
       "other": "Otro"
-    }
+    },
+    "categorySummary": "Pendientes por categoría",
+    "categorySummaryWaiting": "Tareas pendientes del centro: {count}",
+    "categorySummaryEmpty": "No hay tareas clasificadas pendientes."
   },
   "catalog": {
     "title": "Gestión de cursos y docentes",
