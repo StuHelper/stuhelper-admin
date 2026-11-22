@@ -6,7 +6,7 @@ import contract from '../../../../contracts/session.openapi.json';
 import { ApiError } from './api/errors';
 import { Http } from './api/http';
 import { schemaOf } from './api/schema';
-import { useHostFetch } from './api/transport';
+import { imageFetchKey, useHostFetch } from './api/transport';
 
 export type Session = components['schemas']['Session'];
 export type Profile = components['schemas']['Profile'];
@@ -227,8 +227,9 @@ export function useSession(): SessionStore {
 }
 
 /** An HTTP client on the host transport that re-checks the session after a denial. */
-export function useHttp() {
-  const fetcher = useHostFetch();
+export function useHttp(media = false) {
+  const host = useHostFetch();
+  const fetcher = media ? inject(imageFetchKey, host) : host;
   const session = inject(sessionKey, undefined);
   return new Http(fetcher, {
     onDenied: (status) =>

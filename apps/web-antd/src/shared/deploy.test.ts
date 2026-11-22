@@ -44,12 +44,14 @@ describe('container and nginx runtime configuration', () => {
       expect(block).toMatch(/Cache-Control\s+"no-cache"/);
       expect(block).toMatch(/X-Content-Type-Options\s+"nosniff"/);
       expect(block).toMatch(/frame-ancestors\s+'none'/);
+      expect(block).toContain("connect-src 'self' https://media.stuhelper.com\"");
       expect(block).toMatch(/Referrer-Policy/);
     }
 
     const spaBlock = /location\s+\/\s*\{([^}]*)\}/.exec(conf)?.[1] ?? '';
     expect(spaBlock).toMatch(/X-Content-Type-Options\s+"nosniff"/);
     expect(spaBlock).toMatch(/frame-ancestors\s+'none'/);
+    expect(spaBlock).toContain("connect-src 'self' https://media.stuhelper.com\"");
     expect(spaBlock).toMatch(/Referrer-Policy/);
   });
 

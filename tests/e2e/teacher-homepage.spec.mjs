@@ -4,6 +4,7 @@ import { join } from 'node:path';
 
 import { schoolSession } from '../school-session-fixture.mjs';
 import { expect, test } from '../session-fixture.mjs';
+import { animation, cdn, interceptMedia } from '../teacher-media-fixture.mjs';
 import {
   counts,
   createdAt,
@@ -202,6 +203,7 @@ test('teacher homepage settings show overlapping eligibility counts and save exa
 test('teacher homepage profile keeps edits after capacity rejection, validates a replacement photo and removes the override on request', async ({ page }, info) => {
   await schoolSession(page);
   const calls = await teacherHomepageFixture(page, { capacity: true });
+  const mediaReads = await interceptMedia(page, base, () => ({ type: 'image/png', body: portrait }));
   const all = labels(info);
   const profile = all.teacherHomepage.profile;
   await open(page, info, `${pages}/profile`, { teacher_id: teacher.teacher_id });
@@ -270,6 +272,7 @@ test('teacher homepage profile keeps edits after capacity rejection, validates a
   const photoResponse = await savedPhoto;
   expect(photoResponse.headers()['cache-control']).toBe('private, no-store');
   await expect(preview).toHaveAttribute('src', /^blob:/);
+  expect(mediaReads.map(request => new URL(request.url).pathname)).toEqual(['/manual-portrait']);
   await page.getByTestId('teacher-homepage-remove-rule').click();
   await visibility.selectOption('hidden');
   await save.click();
@@ -282,6 +285,7 @@ test('teacher homepage profile keeps edits after capacity rejection, validates a
 test('teacher homepage requests preview private photos and submit decisions using the current revisions', async ({ page }, info) => {
   await schoolSession(page);
   const calls = await teacherHomepageFixture(page, { photoOnce: true, requestConflict: true });
+  const mediaReads = await interceptMedia(page, base, () => ({ type: 'image/png', body: portrait }));
   const all = labels(info);
   const requests = all.teacherHomepage.requests;
   await open(page, info, `${pages}/requests`);
@@ -306,6 +310,7 @@ test('teacher homepage requests preview private photos and submit decisions usin
   await expect(img).toHaveAttribute('src', /^blob:/);
   await expect.poll(() => img.evaluate((image) => image.naturalWidth)).toBe(8);
   await fits(page, info);
+  expect(mediaReads.map(request => new URL(request.url).pathname)).toEqual(['/request-portrait']);
   await screenshot(page, info, 'requests');
 
   const note = 'Portrait and identity checked.';
@@ -491,4 +496,52 @@ test('teacher homepage complaints use a server-filtered queue and hide or dismis
     expect(writes[index].key).toBeTruthy();
   }
   await expect(page.getByText(complaints[0].submission.reason, { exact: true })).toHaveCount(0);
+});
+
+test('authorized homepage images follow signed redirects and revoked previews disappear', async ({ page }, info) => {
+  await schoolSession(page);
+  await teacherHomepageFixture(page);
+  const all = labels(info);
+  const path = `/api/v1/catalog/objects/${teacher.teacher_id}/teacher-homepage`;
+  const photo = { url: path + '/photos/' + 'a'.repeat(64), content_type: 'image/png', width: 8, height: 8 };
+  const image = { kind: 'image', field: 'research', title: 'Animated diagram', url: path + '/images/' + 'b'.repeat(64),
+    image: { content_type: 'image/gif', width: 8, height: 8, size_bytes: animation.length } };
+  await page.route('**' + path, route => route.fulfill({ json: { profile: { name: 'Professor', supervisors: [], fields: [], sections: [], photo } } }));
+  await page.route('**' + path + '/media', route => route.fulfill({ json: { items: [image] } }));
+  const requests = await interceptMedia(page, base, url => {
+    if (url.pathname === '/expired') return { status: 403 };
+    if (url.pathname === '/portrait') return { type: 'image/png', body: portrait };
+    return {};
+  });
+  let reads = 0;
+  let denied = 0;
+  await page.route('**' + photo.url, route => route.fulfill({ status: 302, headers: { location: cdn + '/portrait' } }));
+  await page.route('**' + image.url, route => denied
+    ? route.fulfill({ status: denied, json: { code: denied === 403 ? 'forbidden' : 'not_found' } })
+    : route.fulfill({ status: 302, headers: { location: cdn + (++reads === 1 ? '/expired' : '/gif') } }));
+  await open(page, info, pages + '/profile', { teacher_id: teacher.teacher_id });
+  await button(page, all.common.open).click();
+  await button(page, all.teacherHomepage.fields.photo).click();
+  await expect(page.getByRole('img', { name: all.teacherHomepage.fields.photo, exact: true })).toHaveJSProperty('naturalWidth', 8);
+  const choose = button(page, image.title);
+  const preview = page.getByRole('img', { name: image.title, exact: true });
+  await choose.click();
+  await expect(preview).toHaveAttribute('src', /^blob:/);
+  await expect(preview).toHaveJSProperty('naturalWidth', 8);
+  expect(requests.map(request => new URL(request.url).pathname)).toEqual(['/portrait', '/expired', '/gif']);
+  for (const status of [403, 404]) {
+    const old = await preview.getAttribute('src');
+    denied = status;
+    await choose.click();
+    await expect(preview).toHaveCount(0);
+    await expect(page.getByRole('alert').last()).toBeVisible();
+    expect(await page.evaluate(async url => {
+      try { await fetch(url); return false; } catch { return true; }
+    }, old)).toBe(true);
+    denied = 0;
+    await choose.click();
+    await expect(preview).toHaveJSProperty('naturalWidth', 8);
+  }
+  await button(page, all.teacherHomepage.profile.photo.close).click();
+  await expect(preview).toHaveCount(0);
 });

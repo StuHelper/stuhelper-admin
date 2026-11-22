@@ -2065,6 +2065,8 @@
       "conflict": "La liste a été mise à jour. Vérifiez vos modifications par rapport à la dernière version avant d’enregistrer."
     },
     "profile": {
+      "images": "Images de la page de l’enseignant",
+      "bodyImage": "Image du contenu {number}",
       "title": "Données de la page d’enseignant",
       "teacher": "Enseignant de l’annuaire",
       "chooseTeacher": "Rechercher un enseignant par nom et le sélectionner",

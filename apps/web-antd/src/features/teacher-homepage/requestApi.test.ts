@@ -130,7 +130,7 @@ describe('teacher homepage request reads', () => {
     const api = new TeacherHomepageRequestsApi(new Http(async (path, options) => {
       expect(path).toBe('/api/v1/catalog/admin/schools/buaa/teacher-sites/requests/request%3A1/photo');
       expect(options?.credentials).toBe('same-origin');
-      expect(options?.redirect).toBe('error');
+      expect(options?.redirect).toBe('follow');
       return new Response(new Uint8Array([1, 2, 3]), {
         headers: { 'Content-Type': 'image/png' },
       });

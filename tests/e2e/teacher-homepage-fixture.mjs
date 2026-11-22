@@ -1,5 +1,7 @@
 import { Buffer } from 'node:buffer';
 
+import { cdn } from '../teacher-media-fixture.mjs';
+
 export const teacher = {
   teacher_id: 'teacher-1',
   name: 'Lin Zhiyuan',
@@ -141,9 +143,7 @@ export async function teacherHomepageFixture(page, failures = {}) {
     if (url.pathname.endsWith(`/teacher-homepage/photos/${portraitMetadata.id}`)) {
       if (controls.page_visibility !== 'visible') return fail(route, 404, 'not_found');
       return route.fulfill({
-        body: portrait,
-        contentType: 'image/png',
-        headers: { 'cache-control': 'private, no-store' },
+        status: 302, headers: { location: cdn + '/manual-portrait', 'cache-control': 'private, no-store' },
       });
     }
     return route.fallback();
@@ -274,9 +274,7 @@ export async function teacherHomepageFixture(page, failures = {}) {
         return fail(route, 503, 'unavailable');
       }
       return route.fulfill({
-        body: portrait,
-        contentType: 'image/png',
-        headers: { 'cache-control': 'private, no-store' },
+        status: 302, headers: { location: cdn + '/request-portrait', 'cache-control': 'private, no-store' },
       });
     }
     if (suffix === '') return route.fulfill({ json: item });

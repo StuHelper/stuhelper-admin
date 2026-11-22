@@ -34,7 +34,7 @@ function requestFor(id: string) {
 }
 
 export class TeacherHomepageRequestsApi {
-  constructor(private readonly http: Http) {}
+  constructor(private readonly http: Http, private readonly imageHttp: Http = http) {}
 
   decide(school: string, id: string, body: RequestDecision, key: string) {
     return this.http.json(`${requestPath(school, id)}/decision`, requestFor(id), {
@@ -62,7 +62,7 @@ export class TeacherHomepageRequestsApi {
     signal?: AbortSignal,
   ) {
     const blob = await getTeacherHomepagePhoto(
-      this.http,
+      this.imageHttp,
       `${requestPath(school, id)}/photo`,
       signal,
     );
@@ -73,7 +73,7 @@ export class TeacherHomepageRequestsApi {
 }
 
 export function useTeacherHomepageRequests() {
-  return new TeacherHomepageRequestsApi(useHttp());
+  return new TeacherHomepageRequestsApi(useHttp(), useHttp(true));
 }
 
 export function buildRequestDecision(

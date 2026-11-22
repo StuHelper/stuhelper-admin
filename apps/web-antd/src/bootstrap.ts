@@ -26,7 +26,8 @@ import {
 import { availableMenus } from './menus';
 import { router } from './router';
 import { accountJumpKey, createAccountJumpStore } from './shared/account-jump';
-import { hostFetchKey, sessionFetch } from './shared/api/transport';
+import { mediaFetch } from './shared/api/media';
+import { hostFetchKey, imageFetchKey, sessionFetch } from './shared/api/transport';
 import {
   capabilitiesKey,
   createCapabilities,
@@ -71,6 +72,7 @@ async function bootstrap(namespace: string, fetcher: typeof fetch = sessionFetch
   const catalogJump = createCatalogJumpStore();
   app
     .provide(hostFetchKey, legalMenu.transport)
+    .provide(imageFetchKey, fetcher === sessionFetch && import.meta.env.VITE_DEMO !== '1' ? mediaFetch : fetcher)
     .provide(sessionKey, session)
     .provide(teacherHomepageAccessKey, teacherHomepageAccess)
     .provide(accountJumpKey, accountJump)

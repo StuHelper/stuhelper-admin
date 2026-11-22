@@ -2065,6 +2065,8 @@
       "conflict": "白名单已更新。请核对重新应用的修改后再保存。"
     },
     "profile": {
+      "images": "教师主页图片",
+      "bodyImage": "正文图片 {number}",
       "title": "教师主页资料",
       "teacher": "目录教师",
       "chooseTeacher": "搜索姓名并选择教师",

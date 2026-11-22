@@ -43,6 +43,8 @@ export const sessionFetch: typeof fetch = (input, init) => {
  */
 export const hostFetchKey: InjectionKey<typeof fetch> = Symbol('hostFetch');
 
+export const imageFetchKey: InjectionKey<typeof fetch> = Symbol('teacherImageFetch');
+
 export function useHostFetch(): typeof fetch {
   return inject(hostFetchKey, sessionFetch);
 }

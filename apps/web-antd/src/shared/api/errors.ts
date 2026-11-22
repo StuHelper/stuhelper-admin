@@ -55,6 +55,7 @@ export class ApiError extends Error {
     readonly operationId?: string,
     /** Parsed JSON error payload for typed contract recovery (never shown as raw text). */
     readonly detail?: unknown,
+    readonly retryAfter?: null | string,
   ) {
     super(code);
     this.name = 'ApiError';
