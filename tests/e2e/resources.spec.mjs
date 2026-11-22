@@ -88,6 +88,30 @@ test('review reads the pending file and retries an unknown decision without dupl
   expect(errors).toEqual([]);
 });
 
+test('resource state changes accept up to 2,000 Unicode code points in the reason', async ({ page }, info) => {
+  const { all, m, c, s, errors } = await open(page, info, '/resources');
+  await page.getByRole('button', { name: c.manage, exact: true }).click();
+  const drawer = page.locator('.ant-drawer-content');
+  const reason = drawer.getByLabel(c.reason, { exact: true });
+  const submit = drawer.getByRole('button', { name: m.applyState, exact: true });
+  const acceptedReason = '😀'.repeat(2000);
+  const rejectedReason = `${acceptedReason}😀`;
+  const number = new Intl.NumberFormat(info.project.metadata.locale);
+  const changes = () => s.calls.filter((call) => call.path.endsWith('/state'));
+  await reason.fill(rejectedReason);
+  await expect(reason).toHaveValue(rejectedReason);
+  await expect(reason).toHaveAttribute('aria-invalid', 'true');
+  await expect(drawer.getByText(all.moderation.reasonTooLong.replace('{limit}', number.format(2000)), { exact: true })).toBeVisible();
+  await expect(submit).toBeDisabled();
+  await reason.evaluate((field) => field.closest('form').requestSubmit());
+  expect(changes()).toEqual([]);
+  await reason.fill(acceptedReason);
+  await submit.click();
+  await expect.poll(() => changes().map((call) => call.body.reason)).toEqual([acceptedReason]);
+  await expect(reason).toHaveValue('');
+  expect(errors).toEqual([]);
+});
+
 test('directory editing saves revision and configured names', async ({ page }, info) => {
   const { m, c, s, errors } = await open(page, info, '/resources/directories');
   await page.getByRole('button', { name: c.edit, exact: true }).click();

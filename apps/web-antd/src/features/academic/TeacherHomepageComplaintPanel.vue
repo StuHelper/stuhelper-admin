@@ -15,15 +15,15 @@ import {
   FormItem,
   Select,
   Tag,
-  Textarea,
 } from 'ant-design-vue';
 
 import { ApiError } from '#/shared/api/errors';
 import { useAsync, useMutation } from '#/shared/composables/async';
 import { useFormat } from '#/shared/format';
 import LoadState from '#/shared/ui/LoadState.vue';
+import { isValidModerationReason } from '#/shared/ui/moderation-reason';
+import ModerationReasonField from '#/shared/ui/ModerationReasonField.vue';
 import MutationAlert from '#/shared/ui/MutationAlert.vue';
-import ReasonPresets from '#/shared/ui/ReasonPresets.vue';
 import { stateColor } from '#/shared/ui/state-color';
 
 import { useAcademicAdmin } from './api';
@@ -45,8 +45,6 @@ const action = ref<'dismiss' | 'hide'>();
 const reason = ref('');
 const category = ref<ViolationCategory>();
 const initialCategory = ref<ViolationCategory>();
-const reasonLimit = 2000;
-const reasonTooLong = computed(() => [...reason.value].length > reasonLimit);
 const pollDenied = ref(false);
 
 const data = useAsync(async (signal) => {
@@ -151,8 +149,7 @@ async function decide() {
     !canDecide.value ||
     locked.value ||
     !chosen ||
-    !reason.value.trim() ||
-    reasonTooLong.value ||
+    !isValidModerationReason(reason.value) ||
     needsReload.value
   ) return;
   if (chosen === 'hide' && !target.value) return;
@@ -270,27 +267,18 @@ function decided(result: Task) {
               :placeholder="t('page.moderation.uncategorized')"
             />
           </FormItem>
-          <FormItem
+          <ModerationReasonField
+            id="teacher-homepage-complaint-reason"
+            v-model="reason"
             :label="t('page.moderation.reason')"
-            html-for="teacher-homepage-complaint-reason"
-            :validate-status="reasonTooLong ? 'error' : undefined"
-            :help="reasonTooLong ? t('page.teacherHomepage.moderation.reasonTooLong', { max: format.number(reasonLimit) }) : undefined"
-            required
-          >
-            <ReasonPresets v-model="reason" :presets="reasonPresets" :disabled="locked" />
-            <Textarea
-              id="teacher-homepage-complaint-reason"
-              v-model:value="reason"
-              :rows="3"
-              :maxlength="reasonLimit * 2"
-              :disabled="locked"
-            />
-          </FormItem>
+            :presets="reasonPresets"
+            :disabled="locked"
+          />
           <Button
             type="primary"
             html-type="submit"
             :loading="mutation.busy.value"
-            :disabled="locked || !action || !reason.trim() || reasonTooLong || needsReload"
+            :disabled="locked || !action || !isValidModerationReason(reason) || needsReload"
           >
             {{ t('page.moderation.applyDecision') }}
           </Button>

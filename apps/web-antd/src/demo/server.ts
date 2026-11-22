@@ -1,5 +1,10 @@
+import type { components as Moderation } from '../api/moderation.gen';
+
 import example from '../../../../contracts/contribution.example.json';
+import moderationContract from '../../../../contracts/moderation.openapi.json';
 import operations from '../../../../contracts/storage-operations.example.json';
+import { schemaOf } from '../shared/api/schema';
+import { isValidModerationReason } from '../shared/ui/moderation-reason';
 import * as d from './data';
 import {
   handleDemoTeacherHomepage,
@@ -48,19 +53,31 @@ const entries: Record<string, any>[] = (d.reviews as Record<string, any>[]).map(
     featured: !!r.featured,
   }),
 );
+
+type TaskView = Moderation['schemas']['TaskView'];
+type QueueSummary = Moderation['schemas']['QueueSummary'];
+type DemoTask = TaskView & {
+  content_kind: keyof QueueSummary['by_content_kind'];
+};
+type DemoTaskDecision = Moderation['schemas']['Decide'];
+const moderationSchemas = moderationContract.components.schemas;
+const parseDecide = schemaOf<DemoTaskDecision>(moderationSchemas, 'Decide');
+const taskCategory = (row: TaskView) => row.decision?.category ?? row.submission.category;
+
 const task = (
   id: string,
   object_id: string,
-  kind: string,
+  kind: TaskView['submission']['kind'],
   reason: string,
-  content_kind: string,
+  content_kind: DemoTask['content_kind'],
   state = 'waiting',
   days = 1,
-) => ({
+  category?: TaskView['submission']['category'],
+): DemoTask => ({
   id,
   school_id: d.SCHOOL,
   content_kind,
-  submission: { object_id, kind, reason, evidence: [] as string[] },
+  submission: { object_id, kind, reason, evidence: [], ...(category ? { category } : {}) },
   object_revision: 1,
   revision: 1,
   state,
@@ -68,20 +85,17 @@ const task = (
   updated_at: d.ago(days),
   can_appeal: false,
 });
-const homepageComplaint = task(
-  'm8', 'teacher-homepage:p3', 'report', '主页展示了不应公开的联系方式。', 'teacher_homepage', 'waiting', 1,
-);
-const tasks: Record<string, any>[] = [
-  task('m1', 'r13', 'report', '评价内容涉及人身攻击', 'review', 'waiting', 0),
-  task('m2', 'r7', 'review', 'content_review', 'review', 'waiting', 0),
-  task('m3', 'r5', 'edit_request', '想修改评价中的错别字', 'review', 'waiting', 1),
-  task('m4', 'r11', 'appeal', '我认为隐藏决定有误，内容属实', 'review', 'waiting', 2),
+const tasks = [
+  task('m1', 'r13', 'report', '评价内容涉及人身攻击', 'course', 'waiting', 0, 'personal_attack'),
+  task('m2', 'r7', 'review', 'content_review', 'course', 'waiting', 0),
+  task('m3', 'r5', 'edit_request', '想修改评价中的错别字', 'course', 'waiting', 1),
+  task('m4', 'r11', 'appeal', '我认为隐藏决定有误，内容属实', 'course', 'waiting', 2),
   task('m5', 'resource:x8-v1', 'review', 'content_review', 'resource', 'waiting', 0),
-  task('m6', 'resource:x4-v1', 'report', '疑似未经授权转载', 'resource', 'waiting', 1),
-  task('m7', 'r2', 'report', '广告内容', 'review', 'failed', 3),
-  { ...homepageComplaint, submission: { ...homepageComplaint.submission, category: 'privacy_leak' } },
+  task('m6', 'resource:x4-v1', 'report', '疑似未经授权转载', 'resource', 'waiting', 1, 'copyright'),
+  task('m7', 'r2', 'report', '广告内容', 'course', 'failed', 3, 'spam'),
+  task('m8', 'teacher-homepage:p3', 'report', '主页展示了不应公开的联系方式。', 'teacher_homepage', 'waiting', 1, 'privacy_leak'),
 ];
-const complaintReplays = new Map<string, { body: string; result: unknown }>();
+const complaintReplays = new Map<string, { body: string; result: DemoTask }>();
 const policies: Record<string, any> = {};
 const application = (id: string, state: string, stage: string, days: number) => ({
   ...d.verification.application,
@@ -97,6 +111,30 @@ const applications = [
   application('a3', 'supplement_required', 'bachelor', 3),
   application('a4', 'approved', 'doctor', 8),
 ];
+
+function moderationSummary(school: string, includeTeacherHomepage: boolean): QueueSummary {
+  const summary: QueueSummary = {
+    school_id: school,
+    waiting: 0,
+    decided: 0,
+    failed: 0,
+    by_content_kind: { course: 0, mentor: 0, reply: 0, resource: 0 },
+    by_request_kind: { review: 0, report: 0, edit_request: 0, delete_request: 0, appeal: 0 },
+    by_category: {},
+  };
+  for (const row of tasks) {
+    if (row.school_id !== school || (row.content_kind === 'teacher_homepage' && !includeTeacherHomepage)) continue;
+    if (row.state === 'decided') summary.decided++;
+    if (row.state === 'failed') summary.failed++;
+    if (row.state !== 'waiting') continue;
+    summary.waiting++;
+    summary.by_content_kind[row.content_kind] = (summary.by_content_kind[row.content_kind] ?? 0) + 1;
+    summary.by_request_kind[row.submission.kind]++;
+    const category = taskCategory(row);
+    if (category) summary.by_category[category] = (summary.by_category[category] ?? 0) + 1;
+  }
+  return summary;
+}
 
 function catalog(u: URL) {
   const q = u.searchParams;
@@ -135,22 +173,24 @@ async function body(init?: RequestInit) {
   }
 }
 
-async function decideDemoTeacherComplaint(row: (typeof tasks)[number], init?: RequestInit) {
+function decideDemoTeacherComplaint(row: DemoTask, request: DemoTaskDecision, init?: RequestInit) {
   const key = new Headers(init?.headers).get('Idempotency-Key');
   if (!key) return nope('invalid_input', 400);
-  const request = await body(init);
   const serialized = JSON.stringify(request);
   const replayKey = `${row.id}:${key}`;
   const replay = complaintReplays.get(replayKey);
   if (replay) return replay.body === serialized ? json(replay.result) : nope('conflict', 409);
 
-  const decision = request.decision;
+  const { decision } = request;
   if (
-    !decision ||
     !['dismiss', 'hide'].includes(decision.action) ||
-    typeof decision.reason !== 'string' ||
-    !decision.reason.trim() ||
-    [...decision.reason].length > 2000
+    decision.body !== undefined ||
+    decision.teacher_id ||
+    decision.subject ||
+    decision.author_handle ||
+    decision.evidence_revision ||
+    decision.append_id ||
+    decision.signed
   ) return nope('invalid_input', 400);
   const teacherId = row.submission.object_id.replace(/^teacher-homepage:/, '');
   const target = readDemoTeacherHomepageTarget(row.school_id, teacherId);
@@ -168,7 +208,7 @@ async function decideDemoTeacherComplaint(row: (typeof tasks)[number], init?: Re
   row.state = 'applied';
   row.revision++;
   row.decision = { ...decision, id: `demo-decision:${row.id}` };
-  row.updated_at = new Date().toISOString();
+  row.updated_at = d.ago(0);
   const result = structuredClone(row);
   complaintReplays.set(replayKey, { body: serialized, result });
   return json(result);
@@ -314,27 +354,43 @@ export async function handleDemoRequest(
   if (p === '/moderation/feedback' && method === 'GET') {
     return json({ items: [], next_cursor: '' });
   }
+  if (p === '/moderation/tasks/summary' && method === 'GET') {
+    const school = u.searchParams.get('school_id');
+    if (!school) return nope('invalid_input', 400);
+    if (school !== d.SCHOOL) return nope('forbidden', 403);
+    const includeTeacherHomepage = u.searchParams.get('include_teacher_homepage') ?? '';
+    if (!['', 'false', 'true'].includes(includeTeacherHomepage)) return nope('invalid_input', 400);
+    return json(moderationSummary(school, includeTeacherHomepage === 'true'));
+  }
   if ((p === '/moderation/tasks' || p === '/moderation/tasks/page') && method === 'GET') {
     const q = u.searchParams;
+    const category = q.get('category');
+    if (category && !moderationSchemas.ViolationCategory.enum.includes(category)) {
+      return nope('invalid_input', 400);
+    }
+    const include = q.get('include_teacher_homepage') ?? '';
+    if (!['', 'false', 'true'].includes(include)) return nope('invalid_input', 400);
     const contentKind = q.get('content_kind');
-    const includeTeacherHomepage =
-      contentKind === 'teacher_homepage' || q.get('include_teacher_homepage') === 'true';
-    const list = tasks.filter(
+    const includeTeacherHomepage = contentKind === 'teacher_homepage' || include === 'true';
+    const after = q.get('after');
+    const start = after ? tasks.findIndex((row) => row.id === after) + 1 : 0;
+    const limit = Number(q.get('limit') ?? 20);
+    if ((after && start === 0) || !Number.isInteger(limit) || limit < 1 || limit > 100) {
+      return nope('invalid_input', 400);
+    }
+    const list = tasks.slice(start).filter(
       (row) =>
         (includeTeacherHomepage || row.content_kind !== 'teacher_homepage') &&
         (!q.get('school_id') || row.school_id === q.get('school_id')) &&
         (!q.get('state') || row.state === q.get('state')) &&
         (!q.get('kind') || row.submission.kind === q.get('kind')) &&
         (!q.get('object_id') || row.submission.object_id === q.get('object_id')) &&
-        (!q.get('category') || (row.decision?.category ?? row.submission.category) === q.get('category')) &&
+        (!category || taskCategory(row) === category) &&
         (!contentKind || row.content_kind === contentKind),
     );
-    const after = q.get('after') ?? '';
-    const start = after ? list.findIndex((row) => row.id === after) + 1 : 0;
-    const limit = Number(q.get('limit') ?? 20);
-    const items = list.slice(start, start + limit);
+    const items = list.slice(0, limit);
     if (p === '/moderation/tasks/page') {
-      return json({ items, next_cursor: start + limit < list.length ? (items.at(-1)?.id ?? '') : '' });
+      return json({ items, next_cursor: limit < list.length ? (items.at(-1)?.id ?? '') : '' });
     }
     return json(items);
   }
@@ -351,10 +407,21 @@ export async function handleDemoRequest(
   if (p.startsWith('/moderation/tasks/')) {
     const row = tasks.find((x) => x.id === p.split('/')[3]);
     if (!row) return nope('not_found', 404);
-    if (p.endsWith('/decisions')) {
-      if (row.content_kind === 'teacher_homepage') return decideDemoTeacherComplaint(row, init);
+    if (p.endsWith('/decisions') && method === 'POST') {
+      let input: DemoTaskDecision;
+      try {
+        input = parseDecide(await body(init));
+      } catch {
+        return nope('invalid_input', 400);
+      }
+      if (!isValidModerationReason(input.decision.reason)) return nope('invalid_input', 400);
+      if (row.content_kind === 'teacher_homepage') return decideDemoTeacherComplaint(row, input, init);
+      if (input.revision !== row.revision) return nope('conflict', 409);
+      if (input.decision.object_id !== row.submission.object_id) return nope('invalid_input', 400);
       row.state = 'decided';
       row.revision++;
+      row.decision = { ...input.decision, id: `demo-decision-${row.id}-${row.revision}` };
+      row.updated_at = d.ago(0);
       return json(row);
     }
     return json(row);

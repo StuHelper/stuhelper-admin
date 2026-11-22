@@ -390,6 +390,17 @@ test('teacher homepage complaints use a server-filtered queue and hide or dismis
     const req = route.request();
     const url = new URL(req.url());
     const path = url.pathname;
+    if (path === '/api/v1/moderation/tasks/summary') {
+      const waiting = url.searchParams.get('include_teacher_homepage') === 'true'
+        ? complaints.filter((task) => task.state === 'waiting').length
+        : 0;
+      return route.fulfill({ json: {
+        school_id: 'school', waiting, decided: 0, failed: 0,
+        by_content_kind: { course: 0, mentor: 0, reply: 0, resource: 0, teacher_homepage: waiting },
+        by_request_kind: { review: 0, report: waiting, edit_request: 0, delete_request: 0, appeal: 0 },
+        by_category: waiting ? { privacy_leak: waiting } : {},
+      } });
+    }
     if (path === '/api/v1/moderation/tasks/page') {
       filtered.push(Object.fromEntries(url.searchParams));
       return route.fulfill({

@@ -72,7 +72,8 @@
     "search": "Buscar",
     "status": "Estado",
     "uncertain": "El resultado aún no está confirmado. Para evitar duplicados, solo se puede reintentar la solicitud original y el formulario queda bloqueado.",
-    "reloadCampus": "Recargar información de la universidad"
+    "reloadCampus": "Recargar información de la universidad",
+    "loading": "Cargando…"
   },
   "errors": {
     "network": "La conexión falló o caducó. Se conservan los datos válidos; inténtalo de nuevo.",
@@ -223,6 +224,7 @@
     "unrated": "Sin valorar",
     "action": "Acción de la decisión",
     "reason": "Motivo y respuesta",
+    "reasonTooLong": "El motivo puede contener hasta {limit} puntos de código Unicode.",
     "editedBody": "Texto editado",
     "signedIdentity": "Mostrar con el apodo (desmarca para anónimo)",
     "previewAttribution": "Comprobar la atribución actual",
@@ -421,7 +423,10 @@
       "low_quality": "Baja calidad",
       "author_update": "Solicitud de actualización del autor",
       "other": "Otro"
-    }
+    },
+    "categorySummary": "Pendientes por categoría",
+    "categorySummaryWaiting": "Tareas pendientes del centro: {count}",
+    "categorySummaryEmpty": "No hay tareas clasificadas pendientes."
   },
   "catalog": {
     "title": "Gestión de cursos y docentes",
@@ -2145,8 +2150,7 @@
       "missing": "El registro original del docente no está disponible. Puede desestimar esta denuncia.",
       "hide": "Ocultar datos de la página del docente",
       "hideHint": "Oculta los datos de la página y las fotos. La información del directorio y las reseñas siguen sus reglas de visibilidad vigentes.",
-      "dismiss": "Desestimar la denuncia",
-      "reasonTooLong": "Introduzca un motivo de resolución de hasta {max} caracteres."
+      "dismiss": "Desestimar la denuncia"
     }
   }
 }

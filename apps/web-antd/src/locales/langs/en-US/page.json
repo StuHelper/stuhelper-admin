@@ -72,7 +72,8 @@
     "search": "Search",
     "status": "Status",
     "uncertain": "The result is not confirmed yet. To avoid a duplicate, only the original request can be retried and the form stays locked.",
-    "reloadCampus": "Reload university information"
+    "reloadCampus": "Reload university information",
+    "loading": "Loading…"
   },
   "errors": {
     "network": "The connection failed or timed out. Valid input is kept; please try again.",
@@ -223,6 +224,7 @@
     "unrated": "Not rated",
     "action": "Decision action",
     "reason": "Reason and feedback",
+    "reasonTooLong": "The reason can contain up to {limit} Unicode code points.",
     "editedBody": "Edited text",
     "signedIdentity": "Show with the platform nickname (clear for anonymous)",
     "previewAttribution": "Check current teaching attribution",
@@ -421,7 +423,10 @@
       "low_quality": "Low quality",
       "author_update": "Author update request",
       "other": "Other"
-    }
+    },
+    "categorySummary": "Waiting by category",
+    "categorySummaryWaiting": "Waiting tasks at this school: {count}",
+    "categorySummaryEmpty": "No categorised tasks are waiting."
   },
   "catalog": {
     "title": "Course and teacher records",
@@ -2145,8 +2150,7 @@
       "missing": "The original teacher record is unavailable. This complaint can be dismissed.",
       "hide": "Hide teacher homepage profile",
       "hideHint": "Hide the profile and photos. Directory information and reviews follow their existing visibility rules.",
-      "dismiss": "Dismiss complaint",
-      "reasonTooLong": "Enter a decision reason of at most {max} characters."
+      "dismiss": "Dismiss complaint"
     }
   }
 }

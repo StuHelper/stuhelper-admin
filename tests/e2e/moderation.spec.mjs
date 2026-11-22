@@ -2,6 +2,7 @@ import fs from 'node:fs';
 
 import { schoolSession } from '../school-session-fixture.mjs';
 import { expect, test } from '../session-fixture.mjs';
+import { queueSummary } from './resource-fixture.mjs';
 
 const catalogue = (info) =>
   JSON.parse(
@@ -86,6 +87,9 @@ test('queue batch preview applies decisions per item and content view handles un
   await page.route('**/api/v1/moderation/tasks**', (route) => {
     const req = route.request();
     const u = new URL(req.url());
+    if (u.pathname.endsWith('/summary')) {
+      return route.fulfill({ json: queueSummary({ waiting: applied ? 0 : 1 }) });
+    }
     if (u.pathname.endsWith('/batch-preview')) {
       const body = req.postDataJSON();
       writes.push({
@@ -169,15 +173,27 @@ test('queue batch preview applies decisions per item and content view handles un
     .filter({ hasText: 'Spam link in body' })
     .getByRole('checkbox')
     .check();
-  await page.locator('#moderationview-field-6').fill('Confirmed spam');
-  await page
-    .getByRole('button', { name: m.previewBatch, exact: true })
-    .click();
+  const reason = page.locator('#moderationview-field-6');
+  const previewButton = page.getByRole('button', {
+    name: m.previewBatch,
+    exact: true,
+  });
+  const acceptedReason = '😀'.repeat(2000);
+  const rejectedReason = `${acceptedReason}😀`;
+  await reason.fill(rejectedReason);
+  await expect(reason).toHaveValue(rejectedReason);
+  await expect(previewButton).toBeDisabled();
+  expect(writes).toEqual([]);
+  await reason.fill(acceptedReason);
+  await previewButton.click();
   await expect(page.getByText('t-1', { exact: true })).toBeVisible();
+  expect(writes.find((w) => w.kind === 'preview')?.body.items[0].decision.reason)
+    .toBe(acceptedReason);
   await page.getByRole('button', { name: m.applyBatch, exact: true }).click();
-  expect(writes.find((w) => w.kind === 'apply')?.body.preview_token).toBe(
-    'tok-batch-1',
-  );
+  expect(writes.find((w) => w.kind === 'apply')?.body).toMatchObject({
+    preview_token: 'tok-batch-1',
+    items: [{ decision: { reason: acceptedReason } }],
+  });
 
   // Content view renders unpublished entry (published_at: null) as notProvided, never 1970.
   await page.goto(
@@ -336,6 +352,10 @@ test('a moderator rejects the selected follow-up without deciding its sibling or
   await page.route('**/api/v1/moderation/tasks**', route => {
     const request = route.request();
     const path = new URL(request.url()).pathname;
+    if (path.endsWith('/summary')) {
+      const waiting = tasks.filter((task) => task.state === 'waiting').length;
+      return route.fulfill({ json: queueSummary({ waiting, reviews: waiting }) });
+    }
     const task = tasks.find(row => path.includes(`/${row.id}`));
     if (task && path.endsWith('/decisions')) {
       const { decision } = request.postDataJSON();
@@ -363,10 +383,30 @@ test('a moderator rejects the selected follow-up without deciding its sibling or
   await selector.getByRole('combobox').press('ArrowDown');
   await selector.getByRole('combobox').press('Enter');
   await expect(selector).toContainText(messages.moderation.actions.reject_append);
-  await drawer.locator('#decisionpanel-field-4').fill('Remove only this follow-up.');
-  await drawer.locator('button[type="submit"]').click();
+  const category = drawer.locator('.ant-select').filter({ has: page.locator('#decisionpanel-field-category') });
+  await category.locator('.ant-select-selector').click();
+  await category.getByRole('combobox').fill(messages.moderation.categories.other);
+  await page.locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden)')
+    .getByTitle(messages.moderation.categories.other, { exact: true }).click();
+  const reason = drawer.locator('#decisionpanel-field-4');
+  const submit = drawer.locator('button[type="submit"]');
+  const acceptedReason = '😀'.repeat(2000);
+  const rejectedReason = `${acceptedReason}😀`;
+  await reason.fill(rejectedReason);
+  await expect(reason).toHaveValue(rejectedReason);
+  await expect(submit).toBeDisabled();
+  await reason.evaluate((field) => field.closest('form').requestSubmit());
+  expect(decisions).toEqual([]);
+  await reason.fill(acceptedReason);
+  await submit.click();
   await expect.poll(() => decisions.length).toBe(1);
-  expect(decisions[0]).toMatchObject({ object_id: entry.id, append_id: 'second', action: 'reject_append' });
+  expect(decisions[0]).toMatchObject({
+    object_id: entry.id,
+    append_id: 'second',
+    action: 'reject_append',
+    category: 'other',
+    reason: acceptedReason,
+  });
   expect(tasks[0].state).toBe('waiting');
 });
 
@@ -377,6 +417,9 @@ test('the queue shows each task category and filters by a chosen category', asyn
   const queries = [];
   await page.route('**/api/v1/moderation/tasks**', (route) => {
     const u = new URL(route.request().url());
+    if (u.pathname.endsWith('/summary')) {
+      return route.fulfill({ json: queueSummary({ waiting: 2, byCategory: { privacy_leak: 1 } }) });
+    }
     if (u.pathname !== '/api/v1/moderation/tasks') return route.fallback();
     queries.push(u.searchParams.get('category') ?? '');
     const categorised = { ...makeTask('task-1', 'entry-1'), submission: { ...makeTask('task-1', 'entry-1').submission, category: 'privacy_leak' } };
