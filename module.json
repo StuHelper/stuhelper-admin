@@ -197,6 +197,10 @@
     ],
     "PC-13": [
       "apps/web-antd/src/features/closures/ClosuresView.test.ts#sends queue filters and follows the server cursor even on a short page"
+    ],
+    "MP-08": [
+      "apps/web-antd/src/features/event-retries/EventRetriesView.test.ts#requires an explicit grant and submits the observed generation once",
+      "tests/e2e/event-retries.spec.mjs#only an explicitly authorized session can requeue the observed delivery"
     ]
   }
 }

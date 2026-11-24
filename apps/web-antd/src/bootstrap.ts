@@ -106,7 +106,9 @@ async function bootstrap(namespace: string, fetcher: typeof fetch = sessionFetch
         capabilities.has,
         legalMenu.allowed.value,
         undefined,
-        teacherHomepageAccess.canShowMenu,
+        (path) => path === '/system/event-retries'
+          ? session.session.value?.event_retry_operator === true
+          : teacherHomepageAccess.canShowMenu(path),
       ),
     ),
   );

@@ -1912,7 +1912,9 @@
       "assets_pending": "Remaining balance, refund or unresolved payment",
       "sessions_unavailable": "Session service unavailable",
       "authorizations_unavailable": "Authorization or binding service unavailable",
-      "content_unavailable": "Content or favorites service unavailable"
+      "content_unavailable": "Content or favorites service unavailable",
+      "storage_draining": "Storage replicas are being migrated.",
+      "background_processing": "Background processing is in progress."
     },
     "modules": {
       "storage": "Storage",
@@ -2275,5 +2277,14 @@
       "render_size_limit": "The rendered document exceeds the size limit.",
       "unknown": "An item in the document failed validation."
     }
+  },
+  "eventRetries": {
+    "title": "Event delivery retries",
+    "source": "Source module",
+    "event": "Event ID",
+    "firstFailure": "First failure",
+    "attempts": "Attempts",
+    "code": "Error code",
+    "queued": "The event is queued for retry."
   }
 }

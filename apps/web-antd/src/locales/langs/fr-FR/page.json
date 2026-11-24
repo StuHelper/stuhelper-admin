@@ -1912,7 +1912,9 @@
       "assets_pending": "Solde restant, remboursement ou paiement en suspens",
       "sessions_unavailable": "Service de sessions indisponible",
       "authorizations_unavailable": "Service des autorisations ou liaisons indisponible",
-      "content_unavailable": "Service des contenus ou favoris indisponible"
+      "content_unavailable": "Service des contenus ou favoris indisponible",
+      "storage_draining": "Les répliques de stockage sont en cours de migration.",
+      "background_processing": "Le traitement se poursuit en arrière-plan."
     },
     "modules": {
       "storage": "Stockage",
@@ -2275,5 +2277,14 @@
       "render_size_limit": "Le document après rendu dépasse la taille maximale.",
       "unknown": "Un élément du document n’a pas passé la validation."
     }
+  },
+  "eventRetries": {
+    "title": "Réessayer la livraison des événements",
+    "source": "Module source",
+    "event": "Identifiant de l’événement",
+    "firstFailure": "Premier échec",
+    "attempts": "Tentatives",
+    "code": "Code d’erreur",
+    "queued": "L’événement est en attente d’une nouvelle tentative."
   }
 }

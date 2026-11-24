@@ -1912,7 +1912,9 @@
       "assets_pending": "残高・返金・未確定決済が未完了",
       "sessions_unavailable": "セッションサービスが利用不可",
       "authorizations_unavailable": "認可または連携サービスが利用不可",
-      "content_unavailable": "コンテンツまたはお気に入りサービスが利用不可"
+      "content_unavailable": "コンテンツまたはお気に入りサービスが利用不可",
+      "storage_draining": "ストレージの複製を移行しています。",
+      "background_processing": "バックグラウンド処理中です。"
     },
     "modules": {
       "storage": "ストレージ",
@@ -2275,5 +2277,14 @@
       "render_size_limit": "変換後の本文がサイズの上限を超えています。",
       "unknown": "本文の一部を検証できませんでした。"
     }
+  },
+  "eventRetries": {
+    "title": "イベント配信の再試行",
+    "source": "送信元モジュール",
+    "event": "イベント ID",
+    "firstFailure": "最初の失敗日時",
+    "attempts": "試行回数",
+    "code": "エラーコード",
+    "queued": "イベントの再試行を予約しました。"
   }
 }

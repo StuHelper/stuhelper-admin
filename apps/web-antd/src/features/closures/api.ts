@@ -31,6 +31,7 @@ export const closureSteps: readonly ClosureStep[] = [
 
 export const closureBlockers: readonly ClosureBlocker[] = [
   'assets_unavailable', 'assets_pending', 'sessions_unavailable', 'authorizations_unavailable', 'content_unavailable',
+  'storage_draining', 'background_processing',
 ];
 
 export interface ClosureFilters {

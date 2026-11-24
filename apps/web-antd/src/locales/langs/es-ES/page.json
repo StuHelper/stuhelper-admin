@@ -1912,7 +1912,9 @@
       "assets_pending": "Saldo restante, reembolso o pago pendiente",
       "sessions_unavailable": "Servicio de sesiones no disponible",
       "authorizations_unavailable": "Servicio de autorizaciones o vinculaciones no disponible",
-      "content_unavailable": "Servicio de contenidos o favoritos no disponible"
+      "content_unavailable": "Servicio de contenidos o favoritos no disponible",
+      "storage_draining": "Se están migrando las réplicas de almacenamiento.",
+      "background_processing": "El procesamiento continúa en segundo plano."
     },
     "modules": {
       "storage": "Almacenamiento",
@@ -2275,5 +2277,14 @@
       "render_size_limit": "El documento renderizado supera el límite de tamaño.",
       "unknown": "Un elemento del documento no ha pasado la validación."
     }
+  },
+  "eventRetries": {
+    "title": "Reintentos de entrega de eventos",
+    "source": "Módulo de origen",
+    "event": "ID del evento",
+    "firstFailure": "Primer fallo",
+    "attempts": "Intentos",
+    "code": "Código de error",
+    "queued": "El evento está en la cola de reintentos."
   }
 }
