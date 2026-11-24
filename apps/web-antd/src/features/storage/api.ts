@@ -63,7 +63,7 @@ export function parseOperations(value: unknown): Operations {
     if (mode !== 'paused' && mode !== 'bhpan' && mode !== 'mixed' && mode !== 'cos_only') throw new StorageError('incompatible');
     return { scope: text(row.scope), class: text(row.class), mode, contribution_accounts: integer(row.contribution_accounts), max_file_bytes: integer(row.max_file_bytes), reason: row.reason === undefined ? undefined : text(row.reason) } satisfies NonNullable<Operations['intake']>[number];
   });
-  return { intake,
+  return { ...(v.intake === undefined ? {} : { intake }),
     generated_at: date(v.generated_at), instances: list(v.instances, instance), failures: list(v.failures, job),
     objects: list(v.objects, (value) => { const o = record(value); return { id: text(o.id), state: text(o.state), healthy: integer(o.healthy), desired: integer(o.desired), missing: integer(o.missing), reason: text(o.reason) }; }),
     object_totals: { pending: integer(totals.pending), ready: integer(totals.ready), degraded: integer(totals.degraded), unavailable: integer(totals.unavailable), deleting: integer(totals.deleting) },
