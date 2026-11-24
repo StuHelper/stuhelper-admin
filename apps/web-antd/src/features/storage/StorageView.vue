@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { DeepReadonly } from 'vue';
+
 import type { InstanceHealth, JobFailure } from './api';
 import type { QuotaUnit } from './quota';
 
@@ -22,6 +24,8 @@ import { useStorage } from './useStorage';
  * replicas, and blocked background jobs. Every command is confirmed first and
  * an unknown outcome can only be retried with the original request.
  */
+const instanceTitle = (item: DeepReadonly<InstanceHealth>) => item.adapter === 'cos' ? 'COS' :
+  `${item.adapter === 'bhpan' ? 'BHpan' : item.adapter ?? t('page.storage.instances')} · ${item.account_hint || t('page.storage.trust.noHint')}`;
 const quotaUnits: QuotaUnit[] = ['GB', 'TB', 'B'];
 
 const { t, te } = useI18n();
@@ -35,20 +39,20 @@ const locked = computed(() => loading.value || sending.value || pending.value !=
 useLeaveGuard(() => (uncertain.value ? t('page.common.leaveUncertain') : (sending.value || pending.value !== null ? t('page.common.leaveUnsaved') : '')));
 const label = (key: string) => (te(key) ? t(key) : t('page.storage.unknown'));
 const confirmation = computed(() => (pending.value ? t('page.storage.confirmAction', { action: t(`page.storage.actions.${pending.value.kind === 'job' ? 'retry' : pending.value.body.action}`) }) : ''));
-const unitOf = (instance: InstanceHealth): QuotaUnit => units.value[instance.id] ?? defaultQuotaUnit(instance.limit_bytes);
-function editLimit(instance: InstanceHealth, value: string) {
+const unitOf = (instance: DeepReadonly<InstanceHealth>): QuotaUnit => units.value[instance.id] ?? defaultQuotaUnit(instance.limit_bytes);
+function editLimit(instance: DeepReadonly<InstanceHealth>, value: string) {
   units.value[instance.id] = unitOf(instance);
   limits.value[instance.id] = value;
 }
-const minQuotaBytes = (instance: InstanceHealth) => instance.used_bytes + instance.reserved_bytes;
+const minQuotaBytes = (instance: DeepReadonly<InstanceHealth>) => instance.used_bytes + instance.reserved_bytes;
 // A quota may not drop below what is already used or reserved.
-function quota(instance: InstanceHealth) {
+function quota(instance: DeepReadonly<InstanceHealth>) {
   const unit = unitOf(instance);
   const raw = limits.value[instance.id] ?? formatQuotaPlaceholder(instance.limit_bytes, unit);
   const limit = parseQuotaBytes(raw, unit);
   return limit !== undefined && limit >= minQuotaBytes(instance) ? limit : undefined;
 }
-function quotaHintText(instance: InstanceHealth) {
+function quotaHintText(instance: DeepReadonly<InstanceHealth>) {
   const min = format.value.bytes(minQuotaBytes(instance));
   const converted = quota(instance);
   return converted === undefined
@@ -92,6 +96,15 @@ const failureColumns = computed(() => [
       </div>
       <Card v-if="loading && !data" :bordered="false" :loading="true" />
       <template v-if="data">
+        <Card v-if="data.intake?.length" :title="t('page.storage.trust.intake')" :bordered="false">
+          <ul class="grid gap-2 md:grid-cols-2">
+            <li v-for="row in data.intake" :key="`${row.scope }/${ row.class}`">
+              <bdi>{{ row.scope }}</bdi> · {{ t(`page.storage.trust.${row.class}`) }} · {{ t(`page.storage.trust.${row.mode}`) }}
+              <p v-if="row.reason" class="text-sm">{{ label(`page.storage.trust.${row.reason}`) }}</p>
+              <p class="text-sm">{{ t('page.storage.trust.budget', { count: format.number(row.contribution_accounts), size: format.bytes(row.max_file_bytes) }) }}</p>
+            </li>
+          </ul>
+        </Card>
         <Card :bordered="false">
           <div class="grid gap-4 sm:grid-cols-3">
             <Statistic v-for="(value, key) in data.jobs" :key="key" :title="label(`page.storage.jobStates.${String(key)}`)" :value="format.number(value)" />
@@ -105,9 +118,11 @@ const failureColumns = computed(() => [
               <div class="grid gap-4 xl:grid-cols-2">
                 <article v-for="instance in data.instances" :key="instance.id" class="rounded border p-4">
                   <header class="mb-3 flex flex-wrap items-center justify-between gap-2">
-                    <h2 class="break-all font-mono text-sm font-semibold"><bdi>{{ instance.id }}</bdi></h2>
+                    <h2 class="break-all font-mono text-sm font-semibold"><bdi>{{ instanceTitle(instance) }}</bdi></h2>
                     <Tag :color="instance.state === 'active' ? 'green' : instance.state === 'revoked' ? 'red' : 'orange'">{{ label(`page.storage.states.${instance.state}`) }}</Tag>
                   </header>
+                  <p v-if="instance.adapter === 'bhpan'" class="text-sm">{{ t(instance.trusted ? 'page.storage.trust.trusted' : 'page.storage.trust.untrusted') }}</p>
+                  <p v-if="instance.capacity_warning" role="alert" class="text-sm">{{ t('page.storage.trust.warning') }}</p>
                   <p v-if="instance.reason && te(`page.storage.reasons.${instance.reason}`)" class="mb-2 text-sm">{{ t(`page.storage.reasons.${instance.reason}`) }}</p>
                   <div class="grid grid-cols-2 gap-3">
                     <Statistic :title="t('page.storage.limit')" :value="format.bytes(instance.limit_bytes)" />
@@ -117,6 +132,9 @@ const failureColumns = computed(() => [
                   </div>
                   <p class="text-muted-foreground mt-3 text-sm">{{ t('page.storage.authorizationExpiry', { time: format.dateTime(instance.authorization_expires_at) }) }}</p>
                   <Space class="mt-3" wrap>
+                    <Button v-if="instance.adapter === 'bhpan' && instance.state !== 'revoked'" :disabled="locked || (!instance.trusted && (!instance.trust_consent || Date.parse(instance.trust_consent.until) <= Date.now()))" @click="prepareInstance(instance, instance.trusted ? 'untrust' : 'trust')">
+                      {{ t(instance.trusted ? 'page.storage.actions.untrust' : 'page.storage.actions.trust') }}
+                    </Button>
                     <Button v-if="instance.state === 'active'" :disabled="locked" @click="prepareInstance(instance, 'pause')">{{ t('page.storage.actions.pause') }}</Button>
                     <Button v-if="instance.state === 'paused'" :disabled="locked" @click="prepareInstance(instance, 'resume')">{{ t('page.storage.actions.resume') }}</Button>
                     <Button v-if="['active', 'paused'].includes(instance.state)" :disabled="locked" @click="prepareInstance(instance, 'drain')">{{ t('page.storage.actions.drain') }}</Button>

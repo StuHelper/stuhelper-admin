@@ -892,7 +892,9 @@
       "drain": "Vider le stockage",
       "revoke": "Révoquer l’autorisation",
       "quota": "Modifier le quota",
-      "retry": "Réessayer la tâche"
+      "retry": "Réessayer la tâche",
+      "trust": "Déclarer de confiance",
+      "untrust": "Retirer la confiance"
     },
     "states": {
       "active": "Actif",
@@ -932,7 +934,25 @@
       "TB": "TB (1024⁴ octets)"
     },
     "quotaPreview": "Minimum autorisé : {min} (utilisé + réservé) · Converti : {value}",
-    "quotaMinimumOnly": "Minimum autorisé : {min} (utilisé + réservé)"
+    "quotaMinimumOnly": "Minimum autorisé : {min} (utilisé + réservé)",
+    "trust": {
+      "noHint": "Identifiant masqué indisponible",
+      "trusted": "Compte de contribution de confiance",
+      "untrusted": "Fichiers publics uniquement",
+      "warning": "Le seuil d’alerte de capacité COS est atteint.",
+      "intake": "Disponibilité des envois",
+      "public": "Fichiers publics",
+      "quarantine": "Quarantaine",
+      "restricted": "Accès restreint",
+      "paused": "Envois suspendus",
+      "bhpan": "Comptes de contribution",
+      "mixed": "Compte de contribution et COS",
+      "cos_only": "COS uniquement",
+      "budget": "Comptes admissibles : {count}. Taille maximale : {size}.",
+      "storage_replica_space": "Espace insuffisant pour stocker les copies requises de ce fichier.",
+      "storage_replica_shortage": "Envois suspendus pour cette catégorie. Le stockage disponible ne permet pas la réplication requise.",
+      "storage_restricted_encryption_unavailable": "Les dépôts de fichiers à accès restreint sont suspendus car le chiffrement est indisponible."
+    }
   },
   "contribution": {
     "title": "Gestion des contributions",
@@ -1949,8 +1969,7 @@
     "group": "Groupe d’admission au stockage",
     "public": "Ressources publiques",
     "quarantine": "Ressources en attente ou en quarantaine",
-    "restricted": "Ressources restreintes sans paiement",
-    "paidRestricted": "Ressources payantes restreintes (chiffrement requis)",
+    "restricted": "Fichiers à accès restreint (chiffrés)",
     "addRule": "Ajouter une règle",
     "addMember": "Ajouter un membre",
     "remove": "Retirer"
