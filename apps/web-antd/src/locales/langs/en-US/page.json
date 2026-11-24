@@ -928,8 +928,8 @@
     "quotaUnit": "Capacity unit",
     "quotaUnits": {
       "B": "Bytes (B)",
-      "GB": "Gigabytes (GB)",
-      "TB": "Terabytes (TB)"
+      "GB": "GB (1024³ B)",
+      "TB": "TB (1024⁴ B)"
     },
     "quotaPreview": "Minimum allowed: {min} (used + reserved) · Converted: {value}",
     "quotaMinimumOnly": "Minimum allowed: {min} (used + reserved)"

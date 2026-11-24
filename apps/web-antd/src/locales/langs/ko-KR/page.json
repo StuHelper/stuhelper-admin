@@ -928,8 +928,8 @@
     "quotaUnit": "용량 단위",
     "quotaUnits": {
       "B": "바이트 (B)",
-      "GB": "기가바이트 (GB)",
-      "TB": "테라바이트 (TB)"
+      "GB": "GB (1024³ B)",
+      "TB": "TB (1024⁴ B)"
     },
     "quotaPreview": "최소 허용치: {min}(사용 + 예약) · 환산값: {value}",
     "quotaMinimumOnly": "최소 허용치: {min}(사용 + 예약)"

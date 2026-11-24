@@ -928,8 +928,8 @@
     "quotaUnit": "Unité de capacité",
     "quotaUnits": {
       "B": "Octets (o)",
-      "GB": "Gigaoctets (Go)",
-      "TB": "Téraoctets (To)"
+      "GB": "GB (1024³ B)",
+      "TB": "TB (1024⁴ B)"
     },
     "quotaPreview": "Minimum autorisé : {min} (utilisé + réservé) · Converti : {value}",
     "quotaMinimumOnly": "Minimum autorisé : {min} (utilisé + réservé)"
