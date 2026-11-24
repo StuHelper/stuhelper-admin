@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Closure, ClosureState } from './api';
+import type { Closure, ClosureBlocker, ClosureState } from './api';
 
 import { computed, onMounted, ref, shallowRef, watch } from 'vue';
 
@@ -9,6 +9,7 @@ import {
   Alert,
   Button,
   Card,
+  Checkbox,
   Descriptions,
   DescriptionsItem,
   Drawer,
@@ -32,6 +33,7 @@ import MutationAlert from '#/shared/ui/MutationAlert.vue';
 
 import {
   canProcessClosure,
+  closureBlockers,
   closureStates,
   closureSteps,
   useClosuresAdmin,
@@ -53,12 +55,18 @@ const session = useSession();
 const api = useClosuresAdmin();
 
 const filter = ref<'all' | ClosureState>('all');
-const closures = usePaged<Closure>((after, signal) => api.list(after, signal));
-const rows = computed(() =>
-  closures.items.value.filter(
-    (item) => filter.value === 'all' || item.state === filter.value,
-  ),
-);
+const blocker = ref<'all' | ClosureBlocker>('all');
+const actionable = ref(false);
+const closures = usePaged<Closure>((after, signal) => api.list(after, signal, {
+  state: filter.value === 'all' ? undefined : filter.value,
+  blocker: blocker.value === 'all' ? undefined : blocker.value,
+  actionable: actionable.value || undefined,
+}));
+const rows = closures.items;
+watch([filter, blocker, actionable], () => {
+  clearDetail();
+  void closures.reload();
+});
 
 const selected = shallowRef<Closure>();
 const loadingDetail = ref(false);
@@ -265,6 +273,21 @@ const columns = computed(() => [
               ]"
             />
           </FormItem>
+          <FormItem :label="t('page.closures.blocker')" html-for="closures-blocker-filter">
+            <Select
+              id="closures-blocker-filter"
+              v-model:value="blocker"
+              class="w-48"
+              :disabled="locked"
+              :options="[
+                { value: 'all', label: t('page.common.all') },
+                ...closureBlockers.map(value => ({ value, label: t(`page.closures.blockers.${value}`) })),
+              ]"
+            />
+          </FormItem>
+          <FormItem>
+            <Checkbox v-model:checked="actionable" :disabled="locked">{{ t('page.closures.actionable') }}</Checkbox>
+          </FormItem>
           <FormItem>
             <Button
               :loading="closures.status.value === 'loading' && !closures.appending.value"
@@ -420,6 +443,9 @@ const columns = computed(() => [
                 }}
               </Tag>
             </Space>
+          </DescriptionsItem>
+          <DescriptionsItem v-if="selected.pending_reasons?.length" :label="t('page.closures.blocker')">
+            {{ format.list(selected.pending_reasons.map(reason => t(`page.closures.reasons.${reason}`))) }}
           </DescriptionsItem>
           <DescriptionsItem :label="t('page.closures.skippedModules')">
             <span v-if="selected.skipped_modules?.length">

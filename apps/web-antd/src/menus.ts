@@ -88,6 +88,7 @@ export const menus: MenuRecordRaw[] = [
       { name: 'page.menu.legalDocuments', path: '/system/legal/documents' },
       { name: 'page.menu.legalVariables', path: '/system/legal/variables' },
       { name: 'page.sessionPolicy.title', path: '/system/sessions' },
+      { name: 'page.eventRetries.title', path: '/system/event-retries' },
       { name: 'page.menu.closures', path: '/system/closures' },
       { name: 'page.menu.accessRoles', path: '/system/roles' },
       { name: 'page.menu.eligibility', path: '/system/eligibility' },

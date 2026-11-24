@@ -1,8 +1,8 @@
 // A server-selected community school for school-scoped administration fixtures.
-export async function schoolSession(page, school = 'school', administrator = true) {
+export async function schoolSession(page, school = 'school', administrator = true, eventRetryOperator = false) {
   await page.route('**/api/v1/auth/session', route => route.fulfill({ json: {
     authenticated: true, consent_required: false, content_school_id: school,
     profile: { id: '00000000-0000-4000-8000-000000000001', nickname: 'Fixture admin', nickname_required: false, bio: '', visibility: { school: true, badge: true, department: true, grade: false, reviews: true, resources: true }, group_card_consent: { school: false, grade: false, department: false, name: false, student_id: false, gender: false, nickname: false }, revision: 1 },
-    csrf_token: 'a'.repeat(43), phone_bound: true, administrator, expires_at: '2030-01-01T00:00:00Z',
+    csrf_token: 'a'.repeat(43), phone_bound: true, administrator, event_retry_operator: eventRetryOperator, expires_at: '2030-01-01T00:00:00Z',
   } }));
 }

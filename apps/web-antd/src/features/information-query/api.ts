@@ -14,6 +14,8 @@ export type Candidate = Schemas['Candidate'];
 export type CandidateGroup = Schemas['CandidateGroup'];
 export type Field = Schemas['Field'];
 export type Result = Schemas['Result'];
+export type BatchPreviewRequest = Schemas['BatchPreviewRequest'];
+export type BatchPreviewResult = Schemas['BatchPreviewResult'];
 export type Audit = Schemas['Audit'];
 export type AuditPage = Schemas['AuditPage'];
 export type Domain = Query['domains'][number];
@@ -21,6 +23,7 @@ export type Sensitive = NonNullable<Query['fields']>[number];
 
 const schemas = contract.components.schemas;
 const parse = {
+  preview: schemaOf<BatchPreviewResult>(schemas, 'BatchPreviewResult'),
   audit: schemaOf<AuditPage>(schemas, 'AuditPage'),
   result: schemaOf<Result>(schemas, 'Result'),
 };
@@ -66,6 +69,10 @@ export class InformationQuery {
 
   audit(scope: Scope, purpose: string, after: string, signal?: AbortSignal) {
     return this.http.json('/api/v1/information-query/audit/query', parse.audit, { method: 'POST', body: { scope, purpose, after, limit: pageSize }, signal });
+  }
+
+  preview(body: BatchPreviewRequest, signal?: AbortSignal) {
+    return this.http.json('/api/v1/information-query/preview', parse.preview, { method: 'POST', body, signal });
   }
 
   query(body: Query, signal?: AbortSignal) {

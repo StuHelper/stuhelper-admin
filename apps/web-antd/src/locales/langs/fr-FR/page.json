@@ -1506,7 +1506,11 @@
       "official": "Liaison au robot officiel",
       "connect": "Connexion avec QQ",
       "account": "Identifiant de compte"
-    }
+    },
+    "batch": "Aperçu par lot",
+    "leads": "Un critère par ligne, 20 au maximum de 256 caractères chacun",
+    "partialBatch": "Limite atteinte. Réduisez la portée de la recherche.",
+    "atLeast": "au moins {count}"
   },
   "timetable": {
     "title": "Horaires des créneaux",
@@ -1928,7 +1932,9 @@
       "assets_pending": "Solde restant, remboursement ou paiement en suspens",
       "sessions_unavailable": "Service de sessions indisponible",
       "authorizations_unavailable": "Service des autorisations ou liaisons indisponible",
-      "content_unavailable": "Service des contenus ou favoris indisponible"
+      "content_unavailable": "Service des contenus ou favoris indisponible",
+      "storage_draining": "Les répliques de stockage sont en cours de migration.",
+      "background_processing": "Le traitement se poursuit en arrière-plan."
     },
     "modules": {
       "storage": "Stockage",
@@ -1943,6 +1949,12 @@
     },
     "pointsPolicies": {
       "forfeit_all_points_and_pending_deductions": "Effacer tous les points et déductions en attente lors de la clôture finale sans conversion en espèces ni en Ivory"
+    },
+    "actionable": "Afficher uniquement les demandes arrivées à échéance",
+    "reasons": {
+      "ivory_balance_remaining": "Solde Ivory non réglé",
+      "refund_in_progress": "Remboursement en cours",
+      "payment_pending_reconciliation": "Paiement à rapprocher"
     }
   },
   "accountJump": {
@@ -2284,5 +2296,14 @@
       "render_size_limit": "Le document après rendu dépasse la taille maximale.",
       "unknown": "Un élément du document n’a pas passé la validation."
     }
+  },
+  "eventRetries": {
+    "title": "Réessayer la livraison des événements",
+    "source": "Module source",
+    "event": "Identifiant de l’événement",
+    "firstFailure": "Premier échec",
+    "attempts": "Tentatives",
+    "code": "Code d’erreur",
+    "queued": "L’événement est en attente d’une nouvelle tentative."
   }
 }

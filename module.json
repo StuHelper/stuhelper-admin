@@ -192,6 +192,16 @@
     ],
     "AO-05": [
       "tests/e2e/legal.spec.mjs#legal menu follows platform permission for a consent-pending session and revokes displayed data"
+    ],
+    "IQ-12": [
+      "tests/e2e/lookup.spec.mjs#batch preview sends only the scoped leads and removes the result after denial"
+    ],
+    "PC-13": [
+      "apps/web-antd/src/features/closures/ClosuresView.test.ts#sends queue filters and follows the server cursor even on a short page"
+    ],
+    "MP-08": [
+      "apps/web-antd/src/features/event-retries/EventRetriesView.test.ts#requires an explicit grant and submits the observed generation once",
+      "tests/e2e/event-retries.spec.mjs#only an explicitly authorized session can requeue the observed delivery"
     ]
   }
 }

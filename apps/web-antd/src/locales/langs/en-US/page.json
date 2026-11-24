@@ -1506,7 +1506,11 @@
       "official": "Official bot binding",
       "connect": "QQ Connect",
       "account": "Account ID"
-    }
+    },
+    "batch": "Batch preview",
+    "leads": "One lead per line, up to 20 leads of 256 characters each",
+    "partialBatch": "Preview limit reached. Narrow the search scope.",
+    "atLeast": "at least {count}"
   },
   "timetable": {
     "title": "Class periods",
@@ -1928,7 +1932,9 @@
       "assets_pending": "Remaining balance, refund or unresolved payment",
       "sessions_unavailable": "Session service unavailable",
       "authorizations_unavailable": "Authorization or binding service unavailable",
-      "content_unavailable": "Content or favorites service unavailable"
+      "content_unavailable": "Content or favorites service unavailable",
+      "storage_draining": "Storage replicas are being migrated.",
+      "background_processing": "Background processing is in progress."
     },
     "modules": {
       "storage": "Storage",
@@ -1943,6 +1949,12 @@
     },
     "pointsPolicies": {
       "forfeit_all_points_and_pending_deductions": "Clear all points and pending deductions on final closure without cash or Ivory conversion"
+    },
+    "actionable": "Show only requests due for processing",
+    "reasons": {
+      "ivory_balance_remaining": "Outstanding Ivory balance",
+      "refund_in_progress": "Refund in progress",
+      "payment_pending_reconciliation": "Payment awaiting reconciliation"
     }
   },
   "accountJump": {
@@ -2284,5 +2296,14 @@
       "render_size_limit": "The rendered document exceeds the size limit.",
       "unknown": "An item in the document failed validation."
     }
+  },
+  "eventRetries": {
+    "title": "Event delivery retries",
+    "source": "Source module",
+    "event": "Event ID",
+    "firstFailure": "First failure",
+    "attempts": "Attempts",
+    "code": "Error code",
+    "queued": "The event is queued for retry."
   }
 }
