@@ -871,7 +871,7 @@
     "reserved": "预占容量",
     "available": "当前可写",
     "authorizationExpiry": "授权截止：{time}",
-    "quotaInput": "新平台额度（字节）",
+    "quotaInput": "新额度",
     "quotaHint": "请输入不小于已用与预占之和的整数。",
     "newQuota": "新额度：{value}",
     "replicas": "健康 {healthy} / 目标 {desired}，缺口 {missing}",

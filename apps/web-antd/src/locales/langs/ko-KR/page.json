@@ -871,7 +871,7 @@
     "reserved": "예약한 용량",
     "available": "현재 쓰기 가능 용량",
     "authorizationExpiry": "권한 만료: {time}",
-    "quotaInput": "새 플랫폼 할당량(바이트)",
+    "quotaInput": "새 할당량",
     "quotaHint": "사용한 용량과 예약한 용량의 합 이상인 정수를 입력하세요.",
     "newQuota": "새 한도: {value}",
     "replicas": "정상 {healthy} / 목표 {desired}, 부족 {missing}",

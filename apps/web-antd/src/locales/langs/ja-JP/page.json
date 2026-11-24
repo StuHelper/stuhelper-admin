@@ -871,7 +871,7 @@
     "reserved": "予約済み容量",
     "available": "現在の書込可能容量",
     "authorizationExpiry": "認可の期限：{time}",
-    "quotaInput": "新しい割当量（バイト）",
+    "quotaInput": "新しい割当量",
     "quotaHint": "使用済み容量と予約済み容量の合計以上の整数を入力してください。",
     "newQuota": "新しい上限：{value}",
     "replicas": "正常 {healthy} / 目標 {desired}、不足 {missing}",

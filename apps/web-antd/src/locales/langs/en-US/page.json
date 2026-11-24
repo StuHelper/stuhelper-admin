@@ -871,7 +871,7 @@
     "reserved": "Reserved capacity",
     "available": "Writable now",
     "authorizationExpiry": "Authorization expires: {time}",
-    "quotaInput": "New platform quota (bytes)",
+    "quotaInput": "New quota",
     "quotaHint": "Enter an integer at least equal to used plus reserved capacity.",
     "newQuota": "New quota: {value}",
     "replicas": "Healthy {healthy} / target {desired}, missing {missing}",
