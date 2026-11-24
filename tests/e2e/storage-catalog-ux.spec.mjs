@@ -37,6 +37,7 @@ test('storage quota accepts binary GB and TB units and submits exact byte counts
   const gbInstance = {
     ...storageExample.instances[0],
     id: 'gb-instance',
+    adapter: 'bhpan', account_hint: '1***9', trusted: false,
     limit_bytes: 500 * 2 ** 30,
     used_bytes: 100 * 2 ** 30,
     reserved_bytes: 50 * 2 ** 30,
@@ -52,11 +53,13 @@ test('storage quota accepts binary GB and TB units and submits exact byte counts
       return route.fulfill({ json: gbInstance });
     }
     return route.fulfill({
-      json: { ...storageExample, instances: [gbInstance] },
+      json: { ...storageExample, instances: [gbInstance], intake: [{scope:"school",class:"restricted",mode:"paused",contribution_accounts:0,max_file_bytes:0,reason:"storage_restricted_encryption_unavailable"}] },
     });
   });
 
   await page.goto(`${base}/storage?lang=${info.project.metadata.locale}`);
+  await expect(page.getByRole('heading', { name: 'BHpan · 1***9' })).toBeVisible();
+  await expect(page.getByText(m.trust.storage_restricted_encryption_unavailable, { exact: true })).toBeVisible();
   const quota = page.getByLabel(m.quotaInput);
   await expect(quota).toHaveAttribute('placeholder', '500');
   // 120 GB is below used (100 GB) + reserved (50 GB) = 150 GB.

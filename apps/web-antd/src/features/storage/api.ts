@@ -36,7 +36,20 @@ function list<T>(value: unknown, parse: (item: unknown) => T): T[] {
 }
 function instance(value: unknown): InstanceHealth {
   const v = record(value);
-  return { id: text(v.id), state: text(v.state), reason: text(v.reason), revision: integer(v.revision), limit_bytes: integer(v.limit_bytes), used_bytes: integer(v.used_bytes), reserved_bytes: integer(v.reserved_bytes), available_bytes: integer(v.available_bytes), authorization_expires_at: date(v.authorization_expires_at), quota_expires_at: date(v.quota_expires_at) };
+  let consent: InstanceHealth['trust_consent'];
+  if (v.trust_consent !== undefined) {
+    const c = record(v.trust_consent);
+    const source = c.source;
+    if (source !== 'owner_session' && source !== 'confirmed_by_owner') throw new StorageError('incompatible');
+    const classes = list(c.classes, (k) => {
+      if (k !== 'quarantine' && k !== 'restricted') throw new StorageError('incompatible');
+      return k;
+    });
+    consent = { scope: text(c.scope), until: date(c.until), recorded_at: date(c.recorded_at), source, classes };
+  }
+  if ((v.trusted !== undefined && typeof v.trusted !== 'boolean') || (v.capacity_warning !== undefined && typeof v.capacity_warning !== 'boolean')) throw new StorageError('incompatible');
+  return { adapter: v.adapter === undefined ? undefined : text(v.adapter), account_hint: v.account_hint === undefined ? undefined : text(v.account_hint,128),
+    trusted: v.trusted, capacity_warning: v.capacity_warning, trust_consent: consent, id: text(v.id), state: text(v.state), reason: text(v.reason), revision: integer(v.revision), limit_bytes: integer(v.limit_bytes), used_bytes: integer(v.used_bytes), reserved_bytes: integer(v.reserved_bytes), available_bytes: integer(v.available_bytes), authorization_expires_at: date(v.authorization_expires_at), quota_expires_at: date(v.quota_expires_at) };
 }
 function job(value: unknown): JobFailure {
   const v = record(value);
@@ -44,7 +57,13 @@ function job(value: unknown): JobFailure {
 }
 export function parseOperations(value: unknown): Operations {
   const v = record(value); const jobs = record(v.jobs); const totals = record(v.object_totals);
-  return {
+  const intake = v.intake === undefined ? [] : list(v.intake, (entry) => {
+    const row = record(entry);
+    const mode = row.mode;
+    if (mode !== 'paused' && mode !== 'bhpan' && mode !== 'mixed' && mode !== 'cos_only') throw new StorageError('incompatible');
+    return { scope: text(row.scope), class: text(row.class), mode, contribution_accounts: integer(row.contribution_accounts), max_file_bytes: integer(row.max_file_bytes), reason: row.reason === undefined ? undefined : text(row.reason) } satisfies NonNullable<Operations['intake']>[number];
+  });
+  return { intake,
     generated_at: date(v.generated_at), instances: list(v.instances, instance), failures: list(v.failures, job),
     objects: list(v.objects, (value) => { const o = record(value); return { id: text(o.id), state: text(o.state), healthy: integer(o.healthy), desired: integer(o.desired), missing: integer(o.missing), reason: text(o.reason) }; }),
     object_totals: { pending: integer(totals.pending), ready: integer(totals.ready), degraded: integer(totals.degraded), unavailable: integer(totals.unavailable), deleting: integer(totals.deleting) },
