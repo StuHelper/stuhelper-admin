@@ -19,6 +19,7 @@ const endpoint = '**/api/v1/storage/operations**';
 
 test('translated operation, original-request retry, pagination and permission revocation', async ({ page }, info) => {
   const all = catalogue(info); const m = all.storage; const c = all.common; const errors = watch(page); const requests = [];
+  const instanceTitle = `${m.instances} · ${m.trust.noHint}`;
   let reject = false;
   await page.route(endpoint, async (route) => {
     if (reject) return route.fulfill({ status: 403, json: { code: 'storage_denied' } });
@@ -30,7 +31,7 @@ test('translated operation, original-request retry, pagination and permission re
     return route.fulfill({ json: { ...example, next_cursor: 'fixture-object', failures_next_cursor: 'fixture-job' } });
   });
   await page.goto(`${base}/storage?lang=${info.project.metadata.locale}`);
-  await expect(page.getByRole('heading', { name: 'fixture-instance', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: instanceTitle, exact: true })).toBeVisible();
   await fits(page, info);
   const quota = page.getByLabel(m.quotaInput);
   await quota.fill('1');
@@ -60,7 +61,7 @@ test('translated operation, original-request retry, pagination and permission re
   reject = true;
   await page.getByRole('button', { name: c.refresh, exact: true }).click();
   await expect(page.getByRole('alert')).toContainText(all.errors.forbidden);
-  await expect(page.getByRole('heading', { name: 'fixture-instance', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: instanceTitle, exact: true })).toHaveCount(0);
 });
 
 test('access boundary and empty response recover without local identity', async ({ page }, info) => {
