@@ -928,8 +928,8 @@
     "quotaUnit": "Unidad de capacidad",
     "quotaUnits": {
       "B": "Bytes exactos (B)",
-      "GB": "Gigabytes decimales (GB)",
-      "TB": "Terabytes decimales (TB)"
+      "GB": "GB (1024³ bytes por unidad)",
+      "TB": "TB (1024⁴ bytes por unidad)"
     },
     "quotaPreview": "Mínimo permitido: {min} (usado + reservado) · Convertido: {value}",
     "quotaMinimumOnly": "Mínimo permitido: {min} (usado + reservado)"
