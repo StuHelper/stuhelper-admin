@@ -871,7 +871,7 @@
     "reserved": "예약한 용량",
     "available": "현재 쓰기 가능 용량",
     "authorizationExpiry": "권한 만료: {time}",
-    "quotaInput": "새 플랫폼 할당량(바이트)",
+    "quotaInput": "새 할당량",
     "quotaHint": "사용한 용량과 예약한 용량의 합 이상인 정수를 입력하세요.",
     "newQuota": "새 한도: {value}",
     "replicas": "정상 {healthy} / 목표 {desired}, 부족 {missing}",
@@ -892,7 +892,9 @@
       "drain": "데이터 이전",
       "revoke": "권한 철회",
       "quota": "할당량 변경",
-      "retry": "작업 재시도"
+      "retry": "작업 재시도",
+      "trust": "신뢰 계정으로 지정",
+      "untrust": "신뢰 지정 해제"
     },
     "states": {
       "active": "사용 가능",
@@ -928,11 +930,29 @@
     "quotaUnit": "용량 단위",
     "quotaUnits": {
       "B": "바이트 (B)",
-      "GB": "기가바이트 (GB)",
-      "TB": "테라바이트 (TB)"
+      "GB": "GB (1024³ 바이트)",
+      "TB": "TB (1024⁴ 바이트)"
     },
     "quotaPreview": "최소 허용치: {min}(사용 + 예약) · 환산값: {value}",
-    "quotaMinimumOnly": "최소 허용치: {min}(사용 + 예약)"
+    "quotaMinimumOnly": "최소 허용치: {min}(사용 + 예약)",
+    "trust": {
+      "noHint": "계정 식별 정보 없음",
+      "trusted": "신뢰할 수 있는 기여 계정",
+      "untrusted": "공개 파일만 허용",
+      "warning": "COS 사용량이 용량 경고 기준에 도달했습니다.",
+      "intake": "업로드 접수 상태",
+      "public": "공개",
+      "quarantine": "격리",
+      "restricted": "제한",
+      "paused": "접수 중단",
+      "bhpan": "기여 계정",
+      "mixed": "기여 계정 및 COS",
+      "cos_only": "COS만 사용",
+      "budget": "사용 가능한 기여 계정 {count}개, 최대 파일 크기 {size}.",
+      "storage_replica_space": "필요한 파일 사본을 저장할 공간이 부족합니다.",
+      "storage_replica_shortage": "이 유형의 파일 업로드가 일시 중지되었습니다. 사용 가능한 저장소로는 필요한 사본 수를 확보할 수 없습니다.",
+      "storage_restricted_encryption_unavailable": "암호화를 사용할 수 없어 제한 파일 접수를 일시 중지했습니다."
+    }
   },
   "contribution": {
     "title": "저장소 기여 관리",
@@ -1949,8 +1969,7 @@
     "group": "저장 허용 그룹",
     "public": "공개 자료",
     "quarantine": "검토 대기 또는 격리 자료",
-    "restricted": "비유료 제한 자료",
-    "paidRestricted": "유료 제한 자료(암호화 필요)",
+    "restricted": "제한 파일(암호화됨)",
     "addRule": "규칙 추가",
     "addMember": "구성원 추가",
     "remove": "제거"

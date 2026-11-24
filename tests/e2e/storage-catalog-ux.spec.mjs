@@ -28,7 +28,7 @@ async function fits(page, info) {
   ).toBe(true);
 }
 
-test('storage quota accepts decimal GB and TB units and submits exact byte counts', async ({
+test('storage quota accepts binary GB and TB units and submits exact byte counts', async ({
   page,
 }, info) => {
   const all = catalogue(info);
@@ -37,10 +37,11 @@ test('storage quota accepts decimal GB and TB units and submits exact byte count
   const gbInstance = {
     ...storageExample.instances[0],
     id: 'gb-instance',
-    limit_bytes: 500_000_000_000,
-    used_bytes: 100_000_000_000,
-    reserved_bytes: 50_000_000_000,
-    available_bytes: 350_000_000_000,
+    adapter: 'bhpan', account_hint: '1***9', trusted: false,
+    limit_bytes: 500 * 2 ** 30,
+    used_bytes: 100 * 2 ** 30,
+    reserved_bytes: 50 * 2 ** 30,
+    available_bytes: 350 * 2 ** 30,
   };
   await page.route('**/api/v1/storage/operations**', async (route) => {
     if (route.request().method() === 'POST') {
@@ -52,11 +53,13 @@ test('storage quota accepts decimal GB and TB units and submits exact byte count
       return route.fulfill({ json: gbInstance });
     }
     return route.fulfill({
-      json: { ...storageExample, instances: [gbInstance] },
+      json: { ...storageExample, instances: [gbInstance], intake: [{scope:"school",class:"restricted",mode:"paused",contribution_accounts:0,max_file_bytes:0,reason:"storage_restricted_encryption_unavailable"}] },
     });
   });
 
   await page.goto(`${base}/storage?lang=${info.project.metadata.locale}`);
+  await expect(page.getByRole('heading', { name: 'BHpan · 1***9' })).toBeVisible();
+  await expect(page.getByText(m.trust.storage_restricted_encryption_unavailable, { exact: true })).toBeVisible();
   const quota = page.getByLabel(m.quotaInput);
   await expect(quota).toHaveAttribute('placeholder', '500');
   // 120 GB is below used (100 GB) + reserved (50 GB) = 150 GB.
@@ -70,15 +73,15 @@ test('storage quota accepts decimal GB and TB units and submits exact byte count
     await page.getByRole('button', { name: m.actions.quota, exact: true }).click();
     await page.getByRole('button', { name: all.common.confirm, exact: true }).click();
   };
-  await quota.fill('1000');
+  await quota.fill('1024');
   await saveLimit();
-  await expect(quota).toHaveAttribute('placeholder', '1000');
+  await expect(quota).toHaveAttribute('placeholder', '1024');
   await saveLimit();
   await expect.poll(() => writes.map((write) => write.limit_bytes)).toEqual([
-    1_000_000_000_000, 1_000_000_000_000,
+    2 ** 40, 2 ** 40,
   ]);
 
-  // Switch unit to TB and enter 1.5 TB -> 1,500,000,000,000 bytes.
+  // Switch unit to TB and enter 1.5 TB -> 1,649,267,441,664 bytes.
   await page.locator('article .ant-select-selector').click();
   await page
     .locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden)')
@@ -96,7 +99,7 @@ test('storage quota accepts decimal GB and TB units and submits exact byte count
   await expect.poll(() => writes.length).toBe(3);
   expect(writes[2]).toMatchObject({
     action: 'quota',
-    limit_bytes: 1_500_000_000_000,
+    limit_bytes: 1.5 * 2 ** 40,
   });
   await fits(page, info);
 });
@@ -281,4 +284,40 @@ test('catalog import preview displays state counts and filters rows by change st
     page.getByRole('cell', { name: 'c-conflict', exact: true }),
   ).toBeVisible();
   await fits(page, info);
+});
+
+test('administrator trust requires current owner consent and a confirmed command', async ({ page }, info) => {
+  const all = catalogue(info); const m = all.storage;
+  const instance = { ...storageExample.instances[0], adapter: 'bhpan', account_hint: '5***4', trusted: false };
+  const writes = [];
+  await page.route('**/api/v1/storage/operations**', async route => {
+    const request = route.request();
+    if (request.method() === 'POST') {
+      const body = request.postDataJSON();
+      expect(body.revision).toBe(instance.revision);
+      writes.push({ body, key: request.headers()['idempotency-key'] });
+      instance.trusted = body.action === 'trust';
+      instance.revision++;
+      return route.fulfill({ json: instance });
+    }
+    return route.fulfill({ json: { ...storageExample, instances: [instance] } });
+  });
+  await page.goto(`${base}/storage?lang=${info.project.metadata.locale}`);
+  const trust = page.getByRole('button', { name: m.actions.trust, exact: true });
+  await expect(trust).toBeDisabled();
+  instance.trust_consent = { classes: ['quarantine', 'restricted'], scope: 'school', source: 'owner_session',
+    until: '2099-12-31T23:59:59Z', recorded_at: '2026-11-24T00:00:00Z' };
+  await page.getByRole('button', { name: all.common.refresh, exact: true }).click();
+  await expect(trust).toBeEnabled();
+  await trust.click();
+  expect(writes).toHaveLength(0);
+  await page.getByRole('dialog').getByRole('button', {name: all.common.confirm, exact: true}).click();
+  const untrust = page.getByRole('button', { name: m.actions.untrust, exact: true });
+  await expect(untrust).toBeVisible();
+  await untrust.click();
+  await page.getByRole('dialog').getByRole('button', {name: all.common.confirm, exact: true}).click();
+  await expect(trust).toBeVisible();
+  expect(writes.map(w => w.body.action)).toEqual(['trust','untrust']);
+  expect(writes[0].key).toBeTruthy();
+  expect(writes[0].key).not.toBe(writes[1].key);
 });

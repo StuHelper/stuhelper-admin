@@ -871,7 +871,7 @@
     "reserved": "Capacidad reservada",
     "available": "Disponible para escritura",
     "authorizationExpiry": "La autorización vence: {time}",
-    "quotaInput": "Nueva cuota de la plataforma (bytes)",
+    "quotaInput": "Nueva cuota",
     "quotaHint": "Introduzca un entero igual o superior a la suma de la capacidad utilizada y reservada.",
     "newQuota": "Nueva cuota: {value}",
     "replicas": "Copias válidas {healthy} / objetivo {desired}, faltan {missing}",
@@ -892,7 +892,9 @@
       "drain": "Vaciar almacenamiento",
       "revoke": "Revocar autorización",
       "quota": "Cambiar cuota",
-      "retry": "Reintentar tarea"
+      "retry": "Reintentar tarea",
+      "trust": "Marcar como de confianza",
+      "untrust": "Retirar la confianza"
     },
     "states": {
       "active": "Activo",
@@ -928,11 +930,29 @@
     "quotaUnit": "Unidad de capacidad",
     "quotaUnits": {
       "B": "Bytes exactos (B)",
-      "GB": "Gigabytes decimales (GB)",
-      "TB": "Terabytes decimales (TB)"
+      "GB": "GB (1024³ bytes por unidad)",
+      "TB": "TB (1024⁴ bytes por unidad)"
     },
     "quotaPreview": "Mínimo permitido: {min} (usado + reservado) · Convertido: {value}",
-    "quotaMinimumOnly": "Mínimo permitido: {min} (usado + reservado)"
+    "quotaMinimumOnly": "Mínimo permitido: {min} (usado + reservado)",
+    "trust": {
+      "noHint": "Identificador de cuenta no disponible",
+      "trusted": "Cuenta de contribución de confianza",
+      "untrusted": "Solo archivos públicos",
+      "warning": "Se ha alcanzado el umbral de aviso de capacidad de COS.",
+      "intake": "Disponibilidad de las subidas",
+      "public": "Público",
+      "quarantine": "En cuarentena",
+      "restricted": "Restringido",
+      "paused": "En pausa",
+      "bhpan": "Cuentas de contribución",
+      "mixed": "Cuenta de contribución y COS",
+      "cos_only": "Solo COS",
+      "budget": "Cuentas aptas: {count}. Tamaño máximo: {size}.",
+      "storage_replica_space": "No hay espacio suficiente para todas las copias necesarias del archivo.",
+      "storage_replica_shortage": "Las subidas de esta categoría están en pausa. El almacenamiento disponible no permite crear las copias necesarias.",
+      "storage_restricted_encryption_unavailable": "La carga de archivos restringidos está en pausa porque el cifrado no está disponible."
+    }
   },
   "contribution": {
     "title": "Gestión de aportes de almacenamiento",
@@ -1949,8 +1969,7 @@
     "group": "Grupo de admisión de almacenamiento",
     "public": "Materiales públicos",
     "quarantine": "Materiales pendientes o en cuarentena",
-    "restricted": "Materiales restringidos sin pago",
-    "paidRestricted": "Materiales restringidos de pago (requieren cifrado)",
+    "restricted": "Archivos restringidos (cifrados)",
     "addRule": "Añadir regla",
     "addMember": "Añadir miembro",
     "remove": "Quitar"
