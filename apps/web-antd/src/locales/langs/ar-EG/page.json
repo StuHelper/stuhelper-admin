@@ -871,7 +871,7 @@
     "reserved": "السعة المحجوزة",
     "available": "المتاح للكتابة الآن",
     "authorizationExpiry": "انتهاء التفويض: {time}",
-    "quotaInput": "حصة المنصة الجديدة (بايت)",
+    "quotaInput": "الحصة الجديدة",
     "quotaHint": "أدخل عددًا صحيحًا لا يقل عن مجموع السعة المستخدمة والمحجوزة.",
     "newQuota": "الحصة الجديدة: {value}",
     "replicas": "النسخ السليمة {healthy} / المستهدف {desired}، النقص {missing}",

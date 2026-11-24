@@ -871,7 +871,7 @@
     "reserved": "Capacidad reservada",
     "available": "Disponible para escritura",
     "authorizationExpiry": "La autorización vence: {time}",
-    "quotaInput": "Nueva cuota de la plataforma (bytes)",
+    "quotaInput": "Nueva cuota",
     "quotaHint": "Introduzca un entero igual o superior a la suma de la capacidad utilizada y reservada.",
     "newQuota": "Nueva cuota: {value}",
     "replicas": "Copias válidas {healthy} / objetivo {desired}, faltan {missing}",

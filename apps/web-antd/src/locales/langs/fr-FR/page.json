@@ -871,7 +871,7 @@
     "reserved": "Capacité réservée",
     "available": "Disponible en écriture",
     "authorizationExpiry": "Expiration de l’autorisation : {time}",
-    "quotaInput": "Nouveau quota de la plateforme (octets)",
+    "quotaInput": "Nouveau quota",
     "quotaHint": "Saisissez un entier au moins égal aux capacités utilisée et réservée réunies.",
     "newQuota": "Nouveau quota : {value}",
     "replicas": "Copies valides {healthy} / cible {desired}, manquantes {missing}",
