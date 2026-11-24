@@ -871,7 +871,7 @@
     "reserved": "预占容量",
     "available": "当前可写",
     "authorizationExpiry": "授权截止：{time}",
-    "quotaInput": "新平台额度（字节）",
+    "quotaInput": "新额度",
     "quotaHint": "请输入不小于已用与预占之和的整数。",
     "newQuota": "新额度：{value}",
     "replicas": "健康 {healthy} / 目标 {desired}，缺口 {missing}",
@@ -892,7 +892,9 @@
       "drain": "排空迁移",
       "revoke": "撤销授权",
       "quota": "调整额度",
-      "retry": "重试任务"
+      "retry": "重试任务",
+      "trust": "设为可信",
+      "untrust": "设为不可信"
     },
     "states": {
       "active": "可用",
@@ -932,7 +934,25 @@
       "TB": "TB (1024⁴ 字节)"
     },
     "quotaPreview": "最低允许：{min}（已用 + 预占） · 换算结果：{value}",
-    "quotaMinimumOnly": "最低允许：{min}（已用 + 预占）"
+    "quotaMinimumOnly": "最低允许：{min}（已用 + 预占）",
+    "trust": {
+      "noHint": "账号标识暂不可用",
+      "trusted": "可信贡献账号",
+      "untrusted": "仅限公开文件",
+      "warning": "COS 已达到容量告警阈值。",
+      "intake": "文件受理状态",
+      "public": "公开",
+      "quarantine": "隔离",
+      "restricted": "受限",
+      "paused": "暂停受理",
+      "bhpan": "使用贡献账号",
+      "mixed": "贡献账号与 COS",
+      "cos_only": "仅使用 COS",
+      "budget": "合规贡献账号 {count} 个，单文件上限 {size}。",
+      "storage_replica_space": "暂停接收此文件。可用空间不足以保存所需副本。",
+      "storage_replica_shortage": "暂停接收此类文件。可用存储不足以满足副本要求。",
+      "storage_restricted_encryption_unavailable": "受限文件的加密服务暂不可用，已暂停接收此类文件。"
+    }
   },
   "contribution": {
     "title": "存储贡献管理",
@@ -1961,8 +1981,7 @@
     "group": "存储准入分组",
     "public": "公开资料",
     "quarantine": "待审或隔离资料",
-    "restricted": "非付费受限资料",
-    "paidRestricted": "付费受限资料（需要加密保护）",
+    "restricted": "受限文件（已加密）",
     "addRule": "新增规则",
     "addMember": "新增成员",
     "remove": "移除"

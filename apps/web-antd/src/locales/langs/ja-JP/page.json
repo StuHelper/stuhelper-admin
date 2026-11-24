@@ -871,7 +871,7 @@
     "reserved": "予約済み容量",
     "available": "現在の書込可能容量",
     "authorizationExpiry": "認可の期限：{time}",
-    "quotaInput": "新しい割当量（バイト）",
+    "quotaInput": "新しい割当量",
     "quotaHint": "使用済み容量と予約済み容量の合計以上の整数を入力してください。",
     "newQuota": "新しい上限：{value}",
     "replicas": "正常 {healthy} / 目標 {desired}、不足 {missing}",
@@ -892,7 +892,9 @@
       "drain": "データを退避",
       "revoke": "認可を取り消す",
       "quota": "割当量を変更",
-      "retry": "タスクを再試行"
+      "retry": "タスクを再試行",
+      "trust": "信頼済みに設定",
+      "untrust": "信頼設定を解除"
     },
     "states": {
       "active": "利用可能",
@@ -932,7 +934,25 @@
       "TB": "TB (1024⁴ バイト)"
     },
     "quotaPreview": "下限：{min}（使用済み + 予約済み） · 換算値：{value}",
-    "quotaMinimumOnly": "下限：{min}（使用済み + 予約済み）"
+    "quotaMinimumOnly": "下限：{min}（使用済み + 予約済み）",
+    "trust": {
+      "noHint": "アカウント識別情報を取得できません",
+      "trusted": "信頼済みの提供アカウント",
+      "untrusted": "公開ファイルのみ",
+      "warning": "COS の容量が警告しきい値に達しました。",
+      "intake": "アップロード受付状況",
+      "public": "公開",
+      "quarantine": "隔離",
+      "restricted": "制限付き",
+      "paused": "受付停止",
+      "bhpan": "提供アカウント",
+      "mixed": "提供アカウントと COS",
+      "cos_only": "COS のみ",
+      "budget": "利用可能な提供アカウント数：{count}。ファイル上限：{size}。",
+      "storage_replica_space": "必要なコピーを保存する空き容量が足りません。",
+      "storage_replica_shortage": "この分類のアップロードを停止しています。利用可能な保存先では必要なコピー数を確保できません。",
+      "storage_restricted_encryption_unavailable": "暗号化を利用できないため、制限付きファイルの受け付けを一時停止しています。"
+    }
   },
   "contribution": {
     "title": "ストレージ提供の管理",
@@ -1961,8 +1981,7 @@
     "group": "保存許可グループ",
     "public": "公開資料",
     "quarantine": "審査待ち・隔離中の資料",
-    "restricted": "非有料の制限付き資料",
-    "paidRestricted": "有料の制限付き資料（暗号化必須）",
+    "restricted": "制限付きファイル（暗号化）",
     "addRule": "ルールを追加",
     "addMember": "メンバーを追加",
     "remove": "削除"

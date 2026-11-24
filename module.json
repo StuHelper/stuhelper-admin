@@ -20,7 +20,8 @@
   "scenario_tests": {
     "ST-09": [
       "apps/web-antd/src/api/contribution.test.ts#keeps the operations record when the provider has no successful quota observation",
-      "tests/e2e/contributions.spec.mjs#operator retry preserves conditions, retains uncertain request and clears revoked inventory"
+      "tests/e2e/contributions.spec.mjs#operator retry preserves conditions, retains uncertain request and clears revoked inventory",
+      "tests/e2e/storage-catalog-ux.spec.mjs#administrator trust requires current owner consent and a confirmed command"
     ],
     "ST-12": [
       "tests/e2e/storage-admissions.spec.mjs#edits account and group admissions and retries the original revision"

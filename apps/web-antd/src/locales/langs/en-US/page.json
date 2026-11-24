@@ -871,7 +871,7 @@
     "reserved": "Reserved capacity",
     "available": "Writable now",
     "authorizationExpiry": "Authorization expires: {time}",
-    "quotaInput": "New platform quota (bytes)",
+    "quotaInput": "New quota",
     "quotaHint": "Enter an integer at least equal to used plus reserved capacity.",
     "newQuota": "New quota: {value}",
     "replicas": "Healthy {healthy} / target {desired}, missing {missing}",
@@ -892,7 +892,9 @@
       "drain": "Drain storage",
       "revoke": "Revoke authorization",
       "quota": "Change quota",
-      "retry": "Retry job"
+      "retry": "Retry job",
+      "trust": "Mark as trusted",
+      "untrust": "Remove trust"
     },
     "states": {
       "active": "Active",
@@ -932,7 +934,25 @@
       "TB": "TB (1024⁴ bytes)"
     },
     "quotaPreview": "Minimum allowed: {min} (used + reserved) · Converted: {value}",
-    "quotaMinimumOnly": "Minimum allowed: {min} (used + reserved)"
+    "quotaMinimumOnly": "Minimum allowed: {min} (used + reserved)",
+    "trust": {
+      "noHint": "Account hint unavailable",
+      "trusted": "Trusted contribution account",
+      "untrusted": "Public files only",
+      "warning": "COS has reached its capacity warning threshold.",
+      "intake": "Upload availability",
+      "public": "Public",
+      "quarantine": "Quarantine",
+      "restricted": "Restricted",
+      "paused": "Paused",
+      "bhpan": "Contribution accounts",
+      "mixed": "Contribution account and COS",
+      "cos_only": "COS only",
+      "budget": "Eligible contribution accounts: {count}. Maximum file size: {size}.",
+      "storage_replica_space": "This file cannot be accepted. There is too little space for the required copies.",
+      "storage_replica_shortage": "Uploads of this type are paused. Available storage cannot meet the replica requirement.",
+      "storage_restricted_encryption_unavailable": "Restricted uploads are paused because file encryption is unavailable."
+    }
   },
   "contribution": {
     "title": "Storage contribution management",
@@ -1961,8 +1981,7 @@
     "group": "Storage admission group",
     "public": "Public material",
     "quarantine": "Pending or quarantined material",
-    "restricted": "Restricted material without payment",
-    "paidRestricted": "Paid restricted material (encryption required)",
+    "restricted": "Restricted files (encrypted)",
     "addRule": "Add rule",
     "addMember": "Add member",
     "remove": "Remove"

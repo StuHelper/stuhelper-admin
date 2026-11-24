@@ -34,7 +34,6 @@ const levels = computed(() => [
   { value: 'public', label: t('page.admissions.public') },
   { value: 'quarantine', label: t('page.admissions.quarantine') },
   { value: 'restricted', label: t('page.admissions.restricted') },
-  { value: 'paid-restricted', label: t('page.admissions.paidRestricted') },
 ]);
 
 function snapshot(value: Policy): Policy {

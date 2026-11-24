@@ -1,3 +1,5 @@
+import type { DeepReadonly } from 'vue';
+
 import type { InstanceCommand, InstanceHealth, JobFailure, Operation, Operations } from './api';
 
 import { getCurrentInstance, inject, onMounted, onScopeDispose, readonly, shallowRef } from 'vue';
@@ -42,7 +44,7 @@ export function useStorage(api = storageAPI(useHostFetch())) {
       if (error.value === 'unauthenticated') session?.invalidate();
     } finally { clearTimeout(timeout); if (current === controller) loading.value = false; }
   }
-  function prepareInstance(instance: InstanceHealth, action: InstanceCommand['action'], limit?: number) {
+  function prepareInstance(instance: DeepReadonly<InstanceHealth>, action: InstanceCommand['action'], limit?: number) {
     if (!data.value || pending.value || loading.value) return;
     error.value = null; completed.value = false;
     pending.value = { kind: 'instance', id: instance.id, body: { revision: instance.revision, action, ...(action === 'quota' ? { limit_bytes: limit } : {}) }, key: crypto.randomUUID() };
