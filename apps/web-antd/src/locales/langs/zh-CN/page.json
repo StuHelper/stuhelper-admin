@@ -928,8 +928,8 @@
     "quotaUnit": "容量单位",
     "quotaUnits": {
       "B": "字节 (B)",
-      "GB": "GB (1024³ B)",
-      "TB": "TB (1024⁴ B)"
+      "GB": "GB (1024³ 字节)",
+      "TB": "TB (1024⁴ 字节)"
     },
     "quotaPreview": "最低允许：{min}（已用 + 预占） · 换算结果：{value}",
     "quotaMinimumOnly": "最低允许：{min}（已用 + 预占）"

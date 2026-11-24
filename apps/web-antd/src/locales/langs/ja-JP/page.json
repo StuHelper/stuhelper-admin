@@ -928,8 +928,8 @@
     "quotaUnit": "容量単位",
     "quotaUnits": {
       "B": "バイト (B)",
-      "GB": "GB (1024³ B)",
-      "TB": "TB (1024⁴ B)"
+      "GB": "GB (1024³ バイト)",
+      "TB": "TB (1024⁴ バイト)"
     },
     "quotaPreview": "下限：{min}（使用済み + 予約済み） · 換算値：{value}",
     "quotaMinimumOnly": "下限：{min}（使用済み + 予約済み）"
