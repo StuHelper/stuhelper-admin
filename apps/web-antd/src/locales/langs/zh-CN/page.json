@@ -1486,7 +1486,11 @@
       "official": "官方机器人绑定",
       "connect": "QQ 互联",
       "account": "账号标识"
-    }
+    },
+    "batch": "批量预览",
+    "leads": "每行一条线索，最多 20 条，每条最多 256 个字符",
+    "partialBatch": "已达到预览上限，请缩小查询范围。",
+    "atLeast": "至少 {count}"
   },
   "timetable": {
     "title": "学校作息",
@@ -1923,6 +1927,12 @@
     },
     "pointsPolicies": {
       "forfeit_all_points_and_pending_deductions": "正式注销时清零全部积分与待扣记录，不兑换现金或 Ivory"
+    },
+    "actionable": "仅看已到期且可处理的申请",
+    "reasons": {
+      "ivory_balance_remaining": "Ivory 余额未结清",
+      "refund_in_progress": "退款处理中",
+      "payment_pending_reconciliation": "支付结果待核对"
     }
   },
   "accountJump": {

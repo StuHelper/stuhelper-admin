@@ -29,6 +29,16 @@ export const closureSteps: readonly ClosureStep[] = [
   'content',
 ];
 
+export const closureBlockers: readonly ClosureBlocker[] = [
+  'assets_unavailable', 'assets_pending', 'sessions_unavailable', 'authorizations_unavailable', 'content_unavailable',
+];
+
+export interface ClosureFilters {
+  state?: ClosureState;
+  blocker?: ClosureBlocker;
+  actionable?: boolean;
+}
+
 export const pageSize = 50;
 
 const schemas = contract.components.schemas;
@@ -56,19 +66,18 @@ export class ClosuresAdminApi {
     );
   }
 
-  async list(after = '', signal?: AbortSignal) {
+  async list(after = '', signal?: AbortSignal, filters: ClosureFilters = {}) {
     const page = await this.http.json(
       '/api/v1/profiles/admin/closures',
       parsePage,
       {
-        query: { after: after || undefined, limit: pageSize },
+        query: { ...filters, after: after || undefined, limit: pageSize },
         signal,
       },
     );
-    const last = page.items.at(-1);
     return {
       items: page.items,
-      next: page.items.length === pageSize && last ? last.id : '',
+      next: page.next_cursor ?? '',
     };
   }
 

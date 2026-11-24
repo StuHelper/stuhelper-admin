@@ -1486,7 +1486,11 @@
       "official": "공식 봇 연결",
       "connect": "QQ 로그인 연동",
       "account": "계정 ID"
-    }
+    },
+    "batch": "일괄 미리보기",
+    "leads": "한 줄에 검색어 하나, 최대 20개, 검색어당 256자",
+    "partialBatch": "미리보기 한도에 도달했습니다. 검색 범위를 좁혀 주세요.",
+    "atLeast": "{count} 이상"
   },
   "timetable": {
     "title": "교시 시간",
@@ -1923,6 +1927,12 @@
     },
     "pointsPolicies": {
       "forfeit_all_points_and_pending_deductions": "최종 해지 시 모든 포인트와 차감 대기 내역이 현금이나 Ivory 전환 없이 소멸됩니다"
+    },
+    "actionable": "처리 기한이 된 신청만 표시",
+    "reasons": {
+      "ivory_balance_remaining": "Ivory 잔액 미정산",
+      "refund_in_progress": "환불 처리 중",
+      "payment_pending_reconciliation": "결제 결과 대조 대기"
     }
   },
   "accountJump": {

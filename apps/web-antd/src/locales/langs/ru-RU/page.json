@@ -1486,7 +1486,11 @@
       "official": "Привязка к официальному боту",
       "connect": "Вход через QQ",
       "account": "ID аккаунта"
-    }
+    },
+    "batch": "Групповой просмотр",
+    "leads": "По одному значению в строке, до 20 значений по 256 символов",
+    "partialBatch": "Достигнут предел просмотра. Сузьте область поиска.",
+    "atLeast": "не менее {count}"
   },
   "timetable": {
     "title": "Расписание звонков",
@@ -1923,6 +1927,12 @@
     },
     "pointsPolicies": {
       "forfeit_all_points_and_pending_deductions": "При окончательном закрытии все баллы и отложенные удержания обнуляются без обмена на деньги или Ivory"
+    },
+    "actionable": "Только заявки, срок ожидания которых истёк",
+    "reasons": {
+      "ivory_balance_remaining": "Остаток Ivory не погашен",
+      "refund_in_progress": "Возврат в обработке",
+      "payment_pending_reconciliation": "Платёж ожидает сверки"
     }
   },
   "accountJump": {

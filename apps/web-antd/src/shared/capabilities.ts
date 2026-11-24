@@ -32,6 +32,7 @@ export function routeCapability(path: string): string | undefined {
   if (path === '/billing/refunds' || path === '/billing/memberships') return 'billing.commerce';
   if (path.startsWith('/billing/')) return 'billing.manage';
   if (path === '/qq/groups' || path.startsWith('/qq/groups/')) return 'groups.manage';
+  if (path === '/moderation/queue') return 'moderation.tasks';
   if (path === '/qq-binding') return 'qq-binding.manage';
   if (path === '/open-platform') return 'open-platform.manage';
   if (path === '/storage/custody') return 'storage.custody.operations';

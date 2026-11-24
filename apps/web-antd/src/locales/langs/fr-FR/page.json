@@ -1486,7 +1486,11 @@
       "official": "Liaison au robot officiel",
       "connect": "Connexion avec QQ",
       "account": "Identifiant de compte"
-    }
+    },
+    "batch": "Aperçu par lot",
+    "leads": "Un critère par ligne, 20 au maximum de 256 caractères chacun",
+    "partialBatch": "Limite atteinte. Réduisez la portée de la recherche.",
+    "atLeast": "au moins {count}"
   },
   "timetable": {
     "title": "Horaires des créneaux",
@@ -1923,6 +1927,12 @@
     },
     "pointsPolicies": {
       "forfeit_all_points_and_pending_deductions": "Effacer tous les points et déductions en attente lors de la clôture finale sans conversion en espèces ni en Ivory"
+    },
+    "actionable": "Afficher uniquement les demandes arrivées à échéance",
+    "reasons": {
+      "ivory_balance_remaining": "Solde Ivory non réglé",
+      "refund_in_progress": "Remboursement en cours",
+      "payment_pending_reconciliation": "Paiement à rapprocher"
     }
   },
   "accountJump": {

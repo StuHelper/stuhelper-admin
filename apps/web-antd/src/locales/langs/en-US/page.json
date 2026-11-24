@@ -1486,7 +1486,11 @@
       "official": "Official bot binding",
       "connect": "QQ Connect",
       "account": "Account ID"
-    }
+    },
+    "batch": "Batch preview",
+    "leads": "One lead per line, up to 20 leads of 256 characters each",
+    "partialBatch": "Preview limit reached. Narrow the search scope.",
+    "atLeast": "at least {count}"
   },
   "timetable": {
     "title": "Class periods",
@@ -1923,6 +1927,12 @@
     },
     "pointsPolicies": {
       "forfeit_all_points_and_pending_deductions": "Clear all points and pending deductions on final closure without cash or Ivory conversion"
+    },
+    "actionable": "Show only requests due for processing",
+    "reasons": {
+      "ivory_balance_remaining": "Outstanding Ivory balance",
+      "refund_in_progress": "Refund in progress",
+      "payment_pending_reconciliation": "Payment awaiting reconciliation"
     }
   },
   "accountJump": {

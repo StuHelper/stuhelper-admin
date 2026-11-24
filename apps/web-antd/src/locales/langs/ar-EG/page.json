@@ -1486,7 +1486,11 @@
       "official": "ربط الروبوت الرسمي",
       "connect": "تسجيل الدخول عبر QQ",
       "account": "معرّف الحساب"
-    }
+    },
+    "batch": "معاينة مجمّعة",
+    "leads": "أدخل قيمة في كل سطر، حتى 20 قيمة و256 حرفًا لكل قيمة",
+    "partialBatch": "بلغت المعاينة الحد الأقصى. ضيّق نطاق البحث.",
+    "atLeast": "{count} على الأقل"
   },
   "timetable": {
     "title": "مواعيد الحصص",
@@ -1923,6 +1927,12 @@
     },
     "pointsPolicies": {
       "forfeit_all_points_and_pending_deductions": "تصفير جميع النقاط والخصومات المعلقة عند الإغلاق النهائي دون تحويل إلى نقد أو Ivory"
+    },
+    "actionable": "عرض الطلبات المستحقة للمعالجة فقط",
+    "reasons": {
+      "ivory_balance_remaining": "رصيد Ivory غير مسوّى",
+      "refund_in_progress": "استرداد قيد المعالجة",
+      "payment_pending_reconciliation": "دفعة تنتظر المطابقة"
     }
   },
   "accountJump": {

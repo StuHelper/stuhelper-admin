@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import type { Audit, CandidateGroup, Domain, Query, Scope, Sensitive } from './api';
 
-import { computed, onBeforeUnmount, reactive, ref, shallowRef } from 'vue';
+import { computed, onBeforeUnmount, reactive, ref, shallowRef, watch } from 'vue';
 
 import { useI18n } from '@vben/locales';
 
 import { Alert, Button, Card, Checkbox, CheckboxGroup, Form, FormItem, Input, Select, TabPane, Tabs, Tag, Textarea } from 'ant-design-vue';
 
 import { ApiError, errorCode } from '#/shared/api/errors';
+import { useAsync } from '#/shared/composables/async';
 import { useFormat } from '#/shared/format';
 import AccountJumpBar from '#/shared/ui/AccountJumpBar.vue';
 import AdminPage from '#/shared/ui/AdminPage.vue';
@@ -34,6 +35,25 @@ const scope = (): Scope => ({ school: form.school.trim() || '*', group: form.gro
 const schoolRequired = computed(() => form.kind === 'student_id' || form.kind === 'staff_id');
 const schoolMissing = computed(() => schoolRequired.value && (!form.school.trim() || form.school.trim() === '*'));
 const ready = computed(() => !!form.value.trim() && validPurpose(form.purpose) && !schoolMissing.value && form.domains.length > 0);
+
+const batchMode = ref(false);
+const leadsText = ref('');
+const leads = computed(() => leadsText.value.split(/\r?\n/).filter(line => line.length > 0));
+const batchReady = computed(() => {
+  const values = leads.value;
+  return values.length > 0 && values.length <= 20 && new Set(values).size === values.length
+    && values.every(value => value.trim().length > 0 && [...value].length <= 256)
+    && validPurpose(form.purpose) && !schoolMissing.value && form.domains.length > 0;
+});
+const preview = useAsync(signal => api.preview({
+  kind: form.kind, values: [...leads.value], scope: scope(), domains: [...form.domains], purpose: form.purpose.trim(),
+}, signal), { onDenied: () => clear() });
+watch([batchMode, leadsText, form], () => preview.clear(), { deep: true, flush: 'sync' });
+
+function submitLookup() {
+  if (!batchMode.value) return search();
+  if (batchReady.value) return preview.reload();
+}
 
 const groups = shallowRef<CandidateGroup[]>([]);
 const unavailable = shallowRef<string[]>([]);
@@ -131,12 +151,18 @@ const scopeText = (value: Scope) => [value.school, value.group, value.module].ma
       <TabPane key="query" :tab="t('page.lookup.queryTab')">
         <div class="flex flex-col gap-4">
           <Card :bordered="false">
-            <Form layout="vertical" @submit.prevent="search">
+            <Form layout="vertical" @submit.prevent="submitLookup">
+              <FormItem>
+                <Checkbox v-model:checked="batchMode" :disabled="status === 'loading' || appending">{{ t('page.lookup.batch') }}</Checkbox>
+              </FormItem>
               <div class="grid gap-3 md:grid-cols-3">
                 <FormItem :label="t('page.lookup.kind')" html-for="lookup-kind">
                   <Select id="lookup-kind" v-model:value="form.kind" :options="kinds.map((value) => ({ value, label: t(`page.lookup.kinds.${value}`) }))" />
                 </FormItem>
-                <FormItem class="md:col-span-2" :label="t('page.lookup.value')" required html-for="lookup-value">
+                <FormItem v-if="batchMode" class="md:col-span-2" :label="t('page.lookup.leads')" html-for="lookup-leads" required>
+                  <Textarea id="lookup-leads" v-model:value="leadsText" :rows="4" autocomplete="off" />
+                </FormItem>
+                <FormItem v-else class="md:col-span-2" :label="t('page.lookup.value')" required html-for="lookup-value">
                   <Input id="lookup-value" v-model:value="form.value" :maxlength="256" autocomplete="off" allow-clear />
                 </FormItem>
                 <FormItem :label="t('page.access.school')" :required="schoolRequired" :help="schoolMissing ? t('page.lookup.schoolRequired') : undefined" html-for="lookup-school"><Input id="lookup-school" v-model:value="form.school" :maxlength="128" /></FormItem>
@@ -149,7 +175,7 @@ const scopeText = (value: Scope) => [value.school, value.group, value.module].ma
                   <Checkbox v-for="domain in domains" :key="domain" :value="domain">{{ t(`page.lookup.domainNames.${domain}`) }}</Checkbox>
                 </CheckboxGroup>
               </FormItem>
-              <FormItem :label="t('page.lookup.sensitive')" :extra="t('page.lookup.sensitiveHint')">
+              <FormItem v-if="!batchMode" :label="t('page.lookup.sensitive')" :extra="t('page.lookup.sensitiveHint')">
                 <CheckboxGroup v-model:value="form.fields">
                   <Checkbox v-for="field in sensitive" :key="field" :value="field">{{ t(`page.lookup.categories.${field}`) }}</Checkbox>
                 </CheckboxGroup>
@@ -157,11 +183,33 @@ const scopeText = (value: Scope) => [value.school, value.group, value.module].ma
               <FormItem :label="t('page.lookup.purpose')" required :extra="t('page.lookup.purposeHint')" html-for="lookup-purpose">
                 <Textarea id="lookup-purpose" v-model:value="form.purpose" :rows="2" :maxlength="512" />
               </FormItem>
-              <Button type="primary" html-type="submit" :loading="status === 'loading'" :disabled="!ready">{{ t('page.lookup.submit') }}</Button>
+              <Button type="primary" html-type="submit" :loading="(batchMode ? preview.status.value : status) === 'loading'" :disabled="batchMode ? !batchReady : !ready">{{ t(batchMode ? 'page.lookup.batch' : 'page.lookup.submit') }}</Button>
             </Form>
           </Card>
-          <Alert v-if="unavailable.length > 0" type="warning" show-icon role="alert" :message="t('page.lookup.incomplete', { domains: format.list(unavailable.map((value) => label(`page.lookup.domainNames.${value}`, value))) })" />
-          <Card v-if="status !== 'idle'" :bordered="false">
+          <Card v-if="batchMode && preview.status.value !== 'idle'" :bordered="false">
+            <LoadState v-if="!preview.data.value" :status="preview.status.value" :error="preview.error.value" @retry="submitLookup" />
+            <template v-else>
+              <Alert v-if="preview.data.value.truncated" type="warning" :message="t('page.lookup.partialBatch')" />
+              <Alert v-if="preview.data.value.unavailable_domains.length > 0" type="warning" :message="t('page.lookup.incomplete', { domains: format.list(preview.data.value.unavailable_domains.map(d => label(`page.lookup.domainNames.${d}`, d))) })" />
+              <ol class="flex flex-col gap-3">
+                <li v-for="entry in preview.data.value.entries" :key="entry.index">
+                  <bdi class="break-all">{{ entry.value }}</bdi>
+                  <p v-if="entry.candidates.length === 0">{{ t('page.lookup.empty') }}</p>
+                  <ul>
+                    <li v-for="item in entry.candidates" :key="candidateKey(item.candidate)">
+                      <bdi>{{ item.candidate.account }}</bdi>
+                      <span v-for="summary in item.domain_counts" :key="summary.domain" class="ms-2">
+                        {{ t(`page.lookup.domainNames.${summary.domain}`) }} {{ summary.has_more ? t('page.lookup.atLeast', { count: format.number(summary.count) }) : format.number(summary.count) }}
+                      </span>
+                    </li>
+                  </ul>
+                  <p v-if="entry.has_more_candidates">{{ t('page.lookup.partialBatch') }}</p>
+                </li>
+              </ol>
+            </template>
+          </Card>
+          <Alert v-if="!batchMode && unavailable.length > 0" type="warning" show-icon role="alert" :message="t('page.lookup.incomplete', { domains: format.list(unavailable.map((value) => label(`page.lookup.domainNames.${value}`, value))) })" />
+          <Card v-if="!batchMode && status !== 'idle'" :bordered="false">
             <LoadState v-if="status !== 'ready' || groups.length === 0" :status="status" :error="loadError" :empty="true" :empty-text="t('page.lookup.empty')" @retry="search" />
             <template v-else>
               <ul class="flex flex-col gap-4" :aria-label="t('page.lookup.results')">

@@ -1486,7 +1486,11 @@
       "official": "公式ボット連携",
       "connect": "QQ 連携ログイン",
       "account": "アカウント ID"
-    }
+    },
+    "batch": "一括プレビュー",
+    "leads": "1 行に 1 件、最大 20 件、各 256 文字まで",
+    "partialBatch": "表示上限に達しました。検索範囲を絞ってください。",
+    "atLeast": "{count} 以上"
   },
   "timetable": {
     "title": "時限設定",
@@ -1923,6 +1927,12 @@
     },
     "pointsPolicies": {
       "forfeit_all_points_and_pending_deductions": "最終閉鎖時にすべてのポイントと未精算控除を消去し、現金やIvoryへの換算は行いません"
+    },
+    "actionable": "処理期限に達した申請のみ表示",
+    "reasons": {
+      "ivory_balance_remaining": "Ivory 残高が未精算",
+      "refund_in_progress": "返金処理中",
+      "payment_pending_reconciliation": "決済結果の照合待ち"
     }
   },
   "accountJump": {

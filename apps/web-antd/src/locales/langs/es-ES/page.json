@@ -1486,7 +1486,11 @@
       "official": "Vinculación con el bot oficial",
       "connect": "Inicio de sesión con QQ",
       "account": "ID de cuenta"
-    }
+    },
+    "batch": "Vista previa por lotes",
+    "leads": "Un valor por línea, hasta 20 valores de 256 caracteres cada uno",
+    "partialBatch": "Se alcanzó el límite. Reduzca el ámbito de búsqueda.",
+    "atLeast": "al menos {count}"
   },
   "timetable": {
     "title": "Horario de franjas",
@@ -1923,6 +1927,12 @@
     },
     "pointsPolicies": {
       "forfeit_all_points_and_pending_deductions": "Anular todos los puntos y deducciones pendientes al cerrar definitivamente sin conversión a efectivo ni Ivory"
+    },
+    "actionable": "Mostrar solo solicitudes cuyo plazo ha vencido",
+    "reasons": {
+      "ivory_balance_remaining": "Saldo de Ivory pendiente",
+      "refund_in_progress": "Reembolso en curso",
+      "payment_pending_reconciliation": "Pago pendiente de conciliación"
     }
   },
   "accountJump": {

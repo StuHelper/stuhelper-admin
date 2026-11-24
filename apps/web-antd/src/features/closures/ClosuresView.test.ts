@@ -8,7 +8,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { ApiError } from '#/shared/api/errors';
 
-import { canProcessClosure } from './api';
+import { canProcessClosure, useClosuresAdmin } from './api';
 import ClosuresView from './ClosuresView.vue';
 
 const mock = vi.hoisted(() => ({
@@ -115,6 +115,17 @@ async function mountView() {
 }
 
 describe('Account closures administration', () => {
+  it('sends queue filters and follows the server cursor even on a short page', async () => {
+    const row = blockedClosure();
+    mock.json.mockResolvedValue({ items: [row], next_cursor: row.id });
+    const api = useClosuresAdmin();
+    const filters = { state: 'processing', blocker: 'content_unavailable', actionable: true } as const;
+    const page = await api.list('', undefined, filters);
+    expect(page.next).toBe(row.id);
+    await api.list(page.next, undefined, filters);
+    expect(mock.json.mock.lastCall?.[2].query).toMatchObject({ ...filters, after: row.id });
+  });
+
   it('enforces cooling deadline and terminal states in canProcessClosure', () => {
     expect(canProcessClosure(blockedClosure(), fixedNow())).toBe(true);
     expect(canProcessClosure(coolingClosure(), fixedNow())).toBe(false);
