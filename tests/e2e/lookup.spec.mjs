@@ -117,3 +117,30 @@ test('the query log needs a purpose and lists what each query returned', async (
   await expect(page.getByText(fill(l.auditCount, { count: new Intl.NumberFormat(info.project.metadata.locale).format(3) }), { exact: true })).toBeVisible();
   expect(state.audits[0]).toEqual({ scope: any, purpose: 'Monthly check', after: '', limit: 50 });
 });
+
+test('batch preview sends only the scoped leads and removes the result after denial', async ({ page }, info) => {
+  const l = catalogue(info).lookup;
+  const requests = [];
+  await page.route('**/api/v1/information-query/preview', async route => {
+    const body = route.request().postDataJSON();
+    requests.push(body);
+    if (requests.length > 1) return route.fulfill({ status: 403, json: { code: 'forbidden' } });
+    return route.fulfill({ json: {
+      entries: body.values.map((value, index) => ({ index, value, candidates: [], has_more_candidates: false })),
+      truncated: false, unavailable_domains: [],
+    } });
+  });
+  await page.goto(`${base}/system/lookup?lang=${info.project.metadata.locale}`);
+  await page.getByRole('checkbox', { name: l.batch }).check();
+  await page.locator('#lookup-leads').fill('Synthetic Alpha\nSynthetic Beta');
+  await page.locator('#lookup-purpose').fill('isolated batch preview');
+  const submit = page.getByRole('button', { name: l.batch, exact: true });
+  await submit.click();
+  const first = page.locator('li bdi').filter({ hasText: 'Synthetic Alpha' });
+  await expect(first).toBeVisible();
+  expect(requests[0]).toMatchObject({ kind: 'name', scope: any, values: ['Synthetic Alpha', 'Synthetic Beta'], purpose: 'isolated batch preview' });
+  expect(requests[0]).not.toHaveProperty('fields');
+  await submit.click();
+  await expect(first).toHaveCount(0);
+  await expect(page.locator('#lookup-leads')).toHaveValue('Synthetic Alpha\nSynthetic Beta');
+});

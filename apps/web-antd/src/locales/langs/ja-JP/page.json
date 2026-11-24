@@ -1506,7 +1506,11 @@
       "official": "公式ボット連携",
       "connect": "QQ 連携ログイン",
       "account": "アカウント ID"
-    }
+    },
+    "batch": "一括プレビュー",
+    "leads": "1 行に 1 件、最大 20 件、各 256 文字まで",
+    "partialBatch": "表示上限に達しました。検索範囲を絞ってください。",
+    "atLeast": "{count} 以上"
   },
   "timetable": {
     "title": "時限設定",
@@ -1928,7 +1932,9 @@
       "assets_pending": "残高・返金・未確定決済が未完了",
       "sessions_unavailable": "セッションサービスが利用不可",
       "authorizations_unavailable": "認可または連携サービスが利用不可",
-      "content_unavailable": "コンテンツまたはお気に入りサービスが利用不可"
+      "content_unavailable": "コンテンツまたはお気に入りサービスが利用不可",
+      "storage_draining": "ストレージの複製を移行しています。",
+      "background_processing": "バックグラウンド処理中です。"
     },
     "modules": {
       "storage": "ストレージ",
@@ -1943,6 +1949,12 @@
     },
     "pointsPolicies": {
       "forfeit_all_points_and_pending_deductions": "最終閉鎖時にすべてのポイントと未精算控除を消去し、現金やIvoryへの換算は行いません"
+    },
+    "actionable": "処理期限に達した申請のみ表示",
+    "reasons": {
+      "ivory_balance_remaining": "Ivory 残高が未精算",
+      "refund_in_progress": "返金処理中",
+      "payment_pending_reconciliation": "決済結果の照合待ち"
     }
   },
   "accountJump": {
@@ -2284,5 +2296,14 @@
       "render_size_limit": "変換後の本文がサイズの上限を超えています。",
       "unknown": "本文の一部を検証できませんでした。"
     }
+  },
+  "eventRetries": {
+    "title": "イベント配信の再試行",
+    "source": "送信元モジュール",
+    "event": "イベント ID",
+    "firstFailure": "最初の失敗日時",
+    "attempts": "試行回数",
+    "code": "エラーコード",
+    "queued": "イベントの再試行を予約しました。"
   }
 }

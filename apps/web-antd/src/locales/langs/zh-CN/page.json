@@ -1506,7 +1506,11 @@
       "official": "官方机器人绑定",
       "connect": "QQ 互联",
       "account": "账号标识"
-    }
+    },
+    "batch": "批量预览",
+    "leads": "每行一条线索，最多 20 条，每条最多 256 个字符",
+    "partialBatch": "已达到预览上限，请缩小查询范围。",
+    "atLeast": "至少 {count}"
   },
   "timetable": {
     "title": "学校作息",
@@ -1928,7 +1932,9 @@
       "assets_pending": "仍有余额、退款或未决支付待结清",
       "sessions_unavailable": "会话服务不可用",
       "authorizations_unavailable": "授权或绑定服务不可用",
-      "content_unavailable": "内容或收藏服务不可用"
+      "content_unavailable": "内容或收藏服务不可用",
+      "storage_draining": "存储副本正在迁移。",
+      "background_processing": "后台正在处理，稍后可查看进度。"
     },
     "modules": {
       "storage": "存储",
@@ -1943,6 +1949,12 @@
     },
     "pointsPolicies": {
       "forfeit_all_points_and_pending_deductions": "正式注销时清零全部积分与待扣记录，不兑换现金或 Ivory"
+    },
+    "actionable": "仅看已到期且可处理的申请",
+    "reasons": {
+      "ivory_balance_remaining": "Ivory 余额未结清",
+      "refund_in_progress": "退款处理中",
+      "payment_pending_reconciliation": "支付结果待核对"
     }
   },
   "accountJump": {
@@ -2284,5 +2296,14 @@
       "render_size_limit": "渲染后的正文超过大小上限。",
       "unknown": "正文有一项无法通过校验。"
     }
+  },
+  "eventRetries": {
+    "title": "事件投递重试",
+    "source": "来源模块",
+    "event": "事件 ID",
+    "firstFailure": "首次失败时间",
+    "attempts": "尝试次数",
+    "code": "错误码",
+    "queued": "事件已排队重试。"
   }
 }

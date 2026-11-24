@@ -1506,7 +1506,11 @@
       "official": "ربط الروبوت الرسمي",
       "connect": "تسجيل الدخول عبر QQ",
       "account": "معرّف الحساب"
-    }
+    },
+    "batch": "معاينة مجمّعة",
+    "leads": "أدخل قيمة في كل سطر، حتى 20 قيمة و256 حرفًا لكل قيمة",
+    "partialBatch": "بلغت المعاينة الحد الأقصى. ضيّق نطاق البحث.",
+    "atLeast": "{count} على الأقل"
   },
   "timetable": {
     "title": "مواعيد الحصص",
@@ -1928,7 +1932,9 @@
       "assets_pending": "يوجد رصيد متبقٍ أو استرداد أو دفعة معلقة",
       "sessions_unavailable": "خدمة الجلسات غير متاحة",
       "authorizations_unavailable": "خدمة التفويضات أو الارتباطات غير متاحة",
-      "content_unavailable": "خدمة المحتوى أو المفضلة غير متاحة"
+      "content_unavailable": "خدمة المحتوى أو المفضلة غير متاحة",
+      "storage_draining": "يجري نقل نسخ التخزين.",
+      "background_processing": "تجري المعالجة في الخلفية."
     },
     "modules": {
       "storage": "التخزين",
@@ -1943,6 +1949,12 @@
     },
     "pointsPolicies": {
       "forfeit_all_points_and_pending_deductions": "تصفير جميع النقاط والخصومات المعلقة عند الإغلاق النهائي دون تحويل إلى نقد أو Ivory"
+    },
+    "actionable": "عرض الطلبات المستحقة للمعالجة فقط",
+    "reasons": {
+      "ivory_balance_remaining": "رصيد Ivory غير مسوّى",
+      "refund_in_progress": "استرداد قيد المعالجة",
+      "payment_pending_reconciliation": "دفعة تنتظر المطابقة"
     }
   },
   "accountJump": {
@@ -2284,5 +2296,14 @@
       "render_size_limit": "يتجاوز حجم المستند بعد العرض الحد المسموح به.",
       "unknown": "تعذّر التحقق من صحة أحد عناصر المستند."
     }
+  },
+  "eventRetries": {
+    "title": "إعادة محاولة توصيل الأحداث",
+    "source": "الوحدة المصدر",
+    "event": "معرّف الحدث",
+    "firstFailure": "أول إخفاق",
+    "attempts": "عدد المحاولات",
+    "code": "رمز الخطأ",
+    "queued": "أُدرج الحدث في قائمة انتظار إعادة المحاولة."
   }
 }
