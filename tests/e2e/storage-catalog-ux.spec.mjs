@@ -285,3 +285,39 @@ test('catalog import preview displays state counts and filters rows by change st
   ).toBeVisible();
   await fits(page, info);
 });
+
+test('administrator trust requires current owner consent and a confirmed command', async ({ page }, info) => {
+  const all = catalogue(info); const m = all.storage;
+  const instance = { ...storageExample.instances[0], adapter: 'bhpan', account_hint: '5***4', trusted: false };
+  const writes = [];
+  await page.route('**/api/v1/storage/operations**', async route => {
+    const request = route.request();
+    if (request.method() === 'POST') {
+      const body = request.postDataJSON();
+      expect(body.revision).toBe(instance.revision);
+      writes.push({ body, key: request.headers()['idempotency-key'] });
+      instance.trusted = body.action === 'trust';
+      instance.revision++;
+      return route.fulfill({ json: instance });
+    }
+    return route.fulfill({ json: { ...storageExample, instances: [instance] } });
+  });
+  await page.goto(`${base}/storage?lang=${info.project.metadata.locale}`);
+  const trust = page.getByRole('button', { name: m.actions.trust, exact: true });
+  await expect(trust).toBeDisabled();
+  instance.trust_consent = { classes: ['quarantine', 'restricted'], scope: 'school', source: 'owner_session',
+    until: '2099-12-31T23:59:59Z', recorded_at: '2026-11-24T00:00:00Z' };
+  await page.getByRole('button', { name: all.common.refresh, exact: true }).click();
+  await expect(trust).toBeEnabled();
+  await trust.click();
+  expect(writes).toHaveLength(0);
+  await page.getByRole('dialog').getByRole('button', {name: all.common.confirm, exact: true}).click();
+  const untrust = page.getByRole('button', { name: m.actions.untrust, exact: true });
+  await expect(untrust).toBeVisible();
+  await untrust.click();
+  await page.getByRole('dialog').getByRole('button', {name: all.common.confirm, exact: true}).click();
+  await expect(trust).toBeVisible();
+  expect(writes.map(w => w.body.action)).toEqual(['trust','untrust']);
+  expect(writes[0].key).toBeTruthy();
+  expect(writes[0].key).not.toBe(writes[1].key);
+});
