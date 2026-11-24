@@ -28,7 +28,7 @@ async function fits(page, info) {
   ).toBe(true);
 }
 
-test('storage quota accepts decimal GB and TB units and submits exact byte counts', async ({
+test('storage quota accepts binary GB and TB units and submits exact byte counts', async ({
   page,
 }, info) => {
   const all = catalogue(info);
@@ -37,10 +37,10 @@ test('storage quota accepts decimal GB and TB units and submits exact byte count
   const gbInstance = {
     ...storageExample.instances[0],
     id: 'gb-instance',
-    limit_bytes: 500_000_000_000,
-    used_bytes: 100_000_000_000,
-    reserved_bytes: 50_000_000_000,
-    available_bytes: 350_000_000_000,
+    limit_bytes: 500 * 2 ** 30,
+    used_bytes: 100 * 2 ** 30,
+    reserved_bytes: 50 * 2 ** 30,
+    available_bytes: 350 * 2 ** 30,
   };
   await page.route('**/api/v1/storage/operations**', async (route) => {
     if (route.request().method() === 'POST') {
@@ -70,15 +70,15 @@ test('storage quota accepts decimal GB and TB units and submits exact byte count
     await page.getByRole('button', { name: m.actions.quota, exact: true }).click();
     await page.getByRole('button', { name: all.common.confirm, exact: true }).click();
   };
-  await quota.fill('1000');
+  await quota.fill('1024');
   await saveLimit();
-  await expect(quota).toHaveAttribute('placeholder', '1000');
+  await expect(quota).toHaveAttribute('placeholder', '1024');
   await saveLimit();
   await expect.poll(() => writes.map((write) => write.limit_bytes)).toEqual([
-    1_000_000_000_000, 1_000_000_000_000,
+    2 ** 40, 2 ** 40,
   ]);
 
-  // Switch unit to TB and enter 1.5 TB -> 1,500,000,000,000 bytes.
+  // Switch unit to TB and enter 1.5 TB -> 1,649,267,441,664 bytes.
   await page.locator('article .ant-select-selector').click();
   await page
     .locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden)')
@@ -96,7 +96,7 @@ test('storage quota accepts decimal GB and TB units and submits exact byte count
   await expect.poll(() => writes.length).toBe(3);
   expect(writes[2]).toMatchObject({
     action: 'quota',
-    limit_bytes: 1_500_000_000_000,
+    limit_bytes: 1.5 * 2 ** 40,
   });
   await fits(page, info);
 });
