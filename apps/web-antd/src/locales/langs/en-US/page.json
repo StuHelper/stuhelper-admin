@@ -95,7 +95,7 @@
     "rate_limited": "Too many attempts or the limit is reached. Please try again later.",
     "retry_required": "The previous submission is not confirmed. Retry the original request first.",
     "edit_window_closed": "The editing window has closed. This action is unavailable.",
-    "enrollment_required": "No enrollment record was found for you in this course and semester. You cannot submit a review yet.",
+
     "disclosure_required": "Authorized real name or teacher verification is missing. You cannot reply to your own course yet.",
     "identity_owned": "This student identity belongs to another account. Recover that account or contact an administrator.",
     "expired": "The application, code or capture link expired. Please start again.",
@@ -1767,8 +1767,7 @@
       "content_access": "Content admission",
       "campus_eligibility": "Valid campus eligibility",
       "phone_bound": "Phone linked",
-      "identity_verified": "Identity verified",
-      "course_enrollment": "Enrolled in the course"
+      "identity_verified": "Identity verified"
     }
   },
   "sessionPolicy": {

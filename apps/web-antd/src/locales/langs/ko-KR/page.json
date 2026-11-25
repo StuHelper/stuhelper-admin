@@ -95,7 +95,7 @@
     "rate_limited": "시도가 너무 많거나 한도에 도달했습니다. 잠시 후 다시 시도하세요.",
     "retry_required": "이전 제출 결과가 확인되지 않았습니다. 먼저 원래 요청을 다시 보내세요.",
     "edit_window_closed": "수정 가능 시간이 지나 이 작업을 수행할 수 없습니다.",
-    "enrollment_required": "해당 강의와 학기의 본인 수강 기록이 없어 평가를 제출할 수 없습니다.",
+
     "disclosure_required": "공개가 허용된 실명 또는 교원 인증 정보가 없어 담당 과목에 답글을 달 수 없습니다.",
     "identity_owned": "해당 학생 신원은 다른 계정에 연결되어 있습니다. 기존 계정을 복구하거나 관리자에게 문의하세요.",
     "expired": "신청, 코드 또는 촬영 링크가 만료되었습니다. 다시 시작하세요.",
@@ -1767,8 +1767,7 @@
       "content_access": "콘텐츠 이용 허가",
       "campus_eligibility": "유효한 재학 자격",
       "phone_bound": "휴대전화 연결됨",
-      "identity_verified": "실명 인증 완료",
-      "course_enrollment": "해당 강의 수강"
+      "identity_verified": "실명 인증 완료"
     }
   },
   "sessionPolicy": {

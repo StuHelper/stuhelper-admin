@@ -95,7 +95,7 @@
     "rate_limited": "Demasiados intentos o se alcanzó el límite. Inténtalo más tarde.",
     "retry_required": "El envío anterior no está confirmado. Reintenta primero la solicitud original.",
     "edit_window_closed": "El plazo de edición terminó. Esta acción no está disponible.",
-    "enrollment_required": "No se encontró tu matrícula en este curso y semestre. Aún no puedes publicar una reseña.",
+
     "disclosure_required": "Falta el nombre real o la acreditación autorizada. Aún no puedes responder sobre tu curso.",
     "identity_owned": "Esta identidad estudiantil está vinculada a otra cuenta. Recupérala o contacta con un administrador.",
     "expired": "La solicitud, el código o el enlace caducó. Inicia de nuevo.",
@@ -1767,8 +1767,7 @@
       "content_access": "Acceso al contenido",
       "campus_eligibility": "Condición de estudiante válida",
       "phone_bound": "Teléfono vinculado",
-      "identity_verified": "Identidad verificada",
-      "course_enrollment": "Matriculado en la asignatura"
+      "identity_verified": "Identidad verificada"
     }
   },
   "sessionPolicy": {
