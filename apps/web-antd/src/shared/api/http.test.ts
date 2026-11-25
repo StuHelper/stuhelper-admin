@@ -52,11 +52,11 @@ describe('HTTP boundary', () => {
     const respond = (body: BodyInit, status: number) =>
       new Http(async () => new Response(body, { status }));
     await expect(
-      respond(JSON.stringify({ code: 'enrollment_required' }), 403).json(
+      respond(JSON.stringify({ code: 'school_credentials_rejected' }), 403).json(
         '/api/v1/x',
         anything,
       ),
-    ).rejects.toMatchObject({ code: 'enrollment_required', uncertain: false });
+    ).rejects.toMatchObject({ code: 'school_credentials_rejected', uncertain: false });
     await expect(
       respond(JSON.stringify({ code: 'permission_denied' }), 403).json(
         '/api/v1/x',

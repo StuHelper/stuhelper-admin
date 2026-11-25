@@ -95,7 +95,7 @@
     "rate_limited": "操作过于频繁或已达到数量上限，请稍后重试。",
     "retry_required": "上一次提交的结果尚未确认，请先重试原请求。",
     "edit_window_closed": "已超过允许编辑的时间，无法执行此操作。",
-    "enrollment_required": "没有找到该课程、该学期的本人选课记录，暂不能提交评价。",
+
     "disclosure_required": "缺少已获准公开的真实姓名或教师认证信息，暂时不能回复本人任课课程。",
     "identity_owned": "该学生身份已绑定其他账号，请找回原账号或联系管理员。",
     "expired": "申请、验证码或拍摄链接已到期，请重新发起。",
@@ -1767,8 +1767,7 @@
       "content_access": "内容准入",
       "campus_eligibility": "有效校园资格",
       "phone_bound": "已绑定手机",
-      "identity_verified": "已实名认证",
-      "course_enrollment": "已选该课程"
+      "identity_verified": "已实名认证"
     }
   },
   "sessionPolicy": {

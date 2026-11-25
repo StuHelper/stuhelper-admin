@@ -95,7 +95,7 @@
     "rate_limited": "Trop de tentatives ou limite atteinte. Réessayez plus tard.",
     "retry_required": "L’envoi précédent n’est pas confirmé. Renvoyez d’abord la demande initiale.",
     "edit_window_closed": "Le délai de modification est écoulé. Cette action est indisponible.",
-    "enrollment_required": "Aucune inscription à ce cours et ce semestre n’a été trouvée pour vous. L’avis ne peut pas encore être envoyé.",
+
     "disclosure_required": "Le nom réel ou la certification autorisée manque. Vous ne pouvez pas répondre à votre cours.",
     "identity_owned": "Cette identité étudiante est liée à un autre compte. Récupérez-le ou contactez un administrateur.",
     "expired": "La demande, le code ou le lien a expiré. Recommencez.",
@@ -1767,8 +1767,7 @@
       "content_access": "Accès au contenu",
       "campus_eligibility": "Statut étudiant valide",
       "phone_bound": "Téléphone associé",
-      "identity_verified": "Identité vérifiée",
-      "course_enrollment": "Inscrit au cours"
+      "identity_verified": "Identité vérifiée"
     }
   },
   "sessionPolicy": {

@@ -95,7 +95,7 @@
     "rate_limited": "操作が多すぎるか上限に達しました。しばらくして再試行してください。",
     "retry_required": "前回の送信結果が未確認です。先に元のリクエストを再試行してください。",
     "edit_window_closed": "編集可能期間が終了したため、この操作はできません。",
-    "enrollment_required": "この授業・学期の履修記録が見つからないため、投稿できません。",
+
     "disclosure_required": "公開可能な実名または教員認証情報がないため、担当科目には返信できません。",
     "identity_owned": "この学生情報は別のアカウントに紐づいています。元のアカウントを復旧するか、管理者に連絡してください。",
     "expired": "申請・コード・撮影リンクの期限が切れました。再度開始してください。",
@@ -1767,8 +1767,7 @@
       "content_access": "コンテンツ利用許可",
       "campus_eligibility": "有効な在学資格",
       "phone_bound": "電話番号登録済み",
-      "identity_verified": "本人確認済み",
-      "course_enrollment": "その授業を履修"
+      "identity_verified": "本人確認済み"
     }
   },
   "sessionPolicy": {
