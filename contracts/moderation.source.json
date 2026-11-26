@@ -1,6 +1,6 @@
 {
   "repository": "StuHelper/stuhelper-moderation",
-  "revision": "cbf5cfbd3b7c706bbd7d338ee57eaca532edcfb5",
+  "revision": "04dfecce5364458f3649e67927e580ee7e975933",
   "version": "0.7.0",
   "files": {
     "contracts/moderation.openapi.json": "contracts/moderation.openapi.json",
