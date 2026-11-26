@@ -491,15 +491,17 @@ export async function handleDemoRequest(
     if (!row) return nope('not_found', 404);
     if (p.endsWith('/history')) return json([row]);
     if (p.endsWith('/attribution')) {
-      const selection = (await body(init)).teacher_ids;
+      const request = await body(init);
+      const selection = request.teacher_ids;
+      const previous = row.input.teacher_ids ?? [];
       const options = demoCourseTeacherIds(row.input.target_id, row.input.term_id);
       if (!Array.isArray(selection) || new Set(selection).size !== selection.length ||
           selection.some((id) => typeof id !== 'string' || !options.includes(id))) return nope('invalid_input', 400);
       return json({
         revision: row.revision,
         evidence_revision: `demo-ev-${row.revision}`,
-        teacher_ids: selection.length ? selection : options,
-        previous_teacher_ids: row.input.teacher_ids?.length ? row.input.teacher_ids : options,
+        teacher_ids: selection.length > 0 ? selection : options,
+        previous_teacher_ids: previous.length > 0 ? previous : options,
       });
     }
     return json(row);
