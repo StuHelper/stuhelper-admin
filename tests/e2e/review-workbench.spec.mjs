@@ -167,7 +167,7 @@ test('moderation decision panel shows target course and term, highlights propose
       kind: 'course',
       target_id: 'course-cs101',
       term_id: 'term-2026f',
-      teacher_id: 'teacher-1',
+      teacher_ids: ['teacher-1'],
       title: 'Initial thoughts',
       body: 'Pace is fast and homework is heavy.',
       ratings: [4, 4, 3, 4, 5],

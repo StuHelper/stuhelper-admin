@@ -165,12 +165,16 @@ describe('demo server contract alignment', () => {
     expect(parseSaved(await saved.response.json())).toEqual({ ok: true });
 
     const attribution = await call(
-      '/api/v1/reviews/admin/entries/r1/attribution',
+      '/api/v1/reviews/admin/entries/r3/attribution',
+      'POST',
+      { teacher_ids: ['p1', 'p2'] },
     );
     expect(attribution.status).toBe(200);
     expect(parseAttribution(await attribution.response.json())).toMatchObject({
       revision: 1,
       evidence_revision: 'demo-ev-1',
+      teacher_ids: ['p1', 'p2'],
+      previous_teacher_ids: ['p1'],
     });
   });
 });

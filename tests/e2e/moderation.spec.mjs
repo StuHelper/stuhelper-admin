@@ -21,7 +21,7 @@ const makeEntry = (id, overrides = {}) => ({
     kind: 'course',
     target_id: 'course-1',
     term_id: 'term-1',
-    teacher_id: 'teacher-1',
+    teacher_ids: ['teacher-1'],
     title: `Review ${id}`,
     body: 'Detailed course review body.',
     ratings: [4, 4, 3, 4, 5],
@@ -74,6 +74,68 @@ function mockCatalogSchool(page) {
     return route.fulfill({ json: { items: [schoolObj], next: '' } });
   });
 }
+
+test('moderation previews and applies multiple teachers from the review term', async ({ page }, info) => {
+  await schoolSession(page);
+  const all = catalogue(info);
+  const task = makeTask('reviewux-task', 'entry-1');
+  const entry = makeEntry('entry-1', { state: 'published' });
+  let previewBody;
+  let decisionBody;
+  await page.route('**/api/v1/catalog/objects**', (route) => {
+    const url = new URL(route.request().url());
+    if (url.pathname.endsWith('/lookup')) {
+      return route.fulfill({ json: { items: [], missing_ids: [] } });
+    }
+    if (url.searchParams.get('kind') !== 'teacher') {
+      return route.fulfill({ json: { items: [schoolObj], next: '' } });
+    }
+    expect(url.searchParams.get('course_id')).toBe('course-1');
+    expect(url.searchParams.get('term_id')).toBe('term-1');
+    const items = [1, 2].map((id) => ({
+      ...schoolObj, id: `teacher-${id}`, kind: 'teacher', name: `Professor ${id}`,
+    }));
+    return route.fulfill({ json: { items, next: '' } });
+  });
+  await page.route('**/api/v1/reviews/admin/entries/**', (route) => {
+    const request = route.request();
+    if (request.url().includes('/attribution')) {
+      previewBody = request.postDataJSON();
+      return route.fulfill({ json: { revision: 2, evidence_revision: 'reviewux-evidence', teacher_ids: previewBody.teacher_ids, previous_teacher_ids: ['teacher-1'] } });
+    }
+    if (request.url().includes('/history')) return route.fulfill({ json: [] });
+    return route.fulfill({ json: entry });
+  });
+  await page.route('**/api/v1/moderation/tasks**', (route) => {
+    const req = route.request();
+    const path = new URL(req.url()).pathname;
+    if (path.endsWith('/summary')) return route.fulfill({ json: queueSummary({ waiting: 1 }) });
+    if (path.endsWith('/decisions')) {
+      decisionBody = req.postDataJSON();
+      return route.fulfill({ json: { ...task, state: 'applied', revision: 4, decision: decisionBody.decision } });
+    }
+    return route.fulfill({ json: path.endsWith('/tasks') ? [task] : task });
+  });
+  await page.goto(`${base}/moderation/queue?lang=${info.project.metadata.locale}`);
+  await page.getByRole('button', { name: all.common.open, exact: true }).click();
+  const drawer = page.locator('.ant-drawer-content');
+  await expect(drawer.getByText('Professor 1', { exact: true })).toBeVisible();
+  const dropdown = page.locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden)');
+  await drawer.locator('#decisionpanel-field-1').click();
+  await dropdown.getByText(all.moderation.actions.reassign, { exact: true }).click();
+  await drawer.locator('#decisionpanel-field-2').click();
+  await dropdown.getByText('Professor 2', { exact: true }).click();
+  await drawer.locator('#decisionpanel-field-2').press('Escape');
+  await drawer.getByRole('button', { name: all.moderation.previewAttribution, exact: true }).click();
+  const attribution = all.moderation.attributionResult.replace('{teachers}', 'Professor 1, Professor 2');
+  await expect(drawer.getByText(attribution, { exact: true })).toBeVisible();
+  expect(previewBody).toEqual({ teacher_ids: ['teacher-1', 'teacher-2'] });
+  await drawer.getByLabel(all.moderation.reason, { exact: true }).fill('Confirmed both teachers');
+  await drawer.getByRole('button', { name: all.moderation.applyDecision, exact: true }).click();
+  await expect.poll(() => decisionBody).toMatchObject({ decision: {
+    action: 'reassign', evidence_revision: 'reviewux-evidence', teacher_ids: ['teacher-1', 'teacher-2'],
+  } });
+});
 
 test('queue batch preview applies decisions per item and content view handles unpublished entries', async ({
   page,

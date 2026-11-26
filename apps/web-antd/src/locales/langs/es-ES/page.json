@@ -221,7 +221,7 @@
     "author": "Identidad del autor",
     "anonymous": "Anónimo",
     "signed": "Firmado",
-    "teacher": "Profesor atribuido",
+    "teacher": "Profesores atribuidos",
     "noTeacher": "Sin profesor concreto",
     "featured": "Destacado",
     "unrated": "Sin valorar",
@@ -330,7 +330,7 @@
       "dismiss": "Cierra la solicitud o denuncia sin cambiar el contenido.",
       "feature": "Marca la entrada como destacada; las recompensas las gestiona facturación.",
       "unfeature": "Quita el destacado; indica el motivo.",
-      "reassign": "Corrige la atribución según la matrícula más reciente; comprueba antes de guardar.",
+      "reassign": "Selecciona docentes del curso en el semestre de la evaluación. Si dejas el campo vacío, la evaluación se atribuirá a todos los docentes del curso en ese semestre. Comprueba la atribución antes de guardar.",
       "approve_append": "Publicar este comentario adicional.",
       "reject_append": "Retirar este comentario adicional y conservar la reseña original."
     },

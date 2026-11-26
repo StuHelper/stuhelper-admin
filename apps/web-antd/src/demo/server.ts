@@ -42,7 +42,7 @@ const entries: Record<string, any>[] = (d.reviews as Record<string, any>[]).map(
       kind: r.kind,
       target_id: r.target_id,
       ...(r.term_id ? { term_id: r.term_id } : {}),
-      ...(r.teacher_id ? { teacher_id: r.teacher_id } : {}),
+      ...(r.teacher_ids ? { teacher_ids: r.teacher_ids } : {}),
       title: r.title,
       body: r.body,
       ratings: r.ratings,
@@ -140,11 +140,21 @@ function moderationSummary(school: string, includeTeacherHomepage: boolean): Que
   return summary;
 }
 
+function demoCourseTeacherIds(course: string, term?: null | string) {
+  if (term && !d.offerings.some((item) => item.id === `${course}-${term}`)) return [];
+  return d.teachesIn.filter(([id]) => id === course).map(([, teacher]) => teacher);
+}
+
 function catalog(u: URL) {
   const q = u.searchParams;
+  const teacherCourse = q.get('kind') === 'teacher' ? q.get('course_id') : null;
   let items = [
     ...(d.catalogByKind[q.get('kind') ?? ''] ?? []),
   ] as Record<string, any>[];
+  if (teacherCourse) {
+    const teachers = demoCourseTeacherIds(teacherCourse, q.get('term_id'));
+    items = items.filter((item) => teachers.includes(item.id));
+  }
   const text = (q.get('q') ?? '').trim();
   if (text) {
     items = items.filter(
@@ -158,6 +168,7 @@ function catalog(u: URL) {
     'term_course_id',
     'class_id',
   ]) {
+    if (teacherCourse && (key === 'course_id' || key === 'term_id')) continue;
     const value = q.get(key);
     if (value) items = items.filter((o) => o[key] === value);
   }
@@ -189,7 +200,7 @@ function decideDemoTeacherComplaint(row: DemoTask, request: DemoTaskDecision, in
   if (
     !['dismiss', 'hide'].includes(decision.action) ||
     decision.body !== undefined ||
-    decision.teacher_id ||
+    decision.teacher_ids !== undefined ||
     decision.subject ||
     decision.author_handle ||
     decision.evidence_revision ||
@@ -426,6 +437,16 @@ export async function handleDemoRequest(
       if (row.content_kind === 'teacher_homepage') return decideDemoTeacherComplaint(row, input, init);
       if (input.revision !== row.revision) return nope('conflict', 409);
       if (input.decision.object_id !== row.submission.object_id) return nope('invalid_input', 400);
+      if (input.decision.action === 'reassign') {
+        const entry = entries.find((item) => item.id === row.submission.object_id);
+        const teachers = input.decision.teacher_ids;
+        if (!entry || input.decision.revision !== entry.revision ||
+            input.decision.evidence_revision !== `demo-ev-${entry.revision}`) return nope('conflict', 409);
+        const options = demoCourseTeacherIds(entry.input.target_id, entry.input.term_id);
+        if (!teachers || teachers.some((id) => !options.includes(id))) return nope('invalid_input', 400);
+        entry.input.teacher_ids = teachers;
+        entry.revision++;
+      }
       row.state = 'decided';
       row.revision++;
       row.decision = { ...input.decision, id: `demo-decision-${row.id}-${row.revision}` };
@@ -470,12 +491,18 @@ export async function handleDemoRequest(
     if (!row) return nope('not_found', 404);
     if (p.endsWith('/history')) return json([row]);
     if (p.endsWith('/attribution')) {
-      const teachers = row.input.teacher_id ? [row.input.teacher_id] : [];
+      if (method !== 'POST') return nope('not_found', 404);
+      const request = await body(init);
+      const selection = request.teacher_ids;
+      const previous = row.input.teacher_ids ?? [];
+      const options = demoCourseTeacherIds(row.input.target_id, row.input.term_id);
+      if (!Array.isArray(selection) || new Set(selection).size !== selection.length ||
+          selection.some((id) => typeof id !== 'string' || !options.includes(id))) return nope('invalid_input', 400);
       return json({
         revision: row.revision,
-        evidence_revision: 'demo-ev-1',
-        teacher_ids: teachers,
-        previous_teacher_ids: teachers,
+        evidence_revision: `demo-ev-${row.revision}`,
+        teacher_ids: selection.length > 0 ? selection : options,
+        previous_teacher_ids: previous.length > 0 ? previous : options,
       });
     }
     return json(row);

@@ -221,7 +221,7 @@
     "author": "Identité de l’auteur",
     "anonymous": "Anonyme",
     "signed": "Signé",
-    "teacher": "Enseignant attribué",
+    "teacher": "Enseignants associés",
     "noTeacher": "Aucun enseignant précis",
     "featured": "Mis en avant",
     "unrated": "Non noté",
@@ -330,7 +330,7 @@
       "dismiss": "Clôt la demande ou le signalement sans modifier le contenu.",
       "feature": "Met l’entrée en avant ; les récompenses relèvent du module de facturation.",
       "unfeature": "Retire la mise en avant ; indiquez le motif.",
-      "reassign": "Corrige l’attribution d’après l’inscription la plus récente ; vérifiez avant d’enregistrer.",
+      "reassign": "Sélectionnez des enseignants du cours pour le semestre évalué. Si le champ reste vide, l’évaluation est attribuée à tous les enseignants du cours pour ce semestre. Vérifiez l’aperçu avant d’enregistrer.",
       "approve_append": "Publier ce complément.",
       "reject_append": "Retirer ce complément et conserver l’avis initial."
     },
