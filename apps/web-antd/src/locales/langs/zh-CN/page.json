@@ -863,12 +863,26 @@
     },
     "schoolData": {
       "recheckDays": "学校数据认证自动重验周期（天）",
-      "recheckDaysHint": "0 表示关闭自动重验。重验会用保存的学校账号再次登录校验；密码被拒或账号停用时自动撤销授权。中继到学校 LDAP 的最后一段尚未确认加密，请谨慎开启。",
+      "recheckDaysHint": "0 表示关闭自动重验。密码被拒或账号停用时，停止重验并删除凭据，已授权学期保留。中继到学校 LDAP 的最后一段尚未确认加密，请谨慎开启。",
       "recheckAll": "重验全部学校数据认证",
       "recheckOne": "重验此人的学校数据认证",
       "confirmAll": "将用保存的学校账号重验全部有效的学校数据认证，后台每次处理 2 个，可在完成前撤回。确定开始？",
       "confirmOne": "将用保存的学校账号重验学生 {student} 的学校数据认证。确定开始？",
-      "scheduled": "已安排重验，数量：{count}"
+      "scheduled": "已安排重验，数量：{count}",
+      "statusLabel": "学校数据认证状态",
+      "throughLabel": "授权截至学期",
+      "term": "{year} {season}学期",
+      "seasons": {
+        "spring": "春季",
+        "summer": "暑期",
+        "autumn": "秋季"
+      },
+      "states": {
+        "active": "有效",
+        "historical": "已停止更新，保留历史",
+        "inactive": "从未授权"
+      },
+      "loading": "正在读取学校数据认证状态"
     }
   },
   "storage": {

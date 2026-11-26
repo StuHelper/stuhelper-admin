@@ -64,6 +64,7 @@ import { safeExternalUrl } from '#/shared/url';
 
 import { methods, schoolDataSchoolId, useVerification } from './api';
 import CancelPendingRechecks from './CancelPendingRechecks.vue';
+import SchoolDataAuthorization from './SchoolDataAuthorization.vue';
 import SchoolSelect from './SchoolSelect.vue';
 
 /**
@@ -999,6 +1000,10 @@ function chooseSchool(school: School) {
                   class="bg-muted mt-3 max-h-80 overflow-auto rounded p-3 text-xs"
                 >{{ studentProfile.raw_data }}</pre>
               </Card>
+              <SchoolDataAuthorization
+                v-if="credential.school_id === schoolDataSchoolId"
+                :credential-id="credential.id"
+              />
               <FormItem
                 :label="t('page.verification.note')"
                 html-for="verificationview-field-4"
