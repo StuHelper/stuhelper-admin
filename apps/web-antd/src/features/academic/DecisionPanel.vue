@@ -73,9 +73,11 @@ const reason = ref('');
 const category = ref<'' | ViolationCategory>('');
 const categoryOptions = computed(() => violationCategories.map((value) => ({ value, label: t(`page.moderation.categories.${value}`) })));
 const signed = ref(false);
-const teacher = ref('');
+const teachers = ref<string[]>([]);
 const attribution = shallowRef<AttributionPreview>();
+const previewingAttribution = ref(false);
 const attributionError = ref('');
+let previewSequence = 0;
 const success = ref('');
 const showDiff = ref(true);
 const baseline = ref('');
@@ -86,7 +88,7 @@ const form = () =>
     reason.value,
     category.value,
     signed.value,
-    teacher.value,
+    teachers.value,
   ]);
 const dirty = computed(
   () => baseline.value !== '' && baseline.value !== form(),
@@ -110,11 +112,12 @@ const data = useAsync(async (signal) => {
   // A task must not open content outside the selected school.
   if (entry.school_id !== props.schoolId) throw new ApiError('forbidden');
   const [teachers, objects] = await Promise.all([
-    entry.input.kind === 'course'
+    entry.input.kind === 'course' && entry.input.term_id
       ? api.options(
           {
             kind: 'teacher',
             course_id: entry.input.target_id,
+            term_id: entry.input.term_id,
             school_id: entry.school_id,
           },
           signal,
@@ -192,7 +195,7 @@ async function load(preserve = false) {
   reason.value = '';
   category.value = result.task?.decision?.category ?? result.task?.submission.category ?? '';
   signed.value = !result.entry.anonymous;
-  teacher.value = result.entry.input.teacher_id ?? '';
+  teachers.value = [...(result.entry.input.teacher_ids ?? [])];
   baseline.value = form();
 }
 
@@ -207,7 +210,7 @@ const actions = computed<Decision['action'][]>(() => {
   if (current.state === 'hidden' || current.state === 'deleted')
     values.push('restore');
   values.push('edit', 'identity');
-  if (current.input.kind === 'course') values.push('reassign');
+  if (current.input.kind === 'course' && current.input.term_id) values.push('reassign');
   if (current.state !== 'deleted') values.push('delete');
   if (task.value) values.push('dismiss');
   return values;
@@ -226,9 +229,12 @@ const teacherNames = computed(
     ),
 );
 
-watch([action, teacher], () => {
+watch([action, teachers, entry], () => {
+  previewSequence++;
   attribution.value = undefined;
-});
+  attributionError.value = '';
+  previewingAttribution.value = false;
+}, { flush: 'sync' });
 watch(
   () => [props.taskId, props.entryId, props.schoolId],
   () => {
@@ -250,16 +256,24 @@ watch(
 
 async function inspectAttribution() {
   const current = entry.value;
-  if (!current) return;
+  if (!current || previewingAttribution.value) return;
+  const sequence = ++previewSequence;
+  previewingAttribution.value = true;
+  attribution.value = undefined;
   attributionError.value = '';
   try {
-    attribution.value = await api.previewAttribution(
+    const preview = await api.previewAttribution(
       current.id,
-      { teacher_id: teacher.value },
+      { teacher_ids: [...teachers.value] },
       crypto.randomUUID(),
     );
+    if (sequence !== previewSequence) return;
+    if (preview.revision === current.revision) attribution.value = preview;
+    else attributionError.value = 'revision_conflict';
   } catch (error) {
-    attributionError.value = errorCode(error);
+    if (sequence === previewSequence) attributionError.value = errorCode(error);
+  } finally {
+    if (sequence === previewSequence) previewingAttribution.value = false;
   }
 }
 
@@ -303,7 +317,7 @@ async function decide() {
     ...(chosen === 'identity' ? { author_handle: current.author_handle } : {}),
     ...(chosen === 'reassign'
       ? {
-          teacher_id: teacher.value,
+          teacher_ids: [...teachers.value],
           evidence_revision: attribution.value?.evidence_revision,
         }
       : {}),
@@ -420,10 +434,9 @@ defineExpose({ dirty, busy, uncertain });
             :label="t('page.moderation.teacher')"
           >
             {{
-              entry.input.teacher_id
-                ? (teacherNames.get(entry.input.teacher_id) ??
-                  entry.input.teacher_id)
-                : t('page.moderation.noTeacher')
+              entry.input.teacher_ids
+                ?.map((id) => teacherNames.get(id) ?? id)
+                .join(', ') || t('page.moderation.noTeacher')
             }}
           </DescriptionsItem>
         </Descriptions>
@@ -561,19 +574,20 @@ defineExpose({ dirty, busy, uncertain });
             <FormItem :label="t('page.moderation.teacher')" html-for="decisionpanel-field-2">
               <Select
                 id="decisionpanel-field-2"
-                v-model:value="teacher"
+                v-model:value="teachers"
+                mode="multiple"
+                allow-clear
+                option-filter-prop="label"
                 :disabled="busy || uncertain"
-                :options="[
-                  { value: '', label: t('page.moderation.noTeacher') },
-                  ...(data.data.value?.teachers ?? []).map((item) => ({
-                    value: item.id,
-                    label: item.name,
-                  })),
-                ]"
+                :placeholder="t('page.moderation.noTeacher')"
+                :options="(data.data.value?.teachers ?? []).map((item) => ({
+                  value: item.id,
+                  label: item.name,
+                }))"
               />
             </FormItem>
             <Space class="mb-4" wrap>
-              <Button :disabled="busy" @click="inspectAttribution">
+              <Button :disabled="busy || uncertain" :loading="previewingAttribution" @click="inspectAttribution">
                 {{ t('page.moderation.previewAttribution') }}
               </Button>
               <span v-if="attribution">{{

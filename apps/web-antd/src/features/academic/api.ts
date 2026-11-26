@@ -255,7 +255,7 @@ export class AcademicAdminApi {
     );
   }
 
-  previewAttribution(id: string, body: { teacher_id: string }, key: string) {
+  previewAttribution(id: string, body: Reviews['schemas']['AttributionInput'], key: string) {
     return this.http.json(
       `/api/v1/reviews/admin/entries/${segment(id)}/attribution`,
       parse.attribution,
