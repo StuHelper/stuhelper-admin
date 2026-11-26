@@ -62,7 +62,8 @@ import ReasonPresets from '#/shared/ui/ReasonPresets.vue';
 import { stateColor } from '#/shared/ui/state-color';
 import { safeExternalUrl } from '#/shared/url';
 
-import { methods, useVerification } from './api';
+import { methods, schoolDataSchoolId, useVerification } from './api';
+import CancelPendingRechecks from './CancelPendingRechecks.vue';
 import SchoolSelect from './SchoolSelect.vue';
 
 /**
@@ -176,6 +177,7 @@ const blankSchool = (id: string): School => ({
   notice_version: 'v1',
   opening_date: '',
   newcomer_days: 90,
+  school_data_recheck_days: 0,
   email_domain: '',
   material_types: ['student_card', 'admission_letter'],
   revision: 0,
@@ -322,6 +324,7 @@ async function load(append = false) {
     const current = schoolConfig.data.value;
     if (current && current.id === schoolId.value) {
       Object.assign(config, current);
+      config.school_data_recheck_days = current.school_data_recheck_days ?? 0;
       materialTypes.value = current.material_types.join(', ');
       teacherMaterials.value = (current.teacher_material_types ?? []).join(', ');
     }
@@ -544,6 +547,7 @@ async function saveConfig() {
       ),
     (saved) => {
       Object.assign(config, saved);
+      config.school_data_recheck_days = saved.school_data_recheck_days ?? 0;
       materialTypes.value = saved.material_types.join(', ');
       teacherMaterials.value = (saved.teacher_material_types ?? []).join(', ');
       notice.value = t('page.common.saved');
@@ -586,6 +590,42 @@ async function manageCredential(kind: 'graduate' | 'revoke') {
     (updated) => {
       credential.value = updated;
       notice.value = t('page.common.saved');
+    },
+  );
+}
+
+// School data rechecks use the stored school account, so each one asks before it starts.
+// The server only schedules them; its worker rechecks two at a time.
+async function scheduleSchoolDataRecheck(scope: 'all' | 'credential') {
+  const current = credential.value;
+  if (scope === 'credential' && !current) return;
+  const message = scope === 'all' ? t('page.verification.schoolData.confirmAll') : t('page.verification.schoolData.confirmOne', { student: current?.student_display ?? '' });
+  if (!window.confirm(message)) return;
+  const body: Schemas['SchoolDataRecheckRequest'] = scope === 'credential' && current ? { credential_id: current.id } : {};
+  await runWrite(
+    `school-data-recheck:${scope}:${body.credential_id ?? ''}`,
+    body,
+    (frozen, key) => api.write('SchoolDataRecheckReceipt', '/api/v1/admin/verification/school-data/recheck', frozen, 'POST', undefined, key),
+    (receipt) => {
+      notice.value = t('page.verification.schoolData.scheduled', { count: receipt.scheduled });
+    },
+  );
+}
+
+// The provider authorizes cancellation against BUAA's school configuration.
+const canCancelPending = computed(() => schoolId.value === schoolDataSchoolId
+  && schoolConfig.status.value === 'ready'
+  && schoolConfig.data.value?.id === schoolId.value
+  && schoolConfig.data.value.revision > 0);
+
+async function cancelPendingRechecks() {
+  if (!canCancelPending.value) return;
+  await runWrite(
+    'school-data.recheck-cancel',
+    {},
+    (_, key) => api.write('SchoolDataRecheckReceipt', '/api/v1/admin/verification/school-data/recheck/cancel', undefined, 'POST', undefined, key),
+    ({ scheduled }) => {
+      notice.value = t('page.verification.cancelPending.result', { count: format.value.number(scheduled) });
     },
   );
 }
@@ -971,7 +1011,14 @@ function chooseSchool(school: School) {
                   :disabled="locked"
                 />
               </FormItem>
-              <Space>
+              <Space wrap>
+                <Button
+                  v-if="credential.school_id === schoolDataSchoolId"
+                  :disabled="locked || credential.state !== 'active'"
+                  @click="scheduleSchoolDataRecheck('credential')"
+                >
+                  {{ t('page.verification.schoolData.recheckOne') }}
+                </Button>
                 <Button
                   :disabled="locked || credential.state !== 'active'"
                   @click="manageCredential('graduate')"
@@ -1065,6 +1112,31 @@ function chooseSchool(school: School) {
                     :disabled="locked"
                   />
                 </FormItem>
+                <FormItem
+                  v-if="config.id === schoolDataSchoolId"
+                  :label="t('page.verification.schoolData.recheckDays')"
+                  :extra="t('page.verification.schoolData.recheckDaysHint')"
+                  html-for="verificationview-field-school-data"
+                >
+                  <Space wrap>
+                    <InputNumber
+                      id="verificationview-field-school-data"
+                      v-model:value="config.school_data_recheck_days"
+                      :min="0"
+                      :max="365"
+                      :precision="0"
+                      :disabled="locked"
+                    />
+                    <Button :disabled="locked" @click="scheduleSchoolDataRecheck('all')">
+                      {{ t('page.verification.schoolData.recheckAll') }}
+                    </Button>
+                  </Space>
+                </FormItem>
+                <CancelPendingRechecks
+                  v-if="canCancelPending"
+                  :disabled="locked"
+                  @confirm="cancelPendingRechecks"
+                />
               </div>
               <FormItem :label="t('page.verification.methodsLabel')">
                 <CheckboxGroup v-model:value="config.methods" :disabled="locked">

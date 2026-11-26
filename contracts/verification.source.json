@@ -1,8 +1,8 @@
 {
   "repository": "StuHelper/stuhelper-verification",
-  "revision": "963b4d0ef9250760c6f054e4fa03c496b45ba587",
-  "version": "0.5.0",
-  "sha256": "470611b3d89fd9fc3f022ca61139a5e8e5a7f8f1fd65351e16697f6dd62baa1c",
+  "revision": "30b1cc7e8b513ee8c9252c9631e9ec03e70f68f4",
+  "version": "0.6.0",
+  "sha256": "52ae8f2bf9a752badda2996c65a9259e863ea5c5bddfc3108851be93156fc25f",
   "files": {
     "contracts/verification.openapi.yaml": "contracts/verification.openapi.yaml",
     "sdk/verification.gen.ts": "apps/web-antd/src/api/verification.gen.ts",

@@ -5,6 +5,8 @@ import { type Http, readLimited, saveBlob, segment } from '#/shared/api/http'
 import { useHttp } from '#/shared/session'
 
 export type Schemas = components['schemas']
+/** The only school with school data authorization; the provider fixes it to BUAA's official school ID. */
+export const schoolDataSchoolId = '4111010006'
 export type Application = Schemas['Application']
 export type School = Schemas['School']
 export type Credential = Schemas['Credential']
@@ -23,7 +25,7 @@ export type TeacherCredential = Schemas['TeacherCredential']
 export type TeacherDisclosure = Schemas['TeacherDisclosures'][number]
 export const teacherDisclosures: TeacherDisclosure[] = ['real_name', 'teacher', 'gender', 'organization']
 
-type Entity = 'AdminOverview' | 'Application' | 'CaptureSession' | 'Credential' | 'EmailChallenge' | 'EmailInput' | 'IdentityInput' | 'IdentityMasked' | 'Job' | 'ManualInput' | 'Material' | 'Operation' | 'Problem' | 'RemovalRequest' | 'School' | 'StudentProfile' | 'Suggestion' | 'Summary' | 'TeacherCredential' | 'TeacherForm' | 'VerifyInput'
+type Entity = 'AdminOverview' | 'Application' | 'CaptureSession' | 'Credential' | 'EmailChallenge' | 'EmailInput' | 'IdentityInput' | 'IdentityMasked' | 'Job' | 'ManualInput' | 'Material' | 'Operation' | 'Problem' | 'RemovalRequest' | 'School' | 'SchoolDataRecheckReceipt' | 'StudentProfile' | 'Suggestion' | 'Summary' | 'TeacherCredential' | 'TeacherForm' | 'VerifyInput'
 
 export const methods = ['real_name_identity_check', 'school_sso', 'student_email_outbound_otp', 'student_email_inbound_challenge', 'manual_material_review'] as const
 export const stages = ['bachelor', 'master', 'doctor', 'other', 'unknown'] as const
@@ -62,7 +64,7 @@ const challenge = (v: unknown) => object(v) && text(v.id) && oneOf(v.state, ['pr
 
 const checks: Record<Entity, (v: Record<string, unknown>) => boolean> = {
   StudentProfile: (v) => text(v.school_id) && oneOf(v.data_status, ['complete', 'partial', 'reference_only', 'unavailable']) && text(v.schema) && count(v.revision) && optionalInstant(v.collected_at) && text(v.source_revision) && object(v.fields) && Object.keys(v.fields).length <= 64 && object(v.field_sources) && Object.values(v.field_sources).every(text) && (v.raw_data === undefined || text(v.raw_data)),
-  School: (v) => text(v.id) && text(v.name) && typeof v.enabled === 'boolean' && Array.isArray(v.methods) && v.methods.every((m) => oneOf(m, methods)) && text(v.notice_version) && text(v.opening_date) && count(v.newcomer_days) && text(v.email_domain) && materialTypes(v.material_types) && methodCapabilities(v.method_capabilities) && (v.teacher_enabled === undefined || typeof v.teacher_enabled === 'boolean') && (v.teacher_material_types === undefined || materialTypes(v.teacher_material_types)) && count(v.revision) && (v.profile_schema === undefined || text(v.profile_schema)),
+  School: (v) => text(v.id) && text(v.name) && typeof v.enabled === 'boolean' && Array.isArray(v.methods) && v.methods.every((m) => oneOf(m, methods)) && text(v.notice_version) && text(v.opening_date) && count(v.newcomer_days) && text(v.email_domain) && materialTypes(v.material_types) && methodCapabilities(v.method_capabilities) && (v.teacher_enabled === undefined || typeof v.teacher_enabled === 'boolean') && (v.teacher_material_types === undefined || materialTypes(v.teacher_material_types)) && count(v.revision) && (v.profile_schema === undefined || text(v.profile_schema)) && (v.school_data_recheck_days === undefined || (count(v.school_data_recheck_days) && v.school_data_recheck_days <= 365)),
   Application: (v) => text(v.id) && text(v.school_id) && oneOf(v.method, methods) && oneOf(v.stage, stages) && oneOf(v.kind, recordKinds) && oneOf(v.state, ['in_progress', 'pending_review', 'supplement_required', 'approved', 'rejected', 'cancelled', 'expired', 'deleted']) && count(v.revision) && instant(v.created_at) && instant(v.updated_at) && instant(v.expires_at) && text(v.credential_id) && text(v.result_code) && (v.review_note === undefined || text(v.review_note)) && (v.qualification_expires_at === undefined || optionalInstant(v.qualification_expires_at)) && (v.school_challenge === undefined || challenge(v.school_challenge)),
   Credential: (v) => text(v.id) && text(v.school_id) && oneOf(v.method, methods) && oneOf(v.stage, stages) && oneOf(v.kind, recordKinds) && oneOf(v.state, ['active', 'revoked', 'expired', 'deleted']) && text(v.student_display) && count(v.revision) && instant(v.verified_at) && optionalInstant(v.expires_at),
   IdentityMasked: masked,
@@ -79,6 +81,7 @@ const checks: Record<Entity, (v: Record<string, unknown>) => boolean> = {
   EmailChallenge: (v) => (v.resend_available_at === undefined || instant(v.resend_available_at)) && (v.remaining_attempts === undefined || count(v.remaining_attempts)) && text(v.id) && text(v.application_id) && instant(v.expires_at) && oneOf(v.state, ['queued', 'waiting', 'delivered', 'used', 'failed']) && text(v.masked_email) && text(v.target_address),
   CaptureSession: (v) => text(v.token) && /^[A-Za-z0-9_-]{43}$/.test(v.token) && instant(v.expires_at),
   Material: (v) => text(v.id) && text(v.application_id) && oneOf(v.content_type, ['image/jpeg', 'image/png', 'application/pdf']) && count(v.size) && instant(v.created_at),
+  SchoolDataRecheckReceipt: (v) => count(v.scheduled),
   Operation: (v) => text(v.id) && oneOf(v.state, ['processing', 'completed', 'failed']) && text(v.code) && instant(v.expires_at),
   Job: (v) => text(v.id) && text(v.school_id) && oneOf(v.kind, ['mail', 'event']) && oneOf(v.state, ['pending', 'running', 'manual', 'done']) && count(v.attempts) && text(v.code),
   TeacherForm: (v) => sized(v.name, 0, 100) && sized(v.organization, 0, 100) && (v.gender === undefined || sized(v.gender, 0, 32)) && sized(v.email, 0, 254) && sized(v.material_type, 0, 64) && strings(v.material_ids) && v.material_ids.length <= 5 && disclosures(v.disclosures) && count(v.revision),
