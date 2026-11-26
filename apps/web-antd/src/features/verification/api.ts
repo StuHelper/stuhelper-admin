@@ -5,6 +5,8 @@ import { type Http, readLimited, saveBlob, segment } from '#/shared/api/http'
 import { useHttp } from '#/shared/session'
 
 export type Schemas = components['schemas']
+/** The only school with school data authorization; the provider fixes it to BUAA's official school ID. */
+export const schoolDataSchoolId = '4111010006'
 export type Application = Schemas['Application']
 export type School = Schemas['School']
 export type Credential = Schemas['Credential']

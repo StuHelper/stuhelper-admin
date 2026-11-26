@@ -62,7 +62,7 @@ import ReasonPresets from '#/shared/ui/ReasonPresets.vue';
 import { stateColor } from '#/shared/ui/state-color';
 import { safeExternalUrl } from '#/shared/url';
 
-import { methods, useVerification } from './api';
+import { methods, schoolDataSchoolId, useVerification } from './api';
 import CancelPendingRechecks from './CancelPendingRechecks.vue';
 import SchoolSelect from './SchoolSelect.vue';
 
@@ -613,7 +613,7 @@ async function scheduleSchoolDataRecheck(scope: 'all' | 'credential') {
 }
 
 // The provider authorizes cancellation against BUAA's school configuration.
-const canCancelPending = computed(() => schoolId.value === '4111010006'
+const canCancelPending = computed(() => schoolId.value === schoolDataSchoolId
   && schoolConfig.status.value === 'ready'
   && schoolConfig.data.value?.id === schoolId.value
   && schoolConfig.data.value.revision > 0);
@@ -1013,7 +1013,7 @@ function chooseSchool(school: School) {
               </FormItem>
               <Space wrap>
                 <Button
-                  v-if="credential.school_id === 'buaa'"
+                  v-if="credential.school_id === schoolDataSchoolId"
                   :disabled="locked || credential.state !== 'active'"
                   @click="scheduleSchoolDataRecheck('credential')"
                 >
@@ -1113,7 +1113,7 @@ function chooseSchool(school: School) {
                   />
                 </FormItem>
                 <FormItem
-                  v-if="config.id === 'buaa'"
+                  v-if="config.id === schoolDataSchoolId"
                   :label="t('page.verification.schoolData.recheckDays')"
                   :extra="t('page.verification.schoolData.recheckDaysHint')"
                   html-for="verificationview-field-school-data"
