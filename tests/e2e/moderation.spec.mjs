@@ -127,9 +127,10 @@ test('moderation previews and applies multiple teachers from the review term', a
   await dropdown.getByText('Professor 2', { exact: true }).click();
   await drawer.locator('#decisionpanel-field-2').press('Escape');
   await drawer.getByRole('button', { name: all.moderation.previewAttribution, exact: true }).click();
-  await expect(drawer.getByText('Professor 1, Professor 2', { exact: false })).toBeVisible();
+  const attribution = all.moderation.attributionResult.replace('{teachers}', 'Professor 1, Professor 2');
+  await expect(drawer.getByText(attribution, { exact: true })).toBeVisible();
   expect(previewBody).toEqual({ teacher_ids: ['teacher-1', 'teacher-2'] });
-  await drawer.getByLabel(all.common.reason, { exact: true }).fill('Confirmed both teachers');
+  await drawer.getByLabel(all.moderation.reason, { exact: true }).fill('Confirmed both teachers');
   await drawer.getByRole('button', { name: all.moderation.applyDecision, exact: true }).click();
   await expect.poll(() => decisionBody).toMatchObject({ decision: {
     action: 'reassign', evidence_revision: 'reviewux-evidence', teacher_ids: ['teacher-1', 'teacher-2'],
