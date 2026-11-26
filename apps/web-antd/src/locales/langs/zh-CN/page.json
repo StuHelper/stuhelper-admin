@@ -95,7 +95,6 @@
     "rate_limited": "操作过于频繁或已达到数量上限，请稍后重试。",
     "retry_required": "上一次提交的结果尚未确认，请先重试原请求。",
     "edit_window_closed": "已超过允许编辑的时间，无法执行此操作。",
-
     "disclosure_required": "缺少已获准公开的真实姓名或教师认证信息，暂时不能回复本人任课课程。",
     "identity_owned": "该学生身份已绑定其他账号，请找回原账号或联系管理员。",
     "expired": "申请、验证码或拍摄链接已到期，请重新发起。",
@@ -856,7 +855,16 @@
       "teacherProof": "缺少有效的在职或任课证明，请补充工作证或院系名录材料。"
     },
     "teacherEnabled": "开放教师认证",
-    "teacherMaterials": "教师材料类型"
+    "teacherMaterials": "教师材料类型",
+    "schoolData": {
+      "recheckDays": "学校数据认证自动重验周期（天）",
+      "recheckDaysHint": "0 表示关闭自动重验。重验会用保存的学校账号再次登录校验；密码被拒或账号停用时自动撤销授权。中继到学校 LDAP 的最后一段尚未确认加密，请谨慎开启。",
+      "recheckAll": "重验全部学校数据认证",
+      "recheckOne": "重验此人的学校数据认证",
+      "confirmAll": "将用保存的学校账号重验全部有效的学校数据认证，后台每次处理 2 个，可在完成前撤回。确定开始？",
+      "confirmOne": "将用保存的学校账号重验学生 {student} 的学校数据认证。确定开始？",
+      "scheduled": "已安排重验，数量：{count}"
+    }
   },
   "storage": {
     "title": "存储运营管理",

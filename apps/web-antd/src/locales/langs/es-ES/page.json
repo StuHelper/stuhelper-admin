@@ -95,7 +95,6 @@
     "rate_limited": "Demasiados intentos o se alcanzó el límite. Inténtalo más tarde.",
     "retry_required": "El envío anterior no está confirmado. Reintenta primero la solicitud original.",
     "edit_window_closed": "El plazo de edición terminó. Esta acción no está disponible.",
-
     "disclosure_required": "Falta el nombre real o la acreditación autorizada. Aún no puedes responder sobre tu curso.",
     "identity_owned": "Esta identidad estudiantil está vinculada a otra cuenta. Recupérala o contacta con un administrador.",
     "expired": "La solicitud, el código o el enlace caducó. Inicia de nuevo.",
@@ -856,7 +855,16 @@
       "teacherProof": "Falta comprobante válido de vinculación docente o cátedra; adjúntelo."
     },
     "teacherEnabled": "Activar la verificación del profesorado",
-    "teacherMaterials": "Tipos de documentos del profesorado"
+    "teacherMaterials": "Tipos de documentos del profesorado",
+    "schoolData": {
+      "recheckDays": "Periodo de reverificación de datos escolares (días)",
+      "recheckDaysHint": "0 desactiva la reverificación automática. Cada reverificación vuelve a iniciar sesión con la cuenta escolar guardada; una contraseña rechazada o una cuenta desactivada revoca la autorización. El último tramo del relé al LDAP de la universidad no está confirmado como cifrado; actívalo con cuidado.",
+      "recheckAll": "Reverificar todas las autorizaciones",
+      "recheckOne": "Reverificar la autorización de esta persona",
+      "confirmAll": "Todas las autorizaciones activas se reverificarán con la cuenta escolar guardada, de dos en dos, y se puede retirar antes de terminar. ¿Empezar?",
+      "confirmOne": "La autorización de datos escolares del estudiante {student} se reverificará con la cuenta escolar guardada. ¿Empezar?",
+      "scheduled": "Reverificaciones programadas: {count}"
+    }
   },
   "storage": {
     "title": "Gestión del almacenamiento",
