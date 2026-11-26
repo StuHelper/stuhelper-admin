@@ -63,6 +63,7 @@ import { stateColor } from '#/shared/ui/state-color';
 import { safeExternalUrl } from '#/shared/url';
 
 import { methods, useVerification } from './api';
+import CancelPendingRechecks from './CancelPendingRechecks.vue';
 import SchoolSelect from './SchoolSelect.vue';
 
 /**
@@ -611,6 +612,24 @@ async function scheduleSchoolDataRecheck(scope: 'all' | 'credential') {
   );
 }
 
+// The provider authorizes cancellation against BUAA's school configuration.
+const canCancelPending = computed(() => schoolId.value === '4111010006'
+  && schoolConfig.status.value === 'ready'
+  && schoolConfig.data.value?.id === schoolId.value
+  && schoolConfig.data.value.revision > 0);
+
+async function cancelPendingRechecks() {
+  if (!canCancelPending.value) return;
+  await runWrite(
+    'school-data.recheck-cancel',
+    {},
+    (_, key) => api.write('SchoolDataRecheckReceipt', '/api/v1/admin/verification/school-data/recheck/cancel', undefined, 'POST', undefined, key),
+    ({ scheduled }) => {
+      notice.value = t('page.verification.cancelPending.result', { count: format.value.number(scheduled) });
+    },
+  );
+}
+
 // Full identity, document and raw fields each need their own permission on the server.
 async function showProfile(mode: 'basic' | 'document' | 'full' | 'raw') {
   const current = credential.value;
@@ -1113,6 +1132,11 @@ function chooseSchool(school: School) {
                     </Button>
                   </Space>
                 </FormItem>
+                <CancelPendingRechecks
+                  v-if="canCancelPending"
+                  :disabled="locked"
+                  @confirm="cancelPendingRechecks"
+                />
               </div>
               <FormItem :label="t('page.verification.methodsLabel')">
                 <CheckboxGroup v-model:value="config.methods" :disabled="locked">

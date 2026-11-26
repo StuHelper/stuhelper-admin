@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "StuHelper Catalog",
-    "version": "0.15.0"
+    "version": "0.19.1"
   },
   "servers": [
     {
@@ -2633,7 +2633,7 @@
             }
           },
           "409": {
-            "description": "The published directory version or the heat window changed. Restart from the first page.",
+            "description": "The published directory version changed. Restart from the first page.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2803,7 +2803,7 @@
             }
           }
         ],
-        "description": "Current visible course/teacher directory, stable sort with ID tie-break and filter-bound cursor. Categories count distinct courses after all filters except category_id. Department groups respect all current filters. Classification filters apply to the same offering/class. Teacher rows and counts require T2 persisted marking; absent marker enforcement returns 503. Scores are read in bounded batches from owning modules, without per-row queries. Catalog membership is cached with transactional revision invalidation; ratings and heat are always current. 目录成员和分面来自同一持久投影版本，实时评分与热度按 ID 关联。游标绑定投影版本，目录重建或热门等含热度排序的窗口换日后，旧游标返回 409，应从第一页重新读取。 普通目录仅提供学校、院系、分类、性质、学期、课程和教师；term_course、class、assignment、schedule 仅供管理端或受信服务使用。"
+        "description": "Current visible course/teacher directory, stable sort with ID tie-break and filter-bound cursor. Categories count distinct courses after all filters except category_id. Department groups respect all current filters. Classification filters apply to the same offering/class. Teacher rows and counts require T2 persisted marking; absent marker enforcement returns 503. Scores are read in bounded batches from owning modules, without per-row queries. Catalog membership is cached with transactional revision invalidation; ratings and heat are always current. 目录成员和分面来自同一持久投影版本，实时评分与热度按 ID 关联。游标绑定投影版本，目录重建后，旧游标返回 409，应从第一页重新读取。 普通目录仅提供学校、院系、分类、性质、学期、课程和教师；term_course、class、assignment、schedule 仅供管理端或受信服务使用。"
       }
     },
     "/api/v1/catalog/me/recent-courses": {
@@ -3885,6 +3885,149 @@
           },
           "409": {
             "description": "Conflict with existing rebuild or incomplete source import",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required dependency unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/catalog/objects/{id}/teacher-homepage/photos/{photo_id}/thumbnail": {
+      "get": {
+        "operationId": "getTeacherDirectoryAvatar",
+        "description": "每次核对当前教师、学校资格和主页照片展示权限。源照片摘要标识 128 像素居中裁剪的 JPEG 缩略图。生产通过短期 EdgeOne 签名地址分发。",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9_.:-]+$"
+            }
+          },
+          {
+            "name": "photo_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 64,
+              "maxLength": 64,
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "description": "teacher_homepage.photo.url 中的照片内容 SHA-256。"
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Authorized private media redirect valid for 60 seconds",
+            "headers": {
+              "Location": {
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Teacher image signature issuance limit exceeded",
+            "headers": {
+              "Retry-After": {
+                "required": true,
+                "description": "Seconds until the next issuance window",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 60
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "128 × 128 JPEG，最多 32 KiB。",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "private, no-store"
+                  ]
+                }
+              },
+              "X-Content-Type-Options": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "nosniff"
+                  ]
+                }
+              }
+            },
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not permitted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "教师不可见、没有当前有效主页照片，或照片摘要与当前版本不符。",
             "content": {
               "application/json": {
                 "schema": {
@@ -5046,6 +5189,16 @@
               "pattern": "^[A-Za-z0-9_.:-]+$"
             },
             "description": "目录教师对象标识。"
+          },
+          {
+            "name": "reveal_contacts",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "读者主动查看时传 true。重新核对准入和显示设置后返回联系方式。"
           }
         ],
         "responses": {
@@ -7338,6 +7491,7 @@
         "type": "object",
         "additionalProperties": false,
         "properties": {
+          "avatar_url": {"type": "string", "pattern": "^/api/v1/catalog/objects/[A-Za-z0-9_.:-]+/teacher-homepage/photos/[0-9a-f]{64}/thumbnail$", "description": "教师当前可展示照片的缩略图地址。其他情况省略。"},
           "object": {
             "$ref": "#/components/schemas/Object"
           },
@@ -7369,6 +7523,7 @@
             "maxItems": 5
           },
           "heat": {
+            "description": "Weighted all-time views, daily net favorites and currently visible reviews for this directory object.",
             "type": "number",
             "minimum": 0
           }
@@ -7408,6 +7563,7 @@
             }
           },
           "department_facets": {
+            "description": "Departments in school code order: numeric official codes, B-prefixed numeric units, other codes, then missing codes. Ties use name and ID.",
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/DirectoryFacet"
@@ -7422,12 +7578,6 @@
           "generated_at": {
             "type": "string",
             "format": "date-time"
-          },
-          "window_days": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 366,
-            "description": "Number of Beijing calendar dates in the heat window (Asia/Shanghai, UTC+8), including today up to the time of the request. The default is 30."
           },
           "facet_total": {
             "type": "integer",
@@ -7649,6 +7799,7 @@
             "minimum": 0
           },
           "departments": {
+            "description": "Uses the same school department order as directory department_facets.",
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/FilterOption"
@@ -8207,7 +8358,8 @@
         "required": ["from", "to"],
         "properties": {
           "from": { "type": "string", "minLength": 1, "maxLength": 256 },
-          "to": { "type": "string", "minLength": 1, "maxLength": 256 }
+          "to": { "type": "string", "minLength": 1, "maxLength": 256 },
+          "retire_source": { "type": "boolean", "description": "Retire source IDs from the published directory without redirecting them to the target." }
         }
       },
       "SportsProject": {
@@ -8256,6 +8408,12 @@
             "items": { "type": "string", "minLength": 1, "maxLength": 256 }
           },
           "excluded_category_names": {
+            "type": "array",
+            "maxItems": 256,
+            "items": { "type": "string", "minLength": 1, "maxLength": 256 }
+          },
+          "hidden_category_names": {
+            "description": "Category filters omitted from this school directory. Courses and their source classifications remain available.",
             "type": "array",
             "maxItems": 256,
             "items": { "type": "string", "minLength": 1, "maxLength": 256 }
@@ -9453,6 +9611,7 @@
         }
       },
       "TeacherHomepagePublicProfile": {
+        "description": "默认投影用单个 U+E000 标示每处被遮盖的联系方式，包括非空的 email、phone 和 office_location。客户端在原位置渲染“查看联系方式”。源文本中的 U+E000 在展示前移除。",
         "type": "object",
         "additionalProperties": false,
         "required": [
@@ -9727,11 +9886,15 @@
         "additionalProperties": false,
         "required": [],
         "properties": {
+          "contacts_available": {
+            "type": "boolean",
+            "description": "普通响应有可按需查看的联系方式时返回 true。"
+          },
           "profile": {
             "$ref": "#/components/schemas/TeacherHomepagePublicProfile"
           }
         },
-        "description": "应用白名单、个人控制与匹配状态后的教师主页。资料不可展示时省略 profile。"
+        "description": "应用白名单、个人控制与匹配状态后的教师主页。资料不可展示时省略 profile。默认投影在每处被遮盖的位置返回 U+E000。请求 reveal_contacts=true 后返回当前允许查看的原值，正文不含该标记。"
       },
       "TeacherHomepageSupervisor": {
         "type": "string",

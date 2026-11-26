@@ -856,6 +856,11 @@
     },
     "teacherEnabled": "Enable teacher verification",
     "teacherMaterials": "Teacher material types",
+    "cancelPending": {
+      "action": "Cancel pending rechecks",
+      "confirm": "Cancel all pending school data rechecks for Beihang? Checks already in progress will continue. Users will keep their school data authorizations.",
+      "result": "Pending rechecks cancelled: {count}"
+    },
     "schoolData": {
       "recheckDays": "School data automatic recheck period (days)",
       "recheckDaysHint": "0 turns automatic rechecks off. A recheck signs in again with the stored school account; a rejected password or disabled account revokes the authorization. The last hop from the relay to the school LDAP is not confirmed to be encrypted, so enable with care.",

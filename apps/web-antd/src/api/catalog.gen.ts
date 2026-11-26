@@ -364,7 +364,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description Current visible course/teacher directory, stable sort with ID tie-break and filter-bound cursor. Categories count distinct courses after all filters except category_id. Department groups respect all current filters. Classification filters apply to the same offering/class. Teacher rows and counts require T2 persisted marking; absent marker enforcement returns 503. Scores are read in bounded batches from owning modules, without per-row queries. Catalog membership is cached with transactional revision invalidation; ratings and heat are always current. 目录成员和分面来自同一持久投影版本，实时评分与热度按 ID 关联。游标绑定投影版本，目录重建或热门等含热度排序的窗口换日后，旧游标返回 409，应从第一页重新读取。 普通目录仅提供学校、院系、分类、性质、学期、课程和教师；term_course、class、assignment、schedule 仅供管理端或受信服务使用。 */
+        /** @description Current visible course/teacher directory, stable sort with ID tie-break and filter-bound cursor. Categories count distinct courses after all filters except category_id. Department groups respect all current filters. Classification filters apply to the same offering/class. Teacher rows and counts require T2 persisted marking; absent marker enforcement returns 503. Scores are read in bounded batches from owning modules, without per-row queries. Catalog membership is cached with transactional revision invalidation; ratings and heat are always current. 目录成员和分面来自同一持久投影版本，实时评分与热度按 ID 关联。游标绑定投影版本，目录重建后，旧游标返回 409，应从第一页重新读取。 普通目录仅提供学校、院系、分类、性质、学期、课程和教师；term_course、class、assignment、schedule 仅供管理端或受信服务使用。 */
         get: operations["listDirectory"];
         put?: never;
         post?: never;
@@ -507,6 +507,23 @@ export interface paths {
         put?: never;
         /** @description 提交目录投影异步重建持久任务，可选更新学校 DirectoryPolicy。要求 catalog.maintain 与学校维护范围。同键同请求重放原任务，已有排队或运行任务或存在未完成来源导入时返回 409。 */
         post: operations["startDirectoryProjectionRebuild"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/catalog/objects/{id}/teacher-homepage/photos/{photo_id}/thumbnail": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description 每次核对当前教师、学校资格和主页照片展示权限。源照片摘要标识 128 像素居中裁剪的 JPEG 缩略图。生产通过短期 EdgeOne 签名地址分发。 */
+        get: operations["getTeacherDirectoryAvatar"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1069,12 +1086,15 @@ export interface components {
             review_count: number;
         };
         DirectoryItem: {
+            /** @description 教师当前可展示照片的缩略图地址。其他情况省略。 */
+            avatar_url?: string;
             object: components["schemas"]["Object"];
             departments: components["schemas"]["Object"][];
             categories: components["schemas"]["Object"][];
             review_count: number;
             recommendation: components["schemas"]["Recommendation"];
             dimensions: components["schemas"]["DirectoryBand"][];
+            /** @description Weighted all-time views, daily net favorites and currently visible reviews for this directory object. */
             heat: number;
         };
         DirectoryPage: {
@@ -1082,12 +1102,11 @@ export interface components {
             next: string;
             total: number;
             category_facets: components["schemas"]["DirectoryFacet"][];
+            /** @description Departments in school code order: numeric official codes, B-prefixed numeric units, other codes, then missing codes. Ties use name and ID. */
             department_facets: components["schemas"]["DirectoryFacet"][];
             nature_facets: components["schemas"]["DirectoryFacet"][];
             /** Format: date-time */
             generated_at: string;
-            /** @description Number of Beijing calendar dates in the heat window (Asia/Shanghai, UTC+8), including today up to the time of the request. The default is 30. */
-            window_days?: number;
             /** @description Distinct objects after all filters except category_id / category_ids, for the All category badge. */
             facet_total: number;
         };
@@ -1140,6 +1159,7 @@ export interface components {
             kind: "course" | "teacher";
             /** Format: int64 */
             total: number;
+            /** @description Uses the same school department order as directory department_facets. */
             departments: components["schemas"]["FilterOption"][];
             categories: components["schemas"]["FilterOption"][];
             natures: components["schemas"]["FilterOption"][];
@@ -1292,6 +1312,8 @@ export interface components {
         CategoryAlias: {
             from: string;
             to: string;
+            /** @description Retire source IDs from the published directory without redirecting them to the target. */
+            retire_source?: boolean;
         };
         SportsProject: {
             key: string;
@@ -1309,6 +1331,8 @@ export interface components {
             cutoff_season: "spring" | "summer" | "autumn";
             excluded_course_names?: string[];
             excluded_category_names?: string[];
+            /** @description Category filters omitted from this school directory. Courses and their source classifications remain available. */
+            hidden_category_names?: string[];
             category_aliases?: components["schemas"]["CategoryAlias"][];
             sports?: components["schemas"]["SportsDirectoryPolicy"] | null;
         };
@@ -1756,6 +1780,7 @@ export interface components {
             /** @description 反馈给申请人的处理结论，去除首尾空白后须有内容。 */
             note: string;
         };
+        /** @description 默认投影用单个 U+E000 标示每处被遮盖的联系方式，包括非空的 email、phone 和 office_location。客户端在原位置渲染“查看联系方式”。源文本中的 U+E000 在展示前移除。 */
         TeacherHomepagePublicProfile: {
             /** @description 允许显示时提供的官网姓名。被隐藏或未获准时省略。 */
             name?: string;
@@ -1833,8 +1858,10 @@ export interface components {
         TeacherHomepageMediaView: {
             items: components["schemas"]["TeacherHomepageMedium"][];
         };
-        /** @description 应用白名单、个人控制与匹配状态后的教师主页。资料不可展示时省略 profile。 */
+        /** @description 应用白名单、个人控制与匹配状态后的教师主页。资料不可展示时省略 profile。默认投影在每处被遮盖的位置返回 U+E000。请求 reveal_contacts=true 后返回当前允许查看的原值，正文不含该标记。 */
         TeacherHomepagePublicView: {
+            /** @description 普通响应有可按需查看的联系方式时返回 true。 */
+            contacts_available?: boolean;
             profile?: components["schemas"]["TeacherHomepagePublicProfile"];
         };
         /** @enum {string} */
@@ -3823,7 +3850,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description The published directory version or the heat window changed. Restart from the first page. */
+            /** @description The published directory version changed. Restart from the first page. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -4687,6 +4714,94 @@ export interface operations {
             };
         };
     };
+    getTeacherDirectoryAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                /** @description teacher_homepage.photo.url 中的照片内容 SHA-256。 */
+                photo_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 128 × 128 JPEG，最多 32 KiB。 */
+            200: {
+                headers: {
+                    "Cache-Control"?: "private, no-store";
+                    "X-Content-Type-Options"?: "nosniff";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/jpeg": string;
+                };
+            };
+            /** @description Authorized private media redirect valid for 60 seconds */
+            302: {
+                headers: {
+                    Location: string;
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not permitted */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description 教师不可见、没有当前有效主页照片，或照片摘要与当前版本不符。 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Teacher image signature issuance limit exceeded */
+            429: {
+                headers: {
+                    /** @description Seconds until the next issuance window */
+                    "Retry-After": number;
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Required dependency unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     getTeacherHomepagePhoto: {
         parameters: {
             query?: never;
@@ -5435,7 +5550,10 @@ export interface operations {
     };
     getTeacherHomepage: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description 读者主动查看时传 true。重新核对准入和显示设置后返回联系方式。 */
+                reveal_contacts?: boolean;
+            };
             header?: never;
             path: {
                 /** @description 目录教师对象标识。 */

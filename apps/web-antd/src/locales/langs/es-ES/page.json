@@ -856,6 +856,11 @@
     },
     "teacherEnabled": "Activar la verificación del profesorado",
     "teacherMaterials": "Tipos de documentos del profesorado",
+    "cancelPending": {
+      "action": "Cancelar las verificaciones pendientes",
+      "confirm": "¿Cancelar todas las verificaciones de datos académicos pendientes de Beihang? Las que ya estén en curso continuarán. Cada usuario conservará su autorización.",
+      "result": "Verificaciones pendientes canceladas: {count}"
+    },
     "schoolData": {
       "recheckDays": "Periodo de reverificación de datos escolares (días)",
       "recheckDaysHint": "0 desactiva la reverificación automática. Cada reverificación vuelve a iniciar sesión con la cuenta escolar guardada; una contraseña rechazada o una cuenta desactivada revoca la autorización. El último tramo del relé al LDAP de la universidad no está confirmado como cifrado; actívalo con cuidado.",
