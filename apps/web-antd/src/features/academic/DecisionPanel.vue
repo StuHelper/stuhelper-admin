@@ -229,7 +229,7 @@ const teacherNames = computed(
     ),
 );
 
-watch([action, teachers, entry], () => {
+watch([action, teachers, () => entry.value?.id, () => entry.value?.revision], () => {
   previewSequence++;
   attribution.value = undefined;
   attributionError.value = '';

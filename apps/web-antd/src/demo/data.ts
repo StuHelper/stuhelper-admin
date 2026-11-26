@@ -78,7 +78,7 @@ const rows: Row[] = [
 ]
 const stateFor = (id: string) => (id === 'r16' ? { mine: true, can_edit: true } : { mine: false, can_edit: false })
 export const reviews = rows.map(([id, target_id, term_id, teacher_id, title, body, ratings, upvotes, downvotes, days, who, featured]) => ({
-  id, root_id: id, kind: target_id.startsWith('p') ? 'mentor' : 'course', school_id: SCHOOL, target_id, ...(term_id ? { term_id } : {}), ...(teacher_id ? { teacher_id } : {}), title, body, ratings, preview: false, author: author(who), revision: 1, published_at: ago(days), upvotes, downvotes, my_vote: 0, state: 'published', ...(featured ? { featured } : {}), ...stateFor(id),
+  id, root_id: id, kind: target_id.startsWith('p') ? 'mentor' : 'course', school_id: SCHOOL, target_id, ...(term_id ? { term_id } : {}), ...(teacher_id ? { teacher_ids: [teacher_id] } : {}), title, body, ratings, preview: false, author: author(who), revision: 1, published_at: ago(days), upvotes, downvotes, my_vote: 0, state: 'published', ...(featured ? { featured } : {}), ...stateFor(id),
 }))
 export const replies = [
   { root: 'r1', who: '不周山', body: '同意，图算法那个实验确实要预留足够时间。', days: 2 },
