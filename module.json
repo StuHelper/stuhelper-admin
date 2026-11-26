@@ -18,6 +18,9 @@
     "README.md"
   ],
   "scenario_tests": {
+    "REVIEWUX-04": [
+      "tests/e2e/moderation.spec.mjs#moderation previews and applies multiple teachers from the review term"
+    ],
     "ST-09": [
       "apps/web-antd/src/api/contribution.test.ts#keeps the operations record when the provider has no successful quota observation",
       "tests/e2e/contributions.spec.mjs#operator retry preserves conditions, retains uncertain request and clears revoked inventory",

@@ -221,7 +221,7 @@
     "author": "Author identity",
     "anonymous": "Anonymous",
     "signed": "Signed",
-    "teacher": "Attributed teacher",
+    "teacher": "Attributed teachers",
     "noTeacher": "No specific teacher",
     "featured": "Featured",
     "unrated": "Not rated",
@@ -330,7 +330,7 @@
       "dismiss": "Closes this request or report without changing the content.",
       "feature": "Marks the entry as featured; rewards are handled by the billing module.",
       "unfeature": "Removes the featured mark; state the reason in the note.",
-      "reassign": "Corrects the teacher attribution from the latest trusted enrollment; check before saving.",
+      "reassign": "Choose instructors for this course in the review’s term. Leave the field empty to attribute the review to all instructors for that term. Preview before saving.",
       "approve_append": "Publish this follow-up.",
       "reject_append": "Remove this follow-up and keep the original review."
     },
