@@ -95,7 +95,6 @@
     "rate_limited": "Too many attempts or the limit is reached. Please try again later.",
     "retry_required": "The previous submission is not confirmed. Retry the original request first.",
     "edit_window_closed": "The editing window has closed. This action is unavailable.",
-
     "disclosure_required": "Authorized real name or teacher verification is missing. You cannot reply to your own course yet.",
     "identity_owned": "This student identity belongs to another account. Recover that account or contact an administrator.",
     "expired": "The application, code or capture link expired. Please start again.",
@@ -856,7 +855,16 @@
       "teacherProof": "Missing valid employment or teaching proof; please supplement."
     },
     "teacherEnabled": "Enable teacher verification",
-    "teacherMaterials": "Teacher material types"
+    "teacherMaterials": "Teacher material types",
+    "schoolData": {
+      "recheckDays": "School data automatic recheck period (days)",
+      "recheckDaysHint": "0 turns automatic rechecks off. A recheck signs in again with the stored school account; a rejected password or disabled account revokes the authorization. The last hop from the relay to the school LDAP is not confirmed to be encrypted, so enable with care.",
+      "recheckAll": "Recheck all school data authorizations",
+      "recheckOne": "Recheck this person's school data authorization",
+      "confirmAll": "Every active school data authorization will be rechecked with its stored school account, two at a time, and can be taken back before it finishes. Start now?",
+      "confirmOne": "The school data authorization of student {student} will be rechecked with the stored school account. Start now?",
+      "scheduled": "Rechecks scheduled: {count}"
+    }
   },
   "storage": {
     "title": "Storage operations",

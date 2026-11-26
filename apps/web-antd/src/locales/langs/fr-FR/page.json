@@ -95,7 +95,6 @@
     "rate_limited": "Trop de tentatives ou limite atteinte. Réessayez plus tard.",
     "retry_required": "L’envoi précédent n’est pas confirmé. Renvoyez d’abord la demande initiale.",
     "edit_window_closed": "Le délai de modification est écoulé. Cette action est indisponible.",
-
     "disclosure_required": "Le nom réel ou la certification autorisée manque. Vous ne pouvez pas répondre à votre cours.",
     "identity_owned": "Cette identité étudiante est liée à un autre compte. Récupérez-le ou contactez un administrateur.",
     "expired": "La demande, le code ou le lien a expiré. Recommencez.",
@@ -856,7 +855,16 @@
       "teacherProof": "Justificatif d’emploi ou d’enseignement manquant ; veuillez compléter."
     },
     "teacherEnabled": "Activer la vérification des enseignants",
-    "teacherMaterials": "Types de justificatifs des enseignants"
+    "teacherMaterials": "Types de justificatifs des enseignants",
+    "schoolData": {
+      "recheckDays": "Périodicité de revérification des données scolaires (jours)",
+      "recheckDaysHint": "0 désactive la revérification automatique. Une revérification se reconnecte avec le compte scolaire enregistré ; un mot de passe refusé ou un compte désactivé révoque l’autorisation. Le dernier tronçon du relais vers le LDAP de l’école n’est pas confirmé comme chiffré : activez avec prudence.",
+      "recheckAll": "Revérifier toutes les autorisations",
+      "recheckOne": "Revérifier l’autorisation de cette personne",
+      "confirmAll": "Toutes les autorisations actives seront revérifiées avec le compte scolaire enregistré, deux à la fois, et l’opération peut être annulée avant la fin. Commencer ?",
+      "confirmOne": "L’autorisation des données scolaires de l’étudiant {student} sera revérifiée avec le compte scolaire enregistré. Commencer ?",
+      "scheduled": "Revérifications planifiées : {count}"
+    }
   },
   "storage": {
     "title": "Gestion du stockage",
