@@ -248,7 +248,13 @@ test('school data authorization displays the retained term for a credential', as
       : route.fulfill({ status: 404, json: { code: 'not_found' } });
   });
   await page.goto(`${base}/verification?lang=${locale}`);
-  await page.getByRole('tab', { name: v.tabs.credentials, exact: true }).click();
+  await expect(page.getByText(v.noApplications, { exact: true })).toBeVisible();
+  const credTab = page.getByRole('tab', { name: v.tabs.credentials, exact: true });
+  await credTab.click();
+  if ((await credTab.getAttribute('aria-selected')) !== 'true') {
+    await credTab.click();
+  }
+  await expect(credTab).toHaveAttribute('aria-selected', 'true');
   await page.locator('#verificationview-field-3').fill('cred-1');
   await page.getByRole('button', { name: all.common.search, exact: true }).click();
   await expect(page.getByText(v.schoolData.states.historical, { exact: true })).toBeVisible();
