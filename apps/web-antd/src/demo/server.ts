@@ -491,6 +491,7 @@ export async function handleDemoRequest(
     if (!row) return nope('not_found', 404);
     if (p.endsWith('/history')) return json([row]);
     if (p.endsWith('/attribution')) {
+      if (method !== 'POST') return nope('not_found', 404);
       const request = await body(init);
       const selection = request.teacher_ids;
       const previous = row.input.teacher_ids ?? [];
