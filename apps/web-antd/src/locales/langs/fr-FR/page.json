@@ -856,6 +856,11 @@
     },
     "teacherEnabled": "Activer la vérification des enseignants",
     "teacherMaterials": "Types de justificatifs des enseignants",
+    "cancelPending": {
+      "action": "Annuler les vérifications en attente",
+      "confirm": "Annuler toutes les revérifications en attente pour Beihang ? Les vérifications en cours se poursuivront. Les utilisateurs conserveront leurs autorisations.",
+      "result": "Revérifications en attente annulées : {count}"
+    },
     "schoolData": {
       "recheckDays": "Périodicité de revérification des données scolaires (jours)",
       "recheckDaysHint": "0 désactive la revérification automatique. Une revérification se reconnecte avec le compte scolaire enregistré ; un mot de passe refusé ou un compte désactivé révoque l’autorisation. Le dernier tronçon du relais vers le LDAP de l’école n’est pas confirmé comme chiffré : activez avec prudence.",

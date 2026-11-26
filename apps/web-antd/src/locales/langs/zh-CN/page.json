@@ -856,6 +856,11 @@
     },
     "teacherEnabled": "开放教师认证",
     "teacherMaterials": "教师材料类型",
+    "cancelPending": {
+      "action": "撤回未执行的重验",
+      "confirm": "撤回北航所有尚未执行的学校数据重验？已经开始的重验会继续，用户的学校数据授权会保留。",
+      "result": "已撤回的待执行重验数量：{count}"
+    },
     "schoolData": {
       "recheckDays": "学校数据认证自动重验周期（天）",
       "recheckDaysHint": "0 表示关闭自动重验。重验会用保存的学校账号再次登录校验；密码被拒或账号停用时自动撤销授权。中继到学校 LDAP 的最后一段尚未确认加密，请谨慎开启。",
