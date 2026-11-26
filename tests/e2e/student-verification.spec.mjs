@@ -224,3 +224,37 @@ test('student credential lookup loads profile scopes on demand and revokes with 
     },
   ]);
 });
+
+test('school data authorization displays the retained term for a credential', async ({ page }, info) => {
+  await schoolSession(page);
+  const all = catalogue(info);
+  const v = all.verification;
+  const schoolID = '4111010006';
+  const locale = info.project.metadata.locale;
+  const replies = {
+    '/api/v1/admin/verification/access': { allowed: true },
+    '/api/v1/verification/schools': [{ ...school, id: schoolID }],
+    [`/api/v1/admin/verification/schools/${schoolID}/applications`]: [],
+    '/api/v1/admin/verification/credentials/cred-1': { ...credential, school_id: schoolID },
+    '/api/v1/admin/verification/credentials/cred-1/school-data': {
+      authorized_through: { id: 'autumn-26', season: 'autumn', year: 2026 },
+      state: 'historical',
+    },
+  };
+  await page.route('**/api/v1/**verification/**', (route) => {
+    const path = new URL(route.request().url()).pathname;
+    return Object.hasOwn(replies, path)
+      ? route.fulfill({ json: replies[path] })
+      : route.fulfill({ status: 404, json: { code: 'not_found' } });
+  });
+  await page.goto(`${base}/verification?lang=${locale}`);
+  await page.getByRole('tab', { name: v.tabs.credentials, exact: true }).click();
+  await page.locator('#verificationview-field-3').fill('cred-1');
+  await page.getByRole('button', { name: all.common.search, exact: true }).click();
+  await expect(page.getByText(v.schoolData.states.historical, { exact: true })).toBeVisible();
+  const term = fill(v.schoolData.term, {
+    season: v.schoolData.seasons.autumn,
+    year: new Intl.NumberFormat(locale, { useGrouping: false }).format(2026),
+  });
+  await expect(page.getByText(term, { exact: true })).toBeVisible();
+});

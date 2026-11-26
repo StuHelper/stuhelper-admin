@@ -863,12 +863,26 @@
     },
     "schoolData": {
       "recheckDays": "Périodicité de revérification des données scolaires (jours)",
-      "recheckDaysHint": "0 désactive la revérification automatique. Une revérification se reconnecte avec le compte scolaire enregistré ; un mot de passe refusé ou un compte désactivé révoque l’autorisation. Le dernier tronçon du relais vers le LDAP de l’école n’est pas confirmé comme chiffré : activez avec prudence.",
+      "recheckDaysHint": "La valeur 0 désactive les vérifications automatiques. Si le mot de passe est refusé ou le compte désactivé, les vérifications cessent et les identifiants sont supprimés. Les semestres autorisés restent accessibles. Le chiffrement du dernier relais LDAP reste à confirmer.",
       "recheckAll": "Revérifier toutes les autorisations",
       "recheckOne": "Revérifier l’autorisation de cette personne",
       "confirmAll": "Toutes les autorisations actives seront revérifiées avec le compte scolaire enregistré, deux à la fois, et l’opération peut être annulée avant la fin. Commencer ?",
       "confirmOne": "L’autorisation des données scolaires de l’étudiant {student} sera revérifiée avec le compte scolaire enregistré. Commencer ?",
-      "scheduled": "Revérifications planifiées : {count}"
+      "scheduled": "Revérifications planifiées : {count}",
+      "statusLabel": "Autorisation des données scolaires",
+      "throughLabel": "Dernier semestre autorisé",
+      "term": "Semestre {season} {year}",
+      "seasons": {
+        "spring": "de printemps",
+        "summer": "d’été",
+        "autumn": "d’automne"
+      },
+      "states": {
+        "active": "En cours",
+        "historical": "Mises à jour arrêtées, historique conservé",
+        "inactive": "Jamais autorisée"
+      },
+      "loading": "Chargement de l’autorisation des données scolaires"
     }
   },
   "storage": {

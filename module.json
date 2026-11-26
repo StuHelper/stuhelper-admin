@@ -18,6 +18,10 @@
     "README.md"
   ],
   "scenario_tests": {
+    "TERMSCOPE-ADMIN-01": [
+      "apps/web-antd/src/features/verification/SchoolDataAuthorization.test.ts#shows the retained term and removes the previous status on permission denial",
+      "tests/e2e/student-verification.spec.mjs#school data authorization displays the retained term for a credential"
+    ],
     "REVIEWUX-04": [
       "tests/e2e/moderation.spec.mjs#moderation previews and applies multiple teachers from the review term"
     ],

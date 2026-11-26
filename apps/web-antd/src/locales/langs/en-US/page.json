@@ -863,12 +863,26 @@
     },
     "schoolData": {
       "recheckDays": "School data automatic recheck period (days)",
-      "recheckDaysHint": "0 turns automatic rechecks off. A recheck signs in again with the stored school account; a rejected password or disabled account revokes the authorization. The last hop from the relay to the school LDAP is not confirmed to be encrypted, so enable with care.",
+      "recheckDaysHint": "Zero turns off automatic rechecks. A rejected password or disabled account stops rechecks and removes credentials. Previously authorized terms remain available. Encryption for the final school LDAP hop is unconfirmed.",
       "recheckAll": "Recheck all school data authorizations",
       "recheckOne": "Recheck this person's school data authorization",
       "confirmAll": "Every active school data authorization will be rechecked with its stored school account, two at a time, and can be taken back before it finishes. Start now?",
       "confirmOne": "The school data authorization of student {student} will be rechecked with the stored school account. Start now?",
-      "scheduled": "Rechecks scheduled: {count}"
+      "scheduled": "Rechecks scheduled: {count}",
+      "statusLabel": "School data authorization",
+      "throughLabel": "Authorized through",
+      "term": "{season} {year}",
+      "seasons": {
+        "spring": "Spring",
+        "summer": "Summer",
+        "autumn": "Autumn"
+      },
+      "states": {
+        "active": "Active",
+        "historical": "Updates stopped, history retained",
+        "inactive": "Never authorized"
+      },
+      "loading": "Loading school data authorization"
     }
   },
   "storage": {
