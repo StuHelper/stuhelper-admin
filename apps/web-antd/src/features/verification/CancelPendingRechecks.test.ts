@@ -47,6 +47,7 @@ async function openConfiguration(options: { affected?: number; cancelStatus?: nu
     if (path === '/api/v1/verification/schools') return Response.json([school]);
     if (path === '/api/v1/admin/verification/schools/' + id) {
       readConfig = true;
+      if (options.configStatus === 404) return Response.json({ code: 'not_found' }, { status: 404 });
       return options.configStatus === 403
         ? Response.json({ code: 'verification_permission_denied' }, { status: 403 })
         : Response.json(school);
@@ -85,6 +86,14 @@ describe('cancel pending school data rechecks', () => {
 
   it.each([{ id: 'other' }, { configStatus: 403 }])('hides the action outside the authorized school configuration', async options => {
     const { button, posts } = await openConfiguration(options);
+    expect(button()).toBeUndefined();
+    expect(posts).toHaveLength(0);
+  });
+
+  it('keeps cancellation hidden when a missing configuration opens the create form', async () => {
+    const { root, button, posts } = await openConfiguration({ configStatus: 404 });
+    const save = () => [...root.querySelectorAll('button')].find(el => el.textContent?.includes('page.common.save'));
+    await vi.waitFor(() => expect(save()?.disabled).toBe(false));
     expect(button()).toBeUndefined();
     expect(posts).toHaveLength(0);
   });
