@@ -25,7 +25,7 @@ export type TeacherCredential = Schemas['TeacherCredential']
 export type TeacherDisclosure = Schemas['TeacherDisclosures'][number]
 export const teacherDisclosures: TeacherDisclosure[] = ['real_name', 'teacher', 'gender', 'organization']
 
-type Entity = 'AdminOverview' | 'Application' | 'CaptureSession' | 'Credential' | 'EmailChallenge' | 'EmailInput' | 'IdentityInput' | 'IdentityMasked' | 'Job' | 'ManualInput' | 'Material' | 'Operation' | 'Problem' | 'RemovalRequest' | 'School' | 'SchoolDataRecheckReceipt' | 'StudentProfile' | 'Suggestion' | 'Summary' | 'TeacherCredential' | 'TeacherForm' | 'VerifyInput'
+type Entity = 'AdminOverview' | 'Application' | 'CaptureSession' | 'Credential' | 'EmailChallenge' | 'EmailInput' | 'IdentityInput' | 'IdentityMasked' | 'Job' | 'ManualInput' | 'Material' | 'Operation' | 'Problem' | 'RemovalRequest' | 'School' | 'SchoolDataAuthorization' | 'SchoolDataRecheckReceipt' | 'StudentProfile' | 'Suggestion' | 'Summary' | 'TeacherCredential' | 'TeacherForm' | 'VerifyInput'
 
 export const methods = ['real_name_identity_check', 'school_sso', 'student_email_outbound_otp', 'student_email_inbound_challenge', 'manual_material_review'] as const
 export const stages = ['bachelor', 'master', 'doctor', 'other', 'unknown'] as const
@@ -61,6 +61,8 @@ const disclosures = (v: unknown) => Array.isArray(v) && v.length <= 4 && new Set
 const methodCapabilities = (v: unknown) => v === undefined || (object(v) && Object.entries(v).every(([method, capability]) => oneOf(method, methods) && object(capability) && typeof capability.study_stage_required === 'boolean' && (capability.allowed_kinds === undefined || (Array.isArray(capability.allowed_kinds) && capability.allowed_kinds.every((kind) => oneOf(kind, kinds))))))
 const materialTypes = (v: unknown) => Array.isArray(v) && v.length <= 20 && v.every((item: unknown) => sized(item, 1, 64)) && new Set(v).size === v.length
 const challenge = (v: unknown) => object(v) && text(v.id) && oneOf(v.state, ['processing', 'waiting_sms', 'authenticated', 'failed', 'cancelled', 'expired']) && text(v.code) && text(v.masked_phone) && instant(v.expires_at)
+const schoolDataTerm = (v: unknown) => object(v) && sized(v.id, 1, 128)
+  && count(v.year) && v.year >= 1900 && v.year <= 2200 && oneOf(v.season, ['spring', 'summer', 'autumn'])
 
 const checks: Record<Entity, (v: Record<string, unknown>) => boolean> = {
   StudentProfile: (v) => text(v.school_id) && oneOf(v.data_status, ['complete', 'partial', 'reference_only', 'unavailable']) && text(v.schema) && count(v.revision) && optionalInstant(v.collected_at) && text(v.source_revision) && object(v.fields) && Object.keys(v.fields).length <= 64 && object(v.field_sources) && Object.values(v.field_sources).every(text) && (v.raw_data === undefined || text(v.raw_data)),
@@ -81,6 +83,10 @@ const checks: Record<Entity, (v: Record<string, unknown>) => boolean> = {
   EmailChallenge: (v) => (v.resend_available_at === undefined || instant(v.resend_available_at)) && (v.remaining_attempts === undefined || count(v.remaining_attempts)) && text(v.id) && text(v.application_id) && instant(v.expires_at) && oneOf(v.state, ['queued', 'waiting', 'delivered', 'used', 'failed']) && text(v.masked_email) && text(v.target_address),
   CaptureSession: (v) => text(v.token) && /^[A-Za-z0-9_-]{43}$/.test(v.token) && instant(v.expires_at),
   Material: (v) => text(v.id) && text(v.application_id) && oneOf(v.content_type, ['image/jpeg', 'image/png', 'application/pdf']) && count(v.size) && instant(v.created_at),
+  SchoolDataAuthorization: (v) => oneOf(v.state, ['active', 'historical', 'inactive'])
+    && (v.verified_at === undefined || instant(v.verified_at))
+    && (v.authorized_through === undefined || (v.state !== 'inactive' && schoolDataTerm(v.authorized_through)))
+    && (v.history_consent_required === undefined || typeof v.history_consent_required === 'boolean'),
   SchoolDataRecheckReceipt: (v) => count(v.scheduled),
   Operation: (v) => text(v.id) && oneOf(v.state, ['processing', 'completed', 'failed']) && text(v.code) && instant(v.expires_at),
   Job: (v) => text(v.id) && text(v.school_id) && oneOf(v.kind, ['mail', 'event']) && oneOf(v.state, ['pending', 'running', 'manual', 'done']) && count(v.attempts) && text(v.code),

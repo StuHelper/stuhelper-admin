@@ -863,12 +863,26 @@
     },
     "schoolData": {
       "recheckDays": "Periodo de reverificación de datos escolares (días)",
-      "recheckDaysHint": "0 desactiva la reverificación automática. Cada reverificación vuelve a iniciar sesión con la cuenta escolar guardada; una contraseña rechazada o una cuenta desactivada revoca la autorización. El último tramo del relé al LDAP de la universidad no está confirmado como cifrado; actívalo con cuidado.",
+      "recheckDaysHint": "El valor 0 desactiva las comprobaciones automáticas. Si se rechaza la contraseña o se desactiva la cuenta, se detienen las comprobaciones y se eliminan las credenciales. Los semestres autorizados siguen disponibles. El cifrado del último tramo LDAP aún no se ha confirmado.",
       "recheckAll": "Reverificar todas las autorizaciones",
       "recheckOne": "Reverificar la autorización de esta persona",
       "confirmAll": "Todas las autorizaciones activas se reverificarán con la cuenta escolar guardada, de dos en dos, y se puede retirar antes de terminar. ¿Empezar?",
       "confirmOne": "La autorización de datos escolares del estudiante {student} se reverificará con la cuenta escolar guardada. ¿Empezar?",
-      "scheduled": "Reverificaciones programadas: {count}"
+      "scheduled": "Reverificaciones programadas: {count}",
+      "statusLabel": "Autorización de datos académicos",
+      "throughLabel": "Último semestre autorizado",
+      "term": "{season} de {year}",
+      "seasons": {
+        "spring": "Primavera",
+        "summer": "Verano",
+        "autumn": "Otoño"
+      },
+      "states": {
+        "active": "Activa",
+        "historical": "Actualizaciones detenidas, historial conservado",
+        "inactive": "Sin autorización previa"
+      },
+      "loading": "Cargando la autorización de datos académicos"
     }
   },
   "storage": {
